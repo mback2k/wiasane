@@ -1,0 +1,10 @@
+#include <windows.h>
+#include <ntverp.h>
+
+#define VER_FILETYPE                VFT_APP
+#define VER_FILESUBTYPE             VFT_UNKNOWN
+#define VER_FILEDESCRIPTION_STR     "Scanner Access Now Easy - Micro Driver DLL"
+#define VER_INTERNALNAME_STR        "WIASANE"
+#define VER_ORIGINALFILENAME_STR    "WIASANE.DLL"
+
+#include <common.ver>

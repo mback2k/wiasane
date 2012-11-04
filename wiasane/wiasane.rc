@@ -1,0 +1,11 @@
+#include "wiasane.rcv"
+#include "resource.h"
+
+/*
+STRINGTABLE DISCARDABLE
+BEGIN
+
+STRING_LABEL   "String Label"
+
+END
+*/

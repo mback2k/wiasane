@@ -1,0 +1,79 @@
+[Version]
+Signature="$WINDOWS NT$"
+Class=Image
+ClassGUID={6bdd1fc6-810f-11d0-bec7-08002be2092f}
+Provider=%Mfg%
+DriverVer=20/10/2012,0.1.0.0
+CatalogFile=wiasane.cat
+
+[SourceDisksFiles.x86]
+wiasane.dll=1
+[SourceDisksNames.x86]
+1=%Location%,,,
+
+[SourceDisksFiles.ia64]
+wiasane.dll=1
+[SourceDisksNames.ia64]
+1=%Location%,,,
+
+[SourceDisksFiles.amd64]
+wiasane.dll=1
+[SourceDisksNames.amd64]
+1=%Location%,,,
+
+[DestinationDirs]
+; By default, files will be copied to \windows\system32.
+DefaultDestDir=11
+
+[Manufacturer]
+%Mfg%=Models, NTx86, NTamd64, NTia64
+
+; This is the models section for the x86 driver
+[Models.NTx86]
+%WIASANE.DeviceDesc% = WIASANE.Scanner, PnPIDInformation
+
+; This is the models section for the amd64 driver
+[Models.NTamd64]
+%WIASANE.DeviceDesc% = WIASANE.Scanner, PnPIDInformation
+
+; This is the models section for the ia64 driver
+[Models.NTia64]
+%WIASANE.DeviceDesc% = WIASANE.Scanner, PnPIDInformation
+
+[WIASANE.Scanner]
+Include=sti.inf
+Needs=STI.SerialSection, STI.MICRODRIVERSection
+SubClass=StillImage
+DeviceType=1
+DeviceSubType=0x1
+Capabilities=0x30
+Events=WIASANE.Events
+DeviceData=WIASANE.DeviceData
+AddReg=WIASANE.AddReg
+CopyFiles=WIASANE.CopyFiles
+ICMProfiles="sRGB Color Space Profile.icm"
+
+[WIASANE.Events]
+
+[WIASANE.Scanner.Services]
+Include=sti.inf
+Needs=STI.SerialSection.Services
+
+[WIASANE.DeviceData]
+Server=local
+UI Class ID={4DB1AD10-3391-11D2-9A33-00C04FA36145}
+MicroDriver="WIASANE.DLL"
+Sample Entry=1,1
+
+[WIASANE.AddReg]
+HKR,,HardwareConfig,1,1
+
+[WIASANE.CopyFiles]
+wiasane.dll
+
+[Strings]
+Msft="WIASANE"
+Mfg="WIASANE Team"
+Location="Install Source"
+WIASANE.DeviceDesc="WIA Scanner Access Now Easy - Micro Driver Scanner Device"
+

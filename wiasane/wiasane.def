@@ -1,0 +1,6 @@
+LIBRARY WIASANE
+
+EXPORTS
+	MicroEntry
+	Scan
+	SetPixelWindow
