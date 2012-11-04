@@ -17,3 +17,6 @@ ipch/
 
 *.sdf
 *.suo
+
+*.inf
+*.res
