@@ -27,4 +27,8 @@ DEFINE_GUID(WiaImgFmt_MYNEWFORMAT, 0x3b5de639, 0xb2c6, 0x4952, 0x98, 0xa9, 0x1d,
 
 #undef INITGUID
 
+#include "winsane.h"
+
+#pragma comment(lib, "winsane.lib")
+
 #endif

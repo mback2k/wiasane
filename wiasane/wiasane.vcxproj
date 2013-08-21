@@ -84,7 +84,7 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\winsane;%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
       <ExceptionHandling>
       </ExceptionHandling>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</CompileAsManaged>
@@ -95,6 +95,10 @@
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies);kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;ole32.lib;uuid.lib;oleaut32.lib</AdditionalDependencies>
       <ModuleDefinitionFile>wiasane.def</ModuleDefinitionFile>
+      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)\winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)\winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)\winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)\winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
