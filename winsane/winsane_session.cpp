@@ -90,7 +90,8 @@ WINSANE_Session* WINSANE_Session::Remote(const char *hostname) {
 }
 
 WINSANE_Session* WINSANE_Session::Remote(const char *hostname, unsigned short port) {
-	struct addrinfo *result = NULL, *ptr = NULL, hints;
+	struct addrinfo *addrinfo, hints;
+	WINSANE_Session* session;
 	char port_str[10];
 
 	ZeroMemory(&hints, sizeof(hints));
@@ -101,12 +102,14 @@ WINSANE_Session* WINSANE_Session::Remote(const char *hostname, unsigned short po
 	if (_itoa_s(port, port_str, 10, 10) != 0)
 		return NULL;
 
-	if (getaddrinfo(hostname, port_str, &hints, &result) != 0)
+	addrinfo = NULL;
+	if (getaddrinfo(hostname, port_str, &hints, &addrinfo) != 0)
 		return NULL;
 
-	return WINSANE_Session::Remote(result);
+	session = WINSANE_Session::Remote(addrinfo);
 
-	freeaddrinfo(result);
+	freeaddrinfo(addrinfo);
+	return session;
 }
 
 
