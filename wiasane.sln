@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winsane", "winsane\winsane.vcxproj", "{B210E114-BF47-442F-8A8E-6719B6359EB8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wiasane", "wiasane\wiasane.vcxproj", "{6F8F9679-52F6-4B8E-9EDF-67DE89EC3CFA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B210E114-BF47-442F-8A8E-6719B6359EB8} = {B210E114-BF47-442F-8A8E-6719B6359EB8}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winsane-dbg", "winsane-dbg\winsane-dbg.vcxproj", "{59A26F4A-BCF6-4EA0-85A4-20DE17C36BBB}"
 	ProjectSection(ProjectDependencies) = postProject
