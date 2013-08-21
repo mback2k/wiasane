@@ -46,13 +46,25 @@ int main(int argc, char *argv[])
 				printf("Lines:\t\t%d\n", params->GetLines());
 				printf("Depth:\t\t%d\n", params->GetDepth());
 
-				if (i == 1) {
-					WINSANE_Scan *scan = device->Start();
-					if (scan) {
-						Sleep(5000);
+				device->Cancel();
 
-						device->Cancel();
+				WINSANE_Scan *scan = device->Start();
+				if (scan) {
+					printf("Begin scanning image ...\n");
+					HANDLE output = CreateFile(L"winsane-dbg.scan", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+					DWORD written;
+
+					char *buffer = new char[1024];
+					long length = 1024;
+					while (scan->Scan(buffer, &length) == CONTINUE) {
+						printf("Received %d bytes of scanned image ...\n", length);
+						WriteFile(output, buffer, length, &written, NULL);
+						length = 1024;
 					}
+					CloseHandle(output);
+					printf("Finished scanning image!\n");
+
+					device->Cancel();
 				}
 
 				device->Close();
@@ -60,8 +72,6 @@ int main(int argc, char *argv[])
 		}
 
 		session->Exit();
-
-		Sleep(5000);
 	}
 
 	delete session;
