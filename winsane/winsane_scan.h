@@ -25,7 +25,7 @@ public:
 
 
 	/* Public API */
-	WINSANE_Scan_Result Scan(char *buffer, long *length);
+	WINSANE_Scan_Result AquireImage(char *buffer, long *length);
 
 
 protected:

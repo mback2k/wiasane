@@ -19,7 +19,7 @@ WINSANE_Scan::~WINSANE_Scan() {
 }
 
 
-WINSANE_Scan_Result WINSANE_Scan::Scan(char *buffer, long *length) {
+WINSANE_Scan_Result WINSANE_Scan::AquireImage(char *buffer, long *length) {
 	WINSANE_Scan_Result result = SUCCESSFUL;
 
 	switch (this->state) {

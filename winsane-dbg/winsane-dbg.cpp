@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
 					char *buffer = new char[1024];
 					long length = 1024;
-					while (scan->Scan(buffer, &length) == CONTINUE) {
+					while (scan->AquireImage(buffer, &length) == CONTINUE) {
 						printf("Received %d bytes of scanned image ...\n", length);
 						WriteFile(output, buffer, length, &written, NULL);
 						length = 1024;
