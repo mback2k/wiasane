@@ -1,10 +1,9 @@
 #include "stdafx.h"
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved) {
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
 	WSADATA wsaData;
 
-	switch (ul_reason_for_call)
-	{
+	switch (ul_reason_for_call) {
 		case DLL_PROCESS_ATTACH:
 			WSAStartup(MAKEWORD(2,2), &wsaData);
 			break;
