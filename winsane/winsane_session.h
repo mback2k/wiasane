@@ -32,6 +32,7 @@ public:
 	WINSANE_Device* GetDevice(int index);
 	void ClearDevices();
 
+
 private:
 	int num_devices;
 	WINSANE_Device **devices;
@@ -39,5 +40,4 @@ private:
 	bool initialized;
 	SANE_Auth_Callback auth_callback;
 	WINSANE_Socket *sock;
-	SOCKET real_sock;
 };

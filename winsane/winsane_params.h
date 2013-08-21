@@ -4,8 +4,9 @@
 
 class WINSANE_API WINSANE_Params {
 public:
-	WINSANE_Params(WINSANE_Device *device, SANE_Parameters *sane_params);
+	WINSANE_Params(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Parameters *sane_params);
 	~WINSANE_Params();
+
 
 	/* Public API */
 	SANE_Frame GetFormat();
@@ -14,6 +15,7 @@ public:
 	SANE_Int GetPixelsPerLine();
 	SANE_Int GetLines();
 	SANE_Int GetDepth();
+
 
 private:
 	WINSANE_Device *device;

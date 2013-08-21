@@ -3,9 +3,9 @@
 #include "winsane_device.h"
 #include "winsane_session.h"
 
-WINSANE_Option::WINSANE_Option(WINSANE_Device *device, SANE_Option_Descriptor *sane_option) {
+WINSANE_Option::WINSANE_Option(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Option_Descriptor *sane_option) {
 	this->device = device;
-	this->sock = this->device->GetSession()->GetSocket();
+	this->sock = sock;
 	this->sane_option = sane_option;
 }
 

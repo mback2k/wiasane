@@ -4,19 +4,18 @@
 
 #include "winsane_internal.h"
 
-enum WINSANE_Socket_Type {
-	NO_CONVERSION,
-	LITTLE_TO_BIG,
-	BIG_TO_LITTLE
-};
-
 class WINSANE_Socket {
 public:
+	/* Constructer & Deconstructer */
 	WINSANE_Socket(SOCKET sock);
 	~WINSANE_Socket();
 
-	void SetType(WINSANE_Socket_Type type);
-	WINSANE_Socket_Type GetType();
+
+	/* Internal API */
+	SOCKET GetSocket();
+
+	void SetConverting(bool converting);
+	bool IsConverting();
 
 	int Flush();
 	void Clear();
@@ -38,6 +37,7 @@ public:
 	SANE_Handle ReadHandle();
 	SANE_Status ReadStatus();
 
+
 protected:
 	int WriteSocket(const char *buf, int buflen);
 	int ReadSocket(char *buf, int buflen);
@@ -45,12 +45,14 @@ protected:
 	int WritePlain(const char *buf, int buflen);
 	int ReadPlain(char *buf, int buflen);
 
-private:
-	char* WINSANE_Socket::ReallocBuffer(char *buf, int oldlen, int newlen);
 
-	WINSANE_Socket_Type type;
+private:
+	char* ReallocBuffer(char *buf, int oldlen, int newlen);
+	void Close();
+
 	SOCKET sock;
 	char *buf;
 	int buflen;
 	int bufoff;
+	bool conv;
 };

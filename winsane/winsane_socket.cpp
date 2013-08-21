@@ -3,23 +3,29 @@
 
 WINSANE_Socket::WINSANE_Socket(SOCKET sock) {
 	this->sock = sock;
-	this->type = NO_CONVERSION;
-	this->Clear();
+	this->conv = FALSE;
+	this->buf = NULL;
+	this->buflen = 0;
+	this->bufoff = 0;
 }
 
 WINSANE_Socket::~WINSANE_Socket() {
-	this->sock = INVALID_SOCKET;
-	this->type = NO_CONVERSION;
 	this->Clear();
+	this->Close();
 }
 
 
-void WINSANE_Socket::SetType(WINSANE_Socket_Type type) {
-	this->type = type;
+SOCKET WINSANE_Socket::GetSocket() {
+	return this->sock;
 }
 
-WINSANE_Socket_Type WINSANE_Socket::GetType() {
-	return this->type;
+
+void WINSANE_Socket::SetConverting(bool converting) {
+	this->conv = converting;
+}
+
+bool WINSANE_Socket::IsConverting() {
+	return this->conv;
 }
 
 
@@ -79,6 +85,13 @@ char* WINSANE_Socket::ReallocBuffer(char *buf, int oldlen, int newlen) {
 	return newbuf;
 }
 
+void WINSANE_Socket::Close() {
+	if (this->sock != INVALID_SOCKET) {
+		closesocket(this->sock);
+		this->sock = INVALID_SOCKET;
+	}
+}
+
 
 int WINSANE_Socket::WriteSocket(const char *buf, int buflen) {
 	return send(this->sock, buf, buflen, 0);
@@ -119,7 +132,7 @@ int WINSANE_Socket::Write(const char *buf, int buflen) {
 	memset(buftmp, 0, buflen);
 	memcpy(buftmp, buf, buflen);
 
-	if (this->type != NO_CONVERSION)
+	if (this->conv)
 		std::reverse(buftmp, buftmp + buflen);
 
 	result = this->WritePlain(buftmp, buflen);
@@ -139,7 +152,7 @@ int WINSANE_Socket::Read(char *buf, int buflen) {
 
 	result = this->ReadPlain(buftmp, buflen);
 
-	if (this->type != NO_CONVERSION)
+	if (this->conv)
 		std::reverse(buftmp, buftmp + buflen);
 
 	memcpy(buf, buftmp, buflen);

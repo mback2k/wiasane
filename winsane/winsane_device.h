@@ -8,12 +8,8 @@
 class WINSANE_API WINSANE_Device {
 public:
 	/* Constructer & Deconstructer */
-	WINSANE_Device(WINSANE_Session *session, SANE_Device *device);
+	WINSANE_Device(WINSANE_Session *session, WINSANE_Socket *sock, SANE_Device *device);
 	~WINSANE_Device();
-
-
-	/* Internal API */
-	WINSANE_Session* GetSession();
 
 
 	/* Public API */
@@ -37,7 +33,6 @@ public:
 private:
 	int num_options;
 	WINSANE_Option **options;
-	WINSANE_Params *params;
 
 	bool opened;
 	bool started;
