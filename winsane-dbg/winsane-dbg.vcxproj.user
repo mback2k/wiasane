@@ -6,8 +6,10 @@
     <LocalDebuggerCommandArguments>10.0.0.1</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerWorkingDirectory>$(SolutionDir)\winsane\$(OutDir)</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArguments>10.0.0.1</LocalDebuggerCommandArguments>
+    <LocalDebuggerEnvironment>PATH=$(SolutionDir)winsane\$(OutDir);%PATH%</LocalDebuggerEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
@@ -15,7 +17,8 @@
     <LocalDebuggerCommandArguments>10.0.0.1</LocalDebuggerCommandArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LocalDebuggerWorkingDirectory>$(SolutionDir)\winsane\$(OutDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommandArguments>10.0.0.1</LocalDebuggerCommandArguments>
+    <LocalDebuggerEnvironment>PATH=$(SolutionDir)winsane\$(OutDir);%PATH%</LocalDebuggerEnvironment>
   </PropertyGroup>
 </Project>
