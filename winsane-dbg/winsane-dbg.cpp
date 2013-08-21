@@ -46,6 +46,8 @@ int main(int argc, char *argv[])
 				printf("Lines:\t\t%d\n", params->GetLines());
 				printf("Depth:\t\t%d\n", params->GetDepth());
 
+				delete params;
+
 				device->Cancel();
 
 				WINSANE_Scan *scan = device->Start();
