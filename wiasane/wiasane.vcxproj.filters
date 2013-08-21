@@ -42,5 +42,8 @@
     <None Include="wiasane.def">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="wiasane.inf">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
