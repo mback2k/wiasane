@@ -20,4 +20,6 @@
 
 #pragma comment(lib, "Ws2_32.lib")
 
+extern BOOL g_bStarted; // global Winsock initialization status
+
 #endif
