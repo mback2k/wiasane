@@ -14,6 +14,7 @@ ipch/
 *.pdb
 *.ilk
 *.pch
+*.aps
 
 *.sdf
 *.suo
