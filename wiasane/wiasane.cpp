@@ -1,80 +1,14 @@
-#include <DriverSpecs.h>
-_Analysis_mode_(_Analysis_code_type_user_driver_)
-
+#include "stdafx.h"
 #include "wiasane.h"
-#include "wiamicro.h"
-#include "resource.h"
 
 #include <STI.H>
 #include <math.h>
 #include <winioctl.h>
 #include <usbscan.h>
 
-#ifdef DEBUG
-#include <stdio.h>
-#endif
+#include "wiasane_btns.h"
+#include "wiasane_util.h"
 
-#include <strsafe.h>
-
-// #define BUTTON_SUPPORT // (uncomment this to allow BUTTON SUPPORT)
-                          // button support is not functional in the test device
-
-#define MAX_BUTTONS 1
-#define MAX_BUTTON_NAME 255
-
-HINSTANCE g_hInst; // instance of this MicroDriver (used for loading from a resource)
-
-
-// note: MEMORYBMP, and BMP file will be added by wiafbdrv host driver.
-//       do not include them in your extended list.
-//
-
-// #define _USE_EXTENDED_FORMAT_LIST (uncomment this to allow Extented file and memory formats)
-
-#define NUM_SUPPORTED_FILEFORMATS 1
-GUID g_SupportedFileFormats[NUM_SUPPORTED_FILEFORMATS];
-
-#define NUM_SUPPORTED_MEMORYFORMATS 2
-GUID g_SupportedMemoryFormats[NUM_SUPPORTED_MEMORYFORMATS];
-
-//
-// Button GUID array used in Capability negotiation.
-// Set your BUTTON guids here.  These must match the GUIDS specified in
-// your INF.  The Scan Button GUID is public to all scanners with a
-// scan button.
-//
-
-GUID g_Buttons[MAX_BUTTONS] ={{0xa6c5a715, 0x8c6e, 0x11d2,{ 0x97, 0x7a,  0x0,  0x0, 0xf8, 0x7a, 0x92, 0x6f}}};
-BOOL g_bButtonNamesCreated = FALSE;
-WCHAR* g_ButtonNames[MAX_BUTTONS] = {0};
-
-INT g_PalIndex = 0;     // simple palette index counter (test driver specific)
-BOOL g_bDown = FALSE;   // simple band direction bool   (test drvier specific)
-
-BOOL    InitializeScanner(PSCANINFO pScanInfo);
-VOID    InitScannerDefaults(PSCANINFO pScanInfo);
-BOOL    SetScannerSettings(PSCANINFO pScanInfo);
-VOID    CheckButtonStatus(PVAL pValue);
-VOID    GetButtonPress(LONG *pButtonValue);
-HRESULT GetInterruptEvent(PVAL pValue);
-LONG    GetButtonCount();
-HRESULT GetOLESTRResourceString(LONG lResourceID,_Outptr_ LPOLESTR *ppsz,BOOL bLocal);
-VOID    ReadRegistryInformation(PVAL pValue);
-
-BOOL APIENTRY DllMain( HANDLE hModule,DWORD  dwreason, LPVOID lpReserved)
-{
-    UNREFERENCED_PARAMETER(lpReserved);
-
-    g_hInst = (HINSTANCE)hModule;
-    switch(dwreason) {
-        case DLL_PROCESS_ATTACH:
-        case DLL_THREAD_ATTACH:
-        case DLL_THREAD_DETACH:
-        case DLL_PROCESS_DETACH:
-            break;
-    }
-    return TRUE;
-}
 
 /**************************************************************************\
 * MicroEntry (MicroDriver Entry point)
@@ -100,7 +34,6 @@ BOOL APIENTRY DllMain( HANDLE hModule,DWORD  dwreason, LPVOID lpReserved)
 WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 {
     HRESULT hr = E_NOTIMPL;
-    INT index = 0;
 
 //#define _DEBUG_COMMANDS
 
@@ -137,39 +70,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
         // if your device supports buttons, create the BUTTON name information here..
         //
 
-        if (!g_bButtonNamesCreated)
-        {
-            for(index = 0; index < MAX_BUTTONS; index++)
-            {
-                g_ButtonNames[index] = (WCHAR*)CoTaskMemAlloc(MAX_BUTTON_NAME);
-                if (!g_ButtonNames[index])
-                {
-                    hr = E_OUTOFMEMORY;
-                    break;
-                }
-            }
-
-            if(SUCCEEDED(hr))
-            {
-                hr = GetOLESTRResourceString(IDS_SCAN_BUTTON_NAME,&g_ButtonNames[0],TRUE);
-            }
-
-            if(SUCCEEDED(hr))
-            {
-                g_bButtonNamesCreated = TRUE;
-            }
-            else
-            {
-                for(index = 0; index < MAX_BUTTONS; index++)
-                {
-                    if (g_ButtonNames[index])
-                    {
-                        CoTaskMemFree(g_ButtonNames[index]);
-                        g_ButtonNames[index] = NULL;
-                    }
-                }
-            }
-        }
+		hr = CreateButtonNames(hr);
 
         //
         // Initialize the scanner's default settings
@@ -189,24 +90,11 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
             CloseHandle(pValue->pScanInfo->DeviceIOHandles[1]);
         }
 
-
         //
         // if your device supports buttons, free/destroy the BUTTON name information here..
         //
 
-        if(g_bButtonNamesCreated)
-        {
-            g_bButtonNamesCreated = FALSE;
-
-            for(index = 0; index < MAX_BUTTONS; index++)
-            {
-                if (g_ButtonNames[index])
-                {
-                    CoTaskMemFree(g_ButtonNames[index]);
-                    g_ButtonNames[index] = NULL;
-                }
-            }
-        }
+		hr = FreeButtonNames(hr);
 
         //
         // close/unload libraries
@@ -773,50 +661,6 @@ BOOL InitializeScanner(PSCANINFO pScanInfo)
 }
 
 /**************************************************************************\
-* CheckButtonStatus (helper)
-*
-*   Called by the MicroDriver to Set the current Button pressed value.
-*
-* Arguments:
-*
-*   pValue       - VAL structure used for settings
-*
-*
-* Return Value:
-*
-*    VOID
-*
-* History:
-*
-*    1/20/2000 Original Version
-*
-\**************************************************************************/
-
-
-VOID CheckButtonStatus(PVAL pValue)
-{
-    //
-    // Button Polling is done here...
-    //
-
-    //
-    // Check your device for button presses
-    //
-
-    LONG lButtonValue = 0;
-
-    GetButtonPress(&lButtonValue);
-    switch (lButtonValue) {
-    case 1:
-        pValue->pGuid = (GUID*) &guidScanButton;
-        Trace(TEXT("Scan Button Pressed!"));
-        break;
-    default:
-        pValue->pGuid = (GUID*) &GUID_NULL;
-        break;
-    }
-}
-/**************************************************************************\
 * GetInterruptEvent (helper)
 *
 *   Called by the MicroDriver to handle USB interrupt events.
@@ -949,244 +793,3 @@ HRESULT GetInterruptEvent(PVAL pValue)
     }
     return hr;
 }
-
-/**************************************************************************\
-* GetButtonPress (helper)
-*
-*   Called by the MicroDriver to set the actual button value pressed
-*
-* Arguments:
-*
-*   pButtonValue       - actual button pressed
-*
-*
-* Return Value:
-*
-*    Status
-*
-* History:
-*
-*    1/20/2000 Original Version
-*
-\**************************************************************************/
-
-VOID GetButtonPress(LONG *pButtonValue)
-{
-
-    //
-    // This where you can set your button value
-    //
-
-    pButtonValue = 0;
-}
-
-/**************************************************************************\
-* GetButtonCount (helper)
-*
-*   Called by the MicroDriver to get the number of buttons a device supports
-*
-* Arguments:
-*
-*    none
-*
-* Return Value:
-*
-*    LONG - number of supported buttons
-*
-* History:
-*
-*    1/20/2000 Original Version
-*
-\**************************************************************************/
-
-LONG GetButtonCount()
-{
-    LONG ButtonCount  = 0;
-
-    //
-    // Since the test device does not have a button,
-    // set this value to 0.  For a real device with a button,
-    // set (LONG ButtonCount  = 1;)
-    //
-
-    //
-    // determine the button count of your device
-    //
-
-    return ButtonCount;
-}
-
-/**************************************************************************\
-* GetOLDSTRResourceString (helper)
-*
-*   Called by the MicroDriver to Load a resource string in OLESTR format
-*
-* Arguments:
-*
-*   lResourceID  - String resource ID
-*   ppsz         - Pointer to a OLESTR to be filled with the loaded string
-*                  value
-*   bLocal       - Possible, other source for loading a resource string.
-*
-*
-* Return Value:
-*
-*    Status
-*
-* History:
-*
-*    1/20/2000 Original Version
-*
-\**************************************************************************/
-
-HRESULT GetOLESTRResourceString(LONG lResourceID,_Outptr_ LPOLESTR *ppsz,BOOL bLocal)
-{
-    HRESULT hr = S_OK;
-    TCHAR szStringValue[255];
-    if(bLocal) {
-
-        //
-        // We are looking for a resource in our own private resource file
-        //
-
-        INT NumTCHARs = LoadString(g_hInst, lResourceID, szStringValue, sizeof(szStringValue)/sizeof(TCHAR));
-
-        if (NumTCHARs <= 0)
-        {
-
-#ifdef UNICODE
-            DWORD dwError = GetLastError();
-            Trace(TEXT("NumTCHARs = %d dwError = %d Resource ID = %d (UNICODE)szString = %ws"),
-                  NumTCHARs,
-                  dwError,
-                  lResourceID,
-                  szStringValue);
-#else
-            DWORD dwError = GetLastError();
-            Trace(TEXT("NumTCHARs = %d dwError = %d Resource ID = %d (ANSI)szString = %s"),
-                  NumTCHARs,
-                  dwError,
-                  lResourceID,
-                  szStringValue);
-#endif
-
-            return E_FAIL;
-        }
-
-        //
-        // NOTE: caller must free this allocated BSTR
-        //
-
-#ifdef UNICODE
-
-       *ppsz = NULL;
-       *ppsz = (LPOLESTR)CoTaskMemAlloc(sizeof(szStringValue));
-       if(*ppsz != NULL)
-       {
-
-           //
-           // The call to LoadString previously guarantees that szStringValue is null terminated (maybe truncated)
-           // so a buffer of 'sizeof(szStringValue)/sizeof(TCHAR)' should suffice
-           //
-
-           hr = StringCchCopy(*ppsz, sizeof(szStringValue)/sizeof(TCHAR), szStringValue);
-       }
-       else
-       {
-           hr =  E_OUTOFMEMORY;
-       }
-
-#else
-       WCHAR wszStringValue[255];
-       ZeroMemory(wszStringValue,sizeof(wszStringValue));
-
-       //
-       // convert szStringValue from char* to unsigned short* (ANSI only)
-       //
-
-       MultiByteToWideChar(CP_ACP,
-                           MB_PRECOMPOSED,
-                           szStringValue,
-                           lstrlenA(szStringValue)+1,
-                           wszStringValue,
-                           (sizeof(wszStringValue)/sizeof(WCHAR)));
-
-       *ppsz = NULL;
-       *ppsz = (LPOLESTR)CoTaskMemAlloc(sizeof(wszStringValue));
-       if(*ppsz != NULL)
-       {
-
-           //
-           // The call to LoadString & MultiByteToWideChar previously guarantees that wszStringValue is null terminated
-           // (maybe truncated) so a buffer of 'sizeof(wszStringValue)/sizeof(WCHAR)' should suffice
-           //
-
-           hr = StringCchCopyW(*ppsz,sizeof(wszStringValue)/sizeof(WCHAR),wszStringValue);
-       }
-       else
-       {
-           hr =  E_OUTOFMEMORY;
-       }
-#endif
-
-    }
-    else
-    {
-
-        //
-        // looking another place for resources??
-        //
-
-        hr = E_NOTIMPL;
-    }
-
-    return hr;
-}
-
-/**************************************************************************\
-* Trace
-*
-*   Called by the MicroDriver to output strings to a debugger
-*
-* Arguments:
-*
-*   format       - formatted string to output
-*
-*
-* Return Value:
-*
-*    VOID
-*
-* History:
-*
-*    1/20/2000 Original Version
-*
-\**************************************************************************/
-
-VOID Trace(_In_ LPCTSTR format,...)
-{
-
-#ifdef DEBUG
-
-    TCHAR Buffer[1024];
-    va_list arglist;
-    va_start(arglist, format);
-
-    //
-    // StringCchVPrintf API guarantees the buffer to be null terminated (though it maybe truncated)
-    //
-
-    StringCchVPrintf(Buffer, sizeof(Buffer)/sizeof(TCHAR), format, arglist);
-    va_end(arglist);
-    OutputDebugString(Buffer);
-    OutputDebugString(TEXT("\n"));
-
-#else
-
-    UNREFERENCED_PARAMETER(format);
-
-#endif
-
-}
-
-
