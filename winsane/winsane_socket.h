@@ -1,8 +1,13 @@
+#ifndef WINSANE_SOCKET_H
+#define WINSANE_SOCKET_H
+
+#if _MSC_VER > 1000
 #pragma once
+#endif
 
-#include <algorithm>
+#include <winsock2.h>
 
-#include "winsane_internal.h"
+#include "sane.h"
 
 class WINSANE_Socket {
 public:
@@ -56,3 +61,5 @@ private:
 	int bufoff;
 	bool conv;
 };
+
+#endif

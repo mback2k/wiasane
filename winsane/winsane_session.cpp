@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "winsane_session.h"
 
+#include <vector>
+
 WINSANE_Session::WINSANE_Session(SOCKET sock) {
 	this->sock = new WINSANE_Socket(sock);
 	this->initialized = FALSE;

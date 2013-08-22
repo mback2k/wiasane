@@ -1,6 +1,13 @@
-#pragma once
+#ifndef WINSANE_PARAMS_H
+#define WINSANE_PARAMS_H
 
+#if _MSC_VER > 1000
+#pragma once
+#endif
+
+#include "sane.h"
 #include "winsane_socket.h"
+#include "winsane_device.h"
 
 class WINSANE_API WINSANE_Params {
 public:
@@ -22,3 +29,5 @@ private:
 	WINSANE_Socket *sock;
 	SANE_Parameters *sane_params;
 };
+
+#endif

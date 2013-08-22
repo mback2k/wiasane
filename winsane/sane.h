@@ -14,9 +14,14 @@
    This file declares SANE application interface.  See the SANE
    standard for a detailed explanation of the interface.  */
 
-#pragma once
+#ifndef SANE_H
+#define SANE_H
 
-#include "stdafx.h"
+#if _MSC_VER > 1000
+#pragma once
+#endif
+
+#include <windows.h>
 
 #define SANE_CURRENT_MAJOR	1
 #define SANE_CURRENT_MINOR	0
@@ -162,3 +167,5 @@ struct SANE_Auth_Data;
 #define SANE_MAX_PASSWORD_LEN	128
 
 typedef void (*SANE_Auth_Callback) (SANE_String_Const resource, SANE_Char *username, SANE_Char *password);
+
+#endif

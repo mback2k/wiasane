@@ -1,6 +1,13 @@
-#pragma once
+#ifndef WINSANE_OPTION_H
+#define WINSANE_OPTION_H
 
+#if _MSC_VER > 1000
+#pragma once
+#endif
+
+#include "sane.h"
 #include "winsane_socket.h"
+#include "winsane_device.h"
 
 class WINSANE_API WINSANE_Option {
 public:
@@ -24,3 +31,5 @@ private:
 	WINSANE_Socket *sock;
 	SANE_Option_Descriptor *sane_option;
 };
+
+#endif

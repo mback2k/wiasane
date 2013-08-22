@@ -1,7 +1,5 @@
 #include "stdafx.h"
 #include "winsane_scan.h"
-#include "winsane_device.h"
-#include "winsane_session.h"
 
 WINSANE_Scan::WINSANE_Scan(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Word port, SANE_Word byte_order) {
 	this->state = NEW;

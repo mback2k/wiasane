@@ -1,5 +1,12 @@
-#pragma once
+#ifndef WINSANE_DEVICE_H
+#define WINSANE_DEVICE_H
 
+#if _MSC_VER > 1000
+#pragma once
+#endif
+
+#include "sane.h"
+#include "winsane_session.h"
 #include "winsane_socket.h"
 #include "winsane_option.h"
 #include "winsane_params.h"
@@ -41,3 +48,5 @@ private:
 	SANE_Device *sane_device;
 	SANE_Handle sane_handle;
 };
+
+#endif

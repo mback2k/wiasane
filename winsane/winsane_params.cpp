@@ -1,7 +1,5 @@
 #include "stdafx.h"
 #include "winsane_params.h"
-#include "winsane_device.h"
-#include "winsane_session.h"
 
 WINSANE_Params::WINSANE_Params(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Parameters *sane_params) {
 	this->device = device;

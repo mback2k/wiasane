@@ -1,6 +1,13 @@
-#pragma once
+#ifndef WINSANE_SCAN_H
+#define WINSANE_SCAN_H
 
+#if _MSC_VER > 1000
+#pragma once
+#endif
+
+#include "sane.h"
 #include "winsane_socket.h"
+#include "winsane_device.h"
 
 enum WINSANE_Scan_State {
 	NEW,
@@ -42,3 +49,5 @@ private:
 	SANE_Word byte_order;
 	unsigned int buffered;
 };
+
+#endif

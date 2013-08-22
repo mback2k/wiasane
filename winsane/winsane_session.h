@@ -1,6 +1,9 @@
-#pragma once
+#ifndef WINSANE_SESSION_H
+#define WINSANE_SESSION_H
 
-#include <vector>
+#if _MSC_VER > 1000
+#pragma once
+#endif
 
 #include "winsane_socket.h"
 #include "winsane_device.h"
@@ -41,3 +44,5 @@ private:
 	SANE_Auth_Callback auth_callback;
 	WINSANE_Socket *sock;
 };
+
+#endif

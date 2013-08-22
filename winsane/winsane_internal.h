@@ -1,4 +1,9 @@
+#ifndef WINSANE_INTERNAL_H
+#define WINSANE_INTERNAL_H
+
+#if _MSC_VER > 1000
 #pragma once
+#endif
 
 #include "sane.h"
 
@@ -18,8 +23,16 @@ enum WINSANE_Remote_Procedure {
 
 #define WINSANE_DEFAULT_PORT			6566
 
+#ifdef WINSANE_EXPORTS
+#define WINSANE_API __declspec(dllexport)
+#else
+#define WINSANE_API __declspec(dllimport)
+#endif
+
 class WINSANE_API WINSANE_Session;
 class WINSANE_API WINSANE_Device;
 class WINSANE_API WINSANE_Option;
 class WINSANE_API WINSANE_Params;
 class WINSANE_API WINSANE_Scan;
+
+#endif

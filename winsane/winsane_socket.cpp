@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "winsane_socket.h"
 
+#include <algorithm>
+
 WINSANE_Socket::WINSANE_Socket(SOCKET sock) {
 	this->sock = sock;
 	this->conv = FALSE;

@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "winsane_device.h"
-#include "winsane_session.h"
 
 WINSANE_Device::WINSANE_Device(WINSANE_Session *session, WINSANE_Socket *sock, SANE_Device *sane_device) {
 	this->opened = FALSE;
