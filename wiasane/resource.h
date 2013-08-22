@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Developer Studio generated include file.
-// Used by testmcro.rc
+// Used by wiasane.rc
 //
 
 #define IDS_SCAN_BUTTON_NAME  700
@@ -16,5 +16,3 @@
 #define _APS_NEXT_SYMED_VALUE           701
 #endif
 #endif
-
-

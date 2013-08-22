@@ -1,11 +1,9 @@
 #include "wiasane.rcv"
 #include "resource.h"
 
-/*
 STRINGTABLE DISCARDABLE
 BEGIN
 
-STRING_LABEL   "String Label"
+IDS_SCAN_BUTTON_NAME   "My Scan Button"
 
 END
-*/
