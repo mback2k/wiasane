@@ -31,11 +31,11 @@ BEGIN
         BLOCK "000904b0"
         BEGIN
             VALUE "CompanyName", "Marc Hörsken"
-            VALUE "FileDescription", "Scanner Access Now Easy - Micro Driver DLL"
+            VALUE "FileDescription", "Scanner Access Now Easy - Network DLL"
             VALUE "FileVersion", "0.0.0.1"
-            VALUE "InternalName", "wiasane.dll"
+            VALUE "InternalName", "winsane.dll"
             VALUE "LegalCopyright", "Copyright (C) 2013 Marc Hörsken. All rights reserved."
-            VALUE "OriginalFilename", "wiasane.dll"
+            VALUE "OriginalFilename", "winsane.dll"
             VALUE "ProductName", "Scanner Access Now Easy - WIA Driver"
             VALUE "ProductVersion", "0.0.0.1"
         END
@@ -77,10 +77,6 @@ END
 // String Table
 //
 
-STRINGTABLE
-BEGIN
-    IDS_SCAN_BUTTON_NAME    "Scan Button"
-END
 
 #endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
