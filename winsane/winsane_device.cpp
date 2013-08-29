@@ -100,8 +100,7 @@ bool WINSANE_Device::Close() {
 
 int WINSANE_Device::FetchOptions() {
 	SANE_Option_Descriptor **sane_options;
-	SANE_Word num_options, num_values, num_strings;
-	SANE_Handle pointer;
+	SANE_Word num_options, num_values, null_pointer;
 	int written;
 
 	if (!this->opened)
@@ -121,8 +120,8 @@ int WINSANE_Device::FetchOptions() {
 	sane_options = new SANE_Option_Descriptor*[num_options];
 
 	for (int index = 0; index < num_options; index++) {
-		pointer = this->sock->ReadHandle();
-		if (pointer != NULL)
+		null_pointer = this->sock->ReadWord();
+		if (null_pointer)
 			continue;
 
 		SANE_Option_Descriptor *sane_option = new SANE_Option_Descriptor();
@@ -141,7 +140,9 @@ int WINSANE_Device::FetchOptions() {
 			break;
 
 		case SANE_CONSTRAINT_RANGE:
-			pointer = this->sock->ReadHandle();
+			null_pointer = this->sock->ReadWord();
+			if (null_pointer)
+				break;
 			sane_option->constraint.range = new SANE_Range();
 			sane_option->constraint.range->min = this->sock->ReadWord();
 			sane_option->constraint.range->max = this->sock->ReadWord();
@@ -157,9 +158,9 @@ int WINSANE_Device::FetchOptions() {
 			break;
 
 		case SANE_CONSTRAINT_STRING_LIST:
-			num_strings = this->sock->ReadWord();
-			sane_option->constraint.string_list = new SANE_String_Const[num_strings];
-			for (int index = 0; index < num_strings; index++) {
+			num_values = this->sock->ReadWord();
+			sane_option->constraint.string_list = new SANE_String_Const[num_values];
+			for (int index = 0; index < num_values; index++) {
 				sane_option->constraint.string_list[index] = this->sock->ReadString();
 			}
 			break;
