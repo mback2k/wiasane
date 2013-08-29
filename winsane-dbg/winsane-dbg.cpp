@@ -66,6 +66,8 @@ int main(int argc, char *argv[])
 					CloseHandle(output);
 					printf("Finished scanning image!\n");
 
+					delete scan;
+
 					device->Cancel();
 				}
 
