@@ -30,6 +30,9 @@ public:
 	SANE_Word* GetConstraintWordList();
 	SANE_String_Const* GetConstraintStringList();
 
+	bool IsValidValue(SANE_Word value);
+	bool IsValidValue(SANE_String value);
+
 	SANE_Bool GetValueBool();
 	SANE_Int GetValueInt();
 	SANE_Fixed GetValueFixed();

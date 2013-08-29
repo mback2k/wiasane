@@ -90,6 +90,78 @@ SANE_String_Const* WINSANE_Option::GetConstraintStringList() {
 	return this->sane_option->constraint.string_list;
 }
 
+bool WINSANE_Option::IsValidValue(SANE_Word value) {
+	SANE_Word *word_list, word_list_length;
+	SANE_Range *range;
+	bool is_valid;
+	int index;
+
+	switch (this->sane_option->constraint_type) {
+		case SANE_CONSTRAINT_RANGE:
+			is_valid = TRUE;
+			range = this->sane_option->constraint.range;
+			if (value < range->min)
+				is_valid = FALSE;
+			else if (value > range->max)
+				is_valid = FALSE;
+			else if (range->quant && ((value - range->min) % range->quant))
+				is_valid = FALSE;
+			break;
+
+		case SANE_CONSTRAINT_WORD_LIST:
+			is_valid = FALSE;
+			word_list = this->sane_option->constraint.word_list;
+			word_list_length = *word_list;
+			for (index = 1; index <= word_list_length; index++) {
+				if (value == word_list[index]) {
+					is_valid = TRUE;
+					break;
+				}
+			}
+			break;
+
+		case SANE_CONSTRAINT_STRING_LIST:
+			is_valid = FALSE;
+			break;
+
+		case SANE_CONSTRAINT_NONE:
+			is_valid = TRUE;
+			break;
+	}
+
+	return is_valid;
+}
+
+bool WINSANE_Option::IsValidValue(SANE_String value) {
+	SANE_String_Const *string_list;
+	bool is_valid;
+	int index;
+
+	switch (this->sane_option->constraint_type) {
+		case SANE_CONSTRAINT_RANGE:
+		case SANE_CONSTRAINT_WORD_LIST:
+			is_valid = FALSE;
+			break;
+
+		case SANE_CONSTRAINT_STRING_LIST:
+			is_valid = FALSE;
+			string_list = this->sane_option->constraint.string_list;
+			for (index = 0; string_list[index] != NULL; index++) {
+				if (strcmp(value, string_list[index]) == 0) {
+					is_valid = TRUE;
+					break;
+				}
+			}
+			break;
+
+		case SANE_CONSTRAINT_NONE:
+			is_valid = TRUE;
+			break;
+	}
+
+	return is_valid;
+}
+
 
 SANE_Bool WINSANE_Option::GetValueBool() {
 	SANE_Bool value_bool;
