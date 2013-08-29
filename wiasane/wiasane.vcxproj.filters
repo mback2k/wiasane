@@ -24,9 +24,6 @@
     <ClCompile Include="wiasane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="wiasane_btns.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="wiasane_util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,9 +36,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wiasane.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="wiasane_btns.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="wiasane_util.h">

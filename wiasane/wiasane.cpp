@@ -6,7 +6,6 @@
 #include <winioctl.h>
 #include <usbscan.h>
 
-#include "wiasane_btns.h"
 #include "wiasane_util.h"
 
 
@@ -67,12 +66,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
         //                                   NULL );
 
         //
-        // if your device supports buttons, create the BUTTON name information here..
-        //
-
-		hr = CreateButtonNames(hr);
-
-        //
         // Initialize the scanner's default settings
         //
 
@@ -89,12 +82,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
         {
             CloseHandle(pValue->pScanInfo->DeviceIOHandles[1]);
         }
-
-        //
-        // if your device supports buttons, free/destroy the BUTTON name information here..
-        //
-
-		hr = FreeButtonNames(hr);
 
         //
         // close/unload libraries
@@ -127,14 +114,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
         pValue->lVal = MCRO_STATUS_OK;
         pValue->pGuid = (GUID*) &GUID_NULL;
-
-        //
-        // button polling support
-        //
-
-#ifdef BUTTON_SUPPORT
-        CheckButtonStatus(pValue);
-#endif
 
         hr = S_OK;
         break;
