@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "winsane_option.h"
 
-WINSANE_Option::WINSANE_Option(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Option_Descriptor *sane_option) {
+WINSANE_Option::WINSANE_Option(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Option_Descriptor *sane_option, SANE_Handle sane_handle, int index) {
 	this->device = device;
 	this->sock = sock;
 	this->sane_option = sane_option;
+	this->sane_handle = sane_handle;
+	this->index = index;
 }
 
 WINSANE_Option::~WINSANE_Option() {

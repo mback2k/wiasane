@@ -11,7 +11,7 @@
 
 class WINSANE_API WINSANE_Option {
 public:
-	WINSANE_Option(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Option_Descriptor *sane_option);
+	WINSANE_Option(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Option_Descriptor *sane_option, SANE_Handle sane_handle, int index);
 	~WINSANE_Option();
 
 
@@ -30,6 +30,8 @@ private:
 	WINSANE_Device *device;
 	WINSANE_Socket *sock;
 	SANE_Option_Descriptor *sane_option;
+	SANE_Handle sane_handle;
+	int index;
 };
 
 #endif

@@ -173,7 +173,7 @@ int WINSANE_Device::FetchOptions() {
 	this->options = new WINSANE_Option*[this->num_options];
 
 	for (int index = 0; index < this->num_options; index++) {
-		WINSANE_Option *option = new WINSANE_Option(this, this->sock, sane_options[index]);
+		WINSANE_Option *option = new WINSANE_Option(this, this->sock, sane_options[index], this->sane_handle, index);
 		this->options[index] = option;
 	}
 
