@@ -265,7 +265,7 @@ WINSANE_Scan* WINSANE_Device::Start() {
 bool WINSANE_Device::Cancel() {
 	int written;
 
-	if (!this->started)
+	if (!this->opened || !this->started)
 		return FALSE;
 
 	written = this->sock->WriteWord(WINSANE_NET_CANCEL);
