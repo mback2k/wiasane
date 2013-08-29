@@ -28,7 +28,7 @@ public:
 	bool Open();
 	bool Close();
 
-	int GetOptions();
+	int FetchOptions();
 	WINSANE_Option* GetOption(int index);
 	void ClearOptions();
 

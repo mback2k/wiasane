@@ -98,7 +98,7 @@ bool WINSANE_Device::Close() {
 }
 
 
-int WINSANE_Device::GetOptions() {
+int WINSANE_Device::FetchOptions() {
 	SANE_Option_Descriptor **sane_options;
 	SANE_Word num_options, num_values, num_strings;
 	SANE_Handle pointer;

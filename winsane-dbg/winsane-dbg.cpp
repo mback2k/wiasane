@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
 				printf("Model:\t%s\n", device->GetModel());
 				printf("Type:\t%s\n", device->GetType());
 
-				int options = device->GetOptions();
+				int options = device->FetchOptions();
 
 				for (int j = 0; j < options; j++) {
 					WINSANE_Option *option = device->GetOption(j);
