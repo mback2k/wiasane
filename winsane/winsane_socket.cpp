@@ -57,13 +57,16 @@ int WINSANE_Socket::Flush() {
 }
 
 void WINSANE_Socket::Clear() {
-	if (this->buf && this->buflen) {
-		memset(this->buf, 0, this->buflen);
+	if (this->buf) {
+		if (this->buflen) {
+			memset(this->buf, 0, this->buflen);
+			this->buflen = 0;
+		}
+
 		free(this->buf);
+		this->buf = NULL;
 	}
 
-	this->buf = NULL;
-	this->buflen = 0;
 	this->bufoff = 0;
 }
 
