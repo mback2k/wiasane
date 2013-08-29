@@ -26,6 +26,16 @@ public:
 	SANE_Int GetCapabilities();
 
 
+	SANE_Bool GetValueBool();
+	SANE_Int GetValueInt();
+	SANE_Fixed GetValueFixed();
+	SANE_String GetValueString();
+
+
+protected:
+	void* GetValue(SANE_Word value_type, SANE_Word value_size, SANE_Word element_count);
+
+
 private:
 	WINSANE_Device *device;
 	WINSANE_Socket *sock;

@@ -34,6 +34,27 @@ int main(int argc, char *argv[])
 					printf("Name:\t\t%s\n", option->GetName());
 					printf("Title:\t\t%s\n", option->GetTitle());
 					printf("Description:\t%s\n", option->GetDescription());
+
+					switch (option->GetType()) {
+						case SANE_TYPE_BOOL:
+							printf("Value:\t\t%d\n", option->GetValueBool());
+							break;
+						case SANE_TYPE_INT:
+							printf("Value:\t\t%d\n", option->GetValueInt());
+							break;
+						case SANE_TYPE_FIXED:
+							printf("Value:\t\t%d\n", option->GetValueFixed());
+							break;
+						case SANE_TYPE_STRING:
+							SANE_String value = option->GetValueString();
+							if (value) {
+								printf("Value:\t\t%s\n", value);
+								delete value;
+							} else {
+								printf("Value:\t\t<NULL>\n");
+							}
+							break;
+					}
 				}
 
 				WINSANE_Params *params = device->GetParams();

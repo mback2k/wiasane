@@ -25,6 +25,9 @@ public:
 	int Flush();
 	void Clear();
 
+	int WritePlain(const char *buf, int buflen);
+	int ReadPlain(char *buf, int buflen);
+
 	int Write(const char *buf, int buflen);
 	int Read(char *buf, int buflen);
 
@@ -46,9 +49,6 @@ public:
 protected:
 	int WriteSocket(const char *buf, int buflen);
 	int ReadSocket(char *buf, int buflen);
-
-	int WritePlain(const char *buf, int buflen);
-	int ReadPlain(char *buf, int buflen);
 
 
 private:
