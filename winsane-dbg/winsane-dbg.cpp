@@ -83,8 +83,12 @@ int main(int argc, char *argv[])
 
 					if (option->GetName()) {
 						if (strcmp(option->GetName(), "mode") == 0) {
-							printf("Mode 1:\t\t%s\n", option->SetValueString("color"));
-							printf("Mode 2:\t\t%s\n", option->GetValueString());
+							SANE_String mode1 = option->SetValueString("color");
+							printf("Mode 1:\t\t%s\n", mode1);
+							delete mode1;
+							SANE_String mode2 = option->GetValueString();
+							printf("Mode 2:\t\t%s\n", mode2);
+							delete mode2;
 						} else if (strcmp(option->GetName(), "resolution") == 0) {
 							printf("Resolution 1:\t%d\n", option->SetValueInt(300));
 							printf("Resolution 2:\t%d\n", option->GetValueInt());
