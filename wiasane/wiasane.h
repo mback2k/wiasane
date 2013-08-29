@@ -44,7 +44,6 @@ BOOL g_bDown = FALSE;   // simple band direction bool   (test drvier specific)
 BOOL    InitializeScanner(PSCANINFO pScanInfo);
 VOID    InitScannerDefaults(PSCANINFO pScanInfo);
 BOOL    SetScannerSettings(PSCANINFO pScanInfo);
-HRESULT GetInterruptEvent(PVAL pValue);
 VOID    ReadRegistryInformation(PVAL pValue);
 
 #endif
