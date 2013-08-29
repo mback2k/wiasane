@@ -31,9 +31,15 @@ public:
 	SANE_Fixed GetValueFixed();
 	SANE_String GetValueString();
 
+	SANE_Bool SetValueBool(SANE_Bool value_bool);
+	SANE_Int SetValueInt(SANE_Int value_int);
+	SANE_Fixed SetValueFixed(SANE_Fixed value_fixed);
+	SANE_String SetValueString(SANE_String value_string);
+
 
 protected:
 	void* GetValue(SANE_Word value_type, SANE_Word value_size, SANE_Word element_count);
+	void* SetValue(SANE_Word value_type, SANE_Word value_size, SANE_Word element_count, void* value);
 
 
 private:
