@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 							printf("Value:\t\t%d\n", option->GetValueInt());
 							break;
 						case SANE_TYPE_FIXED:
-							printf("Value:\t\t%d\n", option->GetValueFixed());
+							printf("Value:\t\t%f\n", SANE_UNFIX(option->GetValueFixed()));
 							break;
 						case SANE_TYPE_STRING:
 							SANE_String value = option->GetValueString();
@@ -59,16 +59,26 @@ int main(int argc, char *argv[])
 					switch (option->GetConstraintType()) {
 						case SANE_CONSTRAINT_RANGE: {
 							SANE_Range *range = option->GetConstraintRange();
-							printf("Min:\t\t%d\n", range->min);
-							printf("Max:\t\t%d\n", range->max);
-							printf("Quant:\t\t%d\n", range->quant);
+							if (option->GetType() == SANE_TYPE_FIXED) {
+								printf("Min:\t\t%f\n", SANE_UNFIX(range->min));
+								printf("Max:\t\t%f\n", SANE_UNFIX(range->max));
+								printf("Quant:\t\t%f\n", SANE_UNFIX(range->quant));
+							} else {
+								printf("Min:\t\t%d\n", range->min);
+								printf("Max:\t\t%d\n", range->max);
+								printf("Quant:\t\t%d\n", range->quant);
+							}
 							break;
 						}
 						case SANE_CONSTRAINT_WORD_LIST: {
 							SANE_Word *word_list = option->GetConstraintWordList();
 							SANE_Word word_list_length = *word_list;
 							for (int index = 1; index <= word_list_length; index++) {
-								printf("Word:\t\t%d\n", word_list[index]);
+								if (option->GetType() == SANE_TYPE_FIXED) {
+									printf("Word:\t\t%f\n", SANE_UNFIX(word_list[index]));
+								} else {
+									printf("Word:\t\t%d\n", word_list[index]);
+								}
 							}
 							break;
 						}
