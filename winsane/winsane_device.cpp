@@ -189,6 +189,22 @@ WINSANE_Option* WINSANE_Device::GetOption(int index) {
 	return this->options[index];
 }
 
+WINSANE_Option* WINSANE_Device::GetOption(SANE_String_Const name) {
+	SANE_String_Const option_name;
+
+	if (!this->opened)
+		return NULL;
+
+	for (int index = 0; index < this->num_options; index++) {
+		option_name = this->options[index]->GetName();
+		if (option_name && strcmp(name, option_name) == 0) {
+			return this->options[index];
+		}
+	}
+
+	return NULL;
+}
+
 void WINSANE_Device::ClearOptions() {
 	for (int index = 0; index < this->num_options; index++) {
 		delete this->options[index];

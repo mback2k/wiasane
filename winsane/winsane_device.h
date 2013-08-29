@@ -30,6 +30,7 @@ public:
 
 	int FetchOptions();
 	WINSANE_Option* GetOption(int index);
+	WINSANE_Option* GetOption(SANE_String_Const name);
 	void ClearOptions();
 
 	WINSANE_Params* GetParams();
