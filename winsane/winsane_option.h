@@ -25,6 +25,10 @@ public:
 	SANE_Int GetSize();
 	SANE_Int GetCapabilities();
 
+	SANE_Constraint_Type GetConstraintType();
+	SANE_Range* GetConstraintRange();
+	SANE_Word* GetConstraintWordList();
+	SANE_String_Const* GetConstraintStringList();
 
 	SANE_Bool GetValueBool();
 	SANE_Int GetValueInt();

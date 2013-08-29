@@ -56,6 +56,31 @@ int main(int argc, char *argv[])
 							break;
 					}
 
+					switch (option->GetConstraintType()) {
+						case SANE_CONSTRAINT_RANGE: {
+							SANE_Range *range = option->GetConstraintRange();
+							printf("Min:\t\t%d\n", range->min);
+							printf("Max:\t\t%d\n", range->max);
+							printf("Quant:\t\t%d\n", range->quant);
+							break;
+						}
+						case SANE_CONSTRAINT_WORD_LIST: {
+							SANE_Word *word_list = option->GetConstraintWordList();
+							SANE_Word word_list_length = *word_list;
+							for (int index = 1; index <= word_list_length; index++) {
+								printf("Word:\t\t%d\n", word_list[index]);
+							}
+							break;
+						}
+						case SANE_CONSTRAINT_STRING_LIST: {
+							SANE_String_Const *string_list = option->GetConstraintStringList();
+							for (int index = 0; string_list[index] != NULL; index++) {
+								printf("String:\t\t%s\n", string_list[index]);
+							}
+							break;
+						}
+					}
+
 					if (option->GetName()) {
 						if (strcmp(option->GetName(), "mode") == 0) {
 							printf("Mode 1:\t\t%s\n", option->SetValueString("color"));

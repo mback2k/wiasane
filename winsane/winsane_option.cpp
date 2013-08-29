@@ -65,6 +65,32 @@ SANE_Int WINSANE_Option::GetCapabilities() {
 }
 
 
+SANE_Constraint_Type WINSANE_Option::GetConstraintType() {
+	return this->sane_option->constraint_type;
+}
+
+SANE_Range* WINSANE_Option::GetConstraintRange() {
+	if (this->sane_option->constraint_type != SANE_CONSTRAINT_RANGE)
+		return NULL;
+
+	return this->sane_option->constraint.range;
+}
+
+SANE_Word* WINSANE_Option::GetConstraintWordList() {
+	if (this->sane_option->constraint_type != SANE_CONSTRAINT_WORD_LIST)
+		return NULL;
+
+	return this->sane_option->constraint.word_list;
+}
+
+SANE_String_Const* WINSANE_Option::GetConstraintStringList() {
+	if (this->sane_option->constraint_type != SANE_CONSTRAINT_STRING_LIST)
+		return NULL;
+
+	return this->sane_option->constraint.string_list;
+}
+
+
 SANE_Bool WINSANE_Option::GetValueBool() {
 	SANE_Bool value_bool;
 	void *value;
