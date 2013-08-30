@@ -56,6 +56,30 @@ int main(int argc, char *argv[])
 							break;
 					}
 
+					switch (option->GetUnit()) {
+						case SANE_UNIT_NONE:
+							printf("Unit:\t\tNone\n");
+							break;
+						case SANE_UNIT_PIXEL:
+							printf("Unit:\t\tPixel\n");
+							break;
+						case SANE_UNIT_BIT:
+							printf("Unit:\t\tBit\n");
+							break;
+						case SANE_UNIT_MM:
+							printf("Unit:\t\tMillimeter\n");
+							break;
+						case SANE_UNIT_DPI:
+							printf("Unit:\t\tDPI\n");
+							break;
+						case SANE_UNIT_PERCENT:
+							printf("Unit:\t\tPercent\n");
+							break;
+						case SANE_UNIT_MICROSECOND:
+							printf("Unit:\t\tMicrosecond\n");
+							break;
+					}
+
 					switch (option->GetConstraintType()) {
 						case SANE_CONSTRAINT_RANGE: {
 							SANE_Range *range = option->GetConstraintRange();
