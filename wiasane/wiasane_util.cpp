@@ -31,7 +31,7 @@
 *
 \**************************************************************************/
 
-HRESULT GetOLESTRResourceString(LONG lResourceID,_Outptr_ LPOLESTR *ppsz,BOOL bLocal)
+HRESULT GetOLESTRResourceString(LONG lResourceID, _Outptr_ LPOLESTR *ppsz, BOOL bLocal)
 {
     HRESULT hr = S_OK;
     TCHAR szStringValue[255];
@@ -155,7 +155,7 @@ HRESULT GetOLESTRResourceString(LONG lResourceID,_Outptr_ LPOLESTR *ppsz,BOOL bL
 *
 \**************************************************************************/
 
-VOID Trace(_In_ LPCTSTR format,...)
+VOID Trace(_In_ LPCTSTR format, ...)
 {
 
 #ifdef DEBUG

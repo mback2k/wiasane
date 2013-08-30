@@ -8,7 +8,7 @@
 #include <windows.h>
 #include <wtypes.h>
 
-extern HRESULT GetOLESTRResourceString(LONG lResourceID,_Outptr_ LPOLESTR *ppsz,BOOL bLocal);
-extern VOID Trace(_In_ LPCTSTR format,...);
+HRESULT GetOLESTRResourceString(LONG lResourceID, _Outptr_ LPOLESTR *ppsz, BOOL bLocal);
+VOID Trace(_In_ LPCTSTR format, ...);
 
 #endif
