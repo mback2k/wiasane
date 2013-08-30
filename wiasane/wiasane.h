@@ -16,10 +16,6 @@ DEFINE_GUID(WiaImgFmt_BMP, 0xb96b3cab, 0x0728, 0x11d3, 0x9d, 0x7b, 0x00, 0x00, 0
 DEFINE_GUID(WiaImgFmt_JPEG, 0xb96b3cae, 0x0728, 0x11d3, 0x9d, 0x7b, 0x00, 0x00, 0xf8, 0x1e, 0xf3, 0x2e);
 DEFINE_GUID(WiaImgFmt_TIFF, 0xb96b3cb1, 0x0728, 0x11d3, 0x9d, 0x7b, 0x00, 0x00, 0xf8, 0x1e, 0xf3, 0x2e);
 
-// define your custom-defined supported formats here
-// {3B5DE639-B2C6-4952-98A9-1DC06F3703BD}
-DEFINE_GUID(WiaImgFmt_MYNEWFORMAT, 0x3b5de639, 0xb2c6, 0x4952, 0x98, 0xa9, 0x1d, 0xc0, 0x6f, 0x37, 0x3, 0xbd);
-
 #undef INITGUID
 
 
@@ -37,13 +33,14 @@ GUID g_SupportedFileFormats[NUM_SUPPORTED_FILEFORMATS];
 GUID g_SupportedMemoryFormats[NUM_SUPPORTED_MEMORYFORMATS];
 
 
+#include "wiasane_opt.h"
 
-INT g_PalIndex = 0;     // simple palette index counter (test driver specific)
-BOOL g_bDown = FALSE;   // simple band direction bool   (test drvier specific)
-
-BOOL    InitializeScanner(PSCANINFO pScanInfo);
-VOID    InitScannerDefaults(PSCANINFO pScanInfo);
-BOOL    SetScannerSettings(PSCANINFO pScanInfo);
-VOID    ReadRegistryInformation(PVAL pValue);
+HRESULT ReadRegistryInformation(PVAL pValue);
+HRESULT InitializeScanner(PSCANINFO pScanInfo, WIASANE_Context *context);
+HRESULT UninitializeScanner(PSCANINFO pScanInfo, WIASANE_Context *context);
+HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context);
+HRESULT SetScannerSettings(PSCANINFO pScanInfo, WIASANE_Context *context);
+HRESULT FetchScannerParams(PSCANINFO pScanInfo, WIASANE_Context *context);
+HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode);
 
 #endif

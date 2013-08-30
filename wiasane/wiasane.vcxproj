@@ -87,6 +87,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="wiasane.cpp" />
+    <ClCompile Include="wiasane_opt.cpp" />
     <ClCompile Include="wiasane_util.cpp" />
     <ResourceCompile Include="wiasane.rc" />
   </ItemGroup>
@@ -104,6 +105,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="wiasane.h" />
+    <ClInclude Include="wiasane_opt.h" />
     <ClInclude Include="wiasane_util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
