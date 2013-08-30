@@ -62,7 +62,7 @@ Needs=STI.SerialSection.Services
 [WIASANE.DeviceData]
 Server=local
 UI Class ID={4DB1AD10-3391-11D2-9A33-00C04FA36145}
-MicroDriver="WIASANE.DLL"
+MicroDriver="wiasane.dll"
 Sample Entry=1,1
 
 [WIASANE.AddReg]
@@ -70,10 +70,10 @@ HKR,,HardwareConfig,1,1
 
 [WIASANE.CopyFiles]
 wiasane.dll
+winsane.dll
 
 [Strings]
 Msft="WIASANE"
 Mfg="WIASANE Team"
 Location="Install Source"
 WIASANE.DeviceDesc="WIA Scanner Access Now Easy - Micro Driver Scanner Device"
-
