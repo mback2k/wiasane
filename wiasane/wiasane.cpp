@@ -271,12 +271,14 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			*plReceived = 0;
 
 			if (context && context->session && context->device && context->scan) {
+				memset(pBuffer, 0, lLength);
+
 				lAquired = lLength;
-				while (context->scan->AquireImage((char*) pBuffer, &lAquired) == CONTINUE) {
+				while (context->scan->AquireImage((char*) (pBuffer + *plReceived), &lAquired) == CONTINUE) {
 					*plReceived += lAquired;
-					if (*plReceived > 0)
+					lAquired = lLength - *plReceived;
+					if (!lAquired)
 						break;
-					lAquired = lLength;
 				}
 
 				hr = FetchScannerParams(pScanInfo, context);
