@@ -57,8 +57,8 @@ private:
 
 	SOCKET sock;
 	char *buf;
-	int buflen;
-	int bufoff;
+	long buflen;
+	long bufoff;
 	bool conv;
 };
 
