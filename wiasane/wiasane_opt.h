@@ -11,6 +11,8 @@ typedef struct WIASANE_Context {
 	WINSANE_Session *session;
 	WINSANE_Device *device;
 	WINSANE_Scan *scan;
+	LONG total;
+	LONG received;
 } WIASANE_Context;
 
 HRESULT GetOptionValue(WIASANE_Context *context, SANE_String name, double *value);

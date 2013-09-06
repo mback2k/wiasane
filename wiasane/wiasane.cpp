@@ -224,9 +224,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
     return hr;
 }
 
-LONG g_Total = 0;
-LONG g_Received = 0;
-
 WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_bytes_(lLength) PBYTE pBuffer, LONG lLength, _Out_ LONG *plReceived)
 {
 	WIASANE_Context *context;
@@ -255,9 +252,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 
 				context->scan = context->device->Start();
 
-				g_Total = pScanInfo->WidthBytes * pScanInfo->Lines;
-				g_Received = 0;
-				Trace(TEXT("Data: %d/%d"), g_Received, g_Total);
+				context->total = pScanInfo->WidthBytes * pScanInfo->Lines;
+				context->received = 0;
+				Trace(TEXT("Data: %d/%d"), context->received, context->total);
 			}
 
 		case SCAN_NEXT: // SCAN_FIRST will fall through to SCAN_NEXT (because it is expecting data)
@@ -285,9 +282,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				if (hr != S_OK)
 					return hr;
 
-				g_Total = pScanInfo->WidthBytes * pScanInfo->Lines;
-				g_Received += *plReceived;
-				Trace(TEXT("Data: %d/%d"), g_Received, g_Total);
+				context->total = pScanInfo->WidthBytes * pScanInfo->Lines;
+				context->received += *plReceived;
+				Trace(TEXT("Data: %d/%d -> %d/%d"), context->received, context->total, context->total - context->received, lLength);
 			}
 
 			break;
