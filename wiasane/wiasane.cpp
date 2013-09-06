@@ -229,6 +229,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 	WIASANE_Context *context;
 	LONG lAquired;
 	HRESULT hr;
+	LONG idx;
 
     Trace(TEXT("------ Scan Requesting %d ------"), lLength);
 
@@ -276,6 +277,12 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					lAquired = lLength - *plReceived;
 					if (!lAquired)
 						break;
+				}
+
+				if (pScanInfo->DataType == WIA_DATA_THRESHOLD) {
+					for (idx = 0; idx < *plReceived; idx++) {
+						pBuffer[idx] = ~pBuffer[idx];
+					}
 				}
 
 				hr = FetchScannerParams(pScanInfo, context);
