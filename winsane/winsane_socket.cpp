@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "winsane_socket.h"
 
+#include <stdlib.h>
+#include <malloc.h>
 #include <algorithm>
 
 WINSANE_Socket::WINSANE_Socket(SOCKET sock) {
