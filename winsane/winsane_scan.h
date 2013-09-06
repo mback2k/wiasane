@@ -47,7 +47,11 @@ private:
 	WINSANE_Socket *sock, *scan;
 	SANE_Word port;
 	SANE_Word byte_order;
-	unsigned int buffered;
+	char *buf;
+	long buflen;
+	long bufoff;
+	long bufpos;
+	bool conv;
 };
 
 #endif

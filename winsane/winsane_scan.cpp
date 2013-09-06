@@ -1,14 +1,29 @@
 #include "stdafx.h"
 #include "winsane_scan.h"
 
+#include <stdlib.h>
+#include <malloc.h>
+#include <algorithm>
+
 WINSANE_Scan::WINSANE_Scan(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Word port, SANE_Word byte_order) {
+	unsigned char *p, *b;
+	unsigned short ns;
+
 	this->state = NEW;
 	this->device = device;
 	this->sock = sock;
 	this->scan = NULL;
 	this->port = port;
 	this->byte_order = byte_order;
-	this->buffered = 0;
+	this->buf = NULL;
+	this->buflen = 0;
+	this->bufoff = 0;
+	this->bufpos = 0;
+
+	ns = 0x1234;
+	p = (unsigned char*) &ns;
+	b = (unsigned char*) &this->byte_order;
+	this->conv = *p != *b;
 }
 
 WINSANE_Scan::~WINSANE_Scan() {
@@ -45,10 +60,7 @@ WINSANE_Scan_Result WINSANE_Scan::Connect() {
 	struct sockaddr addr, *scanaddr;
 	struct sockaddr_in addr_in;
 	struct sockaddr_in6 addr_in6;
-	unsigned char *p, *b;
-	unsigned short ns;
-	int addrlen;
-	int result;
+	int addrlen, result;
 
 	real_sock = this->sock->GetSocket();
 
@@ -86,44 +98,73 @@ WINSANE_Scan_Result WINSANE_Scan::Connect() {
 	}
 
 	this->scan = new WINSANE_Socket(scan_sock);
-	if (sock->IsConverting()) {
-		this->scan->SetConverting(true);
-	} else {
-		ns = 0x1234;
-		p = (unsigned char*) &ns;
-		b = (unsigned char*) &this->byte_order;
-		this->scan->SetConverting(*p != *b);
-	}
+	this->scan->SetConverting(sock->IsConverting());
 
 	this->state = CONNECTED;
 	return CONTINUE;
 }
 
 WINSANE_Scan_Result WINSANE_Scan::Receive(char *buffer, long *length) {
-	unsigned int received, receive;
+	unsigned int record_size;
+	unsigned long size;
 
-	if (this->buffered == 0) {
-		if (this->scan->Read((char*) &received, sizeof(received)) != sizeof(received))
+	if (!this->buf || !this->buflen) {
+		if (this->scan->Read((char*) &record_size, sizeof(record_size)) != sizeof(record_size))
 			return TRANSFER_ERROR;
 
-		if (received == 0) {
+		if (record_size == 0) {
 			this->state = CONNECTED;
 			return CONTINUE;
 		}
-		if (received == -1) {
+		if (record_size == -1) {
 			this->state = COMPLETED;
 			return SUCCESSFUL;
 		}
+
+		this->buf = (char *)malloc(record_size);
+		this->buflen = record_size;
+		this->bufoff = 0;
+		this->bufpos = 0;
+
+		while (this->bufoff < this->buflen) {
+			size = this->scan->ReadPlain(this->buf + this->bufoff, this->buflen - this->bufoff);
+
+			if (size == 0) {
+				this->state = DISCONNECTED;
+				return CONNECTION_ERROR;
+			}
+			if (size == SOCKET_ERROR) {
+				this->state = DISCONNECTED;
+				return CONNECTION_ERROR;
+			}
+
+			this->bufoff += size;
+		}
+
+		if (this->conv)
+			std::reverse(this->buf, this->buf + this->bufoff);
+	}
+
+	if (this->buf && this->buflen > 0 && this->bufoff == this->buflen && this->bufpos < this->bufoff) {
+		size = min(this->bufoff - this->bufpos, *length);
+
+		if (size > 0) {
+			memcpy(buffer, this->buf + this->bufpos, size);
+
+			this->bufpos += size;
+
+			if (this->bufpos == this->bufoff) {
+				free(this->buf);
+				this->buf = NULL;
+				this->buflen = 0;
+				this->bufoff = 0;
+				this->bufpos = 0;
+			}
+		}
+
+		*length = size;
 	} else
-		received = this->buffered;
-
-	if ((long) received > *length)
-		receive = *length;
-	else
-		receive = received;
-
-	*length = this->scan->Read(buffer, receive);
-	this->buffered = received - *length;
+		*length = 0;
 
 	this->state = SCANNING;
 	return CONTINUE;
