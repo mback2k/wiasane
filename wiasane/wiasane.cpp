@@ -654,7 +654,7 @@ HRESULT FetchScannerParams(PSCANINFO pScanInfo, WIASANE_Context *context)
 
 		case SANE_FRAME_RGB:
 			pScanInfo->RawDataFormat = WIA_PACKED_PIXEL;
-			pScanInfo->RawPixelOrder = WIA_ORDER_RGB;
+			pScanInfo->RawPixelOrder = WIA_ORDER_BGR;
 			pScanInfo->DataType = WIA_DATA_COLOR;
 			pScanInfo->PixelBits = depth * 3;
 			hr = S_OK;
@@ -664,7 +664,7 @@ HRESULT FetchScannerParams(PSCANINFO pScanInfo, WIASANE_Context *context)
 		case SANE_FRAME_GREEN:
 		case SANE_FRAME_BLUE:
 			pScanInfo->RawDataFormat = WIA_PLANAR;
-			pScanInfo->RawPixelOrder = WIA_ORDER_RGB;
+			pScanInfo->RawPixelOrder = WIA_ORDER_BGR;
 			pScanInfo->DataType = WIA_DATA_COLOR;
 			pScanInfo->PixelBits = depth * 3;
 			hr = S_OK;
