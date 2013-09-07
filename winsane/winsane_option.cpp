@@ -279,7 +279,7 @@ SANE_Fixed WINSANE_Option::SetValueFixed(SANE_Fixed value_fixed) {
 	return value_fixed;
 }
 
-SANE_String WINSANE_Option::SetValueString(SANE_String value_string) {
+SANE_String WINSANE_Option::SetValueString(SANE_String_Const value_string) {
 	SANE_Word value_size;
 	void *value;
 
@@ -293,9 +293,8 @@ SANE_String WINSANE_Option::SetValueString(SANE_String value_string) {
 
 	value = (void*) value_string;
 	value = this->SetValue(this->sane_option->type, value_size, value_size, value);
-	value_string = (SANE_String) value;
 
-	return value_string;
+	return (SANE_String) value;
 }
 
 

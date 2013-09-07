@@ -41,7 +41,7 @@ public:
 	SANE_Bool SetValueBool(SANE_Bool value_bool);
 	SANE_Int SetValueInt(SANE_Int value_int);
 	SANE_Fixed SetValueFixed(SANE_Fixed value_fixed);
-	SANE_String SetValueString(SANE_String value_string);
+	SANE_String SetValueString(SANE_String_Const value_string);
 
 
 protected:
