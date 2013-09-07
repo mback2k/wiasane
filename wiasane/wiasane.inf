@@ -63,7 +63,9 @@ Needs=STI.SerialSection.Services
 Server=local
 UI Class ID={4DB1AD10-3391-11D2-9A33-00C04FA36145}
 MicroDriver="wiasane.dll"
-Sample Entry=1,1
+Host=10.0.0.1
+Port=6566,1
+Name=hpaio:/net/Officejet_J6400_series?ip=10.2.2.64
 
 [WIASANE.AddReg]
 HKR,,HardwareConfig,1,1
@@ -76,4 +78,4 @@ winsane.dll
 Msft="WIASANE"
 Mfg="WIASANE Team"
 Location="Install Source"
-WIASANE.DeviceDesc="WIA Scanner Access Now Easy - Micro Driver Scanner Device"
+WIASANE.DeviceDesc="Officejet J6400 series"

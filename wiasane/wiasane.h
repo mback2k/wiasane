@@ -39,13 +39,17 @@ typedef struct WIASANE_Context {
 	WINSANE_Session *session;
 	WINSANE_Device *device;
 	WINSANE_Scan *scan;
+	DWORD port;
+	PCHAR host;
+	PCHAR name;
 	LONG total;
 	LONG received;
 } WIASANE_Context;
 
-HRESULT ReadRegistryInformation(PVAL pValue);
-HRESULT InitializeScanner(PSCANINFO pScanInfo, WIASANE_Context *context);
-HRESULT UninitializeScanner(PSCANINFO pScanInfo, WIASANE_Context *context);
+HRESULT ReadRegistryInformation(WIASANE_Context *context, HANDLE *pHandle);
+HRESULT InitializeScanner(WIASANE_Context *context);
+HRESULT UninitializeScanner(WIASANE_Context *context);
+HRESULT FreeScanner(WIASANE_Context *context);
 HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context);
 HRESULT SetScannerSettings(PSCANINFO pScanInfo, WIASANE_Context *context);
 HRESULT FetchScannerParams(PSCANINFO pScanInfo, WIASANE_Context *context);

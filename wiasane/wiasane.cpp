@@ -30,18 +30,15 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
     switch(lCommand) {
 		case CMD_INITIALIZE:
 			if (context) {
-				UninitializeScanner(pValue->pScanInfo, context);
-				context = NULL;
-			}
+				if (context->session)
+					hr = UninitializeScanner(context);
+				else
+					hr = S_OK;
 
-			context = new WIASANE_Context;
-			if (context) {
-				pValue->pScanInfo->pMicroDriverContext = context;
-				hr = InitializeScanner(pValue->pScanInfo, context);
-			} else {
-				pValue->pScanInfo->pMicroDriverContext = NULL;
-				hr = E_OUTOFMEMORY;
-			}
+				if (hr == S_OK)
+					hr = InitializeScanner(context);
+			} else
+				hr = E_FAIL;
 
 			if (hr == S_OK)
 				hr = InitScannerDefaults(pValue->pScanInfo, context);
@@ -50,11 +47,21 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_UNINITIALIZE:
 			if (context) {
-				UninitializeScanner(pValue->pScanInfo, context);
-				context = NULL;
-			}
+				if (context->session)
+					hr = UninitializeScanner(context);
+				else
+					hr = S_OK;
 
-			hr = S_OK;
+				if (hr == S_OK)
+					hr = FreeScanner(context);
+
+				if (hr == S_OK)
+					context = NULL;
+			} else
+				hr = S_OK;
+
+			pValue->pScanInfo->pMicroDriverContext = context;
+
 			break;
 
 		case CMD_RESETSCANNER:
@@ -191,7 +198,19 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_SETSTIDEVICEHKEY:
-			hr = ReadRegistryInformation(pValue);
+			if (!context) {
+				context = new WIASANE_Context;
+				memset(context, 0, sizeof(WIASANE_Context));
+			}
+			if (!context) {
+				pValue->pScanInfo->pMicroDriverContext = NULL;
+				hr = E_OUTOFMEMORY;
+				break;
+			}
+
+			pValue->pScanInfo->pMicroDriverContext = context;
+
+			hr = ReadRegistryInformation(context, pValue->pHandle);
 			break;
 
 #ifdef _USE_EXTENDED_FORMAT_LIST
@@ -430,55 +449,104 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 }
 
 
-HRESULT ReadRegistryInformation(PVAL pValue)
+HRESULT ReadRegistryInformation(WIASANE_Context *context, HANDLE *pHandle)
 {
-    HKEY hKey, hOpenKey;
-	DWORD dwWritten, dwType;
-	LONG lSampleEntry;
+	HKEY hKey, hOpenKey;
+	DWORD dwWritten, dwType, dwPort;
+	PCHAR pcHost, pcName;
+	LSTATUS st;
+	HRESULT hr;
 
-    if (pValue->pHandle != NULL) {
-        hKey = (HKEY) *(pValue->pHandle);
-		hOpenKey = NULL;
+	if (!pHandle)
+		return E_INVALIDARG;
 
-        //
-        // Open DeviceData section to read driver specific information
-        //
+	hr = S_OK;
+	hKey = (HKEY) *pHandle;
+	hOpenKey = NULL;
 
-        if (RegOpenKeyEx(hKey,                     // handle to open key
-                         TEXT("DeviceData"),       // address of name of subkey to open
-                         0,                        // options (must be NULL)
-                         KEY_QUERY_VALUE|KEY_READ, // just want to QUERY a value
-                         &hOpenKey                 // address of handle to open key
-                        ) == ERROR_SUCCESS) {
+	if (context->host)
+		free(context->host);
 
-            dwWritten = sizeof(DWORD);
-            dwType = REG_DWORD;
+	if (context->name)
+		free(context->name);
 
-            lSampleEntry = 0;
-            RegQueryValueEx(hOpenKey,
-                            TEXT("Sample Entry"),
-                            NULL,
-                            &dwType,
-                            (LPBYTE)&lSampleEntry,
-                            &dwWritten);
+	context->port = WINSANE_DEFAULT_PORT;
+	context->host = _strdup("localhost");
+	context->name = NULL;
 
-            Trace(TEXT("lSampleEntry Value = %d"), lSampleEntry);
-        } else {
-            Trace(TEXT("Could not open DeviceData section"));
-        }
-    }
+	//
+	// Open DeviceData section to read driver specific information
+	//
 
-	return S_OK;
+	st = RegOpenKeyEx(hKey, TEXT("DeviceData"), 0, KEY_QUERY_VALUE|KEY_READ, &hOpenKey);
+	if (st == ERROR_SUCCESS) {
+		dwWritten = sizeof(DWORD);
+		dwType = REG_DWORD;
+		dwPort = WINSANE_DEFAULT_PORT;
+
+		st = RegQueryValueEx(hOpenKey, TEXT("Port"), NULL, &dwType, (LPBYTE)&dwPort, &dwWritten);
+		if (st == ERROR_SUCCESS) {
+			context->port = dwPort;
+		} else
+			hr = E_FAIL;
+
+		dwWritten = 0;
+		dwType = REG_SZ;
+		pcHost = NULL;
+
+		st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)pcHost, &dwWritten);
+		if (st == ERROR_SUCCESS) {
+			pcHost = (PCHAR) malloc(dwWritten);
+			if (pcHost) {
+				st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)pcHost, &dwWritten);
+				if (st == ERROR_SUCCESS) {
+					if (context->host)
+						free(context->host);
+
+					context->host = _strdup(pcHost);
+				} else
+					hr = E_FAIL;
+
+				free(pcHost);
+			} else
+				hr = E_OUTOFMEMORY;
+		} else
+			hr = E_FAIL;
+
+		dwWritten = 0;
+		dwType = REG_SZ;
+		pcName = NULL;
+
+		st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)pcName, &dwWritten);
+		if (st == ERROR_SUCCESS) {
+			pcName = (PCHAR) malloc(dwWritten);
+			if (pcName) {
+				st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)pcName, &dwWritten);
+				if (st == ERROR_SUCCESS) {
+					if (context->name)
+						free(context->name);
+
+					context->name = _strdup(pcName);
+				} else
+					hr = E_FAIL;
+
+				free(pcName);
+			} else
+				hr = E_OUTOFMEMORY;
+		} else
+			hr = E_FAIL;
+	} else
+		hr = E_ACCESSDENIED;
+
+	return hr;
 }
 
-HRESULT InitializeScanner(PSCANINFO pScanInfo, WIASANE_Context *context)
+HRESULT InitializeScanner(WIASANE_Context *context)
 {
-	UNREFERENCED_PARAMETER(pScanInfo);
-	
 	context->scan = NULL;
-	context->session = WINSANE_Session::Remote("10.0.0.1");
+	context->session = WINSANE_Session::Remote(context->host, (unsigned short) context->port);
 	if (context->session && context->session->Init(NULL, NULL) && context->session->GetDevices() > 0) {
-		context->device = context->session->GetDevice(0);
+		context->device = context->session->GetDevice(context->name);
 		if (context->device && context->device->Open()) {
 			context->device->FetchOptions();
 		} else {
@@ -493,7 +561,7 @@ HRESULT InitializeScanner(PSCANINFO pScanInfo, WIASANE_Context *context)
     return S_OK;
 }
 
-HRESULT UninitializeScanner(PSCANINFO pScanInfo, WIASANE_Context *context)
+HRESULT UninitializeScanner(WIASANE_Context *context)
 {
 	if (context->session) {
 		if (context->device) {
@@ -509,7 +577,19 @@ HRESULT UninitializeScanner(PSCANINFO pScanInfo, WIASANE_Context *context)
 		delete context->session;
 		context->session = NULL;
 	}
-	pScanInfo->pMicroDriverContext = NULL;
+
+	return S_OK;
+}
+
+HRESULT FreeScanner(WIASANE_Context *context)
+{
+	if (context->host)
+		free(context->host);
+
+	if (context->name)
+		free(context->name);
+
+	memset(context, 0, sizeof(WIASANE_Context));
 	delete context;
 
 	return S_OK;
