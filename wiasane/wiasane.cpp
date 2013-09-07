@@ -772,6 +772,7 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 {
 	WIASANE_Context *context;
 	WINSANE_Option *option;
+	SANE_String_Const *string_list;
 	SANE_Word *word_list, word;
 	HRESULT hr;
 	int idx;
@@ -783,6 +784,15 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 	switch (lScanMode) {
 		case SCANMODE_FINALSCAN:
 			Trace(TEXT("Final Scan"));
+
+			if (context && context->session && context->device) {
+				option = context->device->GetOption("compression");
+				if (option && option->GetType() == SANE_TYPE_STRING) {
+					hr = SetOptionValue(option, "None");
+					if (hr != S_OK && hr != E_NOTIMPL)
+						break;
+				}
+			}
 
 			hr = S_OK;
 			break;
@@ -806,6 +816,17 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 					pScanInfo->OpticalYResolution = pScanInfo->OpticalXResolution;
 					pScanInfo->Xresolution = pScanInfo->OpticalXResolution;
 					pScanInfo->Yresolution = pScanInfo->OpticalYResolution;
+				}
+
+				option = context->device->GetOption("compression");
+				if (option && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
+					string_list = option->GetConstraintStringList();
+					for (idx = 0; string_list[idx] != NULL; idx++) {
+						if (_stricmp(string_list[idx], "None")) {
+							option->SetValueString(string_list[idx]);
+							break;
+						}
+					}
 				}
 			}
 
