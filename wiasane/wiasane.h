@@ -35,6 +35,14 @@ GUID g_SupportedMemoryFormats[NUM_SUPPORTED_MEMORYFORMATS];
 
 #include "wiasane_opt.h"
 
+typedef struct WIASANE_Context {
+	WINSANE_Session *session;
+	WINSANE_Device *device;
+	WINSANE_Scan *scan;
+	LONG total;
+	LONG received;
+} WIASANE_Context;
+
 HRESULT ReadRegistryInformation(PVAL pValue);
 HRESULT InitializeScanner(PSCANINFO pScanInfo, WIASANE_Context *context);
 HRESULT UninitializeScanner(PSCANINFO pScanInfo, WIASANE_Context *context);
