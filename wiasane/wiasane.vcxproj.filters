@@ -54,7 +54,6 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="*.txt;*.htm;*.html" />
     <None Include="*.def;*.bat;*.hpj;*.asmx">
       <Filter>Source Files</Filter>
     </None>
