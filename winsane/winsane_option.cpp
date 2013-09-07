@@ -125,6 +125,7 @@ bool WINSANE_Option::IsValidValue(SANE_Word value) {
 			break;
 
 		case SANE_CONSTRAINT_NONE:
+		default:
 			is_valid = TRUE;
 			break;
 	}
@@ -155,6 +156,7 @@ bool WINSANE_Option::IsValidValue(SANE_String value) {
 			break;
 
 		case SANE_CONSTRAINT_NONE:
+		default:
 			is_valid = TRUE;
 			break;
 	}
