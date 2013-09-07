@@ -231,6 +231,22 @@ WINSANE_Device* WINSANE_Session::GetDevice(int index) {
 	return this->devices[index];
 }
 
+WINSANE_Device* WINSANE_Session::GetDevice(SANE_String_Const name) {
+	SANE_String_Const device_name;
+
+	if (!this->initialized)
+		return NULL;
+
+	for (int index = 0; index < this->num_devices; index++) {
+		device_name = this->devices[index]->GetName();
+		if (device_name && strcmp(name, device_name) == 0) {
+			return this->devices[index];
+		}
+	}
+
+	return NULL;
+}
+
 void WINSANE_Session::ClearDevices() {
 	for (int index = 0; index < this->num_devices; index++) {
 		delete this->devices[index];

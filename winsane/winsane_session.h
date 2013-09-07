@@ -33,6 +33,7 @@ public:
 
 	int GetDevices();
 	WINSANE_Device* GetDevice(int index);
+	WINSANE_Device* GetDevice(SANE_String_Const name);
 	void ClearDevices();
 
 
