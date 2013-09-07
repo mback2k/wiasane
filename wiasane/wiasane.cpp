@@ -28,7 +28,23 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 	hr = E_NOTIMPL;
 	context = (WIASANE_Context*) pValue->pScanInfo->pMicroDriverContext;
 
-    switch(lCommand) {
+    switch (lCommand) {
+		case CMD_SETSTIDEVICEHKEY:
+			if (!context) {
+				context = new WIASANE_Context;
+				memset(context, 0, sizeof(WIASANE_Context));
+			}
+			if (!context) {
+				pValue->pScanInfo->pMicroDriverContext = NULL;
+				hr = E_OUTOFMEMORY;
+				break;
+			}
+
+			pValue->pScanInfo->pMicroDriverContext = context;
+
+			hr = ReadRegistryInformation(context, pValue->pHandle);
+			break;
+
 		case CMD_INITIALIZE:
 			if (context) {
 				if (context->session)
@@ -196,22 +212,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_SETSCANMODE:
 			hr = SetScanMode(pValue->pScanInfo, pValue->lVal);
-			break;
-
-		case CMD_SETSTIDEVICEHKEY:
-			if (!context) {
-				context = new WIASANE_Context;
-				memset(context, 0, sizeof(WIASANE_Context));
-			}
-			if (!context) {
-				pValue->pScanInfo->pMicroDriverContext = NULL;
-				hr = E_OUTOFMEMORY;
-				break;
-			}
-
-			pValue->pScanInfo->pMicroDriverContext = context;
-
-			hr = ReadRegistryInformation(context, pValue->pHandle);
 			break;
 
 		default:
