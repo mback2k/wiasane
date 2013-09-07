@@ -213,32 +213,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			hr = ReadRegistryInformation(context, pValue->pHandle);
 			break;
 
-#ifdef _USE_EXTENDED_FORMAT_LIST
-
-		// note: MEMORYBMP, and BMP file will be added by wiafbdrv host driver.
-		//       do not include them in your extended list.
-		//
-
-		case CMD_SETFORMAT:
-			hr = S_OK;
-			break;
-
-		case CMD_GETSUPPORTEDFILEFORMATS:
-			g_SupportedFileFormats[0] = WiaImgFmt_JPEG;
-			pValue->lVal = NUM_SUPPORTED_FILEFORMATS;
-			pValue->pGuid = g_SupportedFileFormats;
-			hr = S_OK;
-			break;
-
-		case CMD_GETSUPPORTEDMEMORYFORMATS:
-			g_SupportedMemoryFormats[0] = WiaImgFmt_TIFF;
-			g_SupportedMemoryFormats[1] = WiaImgFmt_MYNEWFORMAT;
-			pValue->lVal = NUM_SUPPORTED_MEMORYFORMATS;
-			pValue->pGuid = g_SupportedMemoryFormats;
-			hr = S_OK;
-	        break;
-#endif
-
 		default:
 			Trace(TEXT("Unknown Command (%d)"),lCommand);
 			break;
