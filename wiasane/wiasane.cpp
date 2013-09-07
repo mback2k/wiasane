@@ -771,9 +771,10 @@ HRESULT FetchScannerParams(PSCANINFO pScanInfo, WIASANE_Context *context)
 HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 {
 	WIASANE_Context *context;
-	WINSANE_Option *resolution;
-	SANE_Word *word_list;
+	WINSANE_Option *option;
+	SANE_Word *word_list, word;
 	HRESULT hr;
+	int idx;
 
 	hr = E_NOTIMPL;
 
@@ -790,13 +791,21 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 			Trace(TEXT("Preview Scan"));
 
 			if (context && context->session && context->device) {
-				resolution = context->device->GetOption("resolution");
-				if (resolution && resolution->GetConstraintType() == SANE_CONSTRAINT_WORD_LIST) {
-					word_list = resolution->GetConstraintWordList();
-					if (word_list && word_list[0] > 0) {
-						pScanInfo->OpticalXResolution = word_list[1];
-						pScanInfo->OpticalYResolution = word_list[1];
+				option = context->device->GetOption("resolution");
+				if (option && option->GetConstraintType() == SANE_CONSTRAINT_WORD_LIST) {
+					word_list = option->GetConstraintWordList();
+					word = word_list[*word_list];
+					for (idx = 1; idx <= *word_list; idx++) {
+						word = min(word, word_list[idx]);
 					}
+					if (option->GetType() == SANE_TYPE_FIXED) {
+						pScanInfo->OpticalXResolution = (LONG) SANE_UNFIX(word);
+					} else {
+						pScanInfo->OpticalXResolution = word;
+					}
+					pScanInfo->OpticalYResolution = pScanInfo->OpticalXResolution;
+					pScanInfo->Xresolution = pScanInfo->OpticalXResolution;
+					pScanInfo->Yresolution = pScanInfo->OpticalYResolution;
 				}
 			}
 
