@@ -320,7 +320,7 @@ void* WINSANE_Option::GetValue(SANE_Word value_type, SANE_Word value_size, SANE_
 	else
 		written += this->sock->Write(buf, value_size);
 	if (this->sock->Flush() != written) {
-		delete buf;
+		delete[] buf;
 		return NULL;
 	}
 
@@ -365,7 +365,7 @@ void* WINSANE_Option::SetValue(SANE_Word value_type, SANE_Word value_size, SANE_
 	else
 		written += this->sock->Write(buf, value_size);
 	if (this->sock->Flush() != written) {
-		delete buf;
+		delete[] buf;
 		return NULL;
 	}
 

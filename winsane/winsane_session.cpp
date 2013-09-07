@@ -219,7 +219,7 @@ int WINSANE_Session::GetDevices() {
 		this->devices[index] = device;
 	}
 
-	delete sane_devices;
+	delete[] sane_devices;
 
 	return this->num_devices;
 }

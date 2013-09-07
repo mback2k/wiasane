@@ -177,7 +177,7 @@ int WINSANE_Device::FetchOptions() {
 		this->options[index] = option;
 	}
 
-	delete sane_options;
+	delete[] sane_options;
 
 	return this->num_options;
 }
