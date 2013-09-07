@@ -139,15 +139,17 @@ int main(int argc, char *argv[])
 
 				WINSANE_Params *params = device->GetParams();
 
-				printf("------------------------------------------------------------\n");
-				printf("Format:\t\t%d\n", params->GetFormat());
-				printf("Last Frame:\t%d\n", params->IsLastFrame());
-				printf("Bytes per Line:\t%d\n", params->GetBytesPerLine());
-				printf("Pixel per Line:\t%d\n", params->GetPixelsPerLine());
-				printf("Lines:\t\t%d\n", params->GetLines());
-				printf("Depth:\t\t%d\n", params->GetDepth());
+				if (params) {
+					printf("------------------------------------------------------------\n");
+					printf("Format:\t\t%d\n", params->GetFormat());
+					printf("Last Frame:\t%d\n", params->IsLastFrame());
+					printf("Bytes per Line:\t%d\n", params->GetBytesPerLine());
+					printf("Pixel per Line:\t%d\n", params->GetPixelsPerLine());
+					printf("Lines:\t\t%d\n", params->GetLines());
+					printf("Depth:\t\t%d\n", params->GetDepth());
 
-				delete params;
+					delete params;
+				}
 
 				device->Cancel();
 
