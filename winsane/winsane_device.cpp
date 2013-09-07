@@ -101,7 +101,7 @@ bool WINSANE_Device::Close() {
 int WINSANE_Device::FetchOptions() {
 	SANE_Option_Descriptor **sane_options;
 	SANE_Word num_options, num_values, null_pointer;
-	int written;
+	int written, index, value;
 
 	if (!this->opened)
 		return 0;
@@ -119,7 +119,7 @@ int WINSANE_Device::FetchOptions() {
 
 	sane_options = new SANE_Option_Descriptor*[num_options];
 
-	for (int index = 0; index < num_options; index++) {
+	for (index = 0; index < num_options; index++) {
 		null_pointer = this->sock->ReadWord();
 		if (null_pointer)
 			continue;
@@ -152,16 +152,16 @@ int WINSANE_Device::FetchOptions() {
 		case SANE_CONSTRAINT_WORD_LIST:
 			num_values = this->sock->ReadWord();
 			sane_option->constraint.word_list = new SANE_Word[num_values];
-			for (int index = 0; index < num_values; index++) {
-				sane_option->constraint.word_list[index] = this->sock->ReadWord();
+			for (value = 0; value < num_values; value++) {
+				sane_option->constraint.word_list[value] = this->sock->ReadWord();
 			}
 			break;
 
 		case SANE_CONSTRAINT_STRING_LIST:
 			num_values = this->sock->ReadWord();
 			sane_option->constraint.string_list = new SANE_String_Const[num_values];
-			for (int index = 0; index < num_values; index++) {
-				sane_option->constraint.string_list[index] = this->sock->ReadString();
+			for (value = 0; value < num_values; value++) {
+				sane_option->constraint.string_list[value] = this->sock->ReadString();
 			}
 			break;
 		}
@@ -172,7 +172,7 @@ int WINSANE_Device::FetchOptions() {
 
 	this->options = new WINSANE_Option*[this->num_options];
 
-	for (int index = 0; index < this->num_options; index++) {
+	for (index = 0; index < this->num_options; index++) {
 		WINSANE_Option *option = new WINSANE_Option(this, this->sock, sane_options[index], this->sane_handle, index);
 		this->options[index] = option;
 	}
@@ -191,11 +191,12 @@ WINSANE_Option* WINSANE_Device::GetOption(int index) {
 
 WINSANE_Option* WINSANE_Device::GetOption(SANE_String_Const name) {
 	SANE_String_Const option_name;
+	int index;
 
 	if (!this->opened)
 		return NULL;
 
-	for (int index = 0; index < this->num_options; index++) {
+	for (index = 0; index < this->num_options; index++) {
 		option_name = this->options[index]->GetName();
 		if (option_name && strcmp(name, option_name) == 0) {
 			return this->options[index];
@@ -206,7 +207,9 @@ WINSANE_Option* WINSANE_Device::GetOption(SANE_String_Const name) {
 }
 
 void WINSANE_Device::ClearOptions() {
-	for (int index = 0; index < this->num_options; index++) {
+	int index;
+
+	for (index = 0; index < this->num_options; index++) {
 		delete this->options[index];
 	}
 

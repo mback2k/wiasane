@@ -175,7 +175,7 @@ int WINSANE_Session::GetDevices() {
 	SANE_Word array_length;
 	SANE_Handle pointer;
 	SANE_Device **sane_devices;
-	int written;
+	int written, index;
 
 	if (!this->initialized)
 		return 0;
@@ -197,7 +197,7 @@ int WINSANE_Session::GetDevices() {
 
 	sane_devices = new SANE_Device*[array_length];
 
-	for (int index = 0; index < array_length; index++) {
+	for (index = 0; index < array_length; index++) {
 		pointer = this->sock->ReadHandle();
 		if (pointer != NULL)
 			continue;
@@ -214,7 +214,7 @@ int WINSANE_Session::GetDevices() {
 
 	this->devices = new WINSANE_Device*[this->num_devices];
 
-	for (int index = 0; index < this->num_devices; index++) {
+	for (index = 0; index < this->num_devices; index++) {
 		WINSANE_Device *device = new WINSANE_Device(this, this->sock, sane_devices[index]);
 		this->devices[index] = device;
 	}
@@ -233,11 +233,12 @@ WINSANE_Device* WINSANE_Session::GetDevice(int index) {
 
 WINSANE_Device* WINSANE_Session::GetDevice(SANE_String_Const name) {
 	SANE_String_Const device_name;
+	int index;
 
 	if (!this->initialized)
 		return NULL;
 
-	for (int index = 0; index < this->num_devices; index++) {
+	for (index = 0; index < this->num_devices; index++) {
 		device_name = this->devices[index]->GetName();
 		if (device_name && strcmp(name, device_name) == 0) {
 			return this->devices[index];
@@ -248,7 +249,9 @@ WINSANE_Device* WINSANE_Session::GetDevice(SANE_String_Const name) {
 }
 
 void WINSANE_Session::ClearDevices() {
-	for (int index = 0; index < this->num_devices; index++) {
+	int index;
+
+	for (index = 0; index < this->num_devices; index++) {
 		delete this->devices[index];
 	}
 

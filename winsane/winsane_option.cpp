@@ -10,6 +10,8 @@ WINSANE_Option::WINSANE_Option(WINSANE_Device *device, WINSANE_Socket *sock, SAN
 }
 
 WINSANE_Option::~WINSANE_Option() {
+	int index;
+
 	if (this->sane_option->name)
 		delete this->sane_option->name;
 	if (this->sane_option->title)
@@ -22,7 +24,7 @@ WINSANE_Option::~WINSANE_Option() {
 	} else if (this->sane_option->constraint_type == SANE_CONSTRAINT_WORD_LIST) {
 		delete this->sane_option->constraint.word_list;
 	} else if (this->sane_option->constraint_type == SANE_CONSTRAINT_STRING_LIST) {
-		for (int index = 0; this->sane_option->constraint.string_list[index] != NULL; index++) {
+		for (index = 0; this->sane_option->constraint.string_list[index] != NULL; index++) {
 			delete this->sane_option->constraint.string_list[index];
 		}
 		delete this->sane_option->constraint.string_list;
