@@ -361,8 +361,8 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 
 	tl_x = ((double) x) / ((double) pScanInfo->Xresolution);
 	tl_y = ((double) y) / ((double) pScanInfo->Yresolution);
-	br_x = ((double) (xExtent - x)) / ((double) pScanInfo->Xresolution);
-	br_y = ((double) (yExtent - y)) / ((double) pScanInfo->Yresolution);
+	br_x = ((double) (x + xExtent)) / ((double) pScanInfo->Xresolution);
+	br_y = ((double) (y + yExtent)) / ((double) pScanInfo->Yresolution);
 
 	tl_x = SANE_UNFIX(SANE_FIX(tl_x));
 	tl_y = SANE_UNFIX(SANE_FIX(tl_y));
