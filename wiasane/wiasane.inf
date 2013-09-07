@@ -2,7 +2,7 @@
 Signature="$WINDOWS NT$"
 Class=Image
 ClassGUID={6bdd1fc6-810f-11d0-bec7-08002be2092f}
-Provider=%Mfg%
+Provider=%Provider%
 DriverVer=20/10/2012,0.1.0.0
 CatalogFile=wiasane.cat
 
@@ -26,7 +26,7 @@ wiasane.dll=1
 DefaultDestDir=11
 
 [Manufacturer]
-%Mfg%=Models, NTx86, NTamd64, NTia64
+%Provider%=Models, NTx86, NTamd64, NTia64
 
 ; This is the models section for the x86 driver
 [Models.NTx86]
@@ -75,7 +75,6 @@ wiasane.dll
 winsane.dll
 
 [Strings]
-Msft="WIASANE"
-Mfg="WIASANE Team"
+Provider="Marc Hörsken"
 Location="Install Source"
 WIASANE.DeviceDesc="Officejet J6400 series"
