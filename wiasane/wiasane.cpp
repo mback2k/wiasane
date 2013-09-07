@@ -84,13 +84,23 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_RESETSCANNER:
 		case CMD_STI_DEVICERESET:
 			if (context && context->session && context->device) {
-				context->device->Cancel();
+				if (!context->device->Cancel()) {
+					hr = E_FAIL;
+					break;
+				}
 			}
 
 			hr = S_OK;
 			break;
 
 		case CMD_STI_DIAGNOSTIC:
+			if (context && context->session && context->device) {
+				if (!context->device->FetchOptions()) {
+					hr = E_FAIL;
+					break;
+				}
+			}
+
 			hr = S_OK;
 			break;
 
