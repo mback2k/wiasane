@@ -610,7 +610,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 			}
 		}
 
-		pScanInfo->BedWidth = 8500;   // 1000's of an inch (WIA compatible unit)
+		pScanInfo->BedWidth  = 8500;  // 1000's of an inch (WIA compatible unit)
 		pScanInfo->BedHeight = 11000; // 1000's of an inch (WIA compatible unit)
 
 		option = context->device->GetOption("br-x");
@@ -628,58 +628,56 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 			}
 		}
 
+		pScanInfo->OpticalXResolution = 300;
+
 		option = context->device->GetOption("resolution");
 		if (option) {
-			if (option->GetType() == SANE_TYPE_FIXED) {
-				pScanInfo->OpticalXResolution = (LONG) SANE_UNFIX(option->GetValueFixed());
-			} else {
-				pScanInfo->OpticalXResolution = option->GetValueInt();
+			hr = GetOptionValue(option, &dbl);
+			if (hr == S_OK) {
+				pScanInfo->OpticalXResolution = (LONG) dbl;
 			}
-		} else {
-			pScanInfo->OpticalXResolution = 300;
 		}
 		pScanInfo->OpticalYResolution = pScanInfo->OpticalXResolution;
 		pScanInfo->Xresolution = pScanInfo->OpticalXResolution;
 		pScanInfo->Yresolution = pScanInfo->OpticalYResolution;
 
+		pScanInfo->Contrast            = 0;
+		pScanInfo->ContrastRange.lMin  = 0;
+		pScanInfo->ContrastRange.lMax  = 100;
+		pScanInfo->ContrastRange.lStep = 1;
+
 		option = context->device->GetOption("contrast");
-		if (option && option->GetType() == SANE_TYPE_INT) {
-			pScanInfo->Contrast = option->GetValueInt();
+		if (option) {
 			if (option->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
 				range = option->GetConstraintRange();
+				pScanInfo->Contrast            = (range->min + range->max) / 2;
 				pScanInfo->ContrastRange.lMin  = range->min;
 				pScanInfo->ContrastRange.lMax  = range->max;
 				pScanInfo->ContrastRange.lStep = range->quant ? range->quant : 1;
-			} else {
-				pScanInfo->ContrastRange.lMin  = 0;
-				pScanInfo->ContrastRange.lMax  = 100;
-				pScanInfo->ContrastRange.lStep = 1;
 			}
-		} else {
-			pScanInfo->Contrast            = 0;
-			pScanInfo->ContrastRange.lMin  = 0;
-			pScanInfo->ContrastRange.lMax  = 0;
-			pScanInfo->ContrastRange.lStep = 0;
+			hr = GetOptionValue(option, &dbl);
+			if (hr == S_OK) {
+				pScanInfo->Contrast = (LONG) dbl;
+			}
 		}
 		
+		pScanInfo->Intensity            = 0;
+		pScanInfo->IntensityRange.lMin  = 0;
+		pScanInfo->IntensityRange.lMax  = 100;
+		pScanInfo->IntensityRange.lStep = 1;
+
 		option = context->device->GetOption("intensity");
-		if (option && option->GetType() == SANE_TYPE_INT) {
-			pScanInfo->Intensity = option->GetValueInt();
+		if (option) {
 			if (option->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
 				range = option->GetConstraintRange();
-				pScanInfo->IntensityRange.lMin  = range->min;
+				pScanInfo->IntensityRange.lMin  = (range->min + range->max) / 2;
 				pScanInfo->IntensityRange.lMax  = range->max;
 				pScanInfo->IntensityRange.lStep = range->quant ? range->quant : 1;
-			} else {
-				pScanInfo->IntensityRange.lMin  = 0;
-				pScanInfo->IntensityRange.lMax  = 100;
-				pScanInfo->IntensityRange.lStep = 1;
 			}
-		} else {
-			pScanInfo->Intensity            = 0;
-			pScanInfo->IntensityRange.lMin  = 0;
-			pScanInfo->IntensityRange.lMax  = 0;
-			pScanInfo->IntensityRange.lStep = 0;
+			hr = GetOptionValue(option, &dbl);
+			if (hr == S_OK) {
+				pScanInfo->Intensity = (LONG) dbl;
+			}
 		}
 
 		pScanInfo->Window.xPos            = 0;
@@ -838,8 +836,8 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 	WIASANE_Context *context;
 	WINSANE_Option *option;
 	SANE_String_Const *string_list;
-	SANE_Word *word_list, word;
 	HRESULT hr;
+	double dbl;
 	int idx;
 
 	hr = E_NOTIMPL;
@@ -867,20 +865,14 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 
 			if (context && context->session && context->device) {
 				option = context->device->GetOption("resolution");
-				if (option && option->GetConstraintType() == SANE_CONSTRAINT_WORD_LIST) {
-					word_list = option->GetConstraintWordList();
-					word = word_list[*word_list];
-					for (idx = 1; idx <= *word_list; idx++) {
-						word = min(word, word_list[idx]);
+				if (option) {
+					hr = GetOptionMaxValue(option, &dbl);
+					if (hr == S_OK) {
+						pScanInfo->OpticalXResolution = (LONG) dbl;
+						pScanInfo->OpticalYResolution = pScanInfo->OpticalXResolution;
+						pScanInfo->Xresolution = pScanInfo->OpticalXResolution;
+						pScanInfo->Yresolution = pScanInfo->OpticalYResolution;
 					}
-					if (option->GetType() == SANE_TYPE_FIXED) {
-						pScanInfo->OpticalXResolution = (LONG) SANE_UNFIX(word);
-					} else {
-						pScanInfo->OpticalXResolution = word;
-					}
-					pScanInfo->OpticalYResolution = pScanInfo->OpticalXResolution;
-					pScanInfo->Xresolution = pScanInfo->OpticalXResolution;
-					pScanInfo->Yresolution = pScanInfo->OpticalYResolution;
 				}
 
 				option = context->device->GetOption("compression");
