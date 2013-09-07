@@ -200,6 +200,10 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		//       do not include them in your extended list.
 		//
 
+		case CMD_SETFORMAT:
+			hr = S_OK;
+			break;
+
 		case CMD_GETSUPPORTEDFILEFORMATS:
 			g_SupportedFileFormats[0] = WiaImgFmt_JPEG;
 			pValue->lVal = NUM_SUPPORTED_FILEFORMATS;
@@ -775,7 +779,7 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 
 	context = (WIASANE_Context*) pScanInfo->pMicroDriverContext;
 
-	switch(lScanMode) {
+	switch (lScanMode) {
 		case SCANMODE_FINALSCAN:
 			Trace(TEXT("Final Scan"));
 
