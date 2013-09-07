@@ -19,6 +19,45 @@ HRESULT GetOptionValue(WINSANE_Option *option, double *value)
 	return E_NOTIMPL;
 }
 
+HRESULT GetOptionMaxValue(WINSANE_Option *option, double *value)
+{
+	SANE_Word *word_list, word;
+	SANE_Range *range;
+	int idx;
+
+	switch (option->GetConstraintType()) {
+		case SANE_CONSTRAINT_RANGE:
+			range = option->GetConstraintRange();
+			word = range->max;
+			break;
+
+		case SANE_CONSTRAINT_WORD_LIST:
+			word_list = option->GetConstraintWordList();
+			word = word_list[*word_list];
+			for (idx = 1; idx <= *word_list; idx++) {
+				word = max(word, word_list[idx]);
+			}
+			break;
+
+		default:
+			return E_FAIL;
+	}
+	switch (option->GetType()) {
+		case SANE_TYPE_INT:
+			*value = word;
+			return S_OK;
+
+		case SANE_TYPE_FIXED:
+			*value = SANE_UNFIX(word);
+			return S_OK;
+
+		case SANE_TYPE_STRING:
+			return E_INVALIDARG;
+	}
+
+	return E_NOTIMPL;
+}
+
 HRESULT GetOptionValue(WINSANE_Option *option, char **value)
 {
 	switch (option->GetType()) {
@@ -107,39 +146,12 @@ HRESULT GetOptionValueInch(WINSANE_Option *option, double *value)
 
 HRESULT GetOptionMaxValueInch(WINSANE_Option *option, double *value)
 {
-	SANE_Word *word_list, word;
-	SANE_Range *range;
-	int idx;
+	HRESULT hr;
 
-	switch (option->GetConstraintType()) {
-		case SANE_CONSTRAINT_RANGE:
-			range = option->GetConstraintRange();
-			word = range->max;
-			break;
+	hr = GetOptionMaxValue(option, value);
+	if (hr != S_OK)
+		return hr;
 
-		case SANE_CONSTRAINT_WORD_LIST:
-			word_list = option->GetConstraintWordList();
-			word = word_list[*word_list];
-			for (idx = 1; idx <= *word_list; idx++) {
-				word = max(word, word_list[idx]);
-			}
-			break;
-
-		default:
-			return E_FAIL;
-	}
-	switch (option->GetType()) {
-		case SANE_TYPE_INT:
-			*value = word;
-			break;
-
-		case SANE_TYPE_FIXED:
-			*value = SANE_UNFIX(word);
-			break;
-
-		default:
-			return E_INVALIDARG;
-	}
 	switch (option->GetUnit()) {
 		case SANE_UNIT_PIXEL:
 			*value /= 96;
