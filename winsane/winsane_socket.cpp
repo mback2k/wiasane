@@ -132,10 +132,13 @@ int WINSANE_Socket::ReadPlain(char *buf, int buflen) {
 
 
 int WINSANE_Socket::Write(const char *buf, int buflen) {
-	char *buftmp = NULL;
-	int result = 0;
+	char *buftmp;
+	int result;
 
 	buftmp = (char *)malloc(buflen);
+	if (!buftmp)
+		return 0;
+
 	memset(buftmp, 0, buflen);
 	memcpy(buftmp, buf, buflen);
 
@@ -151,10 +154,13 @@ int WINSANE_Socket::Write(const char *buf, int buflen) {
 }
 
 int WINSANE_Socket::Read(char *buf, int buflen) {
-	char *buftmp = NULL;
-	int result = 0;
+	char *buftmp;
+	int result;
 
 	buftmp = (char *)malloc(buflen);
+	if (!buftmp)
+		return 0;
+
 	memset(buftmp, 0, buflen);
 
 	result = this->ReadPlain(buftmp, buflen);
