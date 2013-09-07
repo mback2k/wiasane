@@ -7,8 +7,6 @@
 
 #include <windows.h>
 
-#include "wiasane_opt.h"
-
 typedef struct WIASANE_Context {
 	WINSANE_Session *session;
 	WINSANE_Device *device;

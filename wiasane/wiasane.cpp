@@ -6,6 +6,7 @@
 #include <winioctl.h>
 #include <usbscan.h>
 
+#include "wiasane_opt.h"
 #include "wiasane_util.h"
 
 
