@@ -231,6 +231,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 	HRESULT hr;
 	LONG idx;
 
+	if (plReceived)
+		*plReceived = 0;
+
     Trace(TEXT("------ Scan Requesting %d ------"), lLength);
 
 	if (pScanInfo == NULL)
@@ -269,8 +272,6 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			//
 			// next phase, get data from the scanner and set plReceived value
 			//
-
-			*plReceived = 0;
 
 			if (context && context->session && context->device && context->scan) {
 				memset(pBuffer, 0, lLength);
