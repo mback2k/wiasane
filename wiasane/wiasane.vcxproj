@@ -44,12 +44,22 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
-    <OutDir>$(IntDir)</OutDir>
+    <OutDir>$(Configuration)\$(Platform)\</OutDir>
+    <IntDir>$(Configuration)\$(Platform)\Temp\</IntDir>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
   </ImportGroup>
-  <ItemGroup Label="WrappedTaskItems" />
+  <ItemGroup Label="WrappedTaskItems">
+    <ProjectReference Include="..\winsane\winsane.vcxproj">
+      <Project>{b210e114-bf47-442f-8a8e-6719b6359eb8}</Project>
+      <Private>false</Private>
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup>
     <TargetName>wiasane</TargetName>
   </PropertyGroup>
@@ -79,9 +89,6 @@
       <ModuleDefinitionFile>wiasane.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(SolutionDir)\winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
-    <PostBuildEvent>
-      <Command>copy $(SolutionDir)winsane\$(OutputPath)winsane.dll $(TargetDir)</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
