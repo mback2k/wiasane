@@ -96,28 +96,28 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="wiasane.cpp" />
-    <ClCompile Include="wiasane_opt.cpp" />
-    <ClCompile Include="wiasane_util.cpp" />
-    <ResourceCompile Include="wiasane.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Inf Exclude="@(Inf)" Include="*.inf" />
-    <FilesToPackage Include="$(TargetPath)" Condition="'$(ConfigurationType)'=='Driver' or '$(ConfigurationType)'=='DynamicLibrary'" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Exclude="@(None)" Include="*.ico;*.cur;*.bmp;*.dlg;*.rct;*.gif;*.jpg;*.jpeg;*.wav;*.jpe;*.tiff;*.tif;*.png;*.rc2" />
-    <None Exclude="@(None)" Include="*.def;*.bat;*.hpj;*.asmx" />
-    <None Include="wiasane.inf" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="wiasane.h" />
     <ClInclude Include="wiasane_opt.h" />
     <ClInclude Include="wiasane_util.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="wiasane.cpp" />
+    <ClCompile Include="wiasane_opt.cpp" />
+    <ClCompile Include="wiasane_util.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="wiasane.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="wiasane.inf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Inf Exclude="@(Inf)" Include="*.inf" />
+    <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

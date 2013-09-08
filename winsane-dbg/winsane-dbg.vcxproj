@@ -99,6 +99,9 @@
     <ClCompile Include="winsane-dbg.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\winsane\winsane.vcxproj">
       <Project>{b210e114-bf47-442f-8a8e-6719b6359eb8}</Project>
       <Private>false</Private>
