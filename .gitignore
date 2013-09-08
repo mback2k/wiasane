@@ -1,4 +1,5 @@
-wia/
+Release/
+Debug/
 ipch/
 
 *.log
@@ -15,9 +16,7 @@ ipch/
 *.ilk
 *.pch
 *.aps
+*.res
 
 *.sdf
 *.suo
-
-*.inf
-*.res
