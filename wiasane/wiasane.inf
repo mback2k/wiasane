@@ -2,46 +2,38 @@
 Signature="$WINDOWS NT$"
 Class=Image
 ClassGUID={6bdd1fc6-810f-11d0-bec7-08002be2092f}
-Provider=%Provider%
+Provider=%WIASANE.Provider%
 DriverVer=20/10/2012,0.1.0.0
 CatalogFile=wiasane.cat
 
 [SourceDisksFiles.x86]
 wiasane.dll=1
 winsane.dll=1
-[SourceDisksNames.x86]
-1=%Location%,,,
 
-[SourceDisksFiles.ia64]
-wiasane.dll=1
-winsane.dll=1
-[SourceDisksNames.ia64]
-1=%Location%,,,
+[SourceDisksNames.x86]
+1=,%WIASANE.Location%,,
 
 [SourceDisksFiles.amd64]
 wiasane.dll=1
 winsane.dll=1
+
 [SourceDisksNames.amd64]
-1=%Location%,,,
+1=,%WIASANE.Location%,,
 
 [DestinationDirs]
 ; By default, files will be copied to \windows\system32.
 DefaultDestDir=11
 
 [Manufacturer]
-%Provider%=Models, NTx86, NTamd64, NTia64
+%WIASANE.Provider%=Models, NTx86, NTamd64
 
 ; This is the models section for the x86 driver
 [Models.NTx86]
-%WIASANE.DeviceDesc% = WIASANE.Scanner, PnPIDInformation
+%WIASANE.DeviceDesc%=WIASANE.Scanner, PnPIDInformation
 
 ; This is the models section for the amd64 driver
 [Models.NTamd64]
-%WIASANE.DeviceDesc% = WIASANE.Scanner, PnPIDInformation
-
-; This is the models section for the ia64 driver
-[Models.NTia64]
-%WIASANE.DeviceDesc% = WIASANE.Scanner, PnPIDInformation
+%WIASANE.DeviceDesc%=WIASANE.Scanner, PnPIDInformation
 
 [WIASANE.Scanner]
 Include=sti.inf
@@ -78,6 +70,6 @@ wiasane.dll
 winsane.dll
 
 [Strings]
-Provider="Marc Hörsken"
-Location="Install Source"
+WIASANE.Provider="Marc Hörsken"
+WIASANE.Location="Install Source"
 WIASANE.DeviceDesc="Officejet J6400 series"
