@@ -71,6 +71,9 @@
     <FilesToPackage Include="$(SolutionDir)winsane\$(OutDir)winsane.dll" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\wiasane-coi\wiasane-coi.vcxproj">
+      <Project>{cb743d7c-09b3-41af-9067-807f2ced7ad8}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\wiasane\wiasane.vcxproj">
       <Project>{6f8f9679-52f6-4b8e-9edf-67de89ec3cfa}</Project>
       <Private>true</Private>

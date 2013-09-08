@@ -16,6 +16,12 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wiasane-pkg", "wiasane-pkg\wiasane-pkg.vcxproj", "{BAADCDB5-1564-4046-B387-791E1538B840}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6F8F9679-52F6-4B8E-9EDF-67DE89EC3CFA} = {6F8F9679-52F6-4B8E-9EDF-67DE89EC3CFA}
+		{CB743D7C-09B3-41AF-9067-807F2CED7AD8} = {CB743D7C-09B3-41AF-9067-807F2CED7AD8}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wiasane-coi", "wiasane-coi\wiasane-coi.vcxproj", "{CB743D7C-09B3-41AF-9067-807F2CED7AD8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B210E114-BF47-442F-8A8E-6719B6359EB8} = {B210E114-BF47-442F-8A8E-6719B6359EB8}
 	EndProjectSection
 EndProject
 Global
@@ -66,6 +72,14 @@ Global
 		{BAADCDB5-1564-4046-B387-791E1538B840}.Release|x64.ActiveCfg = Release|x64
 		{BAADCDB5-1564-4046-B387-791E1538B840}.Release|x64.Build.0 = Release|x64
 		{BAADCDB5-1564-4046-B387-791E1538B840}.Release|x64.Deploy.0 = Release|x64
+		{CB743D7C-09B3-41AF-9067-807F2CED7AD8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CB743D7C-09B3-41AF-9067-807F2CED7AD8}.Debug|Win32.Build.0 = Debug|Win32
+		{CB743D7C-09B3-41AF-9067-807F2CED7AD8}.Debug|x64.ActiveCfg = Debug|x64
+		{CB743D7C-09B3-41AF-9067-807F2CED7AD8}.Debug|x64.Build.0 = Debug|x64
+		{CB743D7C-09B3-41AF-9067-807F2CED7AD8}.Release|Win32.ActiveCfg = Release|Win32
+		{CB743D7C-09B3-41AF-9067-807F2CED7AD8}.Release|Win32.Build.0 = Release|Win32
+		{CB743D7C-09B3-41AF-9067-807F2CED7AD8}.Release|x64.ActiveCfg = Release|x64
+		{CB743D7C-09B3-41AF-9067-807F2CED7AD8}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

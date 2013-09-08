@@ -1,0 +1,4 @@
+LIBRARY WIASANE-COI
+
+EXPORTS
+	CoInstaller 
