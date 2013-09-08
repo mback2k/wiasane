@@ -70,6 +70,7 @@
   </PropertyGroup>
   <ItemGroup>
     <FilesToPackage Include="@(Inf->'%(CopyOutput)')" Condition="'@(Inf)'!=''" />
+    <FilesToPackage Include="$(SolutionDir)winsane\$(OutDir)winsane.dll" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\wiasane\wiasane.vcxproj">

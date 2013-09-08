@@ -91,6 +91,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Content Include="$(SolutionDir)winsane\$(OutDir)winsane.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="wiasane.cpp" />

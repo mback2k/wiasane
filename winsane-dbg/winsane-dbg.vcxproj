@@ -84,6 +84,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Content Include="$(SolutionDir)winsane\$(OutDir)winsane.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
