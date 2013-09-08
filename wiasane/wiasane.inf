@@ -8,16 +8,19 @@ CatalogFile=wiasane.cat
 
 [SourceDisksFiles.x86]
 wiasane.dll=1
+winsane.dll=1
 [SourceDisksNames.x86]
 1=%Location%,,,
 
 [SourceDisksFiles.ia64]
 wiasane.dll=1
+winsane.dll=1
 [SourceDisksNames.ia64]
 1=%Location%,,,
 
 [SourceDisksFiles.amd64]
 wiasane.dll=1
+winsane.dll=1
 [SourceDisksNames.amd64]
 1=%Location%,,,
 
