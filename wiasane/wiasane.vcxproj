@@ -75,7 +75,7 @@
       <Culture>0x0009</Culture>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\winsane;%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)winsane;%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
       <ExceptionHandling>
       </ExceptionHandling>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">_X86_=1;i386=1;STD_CALL;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -87,7 +87,7 @@
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies);kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;ole32.lib;uuid.lib;oleaut32.lib</AdditionalDependencies>
       <ModuleDefinitionFile>wiasane.def</ModuleDefinitionFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)\winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
