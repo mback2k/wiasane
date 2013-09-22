@@ -273,6 +273,8 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				Trace(TEXT("Data: %d/%d"), context->received, context->total);
 			}
 
+			pScanInfo->DeviceIOHandles[1] = CreateFile(L"C:\\ProgramData\\wiasane.scan", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
 		case SCAN_NEXT: // SCAN_FIRST will fall through to SCAN_NEXT (because it is expecting data)
 			if (lPhase == SCAN_NEXT)
 				Trace(TEXT("SCAN_NEXT"));
@@ -284,10 +286,10 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			if (context && context->session && context->device && context->scan) {
 				memset(pBuffer, 0, lLength);
 
-				lAquired = lLength;
+				lAquired = min(lLength, context->total - context->received);
 				while (context->scan->AquireImage((char*) (pBuffer + *plReceived), &lAquired) == CONTINUE) {
 					*plReceived += lAquired;
-					lAquired = lLength - *plReceived;
+					lAquired = min(lLength - *plReceived, context->total - context->received);
 					if (!lAquired)
 						break;
 				}
@@ -297,6 +299,16 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 						pBuffer[idx] = ~pBuffer[idx];
 					}
 				}
+
+#ifdef _DEBUG
+				if (*plReceived < lLength) {
+					memset(pBuffer + *plReceived, 0, lLength - *plReceived);
+					*plReceived = lLength;
+				}
+#endif
+
+				DWORD written;
+				WriteFile(pScanInfo->DeviceIOHandles[1], pBuffer, *plReceived, &written, NULL);
 
 				if (lPhase == SCAN_FIRST) {
 					hr = FetchScannerParams(pScanInfo, context);
@@ -314,6 +326,8 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 		case SCAN_FINISHED:
 		default:
 			Trace(TEXT("SCAN_FINISHED"));
+
+			CloseHandle(pScanInfo->DeviceIOHandles[1]);
 
 			//
 			// stop scanner, do not set lRecieved, or write any data to pBuffer.  Those values
@@ -617,14 +631,14 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 		if (option) {
 			hr = GetOptionMaxValueInch(option, &dbl);
 			if (hr == S_OK) {
-				pScanInfo->BedWidth = (LONG) ceil(dbl * 1000.0);
+				pScanInfo->BedWidth = (LONG) (dbl * 1000.0);
 			}
 		}
 		option = context->device->GetOption("br-y");
 		if (option) {
 			hr = GetOptionMaxValueInch(option, &dbl);
 			if (hr == S_OK) {
-				pScanInfo->BedHeight = (LONG) ceil(dbl * 1000.0);
+				pScanInfo->BedHeight = (LONG) (dbl * 1000.0);
 			}
 		}
 
