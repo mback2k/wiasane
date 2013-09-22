@@ -76,7 +76,7 @@ WINSANE_Scan_Result WINSANE_Scan::Connect() {
 		if (result)
 			return CONNECTION_ERROR;
 
-		addr_in.sin_port = htons(this->port);
+		addr_in.sin_port = htons((USHORT) this->port);
 	} else if (addr.sa_family == AF_INET6) {
 		addrlen = sizeof(addr_in6);
 		scanaddr = (struct sockaddr*) &addr_in6;
@@ -84,7 +84,7 @@ WINSANE_Scan_Result WINSANE_Scan::Connect() {
 		if (result)
 			return CONNECTION_ERROR;
 
-		addr_in6.sin6_port = htons(this->port);
+		addr_in6.sin6_port = htons((USHORT) this->port);
 	} else
 		return CONNECTION_ERROR;
 
