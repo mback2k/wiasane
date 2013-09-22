@@ -17,7 +17,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 	WINSANE_Params *params;
 	HRESULT hr;
 
-#ifdef DEBUG
+#ifdef _DEBUG
 	if (lCommand != CMD_STI_GETSTATUS)
 		Trace(TEXT("Command Value (%d)"),lCommand);
 #endif
@@ -422,7 +422,7 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
     pScanInfo->Window.xExtent = xExtent;
     pScanInfo->Window.yExtent = yExtent;
 
-#ifdef DEBUG
+#ifdef _DEBUG
     Trace(TEXT("Scanner window"));
     Trace(TEXT("xpos  = %d"), pScanInfo->Window.xPos);
     Trace(TEXT("ypos  = %d"), pScanInfo->Window.yPos);
@@ -699,7 +699,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 			return hr;
 	}
 
-#ifdef DEBUG
+#ifdef _DEBUG
     Trace(TEXT("bw    = %d"), pScanInfo->BedWidth);
     Trace(TEXT("bh    = %d"), pScanInfo->BedHeight);
 #endif
@@ -814,7 +814,7 @@ HRESULT FetchScannerParams(PSCANINFO pScanInfo, WIASANE_Context *context)
 
 	delete params;
 
-#ifdef DEBUG
+#ifdef _DEBUG
     Trace(TEXT("Scanner parameters"));
     Trace(TEXT("x res = %d"), pScanInfo->Xresolution);
     Trace(TEXT("y res = %d"), pScanInfo->Yresolution);

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "wiasane_util.h"
 
-#ifdef DEBUG
+#ifdef _DEBUG
 #include <stdio.h>
 #endif
 
@@ -158,7 +158,7 @@ HRESULT GetOLESTRResourceString(LONG lResourceID, _Outptr_ LPOLESTR *ppsz, BOOL 
 VOID Trace(_In_ LPCTSTR format, ...)
 {
 
-#ifdef DEBUG
+#ifdef _DEBUG
 
     TCHAR Buffer[1024];
     va_list arglist;
