@@ -13,6 +13,5 @@ __user_code
 #include <stdio.h>
 #include <strsafe.h>
 
-#pragma comment(lib, "winsane.lib")
 
 #endif

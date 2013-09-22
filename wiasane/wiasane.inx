@@ -6,33 +6,21 @@ Provider=%WIASANE.Provider%
 DriverVer=20/10/2012,0.1.0.0
 CatalogFile=wiasane.cat
 
-[SourceDisksFiles.x86]
+[SourceDisksFiles.$ARCH$]
 wiasane.dll=1
+wiasane-coi.dll=1
 winsane.dll=1
 
-[SourceDisksNames.x86]
-1=,%WIASANE.Location%,,
-
-[SourceDisksFiles.amd64]
-wiasane.dll=1
-winsane.dll=1
-
-[SourceDisksNames.amd64]
+[SourceDisksNames.$ARCH$]
 1=,%WIASANE.Location%,,
 
 [DestinationDirs]
-; By default, files will be copied to \windows\system32.
 DefaultDestDir=11
 
 [Manufacturer]
-%WIASANE.Provider%=Models, NTx86, NTamd64
+%WIASANE.Provider%=Models, NT$ARCH$
 
-; This is the models section for the x86 driver
-[Models.NTx86]
-%WIASANE.DeviceDesc%=WIASANE.Scanner, PnPIDInformation
-
-; This is the models section for the amd64 driver
-[Models.NTamd64]
+[Models.NT$ARCH$]
 %WIASANE.DeviceDesc%=WIASANE.Scanner, PnPIDInformation
 
 [WIASANE.Scanner]
@@ -48,11 +36,15 @@ AddReg=WIASANE.AddReg
 CopyFiles=WIASANE.CopyFiles
 ICMProfiles="sRGB Color Space Profile.icm"
 
-[WIASANE.Events]
-
 [WIASANE.Scanner.Services]
 Include=sti.inf
 Needs=STI.SerialSection.Services
+
+[WIASANE.Scanner.CoInstallers]
+AddReg=WIASANE.CoInstaller.AddReg
+CopyFiles=WIASANE.CoInstaller.CopyFiles
+
+[WIASANE.Events]
 
 [WIASANE.DeviceData]
 Server=local
@@ -60,7 +52,7 @@ UI Class ID={4DB1AD10-3391-11D2-9A33-00C04FA36145}
 MicroDriver="wiasane.dll"
 Host=10.0.0.1
 Port=6566,1
-Name=hpaio:/net/Officejet_J6400_series?ip=10.2.2.64
+Name="hpaio:/net/Officejet_J6400_series?ip=10.2.2.64"
 
 [WIASANE.AddReg]
 HKR,,HardwareConfig,1,1
@@ -68,6 +60,12 @@ HKR,,HardwareConfig,1,1
 [WIASANE.CopyFiles]
 wiasane.dll
 winsane.dll
+
+[WIASANE.CoInstaller.AddReg]
+HKR,,CoInstallers32,0x00010000,"wiasane-coi.dll,CoInstaller"
+
+[WIASANE.CoInstaller.CopyFiles]
+wiasane-coi.dll
 
 [Strings]
 WIASANE.Provider="Marc Hörsken"

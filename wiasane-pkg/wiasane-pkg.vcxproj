@@ -18,6 +18,12 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <PropertyGroup Label="PropertySheets">
+    <DriverType>Package</DriverType>
+    <PlatformToolset>WindowsApplicationForDrivers8.0</PlatformToolset>
+    <ConfigurationType>Utility</ConfigurationType>
+    <DisableFastUpToDateCheck>True</DisableFastUpToDateCheck>
+  </PropertyGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{BAADCDB5-1564-4046-B387-791E1538B840}</ProjectGuid>
     <ProjectName>wiasane-pkg</ProjectName>
@@ -31,20 +37,15 @@
   <PropertyGroup Label="Globals">
     <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VisualStudioVersion)' == '11.0'">$(VCTargetsPath11)</VCTargetsPath>
   </PropertyGroup>
-  <PropertyGroup Label="PropertySheets">
-    <PlatformToolset>WindowsKernelModeDriver8.0</PlatformToolset>
-    <ConfigurationType>Utility</ConfigurationType>
-    <DriverType>Package</DriverType>
-    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
-  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
+  <PropertyGroup Label="Configuration">
     <TargetVersion>Windows7</TargetVersion>
-    <UseDebugLibraries>true</UseDebugLibraries>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
-    <TargetVersion>Windows7</TargetVersion>
-    <UseDebugLibraries>false</UseDebugLibraries>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)'=='Debug'">
+    <UseDebugLibraries>True</UseDebugLibraries>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)'=='Release'">
+    <UseDebugLibraries>False</UseDebugLibraries>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets">
@@ -68,7 +69,6 @@
   </PropertyGroup>
   <ItemGroup>
     <FilesToPackage Include="@(Inf->'%(CopyOutput)')" Condition="'@(Inf)'!=''" />
-    <FilesToPackage Include="$(SolutionDir)winsane\$(OutDir)winsane.dll" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\wiasane-coi\wiasane-coi.vcxproj">
@@ -76,11 +76,9 @@
     </ProjectReference>
     <ProjectReference Include="..\wiasane\wiasane.vcxproj">
       <Project>{6f8f9679-52f6-4b8e-9edf-67de89ec3cfa}</Project>
-      <Private>true</Private>
-      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <CopyLocalSatelliteAssemblies>true</CopyLocalSatelliteAssemblies>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-      <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+    </ProjectReference>
+    <ProjectReference Include="..\winsane\winsane.vcxproj">
+      <Project>{b210e114-bf47-442f-8a8e-6719b6359eb8}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

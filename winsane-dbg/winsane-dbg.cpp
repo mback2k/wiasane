@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-int main(int argc, char *argv[])
+int _cdecl main(int argc, char *argv[])
 {
 	char *hostname;
 

@@ -17,7 +17,7 @@
 //  OutputDebugString should be fine...
 //
 #if DBG
-#define DbgOut(Text) OutputDebugString(TEXT("CoInstaller: " Text "\n"))
+#define DbgOut(Text) OutputDebugString(TEXT("CoInstaller: ") TEXT(Text) TEXT("\n"))
 #else
 #define DbgOut(Text)
 #endif

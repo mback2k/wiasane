@@ -5,11 +5,8 @@
 #pragma once
 #endif
 
-#include "targetver.h"
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
+#include <DriverSpecs.h>
+__user_code
 
 #include <windows.h>
 #include <stdlib.h>
@@ -17,7 +14,5 @@
 #include <tchar.h>
 
 #include "winsane.h"
-
-#pragma comment(lib, "winsane.lib")
 
 #endif

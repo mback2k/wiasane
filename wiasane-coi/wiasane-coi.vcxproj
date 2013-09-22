@@ -24,23 +24,29 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Globals">
-    <DebuggerFlavor Condition="'$(IsKernelModeToolset)'=='true'">DbgengKernelDebugger</DebuggerFlavor>
-    <DebuggerFlavor Condition="'$(IsUserModeToolset)'=='true'">DbgengRemoteDebugger</DebuggerFlavor>
+    <DebuggerFlavor Condition="'$(IsKernelModeToolset)'=='True'">DbgengKernelDebugger</DebuggerFlavor>
+    <DebuggerFlavor Condition="'$(IsUserModeToolset)'=='True'">DbgengRemoteDebugger</DebuggerFlavor>
     <ProjectGuid>{CB743D7C-09B3-41AF-9067-807F2CED7AD8}</ProjectGuid>
     <ProjectName>wiasane-coi</ProjectName>
     <RootNamespace>$(MSBuildProjectName)</RootNamespace>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
-    <SampleGuid>{33B6CB5E-3677-4D84-972E-FB9BCDD8137B}</SampleGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)'=='Debug'">
+  <PropertyGroup Label="Configuration">
     <TargetVersion>Win7</TargetVersion>
+    <TargetName>$(MSBuildProjectName)</TargetName>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)'=='Debug'">
     <UseDebugLibraries>True</UseDebugLibraries>
+    <LinkIncremental>True</LinkIncremental>
+    <WholeProgramOptimization>False</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)'=='Release'">
-    <TargetVersion>Win7</TargetVersion>
     <UseDebugLibraries>False</UseDebugLibraries>
+    <LinkIncremental>False</LinkIncremental>
+    <WholeProgramOptimization>True</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
@@ -50,26 +56,41 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
   </ImportGroup>
-  <PropertyGroup>
-    <TargetName>wiasane-coi</TargetName>
-  </PropertyGroup>
   <ItemDefinitionGroup>
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
       <Culture>0x0009</Culture>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)winsane;%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
       <ExceptionHandling>
       </ExceptionHandling>
+      <SDLCheck>True</SDLCheck>
     </ClCompile>
     <Midl>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
     </Midl>
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);setupapi.lib;kernel32.lib;advapi32.lib;user32.lib</AdditionalDependencies>
       <ModuleDefinitionFile>wiasane-coi.def</ModuleDefinitionFile>
-      <BaseAddress>0x2000000</BaseAddress>
+      <AdditionalLibraryDirectories>$(SolutionDir)winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);setupapi.lib;comctl32.lib;winsane.lib</AdditionalDependencies>
+      <GenerateDebugInformation>True</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>True</FunctionLevelLinking>
+      <IntrinsicFunctions>True</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>True</EnableCOMDATFolding>
+      <OptimizeReferences>True</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

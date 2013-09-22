@@ -5,11 +5,8 @@
 #pragma once
 #endif
 
-#include "targetver.h"
-
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
+#include <DriverSpecs.h>
+__user_code
 
 #include <windows.h>
 #include <winsock2.h>
@@ -17,8 +14,6 @@
 #include <stdio.h>
 
 #include "winsane_internal.h"
-
-#pragma comment(lib, "Ws2_32.lib")
 
 extern BOOL g_bStarted; // global Winsock initialization status
 

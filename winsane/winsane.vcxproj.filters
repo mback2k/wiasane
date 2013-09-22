@@ -50,9 +50,6 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="winsane_internal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
