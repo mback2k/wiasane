@@ -99,6 +99,8 @@
     <ClInclude Include="wiasane-coi_util.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="wiasane-coi.cpp" />
     <ClCompile Include="wiasane-coi_util.cpp" />
   </ItemGroup>

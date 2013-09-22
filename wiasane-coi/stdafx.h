@@ -13,5 +13,6 @@ __user_code
 #include <stdio.h>
 #include <strsafe.h>
 
+extern HINSTANCE g_hInst; // instance of this CoInstaller (used for loading from a resource)
 
 #endif
