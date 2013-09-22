@@ -153,25 +153,28 @@ int _cdecl main(int argc, char *argv[])
 
 				device->Cancel();
 
-				WINSANE_Scan *scan = device->Start();
-				if (scan) {
-					printf("Begin scanning image ...\n");
-					HANDLE output = CreateFile(L"winsane-dbg.scan", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-					DWORD written;
+				printf("Scan? (y/n)\n");
+				if (fgetc(stdin) == 'y') {
+					WINSANE_Scan *scan = device->Start();
+					if (scan) {
+						printf("Begin scanning image ...\n");
+						HANDLE output = CreateFile(L"winsane-dbg.scan", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+						DWORD written;
 
-					char *buffer = new char[1024];
-					long length = 1024;
-					while (scan->AquireImage(buffer, &length) == CONTINUE) {
-						printf("Received %d bytes of scanned image ...\n", length);
-						WriteFile(output, buffer, length, &written, NULL);
-						length = 1024;
+						char *buffer = new char[1024];
+						long length = 1024;
+						while (scan->AquireImage(buffer, &length) == CONTINUE) {
+							printf("Received %d bytes of scanned image ...\n", length);
+							WriteFile(output, buffer, length, &written, NULL);
+							length = 1024;
+						}
+						CloseHandle(output);
+						printf("Finished scanning image!\n");
+
+						delete scan;
+
+						device->Cancel();
 					}
-					CloseHandle(output);
-					printf("Finished scanning image!\n");
-
-					delete scan;
-
-					device->Cancel();
 				}
 
 				device->Close();
