@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "resource.h"
 #include "wiasane-coi_util.h"
 
 //+---------------------------------------------------------------------------
@@ -39,6 +40,10 @@
 //
 DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData, OPTIONAL _Inout_ PCOINSTALLER_CONTEXT_DATA Context)
 {
+	SP_NEWDEVICEWIZARD_DATA newDeviceWizardData;
+	HPROPSHEETPAGE hPropSheetPage;
+	PROPSHEETPAGE propSheetPage;
+
 	TCHAR FriendlyName[MAX_PATH];
 	DWORD dwRegType, UINumber;
 	INFCONTEXT InfContext;
@@ -211,6 +216,26 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 
 		case DIF_NEWDEVICEWIZARD_FINISHINSTALL:
 			DbgOut("DIF_NEWDEVICEWIZARD_FINISHINSTALL");
+
+			memset(&newDeviceWizardData, 0, sizeof(newDeviceWizardData));
+			newDeviceWizardData.ClassInstallHeader.cbSize = sizeof(newDeviceWizardData.ClassInstallHeader);
+			newDeviceWizardData.ClassInstallHeader.InstallFunction = InstallFunction;
+			res = SetupDiGetClassInstallParams(DeviceInfoSet, DeviceInfoData, &newDeviceWizardData.ClassInstallHeader, sizeof(newDeviceWizardData), NULL);
+			if (res) {
+				if (newDeviceWizardData.NumDynamicPages < MAX_INSTALLWIZARD_DYNAPAGES) {
+					memset(&propSheetPage, 0, sizeof(propSheetPage));
+					propSheetPage.dwSize = sizeof(propSheetPage);
+					propSheetPage.hInstance = g_hInst;
+					propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_PROPPAGE_MEDIUM);
+
+					hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
+					if (hPropSheetPage) {
+						newDeviceWizardData.DynamicPages[newDeviceWizardData.NumDynamicPages++] = hPropSheetPage;
+						SetupDiSetClassInstallParams(DeviceInfoSet, DeviceInfoData, &newDeviceWizardData.ClassInstallHeader, sizeof(newDeviceWizardData));
+					}
+				}
+			}
+
 			break;
 
 		case DIF_INSTALLINTERFACES:
