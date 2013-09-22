@@ -27,7 +27,7 @@
     <DebuggerFlavor Condition="'$(IsKernelModeToolset)'=='True'">DbgengKernelDebugger</DebuggerFlavor>
     <DebuggerFlavor Condition="'$(IsUserModeToolset)'=='True'">DbgengRemoteDebugger</DebuggerFlavor>
     <ProjectGuid>{CB743D7C-09B3-41AF-9067-807F2CED7AD8}</ProjectGuid>
-    <ProjectName>wiasane-coi</ProjectName>
+    <ProjectName>coisane</ProjectName>
     <RootNamespace>$(MSBuildProjectName)</RootNamespace>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
@@ -71,7 +71,7 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
     </Midl>
     <Link>
-      <ModuleDefinitionFile>wiasane-coi.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>coisane.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(SolutionDir)winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>%(AdditionalDependencies);setupapi.lib;comctl32.lib;winsane.lib</AdditionalDependencies>
       <GenerateDebugInformation>True</GenerateDebugInformation>
@@ -96,16 +96,16 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="wiasane-coi_util.h" />
+    <ClInclude Include="coisane_util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="wiasane-coi.cpp" />
-    <ClCompile Include="wiasane-coi_util.cpp" />
+    <ClCompile Include="coisane.cpp" />
+    <ClCompile Include="coisane_util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="wiasane-coi.rc" />
+    <ResourceCompile Include="coisane.rc" />
   </ItemGroup>
   <ItemGroup>
     <FilesToPackage Include="$(TargetPath)" />

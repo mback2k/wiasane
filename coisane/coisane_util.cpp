@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "wiasane-coi_util.h"
+#include "coisane_util.h"
 
 //+---------------------------------------------------------------------------
 //

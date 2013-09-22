@@ -71,7 +71,7 @@
     <FilesToPackage Include="@(Inf->'%(CopyOutput)')" Condition="'@(Inf)'!=''" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\wiasane-coi\wiasane-coi.vcxproj">
+    <ProjectReference Include="..\coisane\coisane.vcxproj">
       <Project>{cb743d7c-09b3-41af-9067-807f2ced7ad8}</Project>
     </ProjectReference>
     <ProjectReference Include="..\wiasane\wiasane.vcxproj">

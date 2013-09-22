@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "resource.h"
-#include "wiasane-coi_util.h"
+#include "coisane_util.h"
 
 //+---------------------------------------------------------------------------
 //

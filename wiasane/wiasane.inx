@@ -7,9 +7,9 @@ DriverVer=20/10/2012,0.1.0.0
 CatalogFile=wiasane.cat
 
 [SourceDisksFiles.$ARCH$]
-wiasane.dll=1
-wiasane-coi.dll=1
 winsane.dll=1
+wiasane.dll=1
+coisane.dll=1
 
 [SourceDisksNames.$ARCH$]
 1=,%WIASANE.Location%,,
@@ -58,14 +58,15 @@ Name="hpaio:/net/Officejet_J6400_series?ip=10.2.2.64"
 HKR,,HardwareConfig,1,1
 
 [WIASANE.CopyFiles]
-wiasane.dll
 winsane.dll
+wiasane.dll
 
 [WIASANE.CoInstaller.AddReg]
-HKR,,CoInstallers32,0x00010000,"wiasane-coi.dll,CoInstaller"
+HKR,,CoInstallers32,0x00010000,"coisane.dll,CoInstaller"
 
 [WIASANE.CoInstaller.CopyFiles]
-wiasane-coi.dll
+winsane.dll
+coisane.dll
 
 [Strings]
 WIASANE.Provider="Marc Hörsken"

@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by wiasane-coi.rc
+// Used by coisane.rc
 //
 #include <windows.h>
 

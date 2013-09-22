@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="wiasane-coi.cpp">
+    <ClCompile Include="coisane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="wiasane-coi_util.cpp">
+    <ClCompile Include="coisane_util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
@@ -35,12 +35,12 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="wiasane-coi_util.h">
+    <ClInclude Include="coisane_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="wiasane-coi.rc">
+    <ResourceCompile Include="coisane.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

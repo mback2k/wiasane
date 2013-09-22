@@ -33,9 +33,9 @@ BEGIN
             VALUE "CompanyName", "Marc Hörsken"
             VALUE "FileDescription", "Scanner Access Now Easy - CoInstaller DLL"
             VALUE "FileVersion", "0.0.0.1"
-            VALUE "InternalName", "wiasane-cio.dll"
+            VALUE "InternalName", "coisane.dll"
             VALUE "LegalCopyright", "Copyright (C) 2013 Marc Hörsken. All rights reserved."
-            VALUE "OriginalFilename", "wiasane-cio.dll"
+            VALUE "OriginalFilename", "coisane.dll"
             VALUE "ProductName", "Scanner Access Now Easy - WIA Driver"
             VALUE "ProductVersion", "0.0.0.1"
         END

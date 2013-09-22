@@ -1,5 +1,5 @@
-#ifndef WIASANE_COI_UTIL_H
-#define WIASANE_COI_UTIL_H
+#ifndef COISANE_UTIL_H
+#define COISANE_UTIL_H
 
 #if _MSC_VER > 1000
 #pragma once
