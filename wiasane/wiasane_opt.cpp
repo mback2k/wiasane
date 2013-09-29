@@ -133,7 +133,7 @@ HRESULT GetOptionValueInch(WINSANE_Option *option, double *value)
 
 	switch (option->GetUnit()) {
 		case SANE_UNIT_PIXEL:
-			*value /= 96;
+			*value /= 96.0;
 			return S_OK;
 
 		case SANE_UNIT_MM:
@@ -154,7 +154,7 @@ HRESULT GetOptionMaxValueInch(WINSANE_Option *option, double *value)
 
 	switch (option->GetUnit()) {
 		case SANE_UNIT_PIXEL:
-			*value /= 96;
+			*value /= 96.0;
 			return S_OK;
 
 		case SANE_UNIT_MM:
@@ -171,7 +171,7 @@ HRESULT IsValidOptionValueInch(WINSANE_Option *option, double value)
 
 	switch (option->GetUnit()) {
 		case SANE_UNIT_PIXEL:
-			value *= 96;
+			value *= 96.0;
 			break;
 
 		case SANE_UNIT_MM:
@@ -198,7 +198,7 @@ HRESULT SetOptionValueInch(WINSANE_Option *option, double value)
 {
 	switch (option->GetUnit()) {
 		case SANE_UNIT_PIXEL:
-			value *= 96;
+			value *= 96.0;
 			break;
 
 		case SANE_UNIT_MM:
