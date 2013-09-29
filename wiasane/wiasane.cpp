@@ -477,13 +477,13 @@ HRESULT ReadRegistryInformation(WIASANE_Context *context, HANDLE *pHandle)
 	// Open DeviceData section to read driver specific information
 	//
 
-	st = RegOpenKeyEx(hKey, TEXT("DeviceData"), 0, KEY_QUERY_VALUE|KEY_READ, &hOpenKey);
+	st = RegOpenKeyExA(hKey, "DeviceData", 0, KEY_QUERY_VALUE|KEY_READ, &hOpenKey);
 	if (st == ERROR_SUCCESS) {
 		dwWritten = sizeof(DWORD);
 		dwType = REG_DWORD;
 		dwPort = WINSANE_DEFAULT_PORT;
 
-		st = RegQueryValueEx(hOpenKey, TEXT("Port"), NULL, &dwType, (LPBYTE)&dwPort, &dwWritten);
+		st = RegQueryValueExA(hOpenKey, "Port", NULL, &dwType, (LPBYTE)&dwPort, &dwWritten);
 		if (st == ERROR_SUCCESS) {
 			context->port = dwPort;
 		} else
@@ -493,11 +493,12 @@ HRESULT ReadRegistryInformation(WIASANE_Context *context, HANDLE *pHandle)
 		dwType = REG_SZ;
 		pcHost = NULL;
 
-		st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)pcHost, &dwWritten);
-		if (st == ERROR_SUCCESS) {
+		st = RegQueryValueExA(hOpenKey, "Host", NULL, &dwType, (LPBYTE)pcHost, &dwWritten);
+		if (st == ERROR_SUCCESS && dwWritten > 0) {
 			pcHost = (PCHAR) malloc(dwWritten);
 			if (pcHost) {
-				st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)pcHost, &dwWritten);
+				pcHost[dwWritten - 1] = '\0';
+				st = RegQueryValueExA(hOpenKey, "Host", NULL, &dwType, (LPBYTE)pcHost, &dwWritten);
 				if (st == ERROR_SUCCESS) {
 					if (context->host)
 						free(context->host);
@@ -516,11 +517,12 @@ HRESULT ReadRegistryInformation(WIASANE_Context *context, HANDLE *pHandle)
 		dwType = REG_SZ;
 		pcName = NULL;
 
-		st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)pcName, &dwWritten);
-		if (st == ERROR_SUCCESS) {
+		st = RegQueryValueExA(hOpenKey, "Name", NULL, &dwType, (LPBYTE)pcName, &dwWritten);
+		if (st == ERROR_SUCCESS && dwWritten > 0) {
 			pcName = (PCHAR) malloc(dwWritten);
 			if (pcName) {
-				st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)pcName, &dwWritten);
+				pcName[dwWritten - 1] = '\0';
+				st = RegQueryValueExA(hOpenKey, "Name", NULL, &dwType, (LPBYTE)pcName, &dwWritten);
 				if (st == ERROR_SUCCESS) {
 					if (context->name)
 						free(context->name);
