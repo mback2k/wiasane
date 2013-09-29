@@ -64,6 +64,7 @@
       <ExceptionHandling>
       </ExceptionHandling>
       <SDLCheck>True</SDLCheck>
+      <AssemblerOutput>All</AssemblerOutput>
       <PreprocessorDefinitions>WINSANE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>

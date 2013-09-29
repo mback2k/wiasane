@@ -65,6 +65,7 @@
       <ExceptionHandling>
       </ExceptionHandling>
       <SDLCheck>True</SDLCheck>
+      <AssemblerOutput>All</AssemblerOutput>
       <PreprocessorDefinitions>_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>

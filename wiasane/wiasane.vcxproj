@@ -73,6 +73,7 @@
       <ExceptionHandling>
       </ExceptionHandling>
       <SDLCheck>True</SDLCheck>
+      <AssemblerOutput>All</AssemblerOutput>
     </ClCompile>
     <Midl>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
