@@ -8,6 +8,7 @@
 #include <strsafe.h>
 #include <objbase.h>
 
+
 /**************************************************************************\
 * GetOLDSTRResourceString (helper)
 *

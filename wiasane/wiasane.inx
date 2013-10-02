@@ -1,7 +1,7 @@
 [Version]
 Signature="$WINDOWS NT$"
 Class=Image
-ClassGUID={6bdd1fc6-810f-11d0-bec7-08002be2092f}
+ClassGUID={6BDD1FC6-810F-11D0-BEC7-08002BE2092F}
 Provider=%WIASANE.Provider%
 DriverVer=20/10/2012,0.1.0.0
 CatalogFile=wiasane.cat
