@@ -32,11 +32,11 @@ public:
 
 
 	/* Public API */
+	WINSANE_Scan_Result Connect();
 	WINSANE_Scan_Result AquireImage(char *buffer, long *length);
 
 
 protected:
-	WINSANE_Scan_Result Connect();
 	WINSANE_Scan_Result Receive(char *buffer, long *length);
 	WINSANE_Scan_Result Disconnect();
 

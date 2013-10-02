@@ -32,7 +32,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_SETSTIDEVICEHKEY:
 			if (!context) {
 				context = new WIASANE_Context;
-				memset(context, 0, sizeof(WIASANE_Context));
+				if (context)
+					memset(context, 0, sizeof(WIASANE_Context));
 			}
 			if (!context) {
 				pValue->pScanInfo->pMicroDriverContext = NULL;
@@ -126,8 +127,9 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 					hr = E_NOTIMPL;
 					break;
 				}
-				if (option->IsValidValue(pValue->lVal)) {
-					hr = S_OK;
+				if (!option->IsValidValue(pValue->lVal)) {
+					hr = E_INVALIDARG;
+					break;
 				}
 			} else {
 				hr = E_FAIL;
@@ -137,17 +139,13 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			switch (lCommand) {
 				case CMD_SETXRESOLUTION:
 					pValue->pScanInfo->Xresolution = pValue->lVal;
-					if (hr == S_OK)
-						pValue->pScanInfo->OpticalXResolution = pValue->lVal;
 					break;
 
 				case CMD_SETYRESOLUTION:
 					pValue->pScanInfo->Yresolution = pValue->lVal;
-					if (hr == S_OK)
-						pValue->pScanInfo->OpticalYResolution = pValue->lVal;
 					break;
 			}
-			
+
 			hr = S_OK;
 			break;
 
@@ -235,7 +233,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_bytes_(lLength) PBYTE pBuffer, LONG lLength, _Out_ LONG *plReceived)
 {
 	WIASANE_Context *context;
-	LONG lAquired;
+	LONG aquire, aquired;
 	HRESULT hr;
 	LONG idx;
 
@@ -262,18 +260,30 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				if (hr != S_OK)
 					return hr;
 
+				context->task = new WIASANE_Task;
+				if (context->task)
+					memset(context->task, 0, sizeof(WIASANE_Task));
+				else
+					return E_OUTOFMEMORY;
+
+				context->task->scan = context->device->Start();
+				if (context->task->scan->Connect() != CONTINUE)
+					return E_FAIL;
+
 				hr = FetchScannerParams(pScanInfo, context);
 				if (hr != S_OK)
 					return hr;
 
-				context->scan = context->device->Start();
+				if (pScanInfo->PixelBits > 1)
+					context->task->xbytegap = (pScanInfo->Window.xExtent * pScanInfo->PixelBits / 8) - pScanInfo->WidthBytes;
+				else
+					context->task->xbytegap = ((LONG) floor(pScanInfo->Window.xExtent + 7.0) / 8) - pScanInfo->WidthBytes;
+				context->task->ybytegap = (pScanInfo->Window.yExtent - pScanInfo->Lines) * pScanInfo->WidthBytes;
 
-				context->total = pScanInfo->WidthBytes * pScanInfo->Lines;
-				context->received = 0;
-				Trace(TEXT("Data: %d/%d"), context->received, context->total);
+				context->task->total = pScanInfo->WidthBytes * pScanInfo->Lines;
+				context->task->received = 0;
+				Trace(TEXT("Data: %d/%d"), context->task->received, context->task->total);
 			}
-
-			pScanInfo->DeviceIOHandles[1] = CreateFile(L"C:\\ProgramData\\wiasane.scan", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
 		case SCAN_NEXT: // SCAN_FIRST will fall through to SCAN_NEXT (because it is expecting data)
 			if (lPhase == SCAN_NEXT)
@@ -283,15 +293,38 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			// next phase, get data from the scanner and set plReceived value
 			//
 
-			if (context && context->session && context->device && context->scan) {
+			if (context && context->session && context->device && context->task && context->task->scan) {
 				memset(pBuffer, 0, lLength);
 
-				lAquired = min(lLength, context->total - context->received);
-				while (context->scan->AquireImage((char*) (pBuffer + *plReceived), &lAquired) == CONTINUE) {
-					*plReceived += lAquired;
-					lAquired = min(lLength - *plReceived, context->total - context->received);
-					if (!lAquired)
+				aquire = context->task->xbytegap ? min(lLength, pScanInfo->WidthBytes) : lLength;
+				aquired = 0;
+
+				while (context->task->scan->AquireImage((char*) (pBuffer + *plReceived + aquired), &aquire) == CONTINUE) {
+					if (aquire > 0) {
+						if (context->task->xbytegap) {
+							aquired += aquire;
+							if (aquired == pScanInfo->WidthBytes) {
+								*plReceived += aquired;
+								if (lLength - *plReceived >= context->task->xbytegap)
+									*plReceived += context->task->xbytegap;
+								aquired = 0;
+							}
+							aquire = pScanInfo->WidthBytes - aquired;
+							if (lLength - *plReceived < aquire)
+								break;
+						} else {
+							*plReceived += aquire;
+							aquire = lLength - *plReceived;
+						}
+					}
+					if (aquire <= 0)
 						break;
+				}
+
+				if (context->task->ybytegap > 0 && *plReceived < lLength) {
+					aquired = min(lLength - *plReceived, context->task->ybytegap);
+					memset(pBuffer + *plReceived, -1, aquired);
+					*plReceived += aquired;
 				}
 
 				if (pScanInfo->DataType == WIA_DATA_THRESHOLD) {
@@ -300,25 +333,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					}
 				}
 
-#ifdef _DEBUG
-				if (*plReceived < lLength) {
-					memset(pBuffer + *plReceived, 0, lLength - *plReceived);
-					*plReceived = lLength;
-				}
-#endif
-
-				DWORD written;
-				WriteFile(pScanInfo->DeviceIOHandles[1], pBuffer, *plReceived, &written, NULL);
-
-				if (lPhase == SCAN_FIRST) {
-					hr = FetchScannerParams(pScanInfo, context);
-					if (hr != S_OK)
-						return hr;
-				}
-
-				context->total = pScanInfo->WidthBytes * pScanInfo->Lines;
-				context->received += *plReceived;
-				Trace(TEXT("Data: %d/%d -> %d/%d"), context->received, context->total, context->total - context->received, lLength);
+				context->task->total = pScanInfo->WidthBytes * pScanInfo->Lines;
+				context->task->received += *plReceived;
+				Trace(TEXT("Data: %d/%d -> %d/%d"), context->task->received, context->task->total, context->task->total - context->task->received, lLength);
 			}
 
 			break;
@@ -326,8 +343,6 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 		case SCAN_FINISHED:
 		default:
 			Trace(TEXT("SCAN_FINISHED"));
-
-			CloseHandle(pScanInfo->DeviceIOHandles[1]);
 
 			//
 			// stop scanner, do not set lRecieved, or write any data to pBuffer.  Those values
@@ -337,9 +352,13 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			//
 
 			if (context && context->session && context->device) {
-				if (context->scan) {
-					delete context->scan;
-					context->scan = NULL;
+				if (context->task->scan) {
+					delete context->task->scan;
+					context->task->scan = NULL;
+				}
+				if (context->task) {
+					delete context->task;
+					context->task = NULL;
 				}
 
 				context->device->Cancel();
@@ -378,11 +397,6 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 	br_x = ((double) (x + xExtent)) / ((double) pScanInfo->Xresolution);
 	br_y = ((double) (y + yExtent)) / ((double) pScanInfo->Yresolution);
 
-	tl_x = SANE_UNFIX(SANE_FIX(tl_x));
-	tl_y = SANE_UNFIX(SANE_FIX(tl_y));
-	br_x = SANE_UNFIX(SANE_FIX(br_x));
-	br_y = SANE_UNFIX(SANE_FIX(br_y));
-
 	hr = IsValidOptionValueInch(opt_tl_x, tl_x);
 	if (hr != S_OK)
 		return hr;
@@ -414,22 +428,6 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 	hr = SetOptionValueInch(opt_br_y, br_y);
 	if (hr != S_OK)
 		return hr;
-
-	hr = GetOptionValueInch(opt_tl_x, &tl_x);
-	if (hr == S_OK)
-		x = (LONG) (tl_x * ((double) pScanInfo->Xresolution));
-
-	hr = GetOptionValueInch(opt_tl_y, &tl_y);
-	if (hr == S_OK)
-		y = (LONG) (tl_y * ((double) pScanInfo->Yresolution));
-
-	hr = GetOptionValueInch(opt_br_x, &br_x);
-	if (hr == S_OK)
-		xExtent = (LONG) ((br_x - tl_x) * ((double) pScanInfo->Xresolution));
-
-	hr = GetOptionValueInch(opt_br_y, &br_y);
-	if (hr == S_OK)
-		yExtent = (LONG) ((br_y - tl_y) * ((double) pScanInfo->Yresolution));
 
     pScanInfo->Window.xPos = x;
     pScanInfo->Window.yPos = y;
@@ -544,7 +542,7 @@ HRESULT ReadRegistryInformation(WIASANE_Context *context, HANDLE *pHandle)
 
 HRESULT InitializeScanner(WIASANE_Context *context)
 {
-	context->scan = NULL;
+	context->task = NULL;
 	context->session = WINSANE_Session::Remote(context->host, (unsigned short) context->port);
 	if (context->session && context->session->Init(NULL, NULL) && context->session->GetDevices() > 0) {
 		context->device = context->session->GetDevice(context->name);
@@ -566,10 +564,14 @@ HRESULT UninitializeScanner(WIASANE_Context *context)
 {
 	if (context->session) {
 		if (context->device) {
-			if (context->scan) {
-				context->device->Cancel();
-				delete context->scan;
-				context->scan = NULL;
+			if (context->task) {
+				if (context->task->scan) {
+					context->device->Cancel();
+					delete context->task->scan;
+					context->task->scan = NULL;
+				}
+				delete context->task;
+				context->task = NULL;
 			}
 			context->device->Close();
 			context->device = NULL;
@@ -645,17 +647,22 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 		}
 
 		pScanInfo->OpticalXResolution = 300;
+		pScanInfo->Xresolution = pScanInfo->OpticalXResolution;
 
 		option = context->device->GetOption("resolution");
 		if (option) {
-			hr = GetOptionValue(option, &dbl);
+			hr = GetOptionMaxValue(option, &dbl);
 			if (hr == S_OK) {
 				pScanInfo->OpticalXResolution = (LONG) dbl;
 			}
+			hr = GetOptionValue(option, &dbl);
+			if (hr == S_OK) {
+				pScanInfo->Xresolution = (LONG) dbl;
+			}
 		}
+
 		pScanInfo->OpticalYResolution = pScanInfo->OpticalXResolution;
-		pScanInfo->Xresolution = pScanInfo->OpticalXResolution;
-		pScanInfo->Yresolution = pScanInfo->OpticalYResolution;
+		pScanInfo->Yresolution = pScanInfo->Xresolution;
 
 		pScanInfo->Contrast            = 0;
 		pScanInfo->ContrastRange.lMin  = 0;
@@ -696,16 +703,19 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 			}
 		}
 
+		pScanInfo->WidthPixels            = (LONG) (((double) (pScanInfo->BedWidth  * pScanInfo->Xresolution)) / 1000.0);
+		pScanInfo->Lines                  = (LONG) (((double) (pScanInfo->BedHeight * pScanInfo->Yresolution)) / 1000.0);
+
 		pScanInfo->Window.xPos            = 0;
 		pScanInfo->Window.yPos            = 0;
-		pScanInfo->Window.xExtent         = (pScanInfo->BedWidth  * pScanInfo->Xresolution) / 1000;
-		pScanInfo->Window.yExtent         = (pScanInfo->BedHeight * pScanInfo->Yresolution) / 1000;
+		pScanInfo->Window.xExtent         = pScanInfo->WidthPixels;
+		pScanInfo->Window.yExtent         = pScanInfo->Lines;
 
 		// Scanner options
-		pScanInfo->DitherPattern          = 0;
 		pScanInfo->Negative               = 0;
 		pScanInfo->Mirror                 = 0;
 		pScanInfo->AutoBack               = 0;
+		pScanInfo->DitherPattern          = 0;
 		pScanInfo->ColorDitherPattern     = 0;
 		pScanInfo->ToneMap                = 0;
 		pScanInfo->Compression            = 0;
@@ -752,7 +762,7 @@ HRESULT SetScannerSettings(PSCANINFO pScanInfo, WIASANE_Context *context)
 
 		option = context->device->GetOption("resolution");
 		if (option) {
-			hr = SetOptionValue(option, pScanInfo->OpticalXResolution);
+			hr = SetOptionValue(option, pScanInfo->Xresolution);
 			if (hr != S_OK)
 				return hr;
 		} else

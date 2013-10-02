@@ -7,15 +7,21 @@
 
 #include <windows.h>
 
+typedef struct WIASANE_Task {
+	WINSANE_Scan *scan;
+	LONG total;
+	LONG received;
+	LONG xbytegap;
+	LONG ybytegap;
+} WIASANE_Task;
+
 typedef struct WIASANE_Context {
 	WINSANE_Session *session;
 	WINSANE_Device *device;
-	WINSANE_Scan *scan;
+	WIASANE_Task *task;
 	DWORD port;
 	PCHAR host;
 	PCHAR name;
-	LONG total;
-	LONG received;
 } WIASANE_Context;
 
 HRESULT ReadRegistryInformation(WIASANE_Context *context, HANDLE *pHandle);
