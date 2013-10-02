@@ -53,6 +53,7 @@ MicroDriver="wiasane.dll"
 Host=10.0.0.1
 Port=6566,1
 Name="hpaio:/net/Officejet_J6400_series?ip=10.2.2.64"
+Resolutions="100, 150, 200, 300, 600"
 
 [WIASANE.AddReg]
 HKR,,HardwareConfig,1,1
