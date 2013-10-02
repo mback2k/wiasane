@@ -172,7 +172,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_SETINTENSITY:
 			if (context && context->session && context->device) {
-				option = context->device->GetOption("intensity");
+				option = context->device->GetOption("brightness");
 				if (!option) {
 					hr = E_NOTIMPL;
 					break;
@@ -689,7 +689,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 		pScanInfo->IntensityRange.lMax  = 100;
 		pScanInfo->IntensityRange.lStep = 1;
 
-		option = context->device->GetOption("intensity");
+		option = context->device->GetOption("brightness");
 		if (option) {
 			if (option->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
 				range = option->GetConstraintRange();
@@ -775,7 +775,7 @@ HRESULT SetScannerSettings(PSCANINFO pScanInfo, WIASANE_Context *context)
 				return hr;
 		}
 
-		option = context->device->GetOption("intensity");
+		option = context->device->GetOption("brightness");
 		if (option) {
 			hr = SetOptionValue(option, pScanInfo->Intensity);
 			if (hr != S_OK && hr != E_NOTIMPL)
