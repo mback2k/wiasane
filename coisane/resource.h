@@ -1,9 +1,7 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by coisane.rc
+// Von Microsoft Visual C++ generierte Includedatei.
+// Verwendet durch coisane.rc
 //
-#include <windows.h>
-
 #define IDC_STATIC						800
 #define IDD_PROPPAGE_MEDIUM             801
 

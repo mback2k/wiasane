@@ -1,9 +1,7 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by wiasane.rc
+// Von Microsoft Visual C++ generierte Includedatei.
+// Verwendet durch wiasane.rc
 //
-#include <windows.h>
-
 
 // Next default values for new objects
 // 
