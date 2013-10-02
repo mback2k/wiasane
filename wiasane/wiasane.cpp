@@ -863,7 +863,6 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 	WINSANE_Option *option;
 	SANE_String_Const *string_list;
 	HRESULT hr;
-	double dbl;
 	int idx;
 
 	hr = E_NOTIMPL;
@@ -890,17 +889,6 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 			Trace(TEXT("Preview Scan"));
 
 			if (context && context->session && context->device) {
-				option = context->device->GetOption("resolution");
-				if (option) {
-					hr = GetOptionMaxValue(option, &dbl);
-					if (hr == S_OK) {
-						pScanInfo->OpticalXResolution = (LONG) dbl;
-						pScanInfo->OpticalYResolution = pScanInfo->OpticalXResolution;
-						pScanInfo->Xresolution = pScanInfo->OpticalXResolution;
-						pScanInfo->Yresolution = pScanInfo->OpticalYResolution;
-					}
-				}
-
 				option = context->device->GetOption("compression");
 				if (option && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
 					string_list = option->GetConstraintStringList();
