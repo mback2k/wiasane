@@ -863,7 +863,6 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 	WINSANE_Option *option;
 	SANE_String_Const *string_list;
 	HRESULT hr;
-	int idx;
 
 	hr = E_NOTIMPL;
 
@@ -875,10 +874,12 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 
 			if (context && context->session && context->device) {
 				option = context->device->GetOption("compression");
-				if (option && option->GetType() == SANE_TYPE_STRING) {
-					hr = SetOptionValue(option, "None");
-					if (hr != S_OK && hr != E_NOTIMPL)
-						break;
+				if (option && option->GetType() == SANE_TYPE_STRING
+				 && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
+					string_list = option->GetConstraintStringList();
+					if (string_list[0] != NULL) {
+						option->SetValueString(string_list[0]);
+					}
 				}
 			}
 
@@ -890,13 +891,11 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 
 			if (context && context->session && context->device) {
 				option = context->device->GetOption("compression");
-				if (option && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
+				if (option && option->GetType() == SANE_TYPE_STRING
+				 && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
 					string_list = option->GetConstraintStringList();
-					for (idx = 0; string_list[idx] != NULL; idx++) {
-						if (_stricmp(string_list[idx], "None")) {
-							option->SetValueString(string_list[idx]);
-							break;
-						}
+					if (string_list[0] != NULL && string_list[1] != NULL) {
+						option->SetValueString(string_list[1]);
 					}
 				}
 			}
