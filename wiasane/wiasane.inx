@@ -52,7 +52,7 @@ UI Class ID={4DB1AD10-3391-11D2-9A33-00C04FA36145}
 MicroDriver="wiasane.dll"
 Host=10.0.0.1
 Port=6566,1
-Name="hpaio:/net/Officejet_J6400_series?ip=10.2.2.64"
+Name="hpaio:/net/Officejet_J4680_series?ip=10.1.2.46"
 Resolutions="100, 150, 200, 300, 600"
 
 [WIASANE.AddReg]
@@ -72,4 +72,4 @@ coisane.dll
 [Strings]
 WIASANE.Provider="Marc Hörsken"
 WIASANE.Location="Install Source"
-WIASANE.DeviceDesc="Officejet J6400 series"
+WIASANE.DeviceDesc="Officejet J4680 series"
