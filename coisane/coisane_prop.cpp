@@ -14,12 +14,7 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 	SP_ADDPROPERTYPAGE_DATA addPropertyPageData;
 	HPROPSHEETPAGE hPropSheetPage;
 	PROPSHEETPAGE propSheetPage;
-	HANDLE hHeap;
 	BOOL res;
-
-	hHeap = GetProcessHeap();
-	if (!hHeap)
-		return ERROR_OUTOFMEMORY;
 
 	ZeroMemory(&addPropertyPageData, sizeof(addPropertyPageData));
 	addPropertyPageData.ClassInstallHeader.cbSize = sizeof(addPropertyPageData.ClassInstallHeader);
@@ -31,10 +26,11 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 	if (addPropertyPageData.NumDynamicPages >= MAX_INSTALLWIZARD_DYNAPAGES)
 		return NO_ERROR;
 
-	pPropertyPageData = (PCOISANE_Property_Page_Data) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(COISANE_Property_Page_Data));
+	pPropertyPageData = new COISANE_Property_Page_Data;
 	if (!pPropertyPageData)
 		return ERROR_OUTOFMEMORY;
 
+	ZeroMemory(pPropertyPageData, sizeof(COISANE_Property_Page_Data));
 	pPropertyPageData->DeviceInfoSet = DeviceInfoSet;
 	pPropertyPageData->DeviceInfoData = DeviceInfoData;
 
@@ -49,7 +45,7 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 
 	hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
 	if (!hPropSheetPage) {
-		HeapFree(hHeap, 0, pPropertyPageData);
+		delete pPropertyPageData;
 		return GetLastError();
 	}
 	
@@ -76,6 +72,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 
 UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp)
 {
+	PCOISANE_Property_Page_Data pPropertyPageData;
 	UINT ret;
 
 	Trace(TEXT("PropSheetPageProcPropertyPageAdvanced(%d, %d, %d)"), hwnd, uMsg, ppsp->lParam);
@@ -94,8 +91,9 @@ UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(HWND hwnd, _In_ UINT uMsg, _
 
 		case PSPCB_RELEASE:
 			Trace(TEXT("PSPCB_RELEASE"));
-			if (HeapFree(GetProcessHeap(), 0, (LPVOID) ppsp->lParam))
-				ppsp->lParam = NULL;
+			pPropertyPageData = (PCOISANE_Property_Page_Data) ppsp->lParam;
+			delete pPropertyPageData;
+			ppsp->lParam = NULL;
 			break;
 	}
 

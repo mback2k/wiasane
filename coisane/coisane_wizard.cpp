@@ -14,12 +14,7 @@ DWORD NewDeviceWizardFinishInstallServer(_In_ DI_FUNCTION InstallFunction, _In_ 
 	SP_NEWDEVICEWIZARD_DATA newDeviceWizardData;
 	HPROPSHEETPAGE hPropSheetPage;
 	PROPSHEETPAGE propSheetPage;
-	HANDLE hHeap;
 	BOOL res;
-
-	hHeap = GetProcessHeap();
-	if (!hHeap)
-		return ERROR_OUTOFMEMORY;
 
 	ZeroMemory(&newDeviceWizardData, sizeof(newDeviceWizardData));
 	newDeviceWizardData.ClassInstallHeader.cbSize = sizeof(newDeviceWizardData.ClassInstallHeader);
@@ -31,10 +26,11 @@ DWORD NewDeviceWizardFinishInstallServer(_In_ DI_FUNCTION InstallFunction, _In_ 
 	if (newDeviceWizardData.NumDynamicPages >= MAX_INSTALLWIZARD_DYNAPAGES)
 		return NO_ERROR;
 
-	pWizardPageData = (PCOISANE_Wizard_Page_Data) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(COISANE_Wizard_Page_Data));
+	pWizardPageData = new COISANE_Wizard_Page_Data;
 	if (!pWizardPageData)
 		return ERROR_OUTOFMEMORY;
 
+	ZeroMemory(pWizardPageData, sizeof(COISANE_Wizard_Page_Data));
 	pWizardPageData->DeviceInfoSet = DeviceInfoSet;
 	pWizardPageData->DeviceInfoData = DeviceInfoData;
 
@@ -51,7 +47,7 @@ DWORD NewDeviceWizardFinishInstallServer(_In_ DI_FUNCTION InstallFunction, _In_ 
 
 	hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
 	if (!hPropSheetPage) {
-		HeapFree(hHeap, 0, pWizardPageData);
+		delete pWizardPageData;
 		return GetLastError();
 	}
 	
@@ -69,12 +65,7 @@ DWORD NewDeviceWizardFinishInstallScanner(_In_ DI_FUNCTION InstallFunction, _In_
 	SP_NEWDEVICEWIZARD_DATA newDeviceWizardData;
 	HPROPSHEETPAGE hPropSheetPage;
 	PROPSHEETPAGE propSheetPage;
-	HANDLE hHeap;
 	BOOL res;
-
-	hHeap = GetProcessHeap();
-	if (!hHeap)
-		return ERROR_OUTOFMEMORY;
 
 	ZeroMemory(&newDeviceWizardData, sizeof(newDeviceWizardData));
 	newDeviceWizardData.ClassInstallHeader.cbSize = sizeof(newDeviceWizardData.ClassInstallHeader);
@@ -86,10 +77,11 @@ DWORD NewDeviceWizardFinishInstallScanner(_In_ DI_FUNCTION InstallFunction, _In_
 	if (newDeviceWizardData.NumDynamicPages >= MAX_INSTALLWIZARD_DYNAPAGES)
 		return NO_ERROR;
 
-	pWizardPageData = (PCOISANE_Wizard_Page_Data) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(COISANE_Wizard_Page_Data));
+	pWizardPageData = new COISANE_Wizard_Page_Data;
 	if (!pWizardPageData)
 		return ERROR_OUTOFMEMORY;
 
+	ZeroMemory(pWizardPageData, sizeof(COISANE_Wizard_Page_Data));
 	pWizardPageData->DeviceInfoSet = DeviceInfoSet;
 	pWizardPageData->DeviceInfoData = DeviceInfoData;
 
@@ -106,7 +98,7 @@ DWORD NewDeviceWizardFinishInstallScanner(_In_ DI_FUNCTION InstallFunction, _In_
 
 	hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
 	if (!hPropSheetPage) {
-		HeapFree(hHeap, 0, pWizardPageData);
+		delete pWizardPageData;
 		return GetLastError();
 	}
 	
@@ -154,6 +146,7 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 
 UINT CALLBACK PropSheetPageProcWizardPageServer(HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp)
 {
+	PCOISANE_Wizard_Page_Data pWizardPageData;
 	UINT ret;
 
 	Trace(TEXT("PropSheetPageProcWizardPageServer(%d, %d, %d)"), hwnd, uMsg, ppsp->lParam);
@@ -172,8 +165,9 @@ UINT CALLBACK PropSheetPageProcWizardPageServer(HWND hwnd, _In_ UINT uMsg, _Inou
 
 		case PSPCB_RELEASE:
 			Trace(TEXT("PSPCB_RELEASE"));
-			if (HeapFree(GetProcessHeap(), 0, (LPVOID) ppsp->lParam))
-				ppsp->lParam = NULL;
+			pWizardPageData = (PCOISANE_Wizard_Page_Data) ppsp->lParam;
+			delete pWizardPageData;
+			ppsp->lParam = NULL;
 			break;
 	}
 
@@ -182,6 +176,7 @@ UINT CALLBACK PropSheetPageProcWizardPageServer(HWND hwnd, _In_ UINT uMsg, _Inou
 
 UINT CALLBACK PropSheetPageProcWizardPageScanner(HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp)
 {
+	PCOISANE_Wizard_Page_Data pWizardPageData;
 	UINT ret;
 
 	Trace(TEXT("PropSheetPageProcWizardPageScanner(%d, %d, %d)"), hwnd, uMsg, ppsp->lParam);
@@ -200,8 +195,9 @@ UINT CALLBACK PropSheetPageProcWizardPageScanner(HWND hwnd, _In_ UINT uMsg, _Ino
 
 		case PSPCB_RELEASE:
 			Trace(TEXT("PSPCB_RELEASE"));
-			if (HeapFree(GetProcessHeap(), 0, (LPVOID) ppsp->lParam))
-				ppsp->lParam = NULL;
+			pWizardPageData = (PCOISANE_Wizard_Page_Data) ppsp->lParam;
+			delete pWizardPageData;
+			ppsp->lParam = NULL;
 			break;
 	}
 
