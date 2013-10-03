@@ -11,6 +11,11 @@
 typedef struct _COISANE_Wizard_Page_Data {
 	HDEVINFO DeviceInfoSet;
 	PSP_DEVINFO_DATA DeviceInfoData;
+	USHORT Port;
+	LPTSTR Host;
+	LPTSTR Name;
+	LPTSTR Username;
+	LPTSTR Password;
 } COISANE_Wizard_Page_Data, *PCOISANE_Wizard_Page_Data;
 
 
@@ -22,5 +27,8 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 
 UINT CALLBACK PropSheetPageProcWizardPageServer(HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp);
 UINT CALLBACK PropSheetPageProcWizardPageScanner(HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp);
+
+BOOL InitWizardPageServer(HWND hwndDlg, PCOISANE_Wizard_Page_Data pWizardPageData);
+BOOL NextWizardPageServer(HWND hwndDlg, PCOISANE_Wizard_Page_Data pWizardPageData);
 
 #endif

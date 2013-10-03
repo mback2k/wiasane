@@ -5,6 +5,8 @@
 #include <tchar.h>
 #include <strsafe.h>
 
+#include "winsane.h"
+
 #include "resource.h"
 #include "coisane_util.h"
 
@@ -112,15 +114,49 @@ DWORD NewDeviceWizardFinishInstallScanner(_In_ DI_FUNCTION InstallFunction, _In_
 
 INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
+	PCOISANE_Wizard_Page_Data pWizardPageData;
+	LPPROPSHEETPAGE lpPropSheetPage;
+
 	Trace(TEXT("DialogProcWizardPageServer(%d, %d, %d, %d)"), hwndDlg, uMsg, wParam, lParam);
 
 	switch (uMsg) {
 		case WM_INITDIALOG:
 			Trace(TEXT("WM_INITDIALOG"));
+			lpPropSheetPage = (LPPROPSHEETPAGE) lParam;
+			pWizardPageData = (PCOISANE_Wizard_Page_Data) lpPropSheetPage->lParam;
+
+			InitWizardPageServer(hwndDlg, pWizardPageData);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
 			break;
 
 		case WM_NOTIFY:
 			Trace(TEXT("WM_NOTIFY"));
+			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			pWizardPageData = (PCOISANE_Wizard_Page_Data) lpPropSheetPage->lParam;
+
+			switch (((NMHDR*) lParam)->code) {
+				case PSN_SETACTIVE:
+					Trace(TEXT("PSN_SETACTIVE"));
+					PropSheet_SetWizButtons(((LPNMHDR) lParam)->hwndFrom, PSWIZB_NEXT);
+					break;
+
+				case PSN_WIZBACK:
+					Trace(TEXT("PSN_WIZBACK"));
+					break;
+
+				case PSN_WIZNEXT:
+					Trace(TEXT("PSN_WIZNEXT"));
+					if (!NextWizardPageServer(hwndDlg, pWizardPageData)) {
+						MessageBox(hwndDlg, TEXT("Unable to connect to the specified server!"), TEXT("Error"), MB_OK | MB_ICONERROR);
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
+						return TRUE;
+					}
+					break;
+
+				case PSN_WIZFINISH:
+					Trace(TEXT("PSN_WIZFINISH"));
+					break;
+			}
 			break;
 	}
 
@@ -138,6 +174,24 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 
 		case WM_NOTIFY:
 			Trace(TEXT("WM_NOTIFY"));
+			switch (((LPNMHDR) lParam)->code) {
+				case PSN_SETACTIVE:
+					Trace(TEXT("PSN_SETACTIVE"));
+					PropSheet_SetWizButtons(((LPNMHDR) lParam)->hwndFrom, PSWIZB_BACK | PSWIZB_NEXT);
+					break;
+
+				case PSN_WIZBACK:
+					Trace(TEXT("PSN_WIZBACK"));
+					break;
+
+				case PSN_WIZNEXT:
+					Trace(TEXT("PSN_WIZNEXT"));
+					break;
+
+				case PSN_WIZFINISH:
+					Trace(TEXT("PSN_WIZFINISH"));
+					break;
+			}
 			break;
 	}
 
@@ -202,4 +256,85 @@ UINT CALLBACK PropSheetPageProcWizardPageScanner(HWND hwnd, _In_ UINT uMsg, _Ino
 	}
 
 	return ret;
+}
+
+BOOL InitWizardPageServer(HWND hwndDlg, PCOISANE_Wizard_Page_Data pWizardPageData)
+{
+	INFCONTEXT InfContext;
+	HINF InfFile;
+	PTCHAR strField;
+	INT intField;
+	DWORD size;
+	BOOL res;
+
+	InfFile = OpenInfFile(pWizardPageData->DeviceInfoSet, pWizardPageData->DeviceInfoData, NULL);
+	if (InfFile != INVALID_HANDLE_VALUE) {
+		res = SetupFindFirstLine(InfFile, TEXT("WIASANE.DeviceData"), TEXT("Host"), &InfContext);
+		if (res) {
+			res = SetupGetStringField(&InfContext, 1, NULL, 0, &size);
+			if (res) {
+				strField = new TCHAR[size];
+				if (strField) {
+					res = SetupGetStringField(&InfContext, 1, strField, size, NULL);
+					if (res) {
+						res = SetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_HOST, strField);
+					}
+					delete strField;
+				} else
+					res = FALSE;
+			}
+		}
+
+		if (res) {
+			res = SetupFindFirstLine(InfFile, TEXT("WIASANE.DeviceData"), TEXT("Port"), &InfContext);
+			if (res) {
+				res = SetupGetIntField(&InfContext, 1, &intField);
+				if (res) {
+					res = SetDlgItemInt(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_PORT, intField, FALSE);
+				}
+			}
+		}
+
+		SetupCloseInfFile(InfFile);
+	} else
+		res = FALSE;
+
+	return res;
+}
+
+BOOL NextWizardPageServer(HWND hwndDlg, PCOISANE_Wizard_Page_Data pWizardPageData)
+{
+	WINSANE_Session *session;
+	BOOL res;
+
+	if (pWizardPageData->Host) {
+		delete pWizardPageData->Host;
+	}
+
+	pWizardPageData->Host = new TCHAR[256];
+	if (pWizardPageData->Host) {
+		res = GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_HOST, pWizardPageData->Host, 256);
+	} else {
+		res = FALSE;
+	}
+	if (!res) {
+		pWizardPageData->Host = _tcsdup(TEXT("localhost"));
+	}
+
+	pWizardPageData->Port = (USHORT) GetDlgItemInt(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_PORT, &res, FALSE);
+	if (!res) {
+		pWizardPageData->Port = WINSANE_DEFAULT_PORT;
+	}
+
+	res = FALSE;
+
+	session = WINSANE_Session::Remote(pWizardPageData->Host, pWizardPageData->Port);
+	if (session) {
+		if (session->Init(NULL, NULL)) {
+			res = session->Exit();
+		}
+		delete session;
+	}
+
+	return res;
 }
