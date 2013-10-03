@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "coisane.h"
 
-#include "resource.h"
 #include "coisane_util.h"
+#include "coisane_prop.h"
+#include "coisane_wizard.h"
 
 //+---------------------------------------------------------------------------
 //
@@ -42,13 +43,15 @@
 //
 DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData, OPTIONAL _Inout_ PCOINSTALLER_CONTEXT_DATA Context)
 {
-	HPROPSHEETPAGE hPropSheetPage;
 	TCHAR FriendlyName[MAX_PATH];
 	INFCONTEXT InfContext;
 	HINF InfFile;
 	HRESULT hr;
+	DWORD ret;
 	BOOL res;
 	size_t len;
+
+	ret = NO_ERROR;
 
 	switch (InstallFunction) {
 		case DIF_INSTALLDEVICE:
@@ -83,7 +86,7 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 				// You can use PrivateData to pass Data needed for PostProcessing
 				// Context->PrivateData = Something;
 
-				return ERROR_DI_POSTPROCESSING_REQUIRED; //Set for PostProcessing
+				ret = ERROR_DI_POSTPROCESSING_REQUIRED; //Set for PostProcessing
 			} else { // post processing
 				//
 				// Sample code to show how you can process a custom section
@@ -213,7 +216,7 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 
 		case DIF_NEWDEVICEWIZARD_FINISHINSTALL:
 			Trace(TEXT("DIF_NEWDEVICEWIZARD_FINISHINSTALL"));
-			NewDeviceWizardFinishInstall(InstallFunction, DeviceInfoSet, DeviceInfoData, &hPropSheetPage);
+			ret = NewDeviceWizardFinishInstall(InstallFunction, DeviceInfoSet, DeviceInfoData);
 			break;
 
 		case DIF_INSTALLINTERFACES:
@@ -230,6 +233,7 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 
 		case DIF_ADDPROPERTYPAGE_ADVANCED:
 			Trace(TEXT("DIF_ADDPROPERTYPAGE_ADVANCED"));
+			ret = AddPropertyPageAdvanced(InstallFunction, DeviceInfoSet, DeviceInfoData);
 			break;
 
 		case DIF_ADDPROPERTYPAGE_BASIC:
@@ -249,36 +253,5 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 			break;
 	}
 
-	return NO_ERROR;
-}
-
-HRESULT NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData, HPROPSHEETPAGE *phPropSheetPage)
-{
-	SP_NEWDEVICEWIZARD_DATA newDeviceWizardData;
-	PROPSHEETPAGE propSheetPage;
-	BOOL res;
-
-	memset(&newDeviceWizardData, 0, sizeof(newDeviceWizardData));
-	newDeviceWizardData.ClassInstallHeader.cbSize = sizeof(newDeviceWizardData.ClassInstallHeader);
-	newDeviceWizardData.ClassInstallHeader.InstallFunction = InstallFunction;
-	res = SetupDiGetClassInstallParams(DeviceInfoSet, DeviceInfoData, &newDeviceWizardData.ClassInstallHeader, sizeof(newDeviceWizardData), NULL);
-	if (res) {
-		if (newDeviceWizardData.NumDynamicPages < MAX_INSTALLWIZARD_DYNAPAGES) {
-			memset(&propSheetPage, 0, sizeof(propSheetPage));
-			propSheetPage.dwSize = sizeof(propSheetPage);
-			propSheetPage.dwFlags = PSP_USEHEADERTITLE | PSP_USEHEADERSUBTITLE;
-			propSheetPage.hInstance = g_hInst;
-			propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_PAGE_SERVER);
-			propSheetPage.pszHeaderTitle = MAKEINTRESOURCE(IDS_PAGE_SERVER_HEADER_TITLE);
-			propSheetPage.pszHeaderSubTitle = MAKEINTRESOURCE(IDS_PAGE_SERVER_HEADER_SUBTITLE);
-
-			*phPropSheetPage = CreatePropertySheetPage(&propSheetPage);
-			if (*phPropSheetPage) {
-				newDeviceWizardData.DynamicPages[newDeviceWizardData.NumDynamicPages++] = *phPropSheetPage;
-				SetupDiSetClassInstallParams(DeviceInfoSet, DeviceInfoData, &newDeviceWizardData.ClassInstallHeader, sizeof(newDeviceWizardData));
-				return S_OK;
-			}
-		}
-	}
-	return E_FAIL;
+	return ret;
 }

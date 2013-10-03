@@ -21,6 +21,12 @@
     <ClCompile Include="coisane_util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="coisane_prop.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="coisane_wizard.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -39,6 +45,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="coisane_util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="coisane_prop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="coisane_wizard.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
