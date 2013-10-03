@@ -33,7 +33,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			if (!context) {
 				context = new WIASANE_Context;
 				if (context)
-					memset(context, 0, sizeof(WIASANE_Context));
+					ZeroMemory(context, sizeof(WIASANE_Context));
 			}
 			if (!context) {
 				pValue->pScanInfo->pMicroDriverContext = NULL;
@@ -262,7 +262,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 
 				context->task = new WIASANE_Task;
 				if (context->task)
-					memset(context->task, 0, sizeof(WIASANE_Task));
+					ZeroMemory(context->task, sizeof(WIASANE_Task));
 				else
 					return E_OUTOFMEMORY;
 
@@ -570,6 +570,7 @@ HRESULT UninitializeScanner(WIASANE_Context *context)
 					delete context->task->scan;
 					context->task->scan = NULL;
 				}
+				ZeroMemory(context->task, sizeof(WIASANE_Task));
 				delete context->task;
 				context->task = NULL;
 			}
@@ -592,7 +593,7 @@ HRESULT FreeScanner(WIASANE_Context *context)
 	if (context->name)
 		free(context->name);
 
-	memset(context, 0, sizeof(WIASANE_Context));
+	ZeroMemory(context, sizeof(WIASANE_Context));
 	delete context;
 
 	return S_OK;
