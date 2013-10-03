@@ -216,7 +216,10 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 
 		case DIF_NEWDEVICEWIZARD_FINISHINSTALL:
 			Trace(TEXT("DIF_NEWDEVICEWIZARD_FINISHINSTALL"));
-			ret = NewDeviceWizardFinishInstall(InstallFunction, DeviceInfoSet, DeviceInfoData);
+			if (ret == NOERROR)
+				ret = NewDeviceWizardFinishInstallServer(InstallFunction, DeviceInfoSet, DeviceInfoData);
+			if (ret == NOERROR)
+				ret = NewDeviceWizardFinishInstallScanner(InstallFunction, DeviceInfoSet, DeviceInfoData);
 			break;
 
 		case DIF_INSTALLINTERFACES:
@@ -233,7 +236,8 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 
 		case DIF_ADDPROPERTYPAGE_ADVANCED:
 			Trace(TEXT("DIF_ADDPROPERTYPAGE_ADVANCED"));
-			ret = AddPropertyPageAdvanced(InstallFunction, DeviceInfoSet, DeviceInfoData);
+			if (ret == NOERROR)
+				ret = AddPropertyPageAdvanced(InstallFunction, DeviceInfoSet, DeviceInfoData);
 			break;
 
 		case DIF_ADDPROPERTYPAGE_BASIC:

@@ -23,11 +23,11 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 
 	ZeroMemory(&propSheetPage, sizeof(propSheetPage));
 	propSheetPage.dwSize = sizeof(propSheetPage);
-	propSheetPage.dwFlags = PSP_USEHEADERTITLE | PSP_USEHEADERSUBTITLE;
+	propSheetPage.dwFlags = PSP_USECALLBACK;
 	propSheetPage.hInstance = g_hInst;
-	propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_PAGE_SERVER);
-	propSheetPage.pszHeaderTitle = MAKEINTRESOURCE(IDS_PAGE_SERVER_HEADER_TITLE);
-	propSheetPage.pszHeaderSubTitle = MAKEINTRESOURCE(IDS_PAGE_SERVER_HEADER_SUBTITLE);
+	propSheetPage.pfnDlgProc = &DialogProcPropertyPageAdvanced;
+	propSheetPage.pfnCallback = &PropSheetPageProcPropertyPageAdvanced;
+	propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_PROPERTIES);
 
 	hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
 	if (!hPropSheetPage)
@@ -39,4 +39,18 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 		return GetLastError();
 
 	return NO_ERROR;
+}
+
+INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
+{
+	Trace(TEXT("DialogProcPropertyPageAdvanced(%d, %d, %d, %d)"), hwndDlg, uMsg, wParam, lParam);
+
+	return FALSE;
+}
+
+UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp)
+{
+	Trace(TEXT("PropSheetPageProcPropertyPageAdvanced(%d, %d, %d)"), hwnd, uMsg, ppsp->lParam);
+
+	return TRUE;
 }
