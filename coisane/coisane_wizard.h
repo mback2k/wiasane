@@ -8,6 +8,12 @@
 #include <windows.h>
 #include <setupapi.h>
 
+typedef struct _COISANE_Wizard_Page_Data {
+    HDEVINFO DeviceInfoSet;
+    PSP_DEVINFO_DATA DeviceInfoData;
+} COISANE_Wizard_Page_Data, *PCOISANE_Wizard_Page_Data;
+
+
 DWORD NewDeviceWizardFinishInstallServer(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData);
 DWORD NewDeviceWizardFinishInstallScanner(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData);
 

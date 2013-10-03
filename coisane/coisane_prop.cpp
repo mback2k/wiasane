@@ -6,10 +6,16 @@
 
 DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData)
 {
+	PCOISANE_Property_Page_Data pPropertyPageData;
 	SP_ADDPROPERTYPAGE_DATA addPropertyPageData;
 	HPROPSHEETPAGE hPropSheetPage;
 	PROPSHEETPAGE propSheetPage;
+	HANDLE hHeap;
 	BOOL res;
+
+	hHeap = GetProcessHeap();
+	if (!hHeap)
+		return ERROR_OUTOFMEMORY;
 
 	ZeroMemory(&addPropertyPageData, sizeof(addPropertyPageData));
 	addPropertyPageData.ClassInstallHeader.cbSize = sizeof(addPropertyPageData.ClassInstallHeader);
@@ -21,6 +27,13 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 	if (addPropertyPageData.NumDynamicPages >= MAX_INSTALLWIZARD_DYNAPAGES)
 		return NO_ERROR;
 
+	pPropertyPageData = (PCOISANE_Property_Page_Data) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(COISANE_Property_Page_Data));
+	if (!pPropertyPageData)
+		return ERROR_OUTOFMEMORY;
+
+	pPropertyPageData->DeviceInfoSet = DeviceInfoSet;
+	pPropertyPageData->DeviceInfoData = DeviceInfoData;
+
 	ZeroMemory(&propSheetPage, sizeof(propSheetPage));
 	propSheetPage.dwSize = sizeof(propSheetPage);
 	propSheetPage.dwFlags = PSP_USECALLBACK;
@@ -28,10 +41,13 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 	propSheetPage.pfnDlgProc = &DialogProcPropertyPageAdvanced;
 	propSheetPage.pfnCallback = &PropSheetPageProcPropertyPageAdvanced;
 	propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_PROPERTIES);
+	propSheetPage.lParam = (LPARAM) pPropertyPageData;
 
 	hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
-	if (!hPropSheetPage)
+	if (!hPropSheetPage) {
+		HeapFree(hHeap, 0, pPropertyPageData);
 		return GetLastError();
+	}
 	
 	addPropertyPageData.DynamicPages[addPropertyPageData.NumDynamicPages++] = hPropSheetPage;
 	res = SetupDiSetClassInstallParams(DeviceInfoSet, DeviceInfoData, &addPropertyPageData.ClassInstallHeader, sizeof(addPropertyPageData));
@@ -50,7 +66,28 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 
 UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp)
 {
+	UINT ret;
+
 	Trace(TEXT("PropSheetPageProcPropertyPageAdvanced(%d, %d, %d)"), hwnd, uMsg, ppsp->lParam);
 
-	return TRUE;
+	ret = 0;
+
+	switch (uMsg) {
+		case PSPCB_ADDREF:
+			Trace(TEXT("PSPCB_ADDREF"));
+			break;
+
+		case PSPCB_CREATE:
+			Trace(TEXT("PSPCB_CREATE"));
+			ret = 1;
+			break;
+
+		case PSPCB_RELEASE:
+			Trace(TEXT("PSPCB_RELEASE"));
+			if (HeapFree(GetProcessHeap(), 0, (LPVOID) ppsp->lParam))
+				ppsp->lParam = NULL;
+			break;
+	}
+
+	return ret;
 }
