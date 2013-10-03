@@ -62,12 +62,16 @@ END
 // Dialog
 //
 
-IDD_PROPPAGE_MEDIUM DIALOGEX 0, 0, 210, 154
+IDD_PAGE_SERVER DIALOGEX 0, 0, 317, 143
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
-CAPTION "Scanner Configuration: Network"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    LTEXT           "TODO: Layout",IDC_STATIC,41,73,128,8
+    LTEXT           "Please specify the hostname or IP address and port of the remote scanner server. The driver uses the TCP/IP protocol to establish a connection to a Scanner Access Now Easy (SANE) server.",IDC_TEXT_INFO,12,12,294,36
+    LTEXT           "Hostname or IP address:",IDC_TEXT_HOST,12,60,216,8
+    EDITTEXT        IDC_EDIT_HOST,12,72,216,14,ES_AUTOHSCROLL
+    LTEXT           "Port:",IDC_TEXT_PORT,240,60,66,8
+    EDITTEXT        IDC_EDIT_PORT,240,72,66,14,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "More information about the SANE network protocol can be found online at sane-project.org",IDC_PAGE_SERVER_INFO,12,126,294,8
 END
 
 
@@ -84,6 +88,18 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_PAGE_SERVER_HEADER_TITLE "Scanner Access Now Easy"
+    IDS_PAGE_SERVER_HEADER_SUBTITLE "Network Configuration"
+END
 
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////

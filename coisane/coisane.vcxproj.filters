@@ -35,6 +35,9 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="coisane.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="coisane_util.h">
       <Filter>Header Files</Filter>
     </ClInclude>

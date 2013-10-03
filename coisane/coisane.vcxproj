@@ -97,6 +97,7 @@
   <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="coisane.h" />
     <ClInclude Include="coisane_util.h" />
   </ItemGroup>
   <ItemGroup>
