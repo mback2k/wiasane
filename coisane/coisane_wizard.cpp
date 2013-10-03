@@ -134,7 +134,7 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
 			pWizardPageData = (PCOISANE_Wizard_Page_Data) lpPropSheetPage->lParam;
 
-			switch (((NMHDR*) lParam)->code) {
+			switch (((LPNMHDR) lParam)->code) {
 				case PSN_SETACTIVE:
 					Trace(TEXT("PSN_SETACTIVE"));
 					PropSheet_SetWizButtons(((LPNMHDR) lParam)->hwndFrom, PSWIZB_NEXT);
