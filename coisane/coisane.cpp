@@ -44,7 +44,6 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 {
 	HPROPSHEETPAGE hPropSheetPage;
 	TCHAR FriendlyName[MAX_PATH];
-	DWORD dwRegType, UINumber;
 	INFCONTEXT InfContext;
 	HINF InfFile;
 	HRESULT hr;
@@ -64,30 +63,21 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 				// So let us get that first .
 				//
 
-				res = SetupDiGetDeviceRegistryProperty(DeviceInfoSet, DeviceInfoData, SPDRP_UI_NUMBER, &dwRegType, (BYTE*) &UINumber, sizeof(UINumber), NULL);
-				if (res) {
-					//
-					// Cook a FriendlyName and add it to the registry
-					//
-
-					hr = StringCbPrintf(FriendlyName, sizeof(FriendlyName), TEXT("ToasterDevice%02u"), UINumber);
+				hr = StringCbPrintf(FriendlyName, sizeof(FriendlyName), TEXT("Friendly Name Test"));
+				if (SUCCEEDED(hr)) {
+					hr = StringCbLength(FriendlyName, sizeof(FriendlyName), &len);
 					if (SUCCEEDED(hr)) {
-						hr = StringCbLength(FriendlyName, sizeof(FriendlyName), &len);
-						if (SUCCEEDED(hr)) {
-							res = SetupDiSetDeviceRegistryProperty(DeviceInfoSet, DeviceInfoData, SPDRP_FRIENDLYNAME, (BYTE *)FriendlyName, (DWORD)len);
-							if (res) {
-								Trace(TEXT("SetupDiSetDeviceRegistryProperty: %s"), FriendlyName);
-							} else {
-								Trace(TEXT("SetupDiSetDeviceRegistryProperty failed!"));
-							}
+						res = SetupDiSetDeviceRegistryProperty(DeviceInfoSet, DeviceInfoData, SPDRP_FRIENDLYNAME, (BYTE *)FriendlyName, (DWORD)len);
+						if (res) {
+							Trace(TEXT("SetupDiSetDeviceRegistryProperty: %s"), FriendlyName);
 						} else {
-							Trace(TEXT("StringCbLength failed!"));
+							Trace(TEXT("SetupDiSetDeviceRegistryProperty failed!"));
 						}
 					} else {
-						Trace(TEXT("StringCbPrintf failed!"));
+						Trace(TEXT("StringCbLength failed!"));
 					}
 				} else {
-					Trace(TEXT("SetupDiGetDeviceRegistryProperty failed!"));
+					Trace(TEXT("StringCbPrintf failed!"));
 				}
 
 				// You can use PrivateData to pass Data needed for PostProcessing
@@ -106,7 +96,7 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 				if (InfFile == INVALID_HANDLE_VALUE)
 					return GetLastError();
 
-				res = SetupFindFirstLine(InfFile, TEXT("MySection"), TEXT("MySpecialFlag"), &InfContext);
+				res = SetupFindFirstLine(InfFile, TEXT("WIASANE.DeviceData"), TEXT("Resolutions"), &InfContext);
 				if (res) {
 					Trace(TEXT("DIF_INSTALLDEVICE, do something here!"));
 				}
