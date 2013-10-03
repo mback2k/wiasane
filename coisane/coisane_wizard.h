@@ -8,27 +8,20 @@
 #include <windows.h>
 #include <setupapi.h>
 
-typedef struct _COISANE_Wizard_Page_Data {
-	HDEVINFO DeviceInfoSet;
-	PSP_DEVINFO_DATA DeviceInfoData;
-	USHORT Port;
-	LPTSTR Host;
-	LPTSTR Name;
-	LPTSTR Username;
-	LPTSTR Password;
-} COISANE_Wizard_Page_Data, *PCOISANE_Wizard_Page_Data;
+#include "coisane.h"
 
 
-DWORD NewDeviceWizardFinishInstallServer(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData);
-DWORD NewDeviceWizardFinishInstallScanner(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData);
+DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData);
 
 INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam);
 
-UINT CALLBACK PropSheetPageProcWizardPageServer(HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp);
-UINT CALLBACK PropSheetPageProcWizardPageScanner(HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp);
+UINT CALLBACK PropSheetPageProcWizardPage(_In_ HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp);
 
-BOOL InitWizardPageServer(HWND hwndDlg, PCOISANE_Wizard_Page_Data pWizardPageData);
-BOOL NextWizardPageServer(HWND hwndDlg, PCOISANE_Wizard_Page_Data pWizardPageData);
+BOOL InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data PrivateData);
+BOOL NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data PrivateData);
+
+BOOL InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data PrivateData);
+BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data PrivateData);
 
 #endif

@@ -10,11 +10,16 @@
 
 DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData)
 {
-	PCOISANE_Property_Page_Data pPropertyPageData;
 	SP_ADDPROPERTYPAGE_DATA addPropertyPageData;
 	HPROPSHEETPAGE hPropSheetPage;
 	PROPSHEETPAGE propSheetPage;
+	PCOISANE_Data privateData;
+	HANDLE hHeap;
 	BOOL res;
+
+	hHeap = GetProcessHeap();
+	if (!hHeap)
+		return ERROR_OUTOFMEMORY;
 
 	ZeroMemory(&addPropertyPageData, sizeof(addPropertyPageData));
 	addPropertyPageData.ClassInstallHeader.cbSize = sizeof(addPropertyPageData.ClassInstallHeader);
@@ -26,13 +31,13 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 	if (addPropertyPageData.NumDynamicPages >= MAX_INSTALLWIZARD_DYNAPAGES)
 		return NO_ERROR;
 
-	pPropertyPageData = new COISANE_Property_Page_Data;
-	if (!pPropertyPageData)
+	privateData = (PCOISANE_Data) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(COISANE_Data));
+	if (!privateData)
 		return ERROR_OUTOFMEMORY;
 
-	ZeroMemory(pPropertyPageData, sizeof(COISANE_Property_Page_Data));
-	pPropertyPageData->DeviceInfoSet = DeviceInfoSet;
-	pPropertyPageData->DeviceInfoData = DeviceInfoData;
+	privateData->hHeap = hHeap;
+	privateData->hDeviceInfoSet = DeviceInfoSet;
+	privateData->pDeviceInfoData = DeviceInfoData;
 
 	ZeroMemory(&propSheetPage, sizeof(propSheetPage));
 	propSheetPage.dwSize = sizeof(propSheetPage);
@@ -41,13 +46,11 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 	propSheetPage.pfnDlgProc = &DialogProcPropertyPageAdvanced;
 	propSheetPage.pfnCallback = &PropSheetPageProcPropertyPageAdvanced;
 	propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_PROPERTIES);
-	propSheetPage.lParam = (LPARAM) pPropertyPageData;
+	propSheetPage.lParam = (LPARAM) privateData;
 
 	hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
-	if (!hPropSheetPage) {
-		delete pPropertyPageData;
+	if (!hPropSheetPage)
 		return GetLastError();
-	}
 	
 	addPropertyPageData.DynamicPages[addPropertyPageData.NumDynamicPages++] = hPropSheetPage;
 	res = SetupDiSetClassInstallParams(DeviceInfoSet, DeviceInfoData, &addPropertyPageData.ClassInstallHeader, sizeof(addPropertyPageData));
@@ -70,30 +73,55 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 	return FALSE;
 }
 
-UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp)
+UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp)
 {
-	PCOISANE_Property_Page_Data pPropertyPageData;
+	PCOISANE_Data privateData;
 	UINT ret;
 
 	Trace(TEXT("PropSheetPageProcPropertyPageAdvanced(%d, %d, %d)"), hwnd, uMsg, ppsp->lParam);
 
 	ret = 0;
 
+	if (ppsp && ppsp->lParam) {
+		privateData = (PCOISANE_Data) ppsp->lParam;
+	} else {
+		privateData = NULL;
+	}
+
 	switch (uMsg) {
 		case PSPCB_ADDREF:
 			Trace(TEXT("PSPCB_ADDREF"));
+			if (privateData) {
+				privateData->uiReferences++;
+			}
 			break;
 
 		case PSPCB_CREATE:
 			Trace(TEXT("PSPCB_CREATE"));
-			ret = 1;
+			if (privateData) {
+				ret = 1;
+			}
 			break;
 
 		case PSPCB_RELEASE:
 			Trace(TEXT("PSPCB_RELEASE"));
-			pPropertyPageData = (PCOISANE_Property_Page_Data) ppsp->lParam;
-			delete pPropertyPageData;
-			ppsp->lParam = NULL;
+			if (privateData) {
+				privateData->uiReferences--;
+
+				if (privateData->uiReferences == 0) {
+					if (privateData->lpHost)
+						free(privateData->lpHost);
+					if (privateData->lpName)
+						free(privateData->lpName);
+					if (privateData->lpUsername)
+						free(privateData->lpUsername);
+					if (privateData->lpPassword)
+						free(privateData->lpPassword);
+
+					HeapFree(privateData->hHeap, 0, privateData);
+					ppsp->lParam = NULL;
+				}
+			}
 			break;
 	}
 

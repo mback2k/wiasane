@@ -62,3 +62,26 @@ HINF OpenInfFile(_In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoDa
 
 	return FileHandle;
 }
+
+DWORD ChangeDeviceState(_In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData, _In_ DWORD StateChange, _In_ DWORD Scope)
+{
+	SP_PROPCHANGE_PARAMS propChangeParams;
+	BOOL res;
+
+	ZeroMemory(&propChangeParams, sizeof(propChangeParams));
+	propChangeParams.ClassInstallHeader.cbSize = sizeof(propChangeParams.ClassInstallHeader);
+	propChangeParams.ClassInstallHeader.InstallFunction = DIF_PROPERTYCHANGE;
+	propChangeParams.StateChange = StateChange;
+	propChangeParams.Scope = Scope;
+	propChangeParams.HwProfile = 0;
+
+	res = SetupDiSetClassInstallParams(DeviceInfoSet, DeviceInfoData, &propChangeParams.ClassInstallHeader, sizeof(propChangeParams));
+	if (!res)
+		return GetLastError();
+
+	res = SetupDiChangeState(DeviceInfoSet, DeviceInfoData);
+	if (!res)
+		return GetLastError();
+
+	return NO_ERROR;
+}
