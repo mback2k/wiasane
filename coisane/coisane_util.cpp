@@ -11,17 +11,18 @@
 VOID Trace(_In_ LPCTSTR format, ...)
 {
 #ifdef _DEBUG
-    TCHAR buffer[1024];
-    va_list arglist;
+	TCHAR buffer[1024];
+	va_list arglist;
 
 	va_start(arglist, format);
-    StringCchVPrintf(buffer, sizeof(buffer) / sizeof(TCHAR), format, arglist);
-    va_end(arglist);
+	StringCchVPrintf(buffer, sizeof(buffer) / sizeof(TCHAR), format, arglist);
+	va_end(arglist);
 
-    OutputDebugString(buffer);
-    OutputDebugString(TEXT("\r\n"));
+	OutputDebugString(TEXT("coisane: "));
+	OutputDebugString(buffer);
+	OutputDebugString(TEXT("\r\n"));
 #else
-    UNREFERENCED_PARAMETER(format);
+	UNREFERENCED_PARAMETER(format);
 #endif
 }
 

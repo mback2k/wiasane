@@ -245,7 +245,7 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 			break;
 
 		default:
-			Trace(TEXT("?????"));
+			Trace(TEXT("Unknown install function call"));
 			break;
 	}
 
