@@ -9,6 +9,25 @@
 #include <objbase.h>
 
 
+VOID Trace(_In_ LPCTSTR format, ...)
+{
+#ifdef _DEBUG
+    TCHAR buffer[1024];
+    va_list arglist;
+
+	va_start(arglist, format);
+    StringCchVPrintf(buffer, sizeof(buffer) / sizeof(TCHAR), format, arglist);
+    va_end(arglist);
+
+    OutputDebugString(buffer);
+    OutputDebugString(TEXT("\n"));
+#else
+    UNREFERENCED_PARAMETER(format);
+#endif
+}
+
+
+
 /**************************************************************************\
 * GetOLDSTRResourceString (helper)
 *
@@ -134,50 +153,4 @@ HRESULT GetOLESTRResourceString(LONG lResourceID, _Outptr_ LPOLESTR *ppsz, BOOL 
     }
 
     return hr;
-}
-
-/**************************************************************************\
-* Trace
-*
-*   Called by the MicroDriver to output strings to a debugger
-*
-* Arguments:
-*
-*   format       - formatted string to output
-*
-*
-* Return Value:
-*
-*    VOID
-*
-* History:
-*
-*    1/20/2000 Original Version
-*
-\**************************************************************************/
-
-VOID Trace(_In_ LPCTSTR format, ...)
-{
-
-#ifdef _DEBUG
-
-    TCHAR Buffer[1024];
-    va_list arglist;
-    va_start(arglist, format);
-
-    //
-    // StringCchVPrintf API guarantees the buffer to be null terminated (though it maybe truncated)
-    //
-
-    StringCchVPrintf(Buffer, sizeof(Buffer)/sizeof(TCHAR), format, arglist);
-    va_end(arglist);
-    OutputDebugString(Buffer);
-    OutputDebugString(TEXT("\n"));
-
-#else
-
-    UNREFERENCED_PARAMETER(format);
-
-#endif
-
 }

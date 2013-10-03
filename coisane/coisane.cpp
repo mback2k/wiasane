@@ -55,7 +55,7 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 	switch (InstallFunction) {
 		case DIF_INSTALLDEVICE:
 			if (!Context->PostProcessing) {
-				DbgOut("DIF_INSTALLDEVICE");
+				Trace(TEXT("DIF_INSTALLDEVICE"));
 
 				//
 				// We wil create here a friendly name for this device
@@ -76,11 +76,19 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 						hr = StringCbLength(FriendlyName, sizeof(FriendlyName), &len);
 						if (SUCCEEDED(hr)) {
 							res = SetupDiSetDeviceRegistryProperty(DeviceInfoSet, DeviceInfoData, SPDRP_FRIENDLYNAME, (BYTE *)FriendlyName, (DWORD)len);
-							if (!res) {
-								DbgOut("SetupDiSetDeviceRegistryProperty failed!");
+							if (res) {
+								Trace(TEXT("SetupDiSetDeviceRegistryProperty: %s"), FriendlyName);
+							} else {
+								Trace(TEXT("SetupDiSetDeviceRegistryProperty failed!"));
 							}
+						} else {
+							Trace(TEXT("StringCbLength failed!"));
 						}
+					} else {
+						Trace(TEXT("StringCbPrintf failed!"));
 					}
+				} else {
+					Trace(TEXT("SetupDiGetDeviceRegistryProperty failed!"));
 				}
 
 				// You can use PrivateData to pass Data needed for PostProcessing
@@ -93,7 +101,7 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 				// in your INF file.
 				//
 
-				DbgOut("DIF_INSTALLDEVICE PostProcessing");
+				Trace(TEXT("DIF_INSTALLDEVICE PostProcessing"));
 
 				InfFile = OpenInfFile(DeviceInfoSet, DeviceInfoData, NULL);
 				if (InfFile == INVALID_HANDLE_VALUE)
@@ -101,121 +109,121 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 
 				res = SetupFindFirstLine(InfFile, TEXT("MySection"), TEXT("MySpecialFlag"), &InfContext);
 				if (res) {
-					DbgOut("DIF_INSTALLDEVICE MySpecicalFlag, Do something here!");
+					Trace(TEXT("DIF_INSTALLDEVICE, do something here!"));
 				}
 			}
 			break;
 
 		case DIF_REMOVE:
-			DbgOut("DIF_REMOVE");
+			Trace(TEXT("DIF_REMOVE"));
 			break;
 
 		case DIF_SELECTDEVICE:
-			DbgOut("DIF_SELECTDEVICE");
+			Trace(TEXT("DIF_SELECTDEVICE"));
 			break;
 
 		case DIF_ASSIGNRESOURCES:
-			DbgOut("DIF_ASSIGNRESOURCES");
+			Trace(TEXT("DIF_ASSIGNRESOURCES"));
 			break;
 
 		case DIF_PROPERTIES:
-			DbgOut("DIF_PROPERTIES");
+			Trace(TEXT("DIF_PROPERTIES"));
 			break;
 
 		case DIF_FIRSTTIMESETUP:
-			DbgOut("DIF_FIRSTTIMESETUP");
+			Trace(TEXT("DIF_FIRSTTIMESETUP"));
 			break;
 
 		case DIF_FOUNDDEVICE:
-			DbgOut("DIF_FOUNDDEVICE");
+			Trace(TEXT("DIF_FOUNDDEVICE"));
 			break;
 
 		case DIF_SELECTCLASSDRIVERS:
-			DbgOut("DIF_SELECTCLASSDRIVERS");
+			Trace(TEXT("DIF_SELECTCLASSDRIVERS"));
 			break;
 
 		case DIF_VALIDATECLASSDRIVERS:
-			DbgOut("DIF_VALIDATECLASSDRIVERS");
+			Trace(TEXT("DIF_VALIDATECLASSDRIVERS"));
 			break;
 
 		case DIF_INSTALLCLASSDRIVERS:
-			DbgOut("DIF_INSTALLCLASSDRIVERS");
+			Trace(TEXT("DIF_INSTALLCLASSDRIVERS"));
 			break;
 
 		case DIF_CALCDISKSPACE:
-			DbgOut("DIF_CALCDISKSPACE");
+			Trace(TEXT("DIF_CALCDISKSPACE"));
 			break;
 
 		case DIF_DESTROYPRIVATEDATA:
-			DbgOut("DIF_DESTROYPRIVATEDATA");
+			Trace(TEXT("DIF_DESTROYPRIVATEDATA"));
 			break;
 
 		case DIF_VALIDATEDRIVER:
-			DbgOut("DIF_VALIDATEDRIVER");
+			Trace(TEXT("DIF_VALIDATEDRIVER"));
 			break;
 
 		case DIF_MOVEDEVICE:
-			DbgOut("DIF_MOVEDEVICE");
+			Trace(TEXT("DIF_MOVEDEVICE"));
 			break;
 
 		case DIF_DETECT:
-			DbgOut("DIF_DETECT");
+			Trace(TEXT("DIF_DETECT"));
 			break;
 
 		case DIF_INSTALLWIZARD:
-			DbgOut("DIF_INSTALLWIZARD");
+			Trace(TEXT("DIF_INSTALLWIZARD"));
 			break;
 
 		case DIF_DESTROYWIZARDDATA:
-			DbgOut("DIF_DESTROYWIZARDDATA");
+			Trace(TEXT("DIF_DESTROYWIZARDDATA"));
 			break;
 
 		case DIF_PROPERTYCHANGE:
-			DbgOut("DIF_PROPERTYCHANGE");
+			Trace(TEXT("DIF_PROPERTYCHANGE"));
 			break;
 
 		case DIF_ENABLECLASS:
-			DbgOut("DIF_ENABLECLASS");
+			Trace(TEXT("DIF_ENABLECLASS"));
 			break;
 
 		case DIF_DETECTVERIFY:
-			DbgOut("DIF_DETECTVERIFY");
+			Trace(TEXT("DIF_DETECTVERIFY"));
 			break;
 
 		case DIF_INSTALLDEVICEFILES:
-			DbgOut("DIF_INSTALLDEVICEFILES");
+			Trace(TEXT("DIF_INSTALLDEVICEFILES"));
 			break;
 
 		case DIF_ALLOW_INSTALL:
-			DbgOut("DIF_ALLOW_INSTALL");
+			Trace(TEXT("DIF_ALLOW_INSTALL"));
 			break;
 
 		case DIF_SELECTBESTCOMPATDRV:
-			DbgOut("DIF_SELECTBESTCOMPATDRV");
+			Trace(TEXT("DIF_SELECTBESTCOMPATDRV"));
 			break;
 
 		case DIF_REGISTERDEVICE:
-			DbgOut("DIF_REGISTERDEVICE");
+			Trace(TEXT("DIF_REGISTERDEVICE"));
 			break;
 
 		case DIF_NEWDEVICEWIZARD_PRESELECT:
-			DbgOut("DIF_NEWDEVICEWIZARD_PRESELECT");
+			Trace(TEXT("DIF_NEWDEVICEWIZARD_PRESELECT"));
 			break;
 
 		case DIF_NEWDEVICEWIZARD_SELECT:
-			DbgOut("DIF_NEWDEVICEWIZARD_SELECT");
+			Trace(TEXT("DIF_NEWDEVICEWIZARD_SELECT"));
 			break;
 
 		case DIF_NEWDEVICEWIZARD_PREANALYZE:
-			DbgOut("DIF_NEWDEVICEWIZARD_PREANALYZE");
+			Trace(TEXT("DIF_NEWDEVICEWIZARD_PREANALYZE"));
 			break;
 
 		case DIF_NEWDEVICEWIZARD_POSTANALYZE:
-			DbgOut("DIF_NEWDEVICEWIZARD_POSTANALYZE");
+			Trace(TEXT("DIF_NEWDEVICEWIZARD_POSTANALYZE"));
 			break;
 
 		case DIF_NEWDEVICEWIZARD_FINISHINSTALL:
-			DbgOut("DIF_NEWDEVICEWIZARD_FINISHINSTALL");
+			Trace(TEXT("DIF_NEWDEVICEWIZARD_FINISHINSTALL"));
 
 			memset(&newDeviceWizardData, 0, sizeof(newDeviceWizardData));
 			newDeviceWizardData.ClassInstallHeader.cbSize = sizeof(newDeviceWizardData.ClassInstallHeader);
@@ -239,35 +247,35 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 			break;
 
 		case DIF_INSTALLINTERFACES:
-			DbgOut("DIF_INSTALLINTERFACES");
+			Trace(TEXT("DIF_INSTALLINTERFACES"));
 			break;
 
 		case DIF_DETECTCANCEL:
-			DbgOut("DIF_DETECTCANCEL");
+			Trace(TEXT("DIF_DETECTCANCEL"));
 			break;
 
 		case DIF_REGISTER_COINSTALLERS:
-			DbgOut("DIF_REGISTER_COINSTALLERS");
+			Trace(TEXT("DIF_REGISTER_COINSTALLERS"));
 			break;
 
 		case DIF_ADDPROPERTYPAGE_ADVANCED:
-			DbgOut("DIF_ADDPROPERTYPAGE_ADVANCED");
+			Trace(TEXT("DIF_ADDPROPERTYPAGE_ADVANCED"));
 			break;
 
 		case DIF_ADDPROPERTYPAGE_BASIC:
-			DbgOut("DIF_ADDPROPERTYPAGE_BASIC");
+			Trace(TEXT("DIF_ADDPROPERTYPAGE_BASIC"));
 			break;
 
 		case DIF_TROUBLESHOOTER:
-			DbgOut("DIF_TROUBLESHOOTER");
+			Trace(TEXT("DIF_TROUBLESHOOTER"));
 			break;
 
 		case DIF_POWERMESSAGEWAKE:
-			DbgOut("DIF_POWERMESSAGEWAKE");
+			Trace(TEXT("DIF_POWERMESSAGEWAKE"));
 			break;
 
 		default:
-			DbgOut("?????");
+			Trace(TEXT("?????"));
 			break;
 	}
 
