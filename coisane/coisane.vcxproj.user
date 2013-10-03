@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Platform)'=='x64'">
+    <LocalDebuggerCommand>C:\Program Files (x86)\Windows Kits\8.0\Tools\x64\devcon.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommandArguments>install wiasane.inf pnpidinformation</LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>$(SolutionDir)wiasane-pkg\$(Configuration)\$(Platform)\wiasane-pkg</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='Win32'">
+    <LocalDebuggerCommand>C:\Program Files (x86)\Windows Kits\8.0\Tools\x86\devcon.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommandArguments>install wiasane.inf pnpidinformation</LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>$(SolutionDir)wiasane-pkg\$(Configuration)\$(Platform)\wiasane-pkg</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+</Project>
