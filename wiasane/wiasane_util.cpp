@@ -12,16 +12,21 @@
 VOID Trace(_In_ LPCTSTR format, ...)
 {
 #ifdef _DEBUG
-	TCHAR buffer[1024];
+	TCHAR input[1024], output[2048];
 	va_list arglist;
+	HRESULT hr;
 
 	va_start(arglist, format);
-	StringCchVPrintf(buffer, sizeof(buffer) / sizeof(TCHAR), format, arglist);
+	hr = StringCchVPrintf(input, sizeof(input) / sizeof(TCHAR), format, arglist);
 	va_end(arglist);
 
-	OutputDebugString(TEXT("wiasane: "));
-	OutputDebugString(buffer);
-	OutputDebugString(TEXT("\r\n"));
+	if (SUCCEEDED(hr)) {
+		hr = StringCchPrintf(output, sizeof(output) / sizeof(TCHAR), TEXT("wiasane: %s\r\n"), input);
+
+		if (SUCCEEDED(hr)) {
+			OutputDebugString(output);
+		}
+	}
 #else
 	UNREFERENCED_PARAMETER(format);
 #endif
