@@ -9,8 +9,8 @@
 #include <setupapi.h>
 
 typedef struct _COISANE_Property_Page_Data {
-    HDEVINFO DeviceInfoSet;
-    PSP_DEVINFO_DATA DeviceInfoData;
+	HDEVINFO DeviceInfoSet;
+	PSP_DEVINFO_DATA DeviceInfoData;
 } COISANE_Property_Page_Data, *PCOISANE_Property_Page_Data;
 
 

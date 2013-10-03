@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "coisane.h"
 
+#include <stdlib.h>
+#include <tchar.h>
+#include <strsafe.h>
+
 #include "coisane_util.h"
 #include "coisane_prop.h"
 #include "coisane_wizard.h"

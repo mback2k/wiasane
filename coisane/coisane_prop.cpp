@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "coisane_prop.h"
 
+#include <stdlib.h>
+#include <tchar.h>
+#include <strsafe.h>
+
 #include "resource.h"
 #include "coisane_util.h"
 
@@ -60,6 +64,12 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	Trace(TEXT("DialogProcPropertyPageAdvanced(%d, %d, %d, %d)"), hwndDlg, uMsg, wParam, lParam);
+
+	switch (uMsg) {
+		case WM_INITDIALOG:
+			Trace(TEXT("WM_INITDIALOG"));
+			break;
+	}
 
 	return FALSE;
 }

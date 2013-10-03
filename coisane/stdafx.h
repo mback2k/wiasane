@@ -10,8 +10,6 @@ __user_code
 
 #include <windows.h>
 #include <setupapi.h>
-#include <stdio.h>
-#include <strsafe.h>
 
 extern HINSTANCE g_hInst; // instance of this CoInstaller (used for loading from a resource)
 

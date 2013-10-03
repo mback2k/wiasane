@@ -1,6 +1,10 @@
 #include "stdafx.h"
 #include "coisane_wizard.h"
 
+#include <stdlib.h>
+#include <tchar.h>
+#include <strsafe.h>
+
 #include "resource.h"
 #include "coisane_util.h"
 
@@ -118,12 +122,32 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 {
 	Trace(TEXT("DialogProcWizardPageServer(%d, %d, %d, %d)"), hwndDlg, uMsg, wParam, lParam);
 
+	switch (uMsg) {
+		case WM_INITDIALOG:
+			Trace(TEXT("WM_INITDIALOG"));
+			break;
+
+		case WM_NOTIFY:
+			Trace(TEXT("WM_NOTIFY"));
+			break;
+	}
+
 	return FALSE;
 }
 
 INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	Trace(TEXT("DialogProcWizardPageScanner(%d, %d, %d, %d)"), hwndDlg, uMsg, wParam, lParam);
+
+	switch (uMsg) {
+		case WM_INITDIALOG:
+			Trace(TEXT("WM_INITDIALOG"));
+			break;
+
+		case WM_NOTIFY:
+			Trace(TEXT("WM_NOTIFY"));
+			break;
+	}
 
 	return FALSE;
 }
