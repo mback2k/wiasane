@@ -1,9 +1,10 @@
 #include "stdafx.h"
 #include "winsane_session.h"
 
-#include <vector>
+#include <stdlib.h>
+#include <tchar.h>
 
-WINSANE_Session::WINSANE_Session(SOCKET sock) {
+WINSANE_Session::WINSANE_Session(_In_ SOCKET sock) {
 	this->sock = new WINSANE_Socket(sock);
 	this->initialized = FALSE;
 	this->num_devices = 0;
@@ -25,89 +26,91 @@ WINSANE_Session::~WINSANE_Session() {
 	this->initialized = FALSE;
 }
 
-WINSANE_Session* WINSANE_Session::Remote(struct addrinfo *addrinfo) {
+WINSANE_Session* WINSANE_Session::Remote(_In_ PADDRINFOT addrInfo) {
 	SOCKET sock;
 
-	sock = socket(addrinfo->ai_family, addrinfo->ai_socktype, addrinfo->ai_protocol);
+	sock = socket(addrInfo->ai_family, addrInfo->ai_socktype, addrInfo->ai_protocol);
 	if (sock == INVALID_SOCKET)
 		return NULL;
 
-	if (connect(sock, addrinfo->ai_addr, (int)addrinfo->ai_addrlen) != 0)
+	if (connect(sock, addrInfo->ai_addr, (int) addrInfo->ai_addrlen) != 0)
 		return NULL;
 
 	return new WINSANE_Session(sock);
 }
 
-WINSANE_Session* WINSANE_Session::Remote(struct in_addr *addr) {
+WINSANE_Session* WINSANE_Session::Remote(_In_ PIN_ADDR addr) {
 	return WINSANE_Session::Remote(addr, WINSANE_DEFAULT_PORT);
 }
 
-WINSANE_Session* WINSANE_Session::Remote(struct in_addr *addr, unsigned short port) {
-	struct sockaddr_in sockaddr;
-	struct addrinfo addrinfo;
+WINSANE_Session* WINSANE_Session::Remote(_In_ PIN_ADDR addr, _In_ USHORT port) {
+	SOCKADDR_IN sockAddr;
+	ADDRINFOT addrInfo;
 
-	ZeroMemory(&sockaddr, sizeof(sockaddr));
-	sockaddr.sin_addr = *addr;
-	sockaddr.sin_family = AF_INET;
-	sockaddr.sin_port = port;
+	ZeroMemory(&sockAddr, sizeof(sockAddr));
+	sockAddr.sin_addr = *addr;
+	sockAddr.sin_family = AF_INET;
+	sockAddr.sin_port = port;
 
-	ZeroMemory(&addrinfo, sizeof(addrinfo));
-	addrinfo.ai_addr = (struct sockaddr*) &sockaddr;
-	addrinfo.ai_addrlen = sizeof(sockaddr);
-	addrinfo.ai_family = AF_INET;
-	addrinfo.ai_socktype = SOCK_STREAM;
-	addrinfo.ai_protocol = IPPROTO_TCP;
+	ZeroMemory(&addrInfo, sizeof(addrInfo));
+	addrInfo.ai_addr = (PSOCKADDR) &sockAddr;
+	addrInfo.ai_addrlen = sizeof(SOCKADDR);
+	addrInfo.ai_family = AF_INET;
+	addrInfo.ai_socktype = SOCK_STREAM;
+	addrInfo.ai_protocol = IPPROTO_TCP;
 
-	return WINSANE_Session::Remote(&addrinfo);
+	return WINSANE_Session::Remote(&addrInfo);
 }
 
-WINSANE_Session* WINSANE_Session::Remote(struct in6_addr *addr) {
+WINSANE_Session* WINSANE_Session::Remote(_In_ PIN6_ADDR addr) {
 	return WINSANE_Session::Remote(addr, WINSANE_DEFAULT_PORT);
 }
 
-WINSANE_Session* WINSANE_Session::Remote(struct in6_addr *addr, unsigned short port) {
-	struct sockaddr_in6 sockaddr;
-	struct addrinfo addrinfo;
+WINSANE_Session* WINSANE_Session::Remote(_In_ PIN6_ADDR addr, _In_ USHORT port) {
+	SOCKADDR_IN6 sockAddr;
+	ADDRINFOT addrInfo;
 
-	ZeroMemory(&sockaddr, sizeof(sockaddr));
-	sockaddr.sin6_addr = *addr;
-	sockaddr.sin6_family = AF_INET6;
-	sockaddr.sin6_port = port;
+	ZeroMemory(&sockAddr, sizeof(sockAddr));
+	sockAddr.sin6_addr = *addr;
+	sockAddr.sin6_family = AF_INET6;
+	sockAddr.sin6_port = port;
 
-	ZeroMemory(&addrinfo, sizeof(addrinfo));
-	addrinfo.ai_addr = (struct sockaddr*) &sockaddr;
-	addrinfo.ai_addrlen = sizeof(sockaddr);
-	addrinfo.ai_family = AF_INET6;
-	addrinfo.ai_socktype = SOCK_STREAM;
-	addrinfo.ai_protocol = IPPROTO_TCP;
+	ZeroMemory(&addrInfo, sizeof(addrInfo));
+	addrInfo.ai_addr = (PSOCKADDR) &sockAddr;
+	addrInfo.ai_addrlen = sizeof(SOCKADDR);
+	addrInfo.ai_family = AF_INET6;
+	addrInfo.ai_socktype = SOCK_STREAM;
+	addrInfo.ai_protocol = IPPROTO_TCP;
 
-	return WINSANE_Session::Remote(&addrinfo);
+	return WINSANE_Session::Remote(&addrInfo);
 }
 
-WINSANE_Session* WINSANE_Session::Remote(const char *hostname) {
+WINSANE_Session* WINSANE_Session::Remote(_In_ PTSTR hostname) {
 	return WINSANE_Session::Remote(hostname, WINSANE_DEFAULT_PORT);
 }
 
-WINSANE_Session* WINSANE_Session::Remote(const char *hostname, unsigned short port) {
-	struct addrinfo *addrinfo, hints;
+WINSANE_Session* WINSANE_Session::Remote(_In_ PTSTR hostname, _In_ USHORT port) {
+	PADDRINFOT pAddrInfo;
+	ADDRINFOT addrInfoHint;
 	WINSANE_Session* session;
-	char port_str[10];
+	TCHAR port_str[10];
 
-	ZeroMemory(&hints, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_protocol = IPPROTO_TCP;
+	ZeroMemory(&addrInfoHint, sizeof(addrInfoHint));
+	addrInfoHint.ai_family = AF_UNSPEC;
+	addrInfoHint.ai_socktype = SOCK_STREAM;
+	addrInfoHint.ai_protocol = IPPROTO_TCP;
 
-	if (_itoa_s(port, port_str, 10, 10) != 0)
+	if (_itot_s(port, port_str, 10, 10) != 0)
 		return NULL;
 
-	addrinfo = NULL;
-	if (getaddrinfo(hostname, port_str, &hints, &addrinfo) != 0)
+	pAddrInfo = NULL;
+	if (GetAddrInfo(hostname, port_str, &addrInfoHint, &pAddrInfo) != 0)
 		return NULL;
 
-	session = WINSANE_Session::Remote(addrinfo);
+	session = WINSANE_Session::Remote(pAddrInfo);
 
-	freeaddrinfo(addrinfo);
+	FreeAddrInfo(pAddrInfo);
+
 	return session;
 }
 
@@ -117,7 +120,7 @@ WINSANE_Socket* WINSANE_Session::GetSocket() {
 }
 
 
-bool WINSANE_Session::Init(SANE_Int *version, SANE_Auth_Callback authorize) {
+BOOL WINSANE_Session::Init(_In_ SANE_Int *version, _In_ SANE_Auth_Callback authorize) {
 	SANE_Word version_code;
 	SANE_Status status;
 	CHAR user_name[SANE_MAX_USERNAME_LEN];
@@ -155,7 +158,7 @@ bool WINSANE_Session::Init(SANE_Int *version, SANE_Auth_Callback authorize) {
 	return TRUE;
 }
 
-bool WINSANE_Session::Exit() {
+BOOL WINSANE_Session::Exit() {
 	int written;
 
 	if (!this->initialized)
@@ -224,14 +227,14 @@ int WINSANE_Session::GetDevices() {
 	return this->num_devices;
 }
 
-WINSANE_Device* WINSANE_Session::GetDevice(int index) {
+WINSANE_Device* WINSANE_Session::GetDevice(_In_ int index) {
 	if (!this->initialized)
 		return NULL;
 
 	return this->devices[index];
 }
 
-WINSANE_Device* WINSANE_Session::GetDevice(SANE_String_Const name) {
+WINSANE_Device* WINSANE_Session::GetDevice(_In_ SANE_String_Const name) {
 	SANE_String_Const device_name;
 	int index;
 
@@ -248,7 +251,37 @@ WINSANE_Device* WINSANE_Session::GetDevice(SANE_String_Const name) {
 	return NULL;
 }
 
-void WINSANE_Session::ClearDevices() {
+WINSANE_Device* WINSANE_Session::GetDevice(_In_ PTSTR ptName) {
+#ifdef UNICODE
+	WINSANE_Device* device;
+	SANE_String_Const name;
+	HANDLE hHeap;
+	int length;
+
+	device = NULL;
+
+	hHeap = GetProcessHeap();
+	if (hHeap) {
+		length = WideCharToMultiByte(CP_ACP, 0, ptName, -1, NULL, 0, NULL, NULL);
+		if (length) {
+			name = (SANE_String_Const) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, length);
+			if (name) {
+				length = WideCharToMultiByte(CP_ACP, 0, ptName, -1, (LPSTR) name, length, NULL, NULL);
+				if (length) {
+					device = WINSANE_Session::GetDevice(name);
+				}
+				HeapFree(hHeap, 0, (LPVOID) name);
+			}
+		}
+	}
+
+	return device;
+#else
+	return WINSANE_Session::GetDevice((SANE_String_Const) name);
+#endif
+}
+
+VOID WINSANE_Session::ClearDevices() {
 	int index;
 
 	for (index = 0; index < this->num_devices; index++) {

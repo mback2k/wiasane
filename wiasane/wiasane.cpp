@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "wiasane.h"
 
-#include <STI.H>
+#include <sti.h>
 #include <math.h>
 #include <winioctl.h>
 #include <usbscan.h>
+#include <stdlib.h>
+#include <tchar.h>
 
 #include "wiasane_opt.h"
 #include "wiasane_util.h"
@@ -450,12 +452,17 @@ HRESULT ReadRegistryInformation(WIASANE_Context *context, HANDLE *pHandle)
 {
 	HKEY hKey, hOpenKey;
 	DWORD dwWritten, dwType, dwPort;
-	PCHAR pcHost, pcName;
+	PTSTR ptHost, ptName;
+	HANDLE hHeap;
 	LSTATUS st;
 	HRESULT hr;
 
 	if (!pHandle)
 		return E_INVALIDARG;
+
+	hHeap = GetProcessHeap();
+	if (!hHeap)
+		return E_OUTOFMEMORY;
 
 	hr = S_OK;
 	hKey = (HKEY) *pHandle;
@@ -468,44 +475,43 @@ HRESULT ReadRegistryInformation(WIASANE_Context *context, HANDLE *pHandle)
 		free(context->name);
 
 	context->port = WINSANE_DEFAULT_PORT;
-	context->host = _strdup("localhost");
+	context->host = _tcsdup(TEXT("localhost"));
 	context->name = NULL;
 
 	//
 	// Open DeviceData section to read driver specific information
 	//
 
-	st = RegOpenKeyExA(hKey, "DeviceData", 0, KEY_QUERY_VALUE|KEY_READ, &hOpenKey);
+	st = RegOpenKeyEx(hKey, TEXT("DeviceData"), 0, KEY_QUERY_VALUE|KEY_READ, &hOpenKey);
 	if (st == ERROR_SUCCESS) {
 		dwWritten = sizeof(DWORD);
 		dwType = REG_DWORD;
 		dwPort = WINSANE_DEFAULT_PORT;
 
-		st = RegQueryValueExA(hOpenKey, "Port", NULL, &dwType, (LPBYTE)&dwPort, &dwWritten);
+		st = RegQueryValueEx(hOpenKey, TEXT("Port"), NULL, &dwType, (LPBYTE)&dwPort, &dwWritten);
 		if (st == ERROR_SUCCESS) {
-			context->port = dwPort;
+			context->port = (USHORT) dwPort;
 		} else
 			hr = E_FAIL;
 
 		dwWritten = 0;
 		dwType = REG_SZ;
-		pcHost = NULL;
+		ptHost = NULL;
 
-		st = RegQueryValueExA(hOpenKey, "Host", NULL, &dwType, (LPBYTE)pcHost, &dwWritten);
+		st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)ptHost, &dwWritten);
 		if (st == ERROR_SUCCESS && dwWritten > 0) {
-			pcHost = (PCHAR) malloc(dwWritten);
-			if (pcHost) {
-				pcHost[dwWritten - 1] = '\0';
-				st = RegQueryValueExA(hOpenKey, "Host", NULL, &dwType, (LPBYTE)pcHost, &dwWritten);
+			ptHost = (PTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, dwWritten);
+			if (ptHost) {
+				st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)ptHost, &dwWritten);
 				if (st == ERROR_SUCCESS) {
 					if (context->host)
 						free(context->host);
 
-					context->host = _strdup(pcHost);
+					context->host = _tcsdup(ptHost);
 				} else
 					hr = E_FAIL;
 
-				free(pcHost);
+				HeapFree(hHeap, 0, ptHost);
 			} else
 				hr = E_OUTOFMEMORY;
 		} else
@@ -513,23 +519,22 @@ HRESULT ReadRegistryInformation(WIASANE_Context *context, HANDLE *pHandle)
 
 		dwWritten = 0;
 		dwType = REG_SZ;
-		pcName = NULL;
+		ptName = NULL;
 
-		st = RegQueryValueExA(hOpenKey, "Name", NULL, &dwType, (LPBYTE)pcName, &dwWritten);
+		st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)ptName, &dwWritten);
 		if (st == ERROR_SUCCESS && dwWritten > 0) {
-			pcName = (PCHAR) malloc(dwWritten);
-			if (pcName) {
-				pcName[dwWritten - 1] = '\0';
-				st = RegQueryValueExA(hOpenKey, "Name", NULL, &dwType, (LPBYTE)pcName, &dwWritten);
+			ptName = (PTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, dwWritten);
+			if (ptName) {
+				st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)ptName, &dwWritten);
 				if (st == ERROR_SUCCESS) {
 					if (context->name)
 						free(context->name);
 
-					context->name = _strdup(pcName);
+					context->name = _tcsdup(ptName);
 				} else
 					hr = E_FAIL;
 
-				free(pcName);
+				HeapFree(hHeap, 0, ptName);
 			} else
 				hr = E_OUTOFMEMORY;
 		} else
@@ -543,7 +548,7 @@ HRESULT ReadRegistryInformation(WIASANE_Context *context, HANDLE *pHandle)
 HRESULT InitializeScanner(WIASANE_Context *context)
 {
 	context->task = NULL;
-	context->session = WINSANE_Session::Remote(context->host, (unsigned short) context->port);
+	context->session = WINSANE_Session::Remote(context->host, context->port);
 	if (context->session && context->session->Init(NULL, NULL) && context->session->GetDevices() > 0) {
 		context->device = context->session->GetDevice(context->name);
 		if (context->device && context->device->Open()) {

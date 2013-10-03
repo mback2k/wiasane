@@ -5,22 +5,28 @@
 #pragma once
 #endif
 
+#include <windows.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+
+#include "winsane_internal.h"
+
 #include "winsane_socket.h"
 #include "winsane_device.h"
 
 class WINSANE_API WINSANE_Session {
 public:
 	/* Constructer & Deconstructer */
-	WINSANE_Session(SOCKET sock);
+	WINSANE_Session(_In_ SOCKET sock);
 	~WINSANE_Session();
 
-	static WINSANE_Session* Remote(struct addrinfo *addrinfo);
-	static WINSANE_Session* Remote(struct in_addr *addr);
-	static WINSANE_Session* Remote(struct in_addr *addr, unsigned short port);
-	static WINSANE_Session* Remote(struct in6_addr *addr);
-	static WINSANE_Session* Remote(struct in6_addr *addr, unsigned short port);
-	static WINSANE_Session* Remote(const char *hostname);
-	static WINSANE_Session* Remote(const char *hostname, unsigned short port);
+	static WINSANE_Session* Remote(_In_ PADDRINFOT addrInfo);
+	static WINSANE_Session* Remote(_In_ PIN_ADDR addr);
+	static WINSANE_Session* Remote(_In_ PIN_ADDR addr, _In_ USHORT port);
+	static WINSANE_Session* Remote(_In_ PIN6_ADDR addr);
+	static WINSANE_Session* Remote(_In_ PIN6_ADDR addr, _In_ USHORT port);
+	static WINSANE_Session* Remote(_In_ PTSTR hostname);
+	static WINSANE_Session* Remote(_In_ PTSTR hostname, _In_ USHORT port);
 
 
 	/* Internal API */
@@ -28,20 +34,21 @@ public:
 
 
 	/* Public API */
-	bool Init(SANE_Int *version_code, SANE_Auth_Callback authorize);
-	bool Exit();
+	BOOL Init(_In_ SANE_Int *version_code, _In_ SANE_Auth_Callback authorize);
+	BOOL Exit();
 
 	int GetDevices();
-	WINSANE_Device* GetDevice(int index);
-	WINSANE_Device* GetDevice(SANE_String_Const name);
-	void ClearDevices();
+	WINSANE_Device* GetDevice(_In_ int index);
+	WINSANE_Device* GetDevice(_In_ SANE_String_Const name);
+	WINSANE_Device* GetDevice(_In_ PTSTR ptName);
+	VOID ClearDevices();
 
 
 private:
 	int num_devices;
 	WINSANE_Device **devices;
 
-	bool initialized;
+	BOOL initialized;
 	SANE_Auth_Callback auth_callback;
 	WINSANE_Socket *sock;
 };

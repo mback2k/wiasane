@@ -1,5 +1,7 @@
 #include "stdafx.h"
 
+#include <winsock2.h>
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved) {
 	WSADATA wsaData;
 

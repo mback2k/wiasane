@@ -1,8 +1,8 @@
 #include "stdafx.h"
 
-int _cdecl main(int argc, char *argv[])
+int _tmain(int argc, TCHAR *argv[])
 {
-	char *hostname;
+	TCHAR *hostname;
 
 	if (argc > 1) {
 		hostname = argv[1];
