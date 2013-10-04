@@ -1,5 +1,5 @@
-#ifndef STDAFX_H
-#define STDAFX_H
+#ifndef DLLMAIN_H
+#define DLLMAIN_H
 
 #if _MSC_VER > 1000
 #pragma once
@@ -9,8 +9,7 @@
 _Analysis_mode_(_Analysis_code_type_user_driver_)
 
 #include <windows.h>
-#include <wiamicro.h>
 
-extern HINSTANCE g_hInst; // instance of this MicroDriver (used for loading from a resource)
+HINSTANCE GetModuleInstance();
 
 #endif

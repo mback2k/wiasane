@@ -5,7 +5,11 @@
 #pragma once
 #endif
 
+#include <DriverSpecs.h>
+_Analysis_mode_(_Analysis_code_type_user_driver_)
+
 #include <windows.h>
+#include <wiamicro.h>
 
 #include "winsane.h"
 

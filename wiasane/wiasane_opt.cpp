@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "wiasane_opt.h"
 
 HRESULT GetOptionValue(WINSANE_Option *option, double *value)

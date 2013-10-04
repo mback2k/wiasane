@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "wiasane.h"
 
 #include <sti.h>

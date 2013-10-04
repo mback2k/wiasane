@@ -1,12 +1,14 @@
-#include "stdafx.h"
 #include "wiasane_util.h"
 
 #ifdef _DEBUG
 #include <stdio.h>
 #endif
 
+#include <tchar.h>
 #include <strsafe.h>
 #include <objbase.h>
+
+#include "dllmain.h"
 
 
 VOID Trace(_In_ LPCTSTR format, ...)
@@ -59,15 +61,21 @@ VOID Trace(_In_ LPCTSTR format, ...)
 
 HRESULT GetOLESTRResourceString(LONG lResourceID, _Outptr_ LPOLESTR *ppsz, BOOL bLocal)
 {
-    HRESULT hr = S_OK;
     TCHAR szStringValue[255];
-    if(bLocal) {
+	HINSTANCE hInstance;
+	HRESULT hr;
+
+	hr = S_OK;
+
+    if (bLocal) {
 
         //
         // We are looking for a resource in our own private resource file
         //
 
-        INT NumTCHARs = LoadString(g_hInst, lResourceID, szStringValue, sizeof(szStringValue)/sizeof(TCHAR));
+		hInstance = GetModuleInstance();
+
+        INT NumTCHARs = LoadString(hInstance, lResourceID, szStringValue, sizeof(szStringValue)/sizeof(TCHAR));
 
         if (NumTCHARs <= 0)
         {
