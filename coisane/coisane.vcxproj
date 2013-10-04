@@ -96,7 +96,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="dllmain.h" />
     <ClInclude Include="coisane.h" />
     <ClInclude Include="coisane_str.h" />
     <ClInclude Include="coisane_util.h" />
@@ -105,7 +105,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="coisane.cpp" />
     <ClCompile Include="coisane_str.cpp" />
     <ClCompile Include="coisane_util.cpp" />

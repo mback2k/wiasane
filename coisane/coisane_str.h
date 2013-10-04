@@ -1,5 +1,11 @@
-#include "stdafx.h"
+#ifndef COISANE_STR_H
+#define COISANE_STR_H
 
+#if _MSC_VER > 1000
+#pragma once
+#endif
+
+#include <windows.h>
 #include <tchar.h>
 #include <strsafe.h>
 
@@ -25,4 +31,6 @@ HRESULT StringCchAVPrintfW(HANDLE hHeap, LPWSTR *ppszDest, size_t *pcbDest, LPCW
 #define StringCchAPrintf StringCchAPrintfA
 #define StringCbAVPrintf StringCbAPrintfA
 #define StringCchAVPrintf StringCchAPrintfA
+#endif
+
 #endif

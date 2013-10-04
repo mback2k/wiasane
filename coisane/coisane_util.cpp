@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "coisane_util.h"
 
 #ifdef _DEBUG

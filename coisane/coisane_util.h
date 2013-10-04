@@ -5,7 +5,11 @@
 #pragma once
 #endif
 
+#include <DriverSpecs.h>
+__user_code
+
 #include <windows.h>
+#include <setupapi.h>
 
 #include "winsane.h"
 

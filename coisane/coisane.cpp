@@ -1,14 +1,8 @@
-#include "stdafx.h"
 #include "coisane.h"
-
-#include <stdlib.h>
-#include <tchar.h>
-#include <strsafe.h>
 
 #include "coisane_util.h"
 #include "coisane_prop.h"
 #include "coisane_wizard.h"
-
 
 
 DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData, OPTIONAL _Inout_ PCOINSTALLER_CONTEXT_DATA Context)

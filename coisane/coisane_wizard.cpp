@@ -1,12 +1,12 @@
-#include "stdafx.h"
 #include "coisane_wizard.h"
 
-#include <stdlib.h>
 #include <tchar.h>
 #include <strsafe.h>
+#include <malloc.h>
 
 #include "winsane.h"
 
+#include "dllmain.h"
 #include "resource.h"
 #include "coisane_util.h"
 
@@ -16,8 +16,13 @@ DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVIN
 	HPROPSHEETPAGE hPropSheetPage;
 	PROPSHEETPAGE propSheetPage;
 	PCOISANE_Data privateData;
+	HINSTANCE hInstance;
 	HANDLE hHeap;
 	BOOL res;
+
+	hInstance = GetModuleInstance();
+	if (!hInstance)
+		return ERROR_OUTOFMEMORY;
 
 	hHeap = GetProcessHeap();
 	if (!hHeap)
@@ -44,7 +49,7 @@ DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVIN
 	ZeroMemory(&propSheetPage, sizeof(propSheetPage));
 	propSheetPage.dwSize = sizeof(propSheetPage);
 	propSheetPage.dwFlags = PSP_USECALLBACK | PSP_USEHEADERTITLE | PSP_USEHEADERSUBTITLE;
-	propSheetPage.hInstance = g_hInst;
+	propSheetPage.hInstance = hInstance;
 	propSheetPage.pfnDlgProc = &DialogProcWizardPageServer;
 	propSheetPage.pfnCallback = &PropSheetPageProcWizardPage;
 	propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_WIZARD_PAGE_SERVER);
@@ -61,7 +66,7 @@ DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVIN
 	ZeroMemory(&propSheetPage, sizeof(propSheetPage));
 	propSheetPage.dwSize = sizeof(propSheetPage);
 	propSheetPage.dwFlags = PSP_USECALLBACK | PSP_USEHEADERTITLE | PSP_USEHEADERSUBTITLE;
-	propSheetPage.hInstance = g_hInst;
+	propSheetPage.hInstance = hInstance;
 	propSheetPage.pfnDlgProc = &DialogProcWizardPageScanner;
 	propSheetPage.pfnCallback = &PropSheetPageProcWizardPage;
 	propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_WIZARD_PAGE_SCANNER);
