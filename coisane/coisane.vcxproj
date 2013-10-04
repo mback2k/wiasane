@@ -63,6 +63,7 @@
     </ResourceCompile>
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir)winsane;%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>ISOLATION_AWARE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>
       </ExceptionHandling>
       <SDLCheck>True</SDLCheck>
