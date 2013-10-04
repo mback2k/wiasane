@@ -64,7 +64,6 @@ END
 
 IDD_WIZARD_PAGE_SERVER DIALOGEX 0, 0, 314, 170
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_VISIBLE
-EXSTYLE WS_EX_TRANSPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     LTEXT           "Please specify the hostname or IP address and port of the remote scanner server. The driver uses the TCP/IP protocol to establish a connection to a Scanner Access Now Easy (SANE) server.",IDC_WIZARD_PAGE_SERVER_TEXT_INFO,12,12,294,36
@@ -94,7 +93,6 @@ END
 
 IDD_WIZARD_PAGE_SCANNER DIALOGEX 0, 0, 314, 170
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_VISIBLE
-EXSTYLE WS_EX_TRANSPARENT
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     LTEXT           "Please select one of the available scanner devices. If the selected scanner requires authentification, the required credentials also needs to be specified here.",IDC_WIZARD_PAGE_SCANNER_TEXT_INFO,12,12,294,24
