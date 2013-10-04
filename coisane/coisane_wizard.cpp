@@ -427,19 +427,25 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 					device = session->GetDevice(privateData->lpName);
 					if (device) {
 						hr = StringCbPrintfA(StringBuf, sizeof(StringBuf), "%s %s", device->GetVendor(), device->GetModel());
-						if (SUCCEEDED(hr)) {							hr = StringCbLengthA(StringBuf, sizeof(StringBuf), &len);							if (SUCCEEDED(hr)) {
+						if (SUCCEEDED(hr)) {
+							hr = StringCbLengthA(StringBuf, sizeof(StringBuf), &len);
+							if (SUCCEEDED(hr)) {
 								SetupDiSetDeviceRegistryPropertyA(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) StringBuf, (DWORD) len);
 							}
 						}
 
 						hr = StringCbPrintfA(StringBuf, sizeof(StringBuf), "%s %s %s (%s)", device->GetVendor(), device->GetModel(), device->GetType(), device->GetName());
-						if (SUCCEEDED(hr)) {							hr = StringCbLengthA(StringBuf, sizeof(StringBuf), &len);							if (SUCCEEDED(hr)) {
+						if (SUCCEEDED(hr)) {
+							hr = StringCbLengthA(StringBuf, sizeof(StringBuf), &len);
+							if (SUCCEEDED(hr)) {
 								SetupDiSetDeviceRegistryPropertyA(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) StringBuf, (DWORD) len);
 							}
 						}
 
 						hr = StringCbPrintfA(StringBuf, sizeof(StringBuf), "%s", device->GetVendor());
-						if (SUCCEEDED(hr)) {							hr = StringCbLengthA(StringBuf, sizeof(StringBuf), &len);							if (SUCCEEDED(hr)) {
+						if (SUCCEEDED(hr)) {
+							hr = StringCbLengthA(StringBuf, sizeof(StringBuf), &len);
+							if (SUCCEEDED(hr)) {
 								SetupDiSetDeviceRegistryPropertyA(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_MFG, (PBYTE) StringBuf, (DWORD) len);
 							}
 						}
