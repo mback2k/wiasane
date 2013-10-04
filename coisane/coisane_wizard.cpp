@@ -95,7 +95,7 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 	LPPROPSHEETPAGE lpPropSheetPage;
 	PCOISANE_Data privateData;
 
-	Trace(TEXT("DialogProcWizardPageServer(%d, %d, %d, %d)"), hwndDlg, uMsg, wParam, lParam);
+	UNREFERENCED_PARAMETER(wParam);
 
 	switch (uMsg) {
 		case WM_INITDIALOG:
@@ -146,7 +146,7 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 	LPPROPSHEETPAGE lpPropSheetPage;
 	PCOISANE_Data privateData;
 
-	Trace(TEXT("DialogProcWizardPageScanner(%d, %d, %d, %d)"), hwndDlg, uMsg, wParam, lParam);
+	UNREFERENCED_PARAMETER(wParam);
 
 	switch (uMsg) {
 		case WM_INITDIALOG:
@@ -197,8 +197,8 @@ UINT CALLBACK PropSheetPageProcWizardPage(_In_ HWND hwnd, _In_ UINT uMsg, _Inout
 	PCOISANE_Data privateData;
 	UINT ret;
 
-	Trace(TEXT("PropSheetPageProcWizardPageServer(%d, %d, %d)"), hwnd, uMsg, ppsp->lParam);
-	
+	UNREFERENCED_PARAMETER(hwnd);
+
 	ret = 0;
 
 	if (ppsp && ppsp->lParam) {
