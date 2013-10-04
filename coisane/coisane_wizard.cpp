@@ -431,7 +431,7 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 				if (devices > 0) {
 					device = session->GetDevice(privateData->lpName);
 					if (device) {
-						UpdateDeviceInfo(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, device);
+						UpdateDeviceInfo(privateData, device);
 						ChangeDeviceState(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_ENABLE, DICS_FLAG_GLOBAL);
 						ChangeDeviceState(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_PROPCHANGE, DICS_FLAG_GLOBAL);
 

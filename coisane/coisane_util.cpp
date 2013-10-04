@@ -93,20 +93,16 @@ DWORD ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDev
 	return NO_ERROR;
 }
 
-VOID UpdateDeviceInfo(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ WINSANE_Device *device)
+DWORD UpdateDeviceInfo(_Inout_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
 {
 	SANE_String_Const name, type, model, vendor;
-	HANDLE hHeap;
 	size_t cbLen;
 	PTSTR lpStr;
 	HRESULT hr;
+	BOOL res;
 
 	if (!device)
-		return;
-
-	hHeap = GetProcessHeap();
-	if (!hHeap)
-		return;
+		return ERROR_INVALID_PARAMETER;
 
 	name = device->GetName();
 	type = device->GetType();
@@ -114,26 +110,34 @@ VOID UpdateDeviceInfo(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDevic
 	vendor = device->GetVendor();
 
 	if (vendor && model) {
-		hr = StringCbAPrintf(hHeap, &lpStr, &cbLen, TEXT("%hs %hs"), vendor, model);
+		hr = StringCbAPrintf(privateData->hHeap, &lpStr, &cbLen, TEXT("%hs %hs"), vendor, model);
 		if (SUCCEEDED(hr)) {
-			SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) lpStr, (DWORD) cbLen);
-			HeapFree(hHeap, 0, lpStr);
+			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) lpStr, (DWORD) cbLen);
+			HeapFree(privateData->hHeap, 0, lpStr);
+			if (!res)
+				return GetLastError();
 		}
 	}
 
 	if (vendor && model && type && name) {
-		hr = StringCbAPrintf(hHeap, &lpStr, &cbLen, TEXT("%hs %hs %hs (%hs)"), vendor, model, type, name);
+		hr = StringCbAPrintf(privateData->hHeap, &lpStr, &cbLen, TEXT("%hs %hs %hs (%hs)"), vendor, model, type, name);
 		if (SUCCEEDED(hr)) {
-			SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) lpStr, (DWORD) cbLen);
-			HeapFree(hHeap, 0, lpStr);
+			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) lpStr, (DWORD) cbLen);
+			HeapFree(privateData->hHeap, 0, lpStr);
+			if (!res)
+				return GetLastError();
 		}
 	}
 
 	if (vendor) {
-		hr = StringCbAPrintf(hHeap, &lpStr, &cbLen, TEXT("%hs"), vendor);
+		hr = StringCbAPrintf(privateData->hHeap, &lpStr, &cbLen, TEXT("%hs"), vendor);
 		if (SUCCEEDED(hr)) {
-			SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_MFG, (PBYTE) (PBYTE) lpStr, (DWORD) cbLen);
-			HeapFree(hHeap, 0, lpStr);
+			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_MFG, (PBYTE) (PBYTE) lpStr, (DWORD) cbLen);
+			HeapFree(privateData->hHeap, 0, lpStr);
+			if (!res)
+				return GetLastError();
 		}
 	}
+
+	return NO_ERROR;
 }
