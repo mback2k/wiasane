@@ -10,7 +10,7 @@
 #include "resource.h"
 #include "coisane_util.h"
 
-DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData)
+DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
 {
 	SP_NEWDEVICEWIZARD_DATA newDeviceWizardData;
 	HPROPSHEETPAGE hPropSheetPage;
@@ -31,7 +31,7 @@ DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVIN
 	ZeroMemory(&newDeviceWizardData, sizeof(newDeviceWizardData));
 	newDeviceWizardData.ClassInstallHeader.cbSize = sizeof(newDeviceWizardData.ClassInstallHeader);
 	newDeviceWizardData.ClassInstallHeader.InstallFunction = InstallFunction;
-	res = SetupDiGetClassInstallParams(DeviceInfoSet, DeviceInfoData, &newDeviceWizardData.ClassInstallHeader, sizeof(newDeviceWizardData), NULL);
+	res = SetupDiGetClassInstallParams(hDeviceInfoSet, pDeviceInfoData, &newDeviceWizardData.ClassInstallHeader, sizeof(newDeviceWizardData), NULL);
 	if (!res)
 		return GetLastError();
 
@@ -43,8 +43,8 @@ DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVIN
 		return ERROR_OUTOFMEMORY;
 
 	privateData->hHeap = hHeap;
-	privateData->hDeviceInfoSet = DeviceInfoSet;
-	privateData->pDeviceInfoData = DeviceInfoData;
+	privateData->hDeviceInfoSet = hDeviceInfoSet;
+	privateData->pDeviceInfoData = pDeviceInfoData;
 
 	ZeroMemory(&propSheetPage, sizeof(propSheetPage));
 	propSheetPage.dwSize = sizeof(propSheetPage);
@@ -80,7 +80,7 @@ DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVIN
 
 	newDeviceWizardData.DynamicPages[newDeviceWizardData.NumDynamicPages++] = hPropSheetPage;
 
-	res = SetupDiSetClassInstallParams(DeviceInfoSet, DeviceInfoData, &newDeviceWizardData.ClassInstallHeader, sizeof(newDeviceWizardData));
+	res = SetupDiSetClassInstallParams(hDeviceInfoSet, pDeviceInfoData, &newDeviceWizardData.ClassInstallHeader, sizeof(newDeviceWizardData));
 	if (!res)
 		return GetLastError();
 

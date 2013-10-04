@@ -8,7 +8,7 @@
 #include "resource.h"
 #include "coisane_util.h"
 
-DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData)
+DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
 {
 	SP_ADDPROPERTYPAGE_DATA addPropertyPageData;
 	HPROPSHEETPAGE hPropSheetPage;
@@ -29,7 +29,7 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 	ZeroMemory(&addPropertyPageData, sizeof(addPropertyPageData));
 	addPropertyPageData.ClassInstallHeader.cbSize = sizeof(addPropertyPageData.ClassInstallHeader);
 	addPropertyPageData.ClassInstallHeader.InstallFunction = InstallFunction;
-	res = SetupDiGetClassInstallParams(DeviceInfoSet, DeviceInfoData, &addPropertyPageData.ClassInstallHeader, sizeof(addPropertyPageData), NULL);
+	res = SetupDiGetClassInstallParams(hDeviceInfoSet, pDeviceInfoData, &addPropertyPageData.ClassInstallHeader, sizeof(addPropertyPageData), NULL);
 	if (!res)
 		return GetLastError();
 
@@ -41,8 +41,8 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 		return ERROR_OUTOFMEMORY;
 
 	privateData->hHeap = hHeap;
-	privateData->hDeviceInfoSet = DeviceInfoSet;
-	privateData->pDeviceInfoData = DeviceInfoData;
+	privateData->hDeviceInfoSet = hDeviceInfoSet;
+	privateData->pDeviceInfoData = pDeviceInfoData;
 
 	ZeroMemory(&propSheetPage, sizeof(propSheetPage));
 	propSheetPage.dwSize = sizeof(propSheetPage);
@@ -58,7 +58,7 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO De
 		return GetLastError();
 	
 	addPropertyPageData.DynamicPages[addPropertyPageData.NumDynamicPages++] = hPropSheetPage;
-	res = SetupDiSetClassInstallParams(DeviceInfoSet, DeviceInfoData, &addPropertyPageData.ClassInstallHeader, sizeof(addPropertyPageData));
+	res = SetupDiSetClassInstallParams(hDeviceInfoSet, pDeviceInfoData, &addPropertyPageData.ClassInstallHeader, sizeof(addPropertyPageData));
 	if (!res)
 		return GetLastError();
 

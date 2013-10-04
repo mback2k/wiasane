@@ -5,7 +5,7 @@
 #include "coisane_wizard.h"
 
 
-DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData, OPTIONAL _Inout_ PCOINSTALLER_CONTEXT_DATA Context)
+DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, OPTIONAL _Inout_ PCOINSTALLER_CONTEXT_DATA Context)
 {
 	DWORD ret;
 
@@ -128,7 +128,7 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 
 		case DIF_NEWDEVICEWIZARD_FINISHINSTALL:
 			Trace(TEXT("DIF_NEWDEVICEWIZARD_FINISHINSTALL"));
-			ret = NewDeviceWizardFinishInstall(InstallFunction, DeviceInfoSet, DeviceInfoData);
+			ret = NewDeviceWizardFinishInstall(InstallFunction, hDeviceInfoSet, pDeviceInfoData);
 			break;
 
 		case DIF_INSTALLINTERFACES:
@@ -145,7 +145,7 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO Devic
 
 		case DIF_ADDPROPERTYPAGE_ADVANCED:
 			Trace(TEXT("DIF_ADDPROPERTYPAGE_ADVANCED"));
-			ret = AddPropertyPageAdvanced(InstallFunction, DeviceInfoSet, DeviceInfoData);
+			ret = AddPropertyPageAdvanced(InstallFunction, hDeviceInfoSet, pDeviceInfoData);
 			break;
 
 		case DIF_ADDPROPERTYPAGE_BASIC:
