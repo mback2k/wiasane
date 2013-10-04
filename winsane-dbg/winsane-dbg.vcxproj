@@ -97,10 +97,9 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="winsane-dbg.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="winsane-dbg.cpp" />
   </ItemGroup>
   <ItemGroup>
