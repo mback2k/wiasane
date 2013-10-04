@@ -371,15 +371,12 @@ BOOL InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 
 BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 {
-	CHAR StringBuf[MAX_PATH];
 	WINSANE_Session *session;
 	WINSANE_Device *device;
 	int devices;
 	LPTSTR lpName;
 	LPTSTR lpUsername;
 	LPTSTR lpPassword;
-	HRESULT hr;
-	size_t len;
 	BOOL res;
 
 	lpName = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
@@ -426,30 +423,7 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 				if (devices > 0) {
 					device = session->GetDevice(privateData->lpName);
 					if (device) {
-						hr = StringCbPrintfA(StringBuf, sizeof(StringBuf), "%s %s", device->GetVendor(), device->GetModel());
-						if (SUCCEEDED(hr)) {
-							hr = StringCbLengthA(StringBuf, sizeof(StringBuf), &len);
-							if (SUCCEEDED(hr)) {
-								SetupDiSetDeviceRegistryPropertyA(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) StringBuf, (DWORD) len);
-							}
-						}
-
-						hr = StringCbPrintfA(StringBuf, sizeof(StringBuf), "%s %s %s (%s)", device->GetVendor(), device->GetModel(), device->GetType(), device->GetName());
-						if (SUCCEEDED(hr)) {
-							hr = StringCbLengthA(StringBuf, sizeof(StringBuf), &len);
-							if (SUCCEEDED(hr)) {
-								SetupDiSetDeviceRegistryPropertyA(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) StringBuf, (DWORD) len);
-							}
-						}
-
-						hr = StringCbPrintfA(StringBuf, sizeof(StringBuf), "%s", device->GetVendor());
-						if (SUCCEEDED(hr)) {
-							hr = StringCbLengthA(StringBuf, sizeof(StringBuf), &len);
-							if (SUCCEEDED(hr)) {
-								SetupDiSetDeviceRegistryPropertyA(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_MFG, (PBYTE) StringBuf, (DWORD) len);
-							}
-						}
-
+						UpdateDeviceInfo(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, device);
 						ChangeDeviceState(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_PROPCHANGE, DICS_FLAG_GLOBAL);
 
 						res = TRUE;

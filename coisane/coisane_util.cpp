@@ -85,3 +85,46 @@ DWORD ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDev
 
 	return NO_ERROR;
 }
+
+VOID UpdateDeviceInfo(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ WINSANE_Device *device)
+{
+	SANE_String_Const name, type, model, vendor;
+	TCHAR StringBuf[MAX_PATH];
+	HRESULT hr;
+	size_t len;
+
+	name = device->GetName();
+	type = device->GetType();
+	model = device->GetModel();
+	vendor = device->GetVendor();
+
+	if (vendor && model) {
+		hr = StringCbPrintf(StringBuf, sizeof(StringBuf), TEXT("%hs %hs"), vendor, model);
+		if (SUCCEEDED(hr)) {
+			hr = StringCbLength(StringBuf, sizeof(StringBuf), &len);
+			if (SUCCEEDED(hr)) {
+				SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) StringBuf, (DWORD) len);
+			}
+		}
+	}
+
+	if (vendor && model && type && name) {
+		hr = StringCbPrintf(StringBuf, sizeof(StringBuf), TEXT("%hs %hs %hs (%hs)"), vendor, model, type, name);
+		if (SUCCEEDED(hr)) {
+			hr = StringCbLength(StringBuf, sizeof(StringBuf), &len);
+			if (SUCCEEDED(hr)) {
+				SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) StringBuf, (DWORD) len);
+			}
+		}
+	}
+
+	if (vendor) {
+		hr = StringCbPrintf(StringBuf, sizeof(StringBuf), TEXT("%hs"), vendor);
+		if (SUCCEEDED(hr)) {
+			hr = StringCbLength(StringBuf, sizeof(StringBuf), &len);
+			if (SUCCEEDED(hr)) {
+				SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_MFG, (PBYTE) StringBuf, (DWORD) len);
+			}
+		}
+	}
+}
