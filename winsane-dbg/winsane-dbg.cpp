@@ -2,7 +2,7 @@
 
 int WINAPIV _tmain(int argc, TCHAR *argv[])
 {
-	TCHAR *hostname;
+	PTSTR hostname;
 
 	if (argc > 1) {
 		hostname = argv[1];
@@ -13,7 +13,7 @@ int WINAPIV _tmain(int argc, TCHAR *argv[])
 	}
 }
 
-VOID Debug(TCHAR *hostname)
+VOID Debug(PTSTR hostname)
 {
 	WINSANE_Session *session;
 

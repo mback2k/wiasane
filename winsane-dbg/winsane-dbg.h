@@ -15,7 +15,7 @@ __user_code
 
 #include "winsane.h"
 
-VOID Debug(TCHAR *hostname);
+VOID Debug(PTSTR hostname);
 VOID DebugSession(WINSANE_Session *session);
 VOID DebugSessionDevice(WINSANE_Session *session, WINSANE_Device *device);
 VOID DebugSessionDeviceOption(WINSANE_Session *session, WINSANE_Device *device, WINSANE_Option *option);
