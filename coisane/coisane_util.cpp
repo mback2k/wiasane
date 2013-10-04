@@ -34,7 +34,7 @@ VOID Trace(_In_ LPCTSTR pszFormat, ...)
 		}
 	}
 #else
-	UNREFERENCED_PARAMETER(format);
+	UNREFERENCED_PARAMETER(pszFormat);
 #endif
 }
 
