@@ -32,7 +32,7 @@ VOID Trace(_In_ LPCTSTR format, ...)
 }
 
 
-HINF OpenInfFile(_In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData, _Out_opt_ PUINT ErrorLine)
+HINF OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _Out_opt_ PUINT ErrorLine)
 {
 	SP_DRVINFO_DATA DriverInfoData;
 	SP_DRVINFO_DETAIL_DATA DriverInfoDetailData;
@@ -42,13 +42,13 @@ HINF OpenInfFile(_In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoDa
 		*ErrorLine = 0;
 
 	DriverInfoData.cbSize = sizeof(SP_DRVINFO_DATA);
-	if (!SetupDiGetSelectedDriver(DeviceInfoSet, DeviceInfoData, &DriverInfoData)) {
+	if (!SetupDiGetSelectedDriver(hDeviceInfoSet, pDeviceInfoData, &DriverInfoData)) {
 		Trace(TEXT("Fail: SetupDiGetSelectedDriver"));
 		return INVALID_HANDLE_VALUE;
 	}
 
 	DriverInfoDetailData.cbSize = sizeof(SP_DRVINFO_DETAIL_DATA);
-	if (!SetupDiGetDriverInfoDetail(DeviceInfoSet, DeviceInfoData, &DriverInfoData,	&DriverInfoDetailData, sizeof(SP_DRVINFO_DETAIL_DATA), NULL)) {
+	if (!SetupDiGetDriverInfoDetail(hDeviceInfoSet, pDeviceInfoData, &DriverInfoData, &DriverInfoDetailData, sizeof(SP_DRVINFO_DETAIL_DATA), NULL)) {
 		if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
 			Trace(TEXT("Fail: SetupDiGetDriverInfoDetail"));
 			return INVALID_HANDLE_VALUE;
@@ -63,7 +63,7 @@ HINF OpenInfFile(_In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoDa
 	return FileHandle;
 }
 
-DWORD ChangeDeviceState(_In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA DeviceInfoData, _In_ DWORD StateChange, _In_ DWORD Scope)
+DWORD ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD StateChange, _In_ DWORD Scope)
 {
 	SP_PROPCHANGE_PARAMS propChangeParams;
 	BOOL res;
@@ -75,11 +75,11 @@ DWORD ChangeDeviceState(_In_ HDEVINFO DeviceInfoSet, _In_ PSP_DEVINFO_DATA Devic
 	propChangeParams.Scope = Scope;
 	propChangeParams.HwProfile = 0;
 
-	res = SetupDiSetClassInstallParams(DeviceInfoSet, DeviceInfoData, &propChangeParams.ClassInstallHeader, sizeof(propChangeParams));
+	res = SetupDiSetClassInstallParams(hDeviceInfoSet, pDeviceInfoData, &propChangeParams.ClassInstallHeader, sizeof(propChangeParams));
 	if (!res)
 		return GetLastError();
 
-	res = SetupDiChangeState(DeviceInfoSet, DeviceInfoData);
+	res = SetupDiChangeState(hDeviceInfoSet, pDeviceInfoData);
 	if (!res)
 		return GetLastError();
 
