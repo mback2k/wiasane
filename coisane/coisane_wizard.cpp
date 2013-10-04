@@ -16,10 +16,11 @@ DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVIN
 	HPROPSHEETPAGE hPropSheetPage;
 	PROPSHEETPAGE propSheetPage;
 	PCOISANE_Data privateData;
+	HANDLE hActCtx, hHeap;
 	HINSTANCE hInstance;
-	HANDLE hHeap;
 	BOOL res;
 
+	hActCtx = GetActivationContext();
 	hInstance = GetModuleInstance();
 	if (!hInstance)
 		return ERROR_OUTOFMEMORY;
@@ -49,6 +50,7 @@ DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVIN
 	ZeroMemory(&propSheetPage, sizeof(propSheetPage));
 	propSheetPage.dwSize = sizeof(propSheetPage);
 	propSheetPage.dwFlags = PSP_USECALLBACK | PSP_USEHEADERTITLE | PSP_USEHEADERSUBTITLE;
+	propSheetPage.hActCtx = hActCtx;
 	propSheetPage.hInstance = hInstance;
 	propSheetPage.pfnDlgProc = &DialogProcWizardPageServer;
 	propSheetPage.pfnCallback = &PropSheetPageProcWizardPage;
@@ -66,6 +68,7 @@ DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVIN
 	ZeroMemory(&propSheetPage, sizeof(propSheetPage));
 	propSheetPage.dwSize = sizeof(propSheetPage);
 	propSheetPage.dwFlags = PSP_USECALLBACK | PSP_USEHEADERTITLE | PSP_USEHEADERSUBTITLE;
+	propSheetPage.hActCtx = hActCtx;
 	propSheetPage.hInstance = hInstance;
 	propSheetPage.pfnDlgProc = &DialogProcWizardPageScanner;
 	propSheetPage.pfnCallback = &PropSheetPageProcWizardPage;

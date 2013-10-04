@@ -13,5 +13,6 @@ __user_code
 #include <windows.h>
 
 HINSTANCE GetModuleInstance();
+HANDLE GetActivationContext();
 
 #endif

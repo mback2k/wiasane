@@ -14,10 +14,11 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hD
 	HPROPSHEETPAGE hPropSheetPage;
 	PROPSHEETPAGE propSheetPage;
 	PCOISANE_Data privateData;
+	HANDLE hActCtx, hHeap;
 	HINSTANCE hInstance;
-	HANDLE hHeap;
 	BOOL res;
 
+	hActCtx = GetActivationContext();
 	hInstance = GetModuleInstance();
 	if (!hInstance)
 		return ERROR_OUTOFMEMORY;
@@ -47,6 +48,7 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hD
 	ZeroMemory(&propSheetPage, sizeof(propSheetPage));
 	propSheetPage.dwSize = sizeof(propSheetPage);
 	propSheetPage.dwFlags = PSP_USECALLBACK;
+	propSheetPage.hActCtx = hActCtx;
 	propSheetPage.hInstance = hInstance;
 	propSheetPage.pfnDlgProc = &DialogProcPropertyPageAdvanced;
 	propSheetPage.pfnCallback = &PropSheetPageProcPropertyPageAdvanced;
