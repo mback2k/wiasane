@@ -660,7 +660,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 			if (SUCCEEDED(hr)) {
 				pScanInfo->OpticalXResolution = (LONG) dbl;
 			}
-			hr = GetOptionValue(option, &dbl);
+			hr = option->GetValue(&dbl);
 			if (SUCCEEDED(hr) == S_OK) {
 				pScanInfo->Xresolution = (LONG) dbl;
 			}
@@ -683,7 +683,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 				pScanInfo->ContrastRange.lMax  = range->max;
 				pScanInfo->ContrastRange.lStep = range->quant ? range->quant : 1;
 			}
-			hr = GetOptionValue(option, &dbl);
+			hr = option->GetValue(&dbl);
 			if (SUCCEEDED(hr)) {
 				pScanInfo->Contrast = (LONG) dbl;
 			}
@@ -702,7 +702,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 				pScanInfo->IntensityRange.lMax  = range->max;
 				pScanInfo->IntensityRange.lStep = range->quant ? range->quant : 1;
 			}
-			hr = GetOptionValue(option, &dbl);
+			hr = option->GetValue(&dbl);
 			if (SUCCEEDED(hr)) {
 				pScanInfo->Intensity = (LONG) dbl;
 			}
@@ -748,13 +748,13 @@ HRESULT SetScannerSettings(PSCANINFO pScanInfo, WIASANE_Context *context)
 		if (option && option->GetType() == SANE_TYPE_STRING) {
 			switch (pScanInfo->DataType) {
 				case WIA_DATA_THRESHOLD:
-					hr = SetOptionValue(option, "Lineart");
+					hr = option->SetValueString("Lineart");
 					break;
 				case WIA_DATA_GRAYSCALE:
-					hr = SetOptionValue(option, "Gray");
+					hr = option->SetValueString("Gray");
 					break;
 				case WIA_DATA_COLOR:
-					hr = SetOptionValue(option, "Color");
+					hr = option->SetValueString("Color");
 					break;
 				default:
 					hr = E_INVALIDARG;
@@ -767,7 +767,7 @@ HRESULT SetScannerSettings(PSCANINFO pScanInfo, WIASANE_Context *context)
 
 		option = context->device->GetOption("resolution");
 		if (option) {
-			hr = SetOptionValue(option, pScanInfo->Xresolution);
+			hr = option->SetValue(pScanInfo->Xresolution);
 			if (FAILED(hr))
 				return hr;
 		} else
@@ -775,14 +775,14 @@ HRESULT SetScannerSettings(PSCANINFO pScanInfo, WIASANE_Context *context)
 
 		option = context->device->GetOption("contrast");
 		if (option) {
-			hr = SetOptionValue(option, pScanInfo->Contrast);
+			hr = option->SetValue(pScanInfo->Contrast);
 			if (FAILED(hr) && hr != E_NOTIMPL)
 				return hr;
 		}
 
 		option = context->device->GetOption("brightness");
 		if (option) {
-			hr = SetOptionValue(option, pScanInfo->Intensity);
+			hr = option->SetValue(pScanInfo->Intensity);
 			if (FAILED(hr) && hr != E_NOTIMPL)
 				return hr;
 		}

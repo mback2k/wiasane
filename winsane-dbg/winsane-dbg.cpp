@@ -85,7 +85,11 @@ VOID DebugSessionDeviceOption(WINSANE_Session *session, WINSANE_Device *device, 
 	SANE_String_Const *string_list;
 	SANE_Word *word_list;
 	SANE_Range *range;
-	SANE_String value;
+	SANE_Bool value_bool;
+	SANE_Int value_int;
+	SANE_Fixed value_fixed;
+	SANE_String value_string;
+	HRESULT hr;
 	int index;
 
 	UNREFERENCED_PARAMETER(session);
@@ -98,24 +102,38 @@ VOID DebugSessionDeviceOption(WINSANE_Session *session, WINSANE_Device *device, 
 
 	switch (option->GetType()) {
 		case SANE_TYPE_BOOL:
-			printf("Value:\t\t%d\n", option->GetValueBool());
+			hr = option->GetValueBool(&value_bool);
+			if (SUCCEEDED(hr))
+				printf("Value:\t\t%d\n", value_bool);
 			break;
 		case SANE_TYPE_INT:
-			printf("Value:\t\t%d\n", option->GetValueInt());
+			hr = option->GetValueInt(&value_int);
+			if (SUCCEEDED(hr))
+				printf("Value:\t\t%d\n", value_int);
 			break;
 		case SANE_TYPE_FIXED:
-			printf("Value:\t\t%f\t(%d)\n", SANE_UNFIX(option->GetValueFixed()), option->GetValueFixed());
+			hr = option->GetValueFixed(&value_fixed);
+			if (SUCCEEDED(hr))
+				printf("Value:\t\t%f\t(%d)\n", SANE_UNFIX(value_fixed), value_fixed);
 			break;
 		case SANE_TYPE_STRING:
-			value = option->GetValueString();
-			if (value) {
-				printf("Value:\t\t%s\n", value);
-				delete value;
-			} else {
-				printf("Value:\t\t<NULL>\n");
+			hr = option->GetValueString(&value_string);
+			if (SUCCEEDED(hr)) {
+				if (value_string) {
+					printf("Value:\t\t%s\n", value_string);
+					delete[] value_string;
+				} else {
+					printf("Value:\t\t<NULL>\n");
+				}
 			}
 			break;
+		default:
+			hr = E_NOTIMPL;
+			break;
 	}
+
+	if (FAILED(hr))
+		printf("Value:\t\t<FAIL>\n");
 
 	switch (option->GetUnit()) {
 		case SANE_UNIT_NONE:
@@ -177,22 +195,25 @@ VOID DebugSessionDeviceOption(WINSANE_Session *session, WINSANE_Device *device, 
 
 	if (option->GetName()) {
 		if (strcmp(option->GetName(), "mode") == 0) {
-			value = option->SetValueString("Color");
-			printf("Mode 1:\t\t%s\n", value);
-			delete value;
-			value = option->GetValueString();
-			printf("Mode 2:\t\t%s\n", value);
-			delete value;
+			hr = option->SetValueString("Color");
+			hr = option->GetValueString(&value_string);
+			if (SUCCEEDED(hr) && value_string) {
+				printf("Mode:\t\t%s\n", value_string);
+				delete[] value_string;
+			}
 		} else if (strcmp(option->GetName(), "compression") == 0) {
-			value = option->SetValueString("None");
-			printf("Compression 1:\t%s\n", value);
-			delete value;
-			value = option->GetValueString();
-			printf("Compression 2:\t%s\n", value);
-			delete value;
+			hr = option->SetValueString("None");
+			hr = option->GetValueString(&value_string);
+			if (SUCCEEDED(hr) && value_string) {
+				printf("Compression:\t%s\n", value_string);
+				delete[] value_string;
+			}
 		} else if (strcmp(option->GetName(), "resolution") == 0) {
-			printf("Resolution 1:\t%d\n", option->SetValueInt(300));
-			printf("Resolution 2:\t%d\n", option->GetValueInt());
+			hr = option->SetValueInt(300);
+			hr = option->GetValueInt(&value_int);
+			if (SUCCEEDED(hr)) {
+				printf("Resolution:\t%d\n", value_int);
+			}
 		}
 	}
 }

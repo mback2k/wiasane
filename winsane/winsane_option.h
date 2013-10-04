@@ -33,15 +33,17 @@ public:
 	BOOL IsValidValue(_In_ SANE_Word value);
 	BOOL IsValidValue(_In_ SANE_String value);
 
-	SANE_Bool GetValueBool();
-	SANE_Int GetValueInt();
-	SANE_Fixed GetValueFixed();
-	SANE_String GetValueString();
+	HRESULT GetValue(_Inout_ double *value);
+	HRESULT GetValueBool(_Inout_ PSANE_Bool value_bool);
+	HRESULT GetValueInt(_Inout_ PSANE_Int value_int);
+	HRESULT GetValueFixed(_Inout_ PSANE_Fixed value_fixed);
+	HRESULT GetValueString(_Inout_ PSANE_String value_string);
 
-	SANE_Bool SetValueBool(_In_ SANE_Bool value_bool);
-	SANE_Int SetValueInt(_In_ SANE_Int value_int);
-	SANE_Fixed SetValueFixed(_In_ SANE_Fixed value_fixed);
-	SANE_String SetValueString(_In_ SANE_String_Const value_string);
+	HRESULT SetValue(_In_ double value);
+	HRESULT SetValueBool(_In_ SANE_Bool value_bool);
+	HRESULT SetValueInt(_In_ SANE_Int value_int);
+	HRESULT SetValueFixed(_In_ SANE_Fixed value_fixed);
+	HRESULT SetValueString(_In_ SANE_String_Const value_string);
 
 
 protected:

@@ -182,146 +182,229 @@ BOOL WINSANE_Option::IsValidValue(_In_ SANE_String value)
 }
 
 
-SANE_Bool WINSANE_Option::GetValueBool()
+HRESULT WINSANE_Option::GetValue(_Inout_ double *value)
 {
 	SANE_Bool value_bool;
+	SANE_Int value_int;
+	SANE_Fixed value_fixed;
+	HRESULT hr;
+
+	if (!value)
+		return E_INVALIDARG;
+
+	switch (this->sane_option->type) {
+		case SANE_TYPE_BOOL:
+			hr = this->GetValueBool(&value_bool);
+			if (SUCCEEDED(hr)) {
+				*value = (double) value_bool;
+			}
+			break;
+
+		case SANE_TYPE_INT:
+			hr = this->GetValueInt(&value_int);
+			if (SUCCEEDED(hr)) {
+				*value = (double) value_int;
+			}
+			break;
+
+		case SANE_TYPE_FIXED:
+			hr = this->GetValueFixed(&value_fixed);
+			if (SUCCEEDED(hr)) {
+				*value = SANE_UNFIX(value_fixed);
+			}
+			break;
+
+		default:
+			hr = E_NOTIMPL;
+			break;
+	}
+
+	return hr;
+}
+
+HRESULT WINSANE_Option::GetValueBool(_Inout_ PSANE_Bool value_bool)
+{
 	PVOID value;
 
+	if (!value_bool)
+		return E_INVALIDARG;
+
 	if (this->sane_option->type != SANE_TYPE_BOOL)
-		return FALSE;
+		return E_INVALIDARG;
 
 	value = this->GetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Bool));
 	if (value) {
-		value_bool = *((SANE_Bool*) value);
-		delete value;
-	} else
-		return FALSE;
+		*value_bool = *((PSANE_Bool) value);
+		delete[] value;
+		return S_OK;
+	}
 
-	return value_bool;
+	return E_FAIL;
 }
 
-SANE_Int WINSANE_Option::GetValueInt()
+HRESULT WINSANE_Option::GetValueInt(_Inout_ PSANE_Int value_int)
 {
-	SANE_Int value_int;
 	PVOID value;
 
+	if (!value_int)
+		return E_INVALIDARG;
+
 	if (this->sane_option->type != SANE_TYPE_INT)
-		return 0;
+		return E_INVALIDARG;
 
 	value = this->GetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Int));
 	if (value) {
-		value_int = *((SANE_Int*) value);
-		delete value;
-	} else
-		return 0;
+		*value_int = *((PSANE_Int) value);
+		delete[] value;
+		return S_OK;
+	}
 
-	return value_int;
+	return E_FAIL;
 }
 
-SANE_Fixed WINSANE_Option::GetValueFixed()
+HRESULT WINSANE_Option::GetValueFixed(_Inout_ PSANE_Fixed value_fixed)
 {
-	SANE_Fixed value_fixed;
 	PVOID value;
 
+	if (!value_fixed)
+		return E_INVALIDARG;
+
 	if (this->sane_option->type != SANE_TYPE_FIXED)
-		return 0;
+		return E_INVALIDARG;
 
 	value = this->GetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Fixed));
 	if (value) {
-		value_fixed = *((SANE_Fixed*) value);
-		delete value;
-	} else
-		return 0;
+		*value_fixed = *((PSANE_Fixed) value);
+		delete[] value;
+		return S_OK;
+	}
 
-	return value_fixed;
+	return E_FAIL;
 }
 
-SANE_String WINSANE_Option::GetValueString()
+HRESULT WINSANE_Option::GetValueString(_Inout_ PSANE_String value_string)
 {
-	SANE_String value_string;
 	PVOID value;
+
+	if (!value_string)
+		return E_INVALIDARG;
 
 	if (this->sane_option->type != SANE_TYPE_STRING)
-		return NULL;
+		return E_INVALIDARG;
 
 	value = this->GetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size);
-	value_string = (SANE_String) value;
+	if (value) {
+		*value_string = (SANE_String) value;
+		return S_OK;
+	}
 
-	return value_string;
+	return E_FAIL;
 }
 
 
-SANE_Bool WINSANE_Option::SetValueBool(_In_ SANE_Bool value_bool)
+HRESULT WINSANE_Option::SetValue(_In_ double value)
+{
+	HRESULT hr;
+
+	if (!value)
+		return E_INVALIDARG;
+
+	switch (this->sane_option->type) {
+		case SANE_TYPE_BOOL:
+			hr = this->SetValueBool((SANE_Bool) value);
+			break;
+
+		case SANE_TYPE_INT:
+			hr = this->SetValueInt((SANE_Int) value);
+			break;
+
+		case SANE_TYPE_FIXED:
+			hr = this->SetValueFixed(SANE_FIX(value));
+			break;
+
+		default:
+			hr = E_NOTIMPL;
+			break;
+	}
+
+	return hr;
+}
+
+HRESULT WINSANE_Option::SetValueBool(_In_ SANE_Bool value_bool)
 {
 	PVOID value;
+	HRESULT hr;
 
 	if (this->sane_option->type != SANE_TYPE_BOOL)
-		return 0;
+		return E_INVALIDARG;
 
-	value = (void*) &value_bool;
-	value = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Word), value);
+	value = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Bool), (PVOID) &value_bool);
 	if (value) {
-		value_bool = *((SANE_Bool*) value);
-		delete value;
-	} else
-		return FALSE;
+		hr = value_bool == *((PSANE_Bool) value) ? S_OK : S_FALSE;
+		delete[] value;
+		return hr;
+	}
 
-	return value_bool;
+	return E_FAIL;
 }
 
-SANE_Int WINSANE_Option::SetValueInt(_In_ SANE_Int value_int)
+HRESULT WINSANE_Option::SetValueInt(_In_ SANE_Int value_int)
 {
 	PVOID value;
+	HRESULT hr;
 
 	if (this->sane_option->type != SANE_TYPE_INT)
-		return 0;
+		return E_INVALIDARG;
 
-	value = (void*) &value_int;
-	value = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Int), value);
+	value = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Int), (PVOID) &value_int);
 	if (value) {
-		value_int = *((SANE_Int*) value);
-		delete value;
-	} else
-		return 0;
+		hr = value_int == *((PSANE_Int) value) ? S_OK : S_FALSE;
+		delete[] value;
+		return hr;
+	}
 
-	return value_int;
+	return E_FAIL;
 }
 
-SANE_Fixed WINSANE_Option::SetValueFixed(_In_ SANE_Fixed value_fixed)
+HRESULT WINSANE_Option::SetValueFixed(_In_ SANE_Fixed value_fixed)
 {
 	PVOID value;
+	HRESULT hr;
 
 	if (this->sane_option->type != SANE_TYPE_FIXED)
-		return 0;
+		return E_INVALIDARG;
 
-	value = (void*) &value_fixed;
-	value = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Fixed), value);
+	value = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Fixed), (PVOID) &value_fixed);
 	if (value) {
-		value_fixed = *((SANE_Fixed*) value);
-		delete value;
-	} else
-		return 0;
+		hr = value_fixed == *((PSANE_Fixed) value) ? S_OK : S_FALSE;
+		delete[] value;
+		return hr;
+	}
 
-	return value_fixed;
+	return E_FAIL;
 }
 
-SANE_String WINSANE_Option::SetValueString(_In_ SANE_String_Const value_string)
+HRESULT WINSANE_Option::SetValueString(_In_ SANE_String_Const value_string)
 {
 	SANE_Word value_size;
 	PVOID value;
+	HRESULT hr;
 
 	if (this->sane_option->type != SANE_TYPE_STRING)
-		return 0;
+		return E_INVALIDARG;
 
 	if (value_string)
 		value_size = (SANE_Word) strlen(value_string) + 1;
 	else
 		value_size = 0;
 
-	value = (void*) value_string;
-	value = this->SetValue(this->sane_option->type, value_size, value_size, value);
+	value = this->SetValue(this->sane_option->type, value_size, value_size, (PVOID) value_string);
+	if (value_string && value)
+		hr = strcmp(value_string, (SANE_String_Const) value) == 0 ? S_OK : FALSE;
+	else
+		hr = value_string == (SANE_String_Const) value ? S_OK : S_FALSE;
 
-	return (SANE_String) value;
+	return hr;
 }
 
 
