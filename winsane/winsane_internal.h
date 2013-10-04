@@ -5,8 +5,6 @@
 #pragma once
 #endif
 
-#include "sane.h"
-
 enum WINSANE_Remote_Procedure {
 	WINSANE_NET_INIT = 0,
 	WINSANE_NET_GET_DEVICES,
@@ -20,19 +18,5 @@ enum WINSANE_Remote_Procedure {
 	WINSANE_NET_AUTHORIZE,
 	WINSANE_NET_EXIT
 };
-
-#define WINSANE_DEFAULT_PORT			6566
-
-#ifdef WINSANE_EXPORTS
-#define WINSANE_API __declspec(dllexport)
-#else
-#define WINSANE_API __declspec(dllimport)
-#endif
-
-class WINSANE_API WINSANE_Session;
-class WINSANE_API WINSANE_Device;
-class WINSANE_API WINSANE_Option;
-class WINSANE_API WINSANE_Params;
-class WINSANE_API WINSANE_Scan;
 
 #endif

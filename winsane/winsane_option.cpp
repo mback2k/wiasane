@@ -1,5 +1,5 @@
-#include "stdafx.h"
 #include "winsane_option.h"
+#include "winsane_internal.h"
 
 WINSANE_Option::WINSANE_Option(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Option_Descriptor *sane_option, SANE_Handle sane_handle, int index) {
 	this->device = device;

@@ -18,19 +18,16 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp">
+    <ClCompile Include="winsane_socket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="winsane_scan.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="winsane_option.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="winsane_params.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="winsane_scan.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="winsane_socket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="winsane_device.cpp">
@@ -41,16 +38,25 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="winsane.h">
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dllmain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="sane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
+    <ClInclude Include="winsane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="winsane_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="winsane_socket.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="winsane_scan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="winsane_option.h">
@@ -59,19 +65,10 @@
     <ClInclude Include="winsane_params.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="winsane_scan.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="winsane_socket.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="winsane_device.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="winsane_session.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

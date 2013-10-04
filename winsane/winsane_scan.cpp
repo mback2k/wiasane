@@ -1,5 +1,5 @@
-#include "stdafx.h"
 #include "winsane_scan.h"
+#include "winsane_internal.h"
 
 #include <stdlib.h>
 #include <malloc.h>

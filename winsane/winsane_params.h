@@ -5,7 +5,7 @@
 #pragma once
 #endif
 
-#include "sane.h"
+#include "winsane.h"
 #include "winsane_socket.h"
 #include "winsane_device.h"
 

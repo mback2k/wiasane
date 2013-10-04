@@ -1,5 +1,5 @@
-#ifndef STDAFX_H
-#define STDAFX_H
+#ifndef DLLMAIN_H
+#define DLLMAIN_H
 
 #if _MSC_VER > 1000
 #pragma once
@@ -10,6 +10,6 @@ __user_code
 
 #include <windows.h>
 
-extern BOOL g_bStarted; // global Winsock initialization status
+BOOL IsWinsockStarted();
 
 #endif

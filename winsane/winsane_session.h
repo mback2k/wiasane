@@ -9,8 +9,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-#include "winsane_internal.h"
-
+#include "winsane.h"
 #include "winsane_socket.h"
 #include "winsane_device.h"
 

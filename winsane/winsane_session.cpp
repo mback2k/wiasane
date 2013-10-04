@@ -1,5 +1,5 @@
-#include "stdafx.h"
 #include "winsane_session.h"
+#include "winsane_internal.h"
 
 #include <stdlib.h>
 #include <tchar.h>
