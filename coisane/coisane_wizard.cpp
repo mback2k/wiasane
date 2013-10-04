@@ -430,6 +430,7 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 					if (device) {
 						UpdateDeviceInfo(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, device);
 						ChangeDeviceState(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_PROPCHANGE, DICS_FLAG_GLOBAL);
+						ChangeDeviceState(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_ENABLE, DICS_FLAG_GLOBAL);
 
 						res = TRUE;
 					} else {

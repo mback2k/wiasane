@@ -16,6 +16,7 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDevi
 	switch (InstallFunction) {
 		case DIF_INSTALLDEVICE:
 			Trace(TEXT("DIF_INSTALLDEVICE"));
+			ret = InstallDevice(hDeviceInfoSet, pDeviceInfoData);
 			break;
 
 		case DIF_REMOVE:
@@ -166,4 +167,23 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDevi
 	}
 
 	return ret;
+}
+
+DWORD InstallDevice(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
+{
+	SP_DEVINSTALL_PARAMS devInstallParams;
+	BOOL res;
+
+	ZeroMemory(&devInstallParams, sizeof(devInstallParams));
+	devInstallParams.cbSize = sizeof(devInstallParams);
+	res = SetupDiGetDeviceInstallParams(hDeviceInfoSet, pDeviceInfoData, &devInstallParams);
+	if (!res)
+		return GetLastError();
+
+	devInstallParams.Flags |= DI_INSTALLDISABLED;
+	res = SetupDiSetDeviceInstallParams(hDeviceInfoSet, pDeviceInfoData, &devInstallParams);
+	if (!res)
+		return GetLastError();
+
+	return NO_ERROR;
 }
