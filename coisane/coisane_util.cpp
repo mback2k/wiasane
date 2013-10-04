@@ -6,6 +6,7 @@
 
 #include <tchar.h>
 #include <strsafe.h>
+#include <malloc.h>
 
 #include "coisane_str.h"
 
@@ -140,4 +141,116 @@ DWORD UpdateDeviceInfo(_Inout_ PCOISANE_Data privateData, _In_ PWINSANE_Device d
 	}
 
 	return NO_ERROR;
+}
+
+DWORD UpdateDeviceData(_Inout_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
+{
+	HKEY hDeviceKey, hDeviceDataKey;
+	DWORD cbData, dwPort;
+	LPTSTR lpResolutions;
+	size_t cbResolutions;
+	LONG res;
+
+	if (!device)
+		return ERROR_INVALID_PARAMETER;
+
+	hDeviceKey = SetupDiOpenDevRegKey(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_ENUMERATE_SUB_KEYS);
+	if (hDeviceKey == INVALID_HANDLE_VALUE)
+		return GetLastError();
+
+	if (device->Open()) {
+		cbResolutions = CreateResolutionList(privateData, device, &lpResolutions);
+
+		device->Close();
+	} else {
+		lpResolutions = NULL;
+		cbResolutions = 0;
+	}
+
+	res = RegOpenKeyEx(hDeviceKey, TEXT("DeviceData"), 0, KEY_SET_VALUE, &hDeviceDataKey);
+	if (res == ERROR_SUCCESS) {
+		if (privateData->usPort) {
+			dwPort = (DWORD) privateData->usPort;
+			RegSetKeyValue(hDeviceDataKey, NULL, TEXT("Port"), REG_DWORD, &dwPort, sizeof(DWORD));
+		}
+
+		if (privateData->lpHost) {
+			cbData = (DWORD) _msize(privateData->lpHost);
+			RegSetKeyValue(hDeviceDataKey, NULL, TEXT("Host"), REG_SZ, privateData->lpHost, cbData);
+		}
+
+		if (privateData->lpName) {
+			cbData = (DWORD) _msize(privateData->lpName);
+			RegSetKeyValue(hDeviceDataKey, NULL, TEXT("Name"), REG_SZ, privateData->lpName, cbData);
+		}
+
+		if (privateData->lpUsername) {
+			cbData = (DWORD) _msize(privateData->lpUsername);
+			RegSetKeyValue(hDeviceDataKey, NULL, TEXT("Username"), REG_SZ, privateData->lpUsername, cbData);
+		}
+
+		if (privateData->lpPassword) {
+			cbData = (DWORD) _msize(privateData->lpPassword);
+			RegSetKeyValue(hDeviceDataKey, NULL, TEXT("Password"), REG_SZ, privateData->lpPassword, cbData);
+		}
+
+		if (lpResolutions) {
+			cbData = (DWORD) cbResolutions;
+			RegSetKeyValue(hDeviceDataKey, NULL, TEXT("Resolutions"), REG_SZ, lpResolutions, cbData);
+		}
+
+		RegCloseKey(hDeviceDataKey);
+	}
+
+	RegCloseKey(hDeviceKey);
+
+	if (lpResolutions)
+		HeapFree(privateData->hHeap, 0, lpResolutions);
+
+	return NO_ERROR;
+}
+
+size_t CreateResolutionList(_Inout_ PCOISANE_Data privateData, _In_ PWINSANE_Device device, _Inout_ LPTSTR *ppszResolutions)
+{
+	PWINSANE_Option resolution;
+	PSANE_Word pWordList;
+	LPTSTR lpResolutions;
+	size_t cbResolutions;
+	int index;
+
+	if (!ppszResolutions)
+		return 0;
+
+	*ppszResolutions = NULL;
+	cbResolutions = 0;
+
+	if (device->FetchOptions() > 0) {
+		resolution = device->GetOption("resolution");
+		if (resolution && resolution->GetConstraintType() == SANE_CONSTRAINT_WORD_LIST) {
+			pWordList = resolution->GetConstraintWordList();
+			if (pWordList && pWordList[0] > 0) {
+				switch (resolution->GetType()) {
+					case SANE_TYPE_INT:
+						StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%d"), pWordList[1]);
+						for (index = 2; index <= pWordList[0]; index++) {
+							lpResolutions = *ppszResolutions;
+							StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pWordList[index]);
+							HeapFree(privateData->hHeap, 0, lpResolutions);
+						}
+						break;
+
+					case SANE_TYPE_FIXED:
+						StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%d"), SANE_UNFIX(pWordList[1]));
+						for (index = 2; index <= pWordList[0]; index++) {
+							lpResolutions = *ppszResolutions;
+							StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, SANE_UNFIX(pWordList[index]));
+							HeapFree(privateData->hHeap, 0, lpResolutions);
+						}
+						break;
+				}
+			}
+		}
+	}
+
+	return cbResolutions;
 }
