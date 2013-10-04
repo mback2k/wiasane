@@ -54,12 +54,12 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 				else
 					hr = S_OK;
 
-				if (hr == S_OK)
+				if (SUCCEEDED(hr))
 					hr = InitializeScanner(context);
 			} else
 				hr = E_FAIL;
 
-			if (hr == S_OK)
+			if (SUCCEEDED(hr))
 				hr = InitScannerDefaults(pValue->pScanInfo, context);
 
 			break;
@@ -71,10 +71,10 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 				else
 					hr = S_OK;
 
-				if (hr == S_OK)
+				if (SUCCEEDED(hr))
 					hr = FreeScanner(context);
 
-				if (hr == S_OK)
+				if (SUCCEEDED(hr))
 					context = NULL;
 			} else
 				hr = S_OK;
@@ -258,7 +258,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 
 			if (context && context->session && context->device) {
 				hr = SetScannerSettings(pScanInfo, context);
-				if (hr != S_OK)
+				if (FAILED(hr))
 					return hr;
 
 				context->task = new WIASANE_Task;
@@ -272,7 +272,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					return E_FAIL;
 
 				hr = FetchScannerParams(pScanInfo, context);
-				if (hr != S_OK)
+				if (FAILED(hr))
 					return hr;
 
 				if (pScanInfo->PixelBits > 1)
@@ -399,35 +399,35 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 	br_y = ((double) (y + yExtent)) / ((double) pScanInfo->Yresolution);
 
 	hr = IsValidOptionValueInch(opt_tl_x, tl_x);
-	if (hr != S_OK)
+	if (FAILED(hr))
 		return hr;
 
 	hr = IsValidOptionValueInch(opt_tl_y, tl_y);
-	if (hr != S_OK)
+	if (FAILED(hr))
 		return hr;
 
 	hr = IsValidOptionValueInch(opt_br_x, br_x);
-	if (hr != S_OK)
+	if (FAILED(hr))
 		return hr;
 
 	hr = IsValidOptionValueInch(opt_br_y, br_y);
-	if (hr != S_OK)
+	if (FAILED(hr))
 		return hr;
 
 	hr = SetOptionValueInch(opt_tl_x, tl_x);
-	if (hr != S_OK)
+	if (FAILED(hr))
 		return hr;
 
 	hr = SetOptionValueInch(opt_tl_y, tl_y);
-	if (hr != S_OK)
+	if (FAILED(hr))
 		return hr;
 
 	hr = SetOptionValueInch(opt_br_x, br_x);
-	if (hr != S_OK)
+	if (FAILED(hr))
 		return hr;
 
 	hr = SetOptionValueInch(opt_br_y, br_y);
-	if (hr != S_OK)
+	if (FAILED(hr))
 		return hr;
 
     pScanInfo->Window.xPos = x;
@@ -639,14 +639,14 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 		option = context->device->GetOption("br-x");
 		if (option) {
 			hr = GetOptionMaxValueInch(option, &dbl);
-			if (hr == S_OK) {
+			if (SUCCEEDED(hr)) {
 				pScanInfo->BedWidth = (LONG) (dbl * 1000.0);
 			}
 		}
 		option = context->device->GetOption("br-y");
 		if (option) {
 			hr = GetOptionMaxValueInch(option, &dbl);
-			if (hr == S_OK) {
+			if (SUCCEEDED(hr)) {
 				pScanInfo->BedHeight = (LONG) (dbl * 1000.0);
 			}
 		}
@@ -657,11 +657,11 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 		option = context->device->GetOption("resolution");
 		if (option) {
 			hr = GetOptionMaxValue(option, &dbl);
-			if (hr == S_OK) {
+			if (SUCCEEDED(hr)) {
 				pScanInfo->OpticalXResolution = (LONG) dbl;
 			}
 			hr = GetOptionValue(option, &dbl);
-			if (hr == S_OK) {
+			if (SUCCEEDED(hr) == S_OK) {
 				pScanInfo->Xresolution = (LONG) dbl;
 			}
 		}
@@ -684,7 +684,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 				pScanInfo->ContrastRange.lStep = range->quant ? range->quant : 1;
 			}
 			hr = GetOptionValue(option, &dbl);
-			if (hr == S_OK) {
+			if (SUCCEEDED(hr)) {
 				pScanInfo->Contrast = (LONG) dbl;
 			}
 		}
@@ -703,7 +703,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 				pScanInfo->IntensityRange.lStep = range->quant ? range->quant : 1;
 			}
 			hr = GetOptionValue(option, &dbl);
-			if (hr == S_OK) {
+			if (SUCCEEDED(hr)) {
 				pScanInfo->Intensity = (LONG) dbl;
 			}
 		}
@@ -726,7 +726,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context)
 		pScanInfo->Compression            = 0;
 
 		hr = FetchScannerParams(pScanInfo, context);
-		if (hr != S_OK)
+		if (FAILED(hr))
 			return hr;
 	}
 
@@ -760,7 +760,7 @@ HRESULT SetScannerSettings(PSCANINFO pScanInfo, WIASANE_Context *context)
 					hr = E_INVALIDARG;
 					break;
 			}
-			if (hr != S_OK)
+			if (FAILED(hr))
 				return hr;
 		} else
 			return E_NOTIMPL;
@@ -768,7 +768,7 @@ HRESULT SetScannerSettings(PSCANINFO pScanInfo, WIASANE_Context *context)
 		option = context->device->GetOption("resolution");
 		if (option) {
 			hr = SetOptionValue(option, pScanInfo->Xresolution);
-			if (hr != S_OK)
+			if (FAILED(hr))
 				return hr;
 		} else
 			return E_NOTIMPL;
@@ -776,14 +776,14 @@ HRESULT SetScannerSettings(PSCANINFO pScanInfo, WIASANE_Context *context)
 		option = context->device->GetOption("contrast");
 		if (option) {
 			hr = SetOptionValue(option, pScanInfo->Contrast);
-			if (hr != S_OK && hr != E_NOTIMPL)
+			if (FAILED(hr) && hr != E_NOTIMPL)
 				return hr;
 		}
 
 		option = context->device->GetOption("brightness");
 		if (option) {
 			hr = SetOptionValue(option, pScanInfo->Intensity);
-			if (hr != S_OK && hr != E_NOTIMPL)
+			if (FAILED(hr) && hr != E_NOTIMPL)
 				return hr;
 		}
 	}
@@ -837,7 +837,7 @@ HRESULT FetchScannerParams(PSCANINFO pScanInfo, WIASANE_Context *context)
 			break;
 	}
 
-	if (hr == S_OK) {
+	if (SUCCEEDED(hr)) {
 		pScanInfo->WidthBytes = params->GetBytesPerLine();
 		pScanInfo->WidthPixels = params->GetPixelsPerLine();
 		pScanInfo->Lines = params->GetLines();
