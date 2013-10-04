@@ -18,5 +18,6 @@ ipch/
 *.aps
 *.res
 
-*.sdf
 *.suo
+*.sdf
+*.opensdf
