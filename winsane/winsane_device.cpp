@@ -1,7 +1,8 @@
 #include "winsane_device.h"
 #include "winsane_internal.h"
 
-WINSANE_Device::WINSANE_Device(WINSANE_Session *session, WINSANE_Socket *sock, SANE_Device *sane_device) {
+WINSANE_Device::WINSANE_Device(WINSANE_Session *session, WINSANE_Socket *sock, SANE_Device *sane_device)
+{
 	this->opened = FALSE;
 	this->started = FALSE;
 	this->session = session;
@@ -12,7 +13,8 @@ WINSANE_Device::WINSANE_Device(WINSANE_Session *session, WINSANE_Socket *sock, S
 	this->options = NULL;
 }
 
-WINSANE_Device::~WINSANE_Device() {
+WINSANE_Device::~WINSANE_Device()
+{
 	if (this->num_options > 0)
 		this->ClearOptions();
 
@@ -37,24 +39,29 @@ WINSANE_Device::~WINSANE_Device() {
 }
 
 
-SANE_String_Const WINSANE_Device::GetName() {
+SANE_String_Const WINSANE_Device::GetName()
+{
 	return this->sane_device->name;
 }
 
-SANE_String_Const WINSANE_Device::GetVendor() {
+SANE_String_Const WINSANE_Device::GetVendor()
+{
 	return this->sane_device->vendor;
 }
 
-SANE_String_Const WINSANE_Device::GetModel() {
+SANE_String_Const WINSANE_Device::GetModel()
+{
 	return this->sane_device->model;
 }
 
-SANE_String_Const WINSANE_Device::GetType() {
+SANE_String_Const WINSANE_Device::GetType()
+{
 	return this->sane_device->type;
 }
 
 
-bool WINSANE_Device::Open() {
+bool WINSANE_Device::Open()
+{
 	SANE_Status status;
 	SANE_Handle handle;
 	SANE_String resource;
@@ -80,7 +87,8 @@ bool WINSANE_Device::Open() {
 	return TRUE;
 }
 
-bool WINSANE_Device::Close() {
+bool WINSANE_Device::Close()
+{
 	int written;
 
 	if (!this->opened)
@@ -98,7 +106,8 @@ bool WINSANE_Device::Close() {
 }
 
 
-int WINSANE_Device::FetchOptions() {
+int WINSANE_Device::FetchOptions()
+{
 	SANE_Option_Descriptor **sane_options;
 	SANE_Word num_options, num_values, null_pointer;
 	int written, index, value;
@@ -182,14 +191,16 @@ int WINSANE_Device::FetchOptions() {
 	return this->num_options;
 }
 
-WINSANE_Option* WINSANE_Device::GetOption(int index) {
+WINSANE_Option* WINSANE_Device::GetOption(int index)
+{
 	if (!this->opened)
 		return NULL;
 
 	return this->options[index];
 }
 
-WINSANE_Option* WINSANE_Device::GetOption(SANE_String_Const name) {
+WINSANE_Option* WINSANE_Device::GetOption(SANE_String_Const name)
+{
 	SANE_String_Const option_name;
 	int index;
 
@@ -206,7 +217,8 @@ WINSANE_Option* WINSANE_Device::GetOption(SANE_String_Const name) {
 	return NULL;
 }
 
-void WINSANE_Device::ClearOptions() {
+void WINSANE_Device::ClearOptions()
+{
 	int index;
 
 	for (index = 0; index < this->num_options; index++) {
@@ -220,7 +232,8 @@ void WINSANE_Device::ClearOptions() {
 }
 
 
-WINSANE_Params* WINSANE_Device::GetParams() {
+WINSANE_Params* WINSANE_Device::GetParams()
+{
 	SANE_Status status;
 	SANE_Parameters *sane_params;
 	int written;
@@ -252,7 +265,8 @@ WINSANE_Params* WINSANE_Device::GetParams() {
 }
 
 
-WINSANE_Scan* WINSANE_Device::Start() {
+WINSANE_Scan* WINSANE_Device::Start()
+{
 	SANE_Status status;
 	SANE_Word port;
 	SANE_Word byte_order;
@@ -281,7 +295,8 @@ WINSANE_Scan* WINSANE_Device::Start() {
 	return new WINSANE_Scan(this, this->sock, port, byte_order);
 }
 
-bool WINSANE_Device::Cancel() {
+bool WINSANE_Device::Cancel()
+{
 	int written;
 
 	if (!this->opened || !this->started)

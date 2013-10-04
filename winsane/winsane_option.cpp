@@ -1,7 +1,8 @@
 #include "winsane_option.h"
 #include "winsane_internal.h"
 
-WINSANE_Option::WINSANE_Option(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Option_Descriptor *sane_option, SANE_Handle sane_handle, int index) {
+WINSANE_Option::WINSANE_Option(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Option_Descriptor *sane_option, SANE_Handle sane_handle, int index)
+{
 	this->device = device;
 	this->sock = sock;
 	this->sane_option = sane_option;
@@ -9,7 +10,8 @@ WINSANE_Option::WINSANE_Option(WINSANE_Device *device, WINSANE_Socket *sock, SAN
 	this->index = index;
 }
 
-WINSANE_Option::~WINSANE_Option() {
+WINSANE_Option::~WINSANE_Option()
+{
 	int index;
 
 	if (this->sane_option->name)
@@ -37,62 +39,74 @@ WINSANE_Option::~WINSANE_Option() {
 }
 
 
-SANE_String_Const WINSANE_Option::GetName() {
+SANE_String_Const WINSANE_Option::GetName()
+{
 	return this->sane_option->name;
 }
 
-SANE_String_Const WINSANE_Option::GetTitle() {
+SANE_String_Const WINSANE_Option::GetTitle()
+{
 	return this->sane_option->title;
 }
 
-SANE_String_Const WINSANE_Option::GetDescription() {
+SANE_String_Const WINSANE_Option::GetDescription()
+{
 	return this->sane_option->desc;
 }
 
 
-SANE_Value_Type WINSANE_Option::GetType() {
+SANE_Value_Type WINSANE_Option::GetType()
+{
 	return this->sane_option->type;
 }
 
-SANE_Unit WINSANE_Option::GetUnit() {
+SANE_Unit WINSANE_Option::GetUnit()
+{
 	return this->sane_option->unit;
 }
 
-SANE_Int WINSANE_Option::GetSize() {
+SANE_Int WINSANE_Option::GetSize()
+{
 	return this->sane_option->size;
 }
 
-SANE_Int WINSANE_Option::GetCapabilities() {
+SANE_Int WINSANE_Option::GetCapabilities()
+{
 	return this->sane_option->cap;
 }
 
 
-SANE_Constraint_Type WINSANE_Option::GetConstraintType() {
+SANE_Constraint_Type WINSANE_Option::GetConstraintType()
+{
 	return this->sane_option->constraint_type;
 }
 
-SANE_Range* WINSANE_Option::GetConstraintRange() {
+SANE_Range* WINSANE_Option::GetConstraintRange()
+{
 	if (this->sane_option->constraint_type != SANE_CONSTRAINT_RANGE)
 		return NULL;
 
 	return this->sane_option->constraint.range;
 }
 
-SANE_Word* WINSANE_Option::GetConstraintWordList() {
+SANE_Word* WINSANE_Option::GetConstraintWordList()
+{
 	if (this->sane_option->constraint_type != SANE_CONSTRAINT_WORD_LIST)
 		return NULL;
 
 	return this->sane_option->constraint.word_list;
 }
 
-SANE_String_Const* WINSANE_Option::GetConstraintStringList() {
+SANE_String_Const* WINSANE_Option::GetConstraintStringList()
+{
 	if (this->sane_option->constraint_type != SANE_CONSTRAINT_STRING_LIST)
 		return NULL;
 
 	return this->sane_option->constraint.string_list;
 }
 
-bool WINSANE_Option::IsValidValue(SANE_Word value) {
+bool WINSANE_Option::IsValidValue(SANE_Word value)
+{
 	SANE_Word *word_list, word_list_length;
 	SANE_Range *range;
 	bool is_valid;
@@ -135,7 +149,8 @@ bool WINSANE_Option::IsValidValue(SANE_Word value) {
 	return is_valid;
 }
 
-bool WINSANE_Option::IsValidValue(SANE_String value) {
+bool WINSANE_Option::IsValidValue(SANE_String value)
+{
 	SANE_String_Const *string_list;
 	bool is_valid;
 	int index;
@@ -167,7 +182,8 @@ bool WINSANE_Option::IsValidValue(SANE_String value) {
 }
 
 
-SANE_Bool WINSANE_Option::GetValueBool() {
+SANE_Bool WINSANE_Option::GetValueBool()
+{
 	SANE_Bool value_bool;
 	void *value;
 
@@ -184,7 +200,8 @@ SANE_Bool WINSANE_Option::GetValueBool() {
 	return value_bool;
 }
 
-SANE_Int WINSANE_Option::GetValueInt() {
+SANE_Int WINSANE_Option::GetValueInt()
+{
 	SANE_Int value_int;
 	void *value;
 
@@ -201,7 +218,8 @@ SANE_Int WINSANE_Option::GetValueInt() {
 	return value_int;
 }
 
-SANE_Fixed WINSANE_Option::GetValueFixed() {
+SANE_Fixed WINSANE_Option::GetValueFixed()
+{
 	SANE_Fixed value_fixed;
 	void *value;
 
@@ -218,7 +236,8 @@ SANE_Fixed WINSANE_Option::GetValueFixed() {
 	return value_fixed;
 }
 
-SANE_String WINSANE_Option::GetValueString() {
+SANE_String WINSANE_Option::GetValueString()
+{
 	SANE_String value_string;
 	void *value;
 
@@ -232,7 +251,8 @@ SANE_String WINSANE_Option::GetValueString() {
 }
 
 
-SANE_Bool WINSANE_Option::SetValueBool(SANE_Bool value_bool) {
+SANE_Bool WINSANE_Option::SetValueBool(SANE_Bool value_bool)
+{
 	void *value;
 
 	if (this->sane_option->type != SANE_TYPE_BOOL)
@@ -249,7 +269,8 @@ SANE_Bool WINSANE_Option::SetValueBool(SANE_Bool value_bool) {
 	return value_bool;
 }
 
-SANE_Int WINSANE_Option::SetValueInt(SANE_Int value_int) {
+SANE_Int WINSANE_Option::SetValueInt(SANE_Int value_int)
+{
 	void *value;
 
 	if (this->sane_option->type != SANE_TYPE_INT)
@@ -266,7 +287,8 @@ SANE_Int WINSANE_Option::SetValueInt(SANE_Int value_int) {
 	return value_int;
 }
 
-SANE_Fixed WINSANE_Option::SetValueFixed(SANE_Fixed value_fixed) {
+SANE_Fixed WINSANE_Option::SetValueFixed(SANE_Fixed value_fixed)
+{
 	void *value;
 
 	if (this->sane_option->type != SANE_TYPE_FIXED)
@@ -283,7 +305,8 @@ SANE_Fixed WINSANE_Option::SetValueFixed(SANE_Fixed value_fixed) {
 	return value_fixed;
 }
 
-SANE_String WINSANE_Option::SetValueString(SANE_String_Const value_string) {
+SANE_String WINSANE_Option::SetValueString(SANE_String_Const value_string)
+{
 	SANE_Word value_size;
 	void *value;
 
@@ -302,7 +325,8 @@ SANE_String WINSANE_Option::SetValueString(SANE_String_Const value_string) {
 }
 
 
-void* WINSANE_Option::GetValue(SANE_Word value_type, SANE_Word value_size, SANE_Word element_count) {
+void* WINSANE_Option::GetValue(SANE_Word value_type, SANE_Word value_size, SANE_Word element_count)
+{
 	SANE_Status status;
 	SANE_Word info, pointer;
 	SANE_String resource;
@@ -346,7 +370,8 @@ void* WINSANE_Option::GetValue(SANE_Word value_type, SANE_Word value_size, SANE_
 	return buf;
 }
 
-void* WINSANE_Option::SetValue(SANE_Word value_type, SANE_Word value_size, SANE_Word element_count, void* value) {
+void* WINSANE_Option::SetValue(SANE_Word value_type, SANE_Word value_size, SANE_Word element_count, void* value)
+{
 	SANE_Status status;
 	SANE_Word info, pointer;
 	SANE_String resource;

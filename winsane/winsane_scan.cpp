@@ -5,7 +5,8 @@
 #include <malloc.h>
 #include <algorithm>
 
-WINSANE_Scan::WINSANE_Scan(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Word port, SANE_Word byte_order) {
+WINSANE_Scan::WINSANE_Scan(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Word port, SANE_Word byte_order)
+{
 	unsigned char *p, *b;
 	unsigned short ns;
 
@@ -26,13 +27,15 @@ WINSANE_Scan::WINSANE_Scan(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Wo
 	this->conv = *p != *b;
 }
 
-WINSANE_Scan::~WINSANE_Scan() {
+WINSANE_Scan::~WINSANE_Scan()
+{
 	this->Disconnect();
 	this->device = NULL;
 }
 
 
-WINSANE_Scan_Result WINSANE_Scan::AquireImage(char *buffer, long *length) {
+WINSANE_Scan_Result WINSANE_Scan::AquireImage(char *buffer, long *length)
+{
 	WINSANE_Scan_Result result = SUCCESSFUL;
 
 	switch (this->state) {
@@ -55,7 +58,8 @@ WINSANE_Scan_Result WINSANE_Scan::AquireImage(char *buffer, long *length) {
 }
 
 
-WINSANE_Scan_Result WINSANE_Scan::Connect() {
+WINSANE_Scan_Result WINSANE_Scan::Connect()
+{
 	SOCKET real_sock, scan_sock;
 	struct sockaddr addr, *scanaddr;
 	struct sockaddr_in addr_in;
@@ -104,7 +108,8 @@ WINSANE_Scan_Result WINSANE_Scan::Connect() {
 	return CONTINUE;
 }
 
-WINSANE_Scan_Result WINSANE_Scan::Receive(char *buffer, long *length) {
+WINSANE_Scan_Result WINSANE_Scan::Receive(char *buffer, long *length)
+{
 	unsigned int record_size;
 	unsigned long size;
 
@@ -170,7 +175,8 @@ WINSANE_Scan_Result WINSANE_Scan::Receive(char *buffer, long *length) {
 	return CONTINUE;
 }
 
-WINSANE_Scan_Result WINSANE_Scan::Disconnect() {
+WINSANE_Scan_Result WINSANE_Scan::Disconnect()
+{
 	if (this->scan != NULL) {
 		delete this->scan;
 		this->scan = NULL;
