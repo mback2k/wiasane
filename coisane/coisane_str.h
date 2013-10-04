@@ -12,17 +12,17 @@ __user_code
 #include <tchar.h>
 #include <strsafe.h>
 
-HRESULT StringCbAPrintfA(HANDLE hHeap, LPSTR *ppszDest, size_t *pcbDest, LPCSTR pszFormat, ...);
-HRESULT StringCbAPrintfW(HANDLE hHeap, LPWSTR *ppszDest, size_t *pcbDest, LPCWSTR pszFormat, ...);
+HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...);
+HRESULT StringCbAPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...);
 
-HRESULT StringCchAPrintfA(HANDLE hHeap, LPSTR *ppszDest, size_t *pcbDest, LPCSTR pszFormat, ...);
-HRESULT StringCchAPrintfW(HANDLE hHeap, LPWSTR *ppszDest, size_t *pcbDest, LPCWSTR pszFormat, ...);
+HRESULT StringCchAPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...);
+HRESULT StringCchAPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...);
 
-HRESULT StringCbAVPrintfA(HANDLE hHeap, LPSTR *ppszDest, size_t *pcbDest, LPCSTR pszFormat, va_list argList);
-HRESULT StringCbAVPrintfW(HANDLE hHeap, LPWSTR *ppszDest, size_t *pcbDest, LPCWSTR pszFormat, va_list argList);
+HRESULT StringCbAVPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, _In_ va_list argList);
+HRESULT StringCbAVPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList);
 
-HRESULT StringCchAVPrintfA(HANDLE hHeap, LPSTR *ppszDest, size_t *pcbDest, LPCSTR pszFormat, va_list argList);
-HRESULT StringCchAVPrintfW(HANDLE hHeap, LPWSTR *ppszDest, size_t *pcbDest, LPCWSTR pszFormat, va_list argList);
+HRESULT StringCchAVPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, _In_ va_list argList);
+HRESULT StringCchAVPrintfW( _In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList);
 
 #ifdef UNICODE
 #define StringCbAPrintf StringCbAPrintfW

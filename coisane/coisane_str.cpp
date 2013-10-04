@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-HRESULT StringCbAPrintfA(HANDLE hHeap, LPSTR *ppszDest, size_t *pcbDest, LPCSTR pszFormat, ...)
+HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...)
 {
 	va_list argList;
 	HRESULT hr;
@@ -15,7 +15,7 @@ HRESULT StringCbAPrintfA(HANDLE hHeap, LPSTR *ppszDest, size_t *pcbDest, LPCSTR 
 	return hr;
 }
 
-HRESULT StringCbAPrintfW(HANDLE hHeap, LPWSTR *ppszDest, size_t *pcbDest, LPCWSTR pszFormat, ...)
+HRESULT StringCbAPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...)
 {
 	va_list argList;
 	HRESULT hr;
@@ -28,7 +28,7 @@ HRESULT StringCbAPrintfW(HANDLE hHeap, LPWSTR *ppszDest, size_t *pcbDest, LPCWST
 }
 
 
-HRESULT StringCchAPrintfA(HANDLE hHeap, LPSTR *ppszDest, size_t *pcbDest, LPCSTR pszFormat, ...)
+HRESULT StringCchAPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...)
 {
 	va_list argList;
 	HRESULT hr;
@@ -40,7 +40,7 @@ HRESULT StringCchAPrintfA(HANDLE hHeap, LPSTR *ppszDest, size_t *pcbDest, LPCSTR
 	return hr;
 }
 
-HRESULT StringCchAPrintfW(HANDLE hHeap, LPWSTR *ppszDest, size_t *pcbDest, LPCWSTR pszFormat, ...)
+HRESULT StringCchAPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...)
 {
 	va_list argList;
 	HRESULT hr;
@@ -53,7 +53,7 @@ HRESULT StringCchAPrintfW(HANDLE hHeap, LPWSTR *ppszDest, size_t *pcbDest, LPCWS
 }
 
 
-HRESULT StringCbAVPrintfA(HANDLE hHeap, LPSTR *ppszDest, size_t *pcbDest, LPCSTR pszFormat, va_list argList)
+HRESULT StringCbAVPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, _In_ va_list argList)
 {
 	HRESULT hr;
 
@@ -65,7 +65,7 @@ HRESULT StringCbAVPrintfA(HANDLE hHeap, LPSTR *ppszDest, size_t *pcbDest, LPCSTR
 	return hr;
 }
 
-HRESULT StringCbAVPrintfW(HANDLE hHeap, LPWSTR *ppszDest, size_t *pcbDest, LPCWSTR pszFormat, va_list argList)
+HRESULT StringCbAVPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList)
 {
 	HRESULT hr;
 
@@ -78,7 +78,7 @@ HRESULT StringCbAVPrintfW(HANDLE hHeap, LPWSTR *ppszDest, size_t *pcbDest, LPCWS
 }
 
 
-HRESULT StringCchAVPrintfA(HANDLE hHeap, LPSTR *ppszDest, size_t *pcbDest, LPCSTR pszFormat, va_list argList)
+HRESULT StringCchAVPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, _In_ va_list argList)
 {
 	LPSTR pszDest;
 	int cbDest;
@@ -106,7 +106,7 @@ HRESULT StringCchAVPrintfA(HANDLE hHeap, LPSTR *ppszDest, size_t *pcbDest, LPCST
 	return STRSAFE_E_INSUFFICIENT_BUFFER;
 }
 
-HRESULT StringCchAVPrintfW(HANDLE hHeap, LPWSTR *ppszDest, size_t *pcbDest, LPCWSTR pszFormat, va_list argList)
+HRESULT StringCchAVPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList)
 {
 	LPWSTR pszDest;
 	int cbDest;
