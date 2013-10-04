@@ -98,6 +98,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="coisane.h" />
+    <ClInclude Include="coisane_str.h" />
     <ClInclude Include="coisane_util.h" />
     <ClInclude Include="coisane_prop.h" />
     <ClInclude Include="coisane_wizard.h" />
@@ -106,6 +107,7 @@
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="coisane.cpp" />
+    <ClCompile Include="coisane_str.cpp" />
     <ClCompile Include="coisane_util.cpp" />
     <ClCompile Include="coisane_prop.cpp" />
     <ClCompile Include="coisane_wizard.cpp" />

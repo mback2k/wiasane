@@ -5,25 +5,33 @@
 #include <stdio.h>
 #endif
 
+#include <tchar.h>
 #include <strsafe.h>
 
+#include "coisane_str.h"
 
-VOID Trace(_In_ LPCTSTR format, ...)
+
+VOID Trace(_In_ LPCTSTR pszFormat, ...)
 {
 #ifdef _DEBUG
-	TCHAR input[1024], output[2048];
-	va_list arglist;
+	PTSTR lpMsg, lpOut;
+	va_list argList;
+	HANDLE hHeap;
+	size_t cbLen;
 	HRESULT hr;
 
-	va_start(arglist, format);
-	hr = StringCchVPrintf(input, sizeof(input) / sizeof(TCHAR), format, arglist);
-	va_end(arglist);
-
-	if (SUCCEEDED(hr)) {
-		hr = StringCchPrintf(output, sizeof(output) / sizeof(TCHAR), TEXT("coisane: %s\r\n"), input);
-
+	hHeap = GetProcessHeap();
+	if (hHeap) {
+		va_start(argList, pszFormat);
+		hr = StringCchAVPrintf(hHeap, &lpMsg, &cbLen, pszFormat, argList);
+		va_end(argList);
 		if (SUCCEEDED(hr)) {
-			OutputDebugString(output);
+			hr = StringCchAPrintf(hHeap, &lpOut, &cbLen, TEXT("coisane: %s\r\n"), lpMsg);
+			if (SUCCEEDED(hr)) {
+				OutputDebugString(lpOut);
+				HeapFree(hHeap, 0, lpOut);
+			}
+			HeapFree(hHeap, 0, lpMsg);
 		}
 	}
 #else
@@ -89,9 +97,17 @@ DWORD ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDev
 VOID UpdateDeviceInfo(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ WINSANE_Device *device)
 {
 	SANE_String_Const name, type, model, vendor;
-	TCHAR StringBuf[MAX_PATH];
+	HANDLE hHeap;
+	size_t cbLen;
+	PTSTR lpStr;
 	HRESULT hr;
-	size_t len;
+
+	if (!device)
+		return;
+
+	hHeap = GetProcessHeap();
+	if (!hHeap)
+		return;
 
 	name = device->GetName();
 	type = device->GetType();
@@ -99,32 +115,26 @@ VOID UpdateDeviceInfo(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDevic
 	vendor = device->GetVendor();
 
 	if (vendor && model) {
-		hr = StringCbPrintf(StringBuf, sizeof(StringBuf), TEXT("%hs %hs"), vendor, model);
+		hr = StringCbAPrintf(hHeap, &lpStr, &cbLen, TEXT("%hs %hs"), vendor, model);
 		if (SUCCEEDED(hr)) {
-			hr = StringCbLength(StringBuf, sizeof(StringBuf), &len);
-			if (SUCCEEDED(hr)) {
-				SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) StringBuf, (DWORD) len);
-			}
+			SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) lpStr, (DWORD) cbLen);
+			HeapFree(hHeap, 0, lpStr);
 		}
 	}
 
 	if (vendor && model && type && name) {
-		hr = StringCbPrintf(StringBuf, sizeof(StringBuf), TEXT("%hs %hs %hs (%hs)"), vendor, model, type, name);
+		hr = StringCbAPrintf(hHeap, &lpStr, &cbLen, TEXT("%hs %hs %hs (%hs)"), vendor, model, type, name);
 		if (SUCCEEDED(hr)) {
-			hr = StringCbLength(StringBuf, sizeof(StringBuf), &len);
-			if (SUCCEEDED(hr)) {
-				SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) StringBuf, (DWORD) len);
-			}
+			SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) lpStr, (DWORD) cbLen);
+			HeapFree(hHeap, 0, lpStr);
 		}
 	}
 
 	if (vendor) {
-		hr = StringCbPrintf(StringBuf, sizeof(StringBuf), TEXT("%hs"), vendor);
+		hr = StringCbAPrintf(hHeap, &lpStr, &cbLen, TEXT("%hs"), vendor);
 		if (SUCCEEDED(hr)) {
-			hr = StringCbLength(StringBuf, sizeof(StringBuf), &len);
-			if (SUCCEEDED(hr)) {
-				SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_MFG, (PBYTE) StringBuf, (DWORD) len);
-			}
+			SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_MFG, (PBYTE) (PBYTE) lpStr, (DWORD) cbLen);
+			HeapFree(hHeap, 0, lpStr);
 		}
 	}
 }
