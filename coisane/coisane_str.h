@@ -5,6 +5,9 @@
 #pragma once
 #endif
 
+#include <DriverSpecs.h>
+__user_code
+
 #include <windows.h>
 #include <tchar.h>
 #include <strsafe.h>
