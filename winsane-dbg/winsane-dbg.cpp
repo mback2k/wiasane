@@ -216,8 +216,8 @@ VOID DebugSessionDeviceScan(WINSANE_Session *session, WINSANE_Device *device)
 	WINSANE_Scan *scan;
 	HANDLE output;
 	DWORD written;
-	char *buffer;
-	long length;
+	DWORD length;
+	PBYTE buffer;
 
 	UNREFERENCED_PARAMETER(session);
 
@@ -228,13 +228,17 @@ VOID DebugSessionDeviceScan(WINSANE_Session *session, WINSANE_Device *device)
 			printf("Begin scanning image ...\n");
 			output = CreateFile(L"winsane-dbg.scan", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
-			buffer = new char[1024];
-			length = 1024;
-			while (scan->AquireImage(buffer, &length) == CONTINUE) {
-				printf("Received %d bytes of scanned image ...\n", length);
-				WriteFile(output, buffer, length, &written, NULL);
+			buffer = new BYTE[1024];
+			if (buffer) {
 				length = 1024;
+				while (scan->AquireImage(buffer, &length) == CONTINUE) {
+					printf("Received %d bytes of scanned image ...\n", length);
+					WriteFile(output, buffer, length, &written, NULL);
+					length = 1024;
+				}
+				delete[] buffer;
 			}
+
 			CloseHandle(output);
 			printf("Finished scanning image!\n");
 

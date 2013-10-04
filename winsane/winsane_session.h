@@ -19,21 +19,21 @@ public:
 	WINSANE_Session(_In_ SOCKET sock);
 	~WINSANE_Session();
 
-	static WINSANE_Session* Remote(_In_ PADDRINFOT addrInfo);
-	static WINSANE_Session* Remote(_In_ PIN_ADDR addr);
-	static WINSANE_Session* Remote(_In_ PIN_ADDR addr, _In_ USHORT port);
-	static WINSANE_Session* Remote(_In_ PIN6_ADDR addr);
-	static WINSANE_Session* Remote(_In_ PIN6_ADDR addr, _In_ USHORT port);
-	static WINSANE_Session* Remote(_In_ PTSTR hostname);
-	static WINSANE_Session* Remote(_In_ PTSTR hostname, _In_ USHORT port);
+	static PWINSANE_Session Remote(_In_ PADDRINFOT addrInfo);
+	static PWINSANE_Session Remote(_In_ PIN_ADDR addr);
+	static PWINSANE_Session Remote(_In_ PIN_ADDR addr, _In_ USHORT port);
+	static PWINSANE_Session Remote(_In_ PIN6_ADDR addr);
+	static PWINSANE_Session Remote(_In_ PIN6_ADDR addr, _In_ USHORT port);
+	static PWINSANE_Session Remote(_In_ PTSTR hostname);
+	static PWINSANE_Session Remote(_In_ PTSTR hostname, _In_ USHORT port);
 
 
 	/* Internal API */
-	WINSANE_Socket* GetSocket();
+	PWINSANE_Socket GetSocket();
 
 
 	/* Public API */
-	BOOL Init(_In_ SANE_Int *version_code, _In_ SANE_Auth_Callback authorize);
+	BOOL Init(_In_ PSANE_Int version, _In_ SANE_Auth_Callback authorize);
 	BOOL Exit();
 
 	int GetDevices();
@@ -45,11 +45,11 @@ public:
 
 private:
 	int num_devices;
-	WINSANE_Device **devices;
+	PWINSANE_Device *devices;
 
 	BOOL initialized;
 	SANE_Auth_Callback auth_callback;
-	WINSANE_Socket *sock;
+	PWINSANE_Socket sock;
 };
 
 #endif

@@ -11,7 +11,7 @@
 
 class WINSANE_API WINSANE_Params {
 public:
-	WINSANE_Params(WINSANE_Device *device, WINSANE_Socket *sock, SANE_Parameters *sane_params);
+	WINSANE_Params(_In_ PWINSANE_Device device, _In_ PWINSANE_Socket sock, _In_ PSANE_Parameters sane_params);
 	~WINSANE_Params();
 
 
@@ -25,9 +25,9 @@ public:
 
 
 private:
-	WINSANE_Device *device;
-	WINSANE_Socket *sock;
-	SANE_Parameters *sane_params;
+	PWINSANE_Device device;
+	PWINSANE_Socket sock;
+	PSANE_Parameters sane_params;
 };
 
 #endif

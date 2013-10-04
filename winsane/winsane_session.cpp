@@ -28,7 +28,7 @@ WINSANE_Session::~WINSANE_Session()
 	this->initialized = FALSE;
 }
 
-WINSANE_Session* WINSANE_Session::Remote(_In_ PADDRINFOT addrInfo)
+PWINSANE_Session WINSANE_Session::Remote(_In_ PADDRINFOT addrInfo)
 {
 	SOCKET sock;
 
@@ -42,12 +42,12 @@ WINSANE_Session* WINSANE_Session::Remote(_In_ PADDRINFOT addrInfo)
 	return new WINSANE_Session(sock);
 }
 
-WINSANE_Session* WINSANE_Session::Remote(_In_ PIN_ADDR addr)
+PWINSANE_Session WINSANE_Session::Remote(_In_ PIN_ADDR addr)
 {
 	return WINSANE_Session::Remote(addr, WINSANE_DEFAULT_PORT);
 }
 
-WINSANE_Session* WINSANE_Session::Remote(_In_ PIN_ADDR addr, _In_ USHORT port)
+PWINSANE_Session WINSANE_Session::Remote(_In_ PIN_ADDR addr, _In_ USHORT port)
 {
 	SOCKADDR_IN sockAddr;
 	ADDRINFOT addrInfo;
@@ -67,12 +67,12 @@ WINSANE_Session* WINSANE_Session::Remote(_In_ PIN_ADDR addr, _In_ USHORT port)
 	return WINSANE_Session::Remote(&addrInfo);
 }
 
-WINSANE_Session* WINSANE_Session::Remote(_In_ PIN6_ADDR addr)
+PWINSANE_Session WINSANE_Session::Remote(_In_ PIN6_ADDR addr)
 {
 	return WINSANE_Session::Remote(addr, WINSANE_DEFAULT_PORT);
 }
 
-WINSANE_Session* WINSANE_Session::Remote(_In_ PIN6_ADDR addr, _In_ USHORT port)
+PWINSANE_Session WINSANE_Session::Remote(_In_ PIN6_ADDR addr, _In_ USHORT port)
 {
 	SOCKADDR_IN6 sockAddr;
 	ADDRINFOT addrInfo;
@@ -92,12 +92,12 @@ WINSANE_Session* WINSANE_Session::Remote(_In_ PIN6_ADDR addr, _In_ USHORT port)
 	return WINSANE_Session::Remote(&addrInfo);
 }
 
-WINSANE_Session* WINSANE_Session::Remote(_In_ PTSTR hostname)
+PWINSANE_Session WINSANE_Session::Remote(_In_ PTSTR hostname)
 {
 	return WINSANE_Session::Remote(hostname, WINSANE_DEFAULT_PORT);
 }
 
-WINSANE_Session* WINSANE_Session::Remote(_In_ PTSTR hostname, _In_ USHORT port)
+PWINSANE_Session WINSANE_Session::Remote(_In_ PTSTR hostname, _In_ USHORT port)
 {
 	PADDRINFOT pAddrInfo;
 	ADDRINFOT addrInfoHint;
@@ -124,13 +124,13 @@ WINSANE_Session* WINSANE_Session::Remote(_In_ PTSTR hostname, _In_ USHORT port)
 }
 
 
-WINSANE_Socket* WINSANE_Session::GetSocket()
+PWINSANE_Socket WINSANE_Session::GetSocket()
 {
 	return this->sock;
 }
 
 
-BOOL WINSANE_Session::Init(_In_ SANE_Int *version, _In_ SANE_Auth_Callback authorize)
+BOOL WINSANE_Session::Init(_In_ PSANE_Int version, _In_ SANE_Auth_Callback authorize)
 {
 	SANE_Word version_code;
 	SANE_Status status;
@@ -138,7 +138,7 @@ BOOL WINSANE_Session::Init(_In_ SANE_Int *version, _In_ SANE_Auth_Callback autho
 	DWORD user_name_len;
 	unsigned short ns;
 	unsigned char *p;
-	int written;
+	DWORD written;
 
 	ns = 0x1234;
 	p = (unsigned char*) &ns;
@@ -171,7 +171,7 @@ BOOL WINSANE_Session::Init(_In_ SANE_Int *version, _In_ SANE_Auth_Callback autho
 
 BOOL WINSANE_Session::Exit()
 {
-	int written;
+	DWORD written;
 
 	if (!this->initialized)
 		return FALSE;
@@ -190,8 +190,10 @@ int WINSANE_Session::GetDevices()
 	SANE_Status status;
 	SANE_Word array_length;
 	SANE_Handle pointer;
-	SANE_Device **sane_devices;
-	int written, index;
+	PSANE_Device *sane_devices;
+	PSANE_Device sane_device;
+	DWORD written;
+	int index;
 
 	if (!this->initialized)
 		return 0;
@@ -211,14 +213,14 @@ int WINSANE_Session::GetDevices()
 
 	this->num_devices = 0;
 
-	sane_devices = new SANE_Device*[array_length];
+	sane_devices = new PSANE_Device[array_length];
 
 	for (index = 0; index < array_length; index++) {
 		pointer = this->sock->ReadHandle();
 		if (pointer != NULL)
 			continue;
 
-		SANE_Device *sane_device = new SANE_Device();
+		sane_device = new SANE_Device();
 		sane_device->name = this->sock->ReadString();
 		sane_device->vendor = this->sock->ReadString();
 		sane_device->model = this->sock->ReadString();
@@ -228,11 +230,10 @@ int WINSANE_Session::GetDevices()
 		this->num_devices++;
 	}
 
-	this->devices = new WINSANE_Device*[this->num_devices];
+	this->devices = new PWINSANE_Device[this->num_devices];
 
 	for (index = 0; index < this->num_devices; index++) {
-		WINSANE_Device *device = new WINSANE_Device(this, this->sock, sane_devices[index]);
-		this->devices[index] = device;
+		this->devices[index] = new WINSANE_Device(this, this->sock, sane_devices[index]);
 	}
 
 	delete[] sane_devices;
@@ -240,7 +241,7 @@ int WINSANE_Session::GetDevices()
 	return this->num_devices;
 }
 
-WINSANE_Device* WINSANE_Session::GetDevice(_In_ int index)
+PWINSANE_Device WINSANE_Session::GetDevice(_In_ int index)
 {
 	if (!this->initialized)
 		return NULL;
@@ -248,7 +249,7 @@ WINSANE_Device* WINSANE_Session::GetDevice(_In_ int index)
 	return this->devices[index];
 }
 
-WINSANE_Device* WINSANE_Session::GetDevice(_In_ SANE_String_Const name)
+PWINSANE_Device WINSANE_Session::GetDevice(_In_ SANE_String_Const name)
 {
 	SANE_String_Const device_name;
 	int index;
@@ -266,10 +267,10 @@ WINSANE_Device* WINSANE_Session::GetDevice(_In_ SANE_String_Const name)
 	return NULL;
 }
 
-WINSANE_Device* WINSANE_Session::GetDevice(_In_ PTSTR ptName)
+PWINSANE_Device WINSANE_Session::GetDevice(_In_ PTSTR ptName)
 {
 #ifdef UNICODE
-	WINSANE_Device* device;
+	PWINSANE_Device device;
 	SANE_String_Const name;
 	HANDLE hHeap;
 	int length;

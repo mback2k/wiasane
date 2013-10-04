@@ -12,31 +12,31 @@
 class WINSANE_Socket {
 public:
 	/* Constructer & Deconstructer */
-	WINSANE_Socket(SOCKET sock);
+	WINSANE_Socket(_In_ SOCKET sock);
 	~WINSANE_Socket();
 
 
 	/* Internal API */
 	SOCKET GetSocket();
 
-	void SetConverting(bool converting);
-	bool IsConverting();
+	VOID SetConverting(_In_ BOOL converting);
+	BOOL IsConverting();
 
-	int Flush();
-	void Clear();
+	DWORD Flush();
+	VOID Clear();
 
-	int WritePlain(const char *buf, int buflen);
-	int ReadPlain(char *buf, int buflen);
+	int WritePlain(_In_ CONST PBYTE buf, _In_ DWORD buflen);
+	int ReadPlain(_In_ PBYTE buf, _In_ DWORD buflen);
 
-	int Write(const char *buf, int buflen);
-	int Read(char *buf, int buflen);
+	int Write(_In_ CONST PBYTE buf, _In_ DWORD buflen);
+	int Read(_In_ PBYTE buf, _In_ DWORD buflen);
 
-	int WriteByte(SANE_Byte b);
-	int WriteWord(SANE_Word w);
-	int WriteChar(SANE_Char c);
-	int WriteString(SANE_String_Const s);
-	int WriteHandle(SANE_Handle h);
-	int WriteStatus(SANE_Status s);
+	int WriteByte(_In_ SANE_Byte b);
+	int WriteWord(_In_ SANE_Word w);
+	int WriteChar(_In_ SANE_Char c);
+	int WriteString(_In_ SANE_String_Const s);
+	int WriteHandle(_In_ SANE_Handle h);
+	int WriteStatus(_In_ SANE_Status s);
 
 	SANE_Byte ReadByte();
 	SANE_Word ReadWord();
@@ -47,19 +47,21 @@ public:
 
 
 protected:
-	int WriteSocket(const char *buf, int buflen);
-	int ReadSocket(char *buf, int buflen);
+	int WriteSocket(_In_ CONST PBYTE buf, _In_ DWORD buflen);
+	int ReadSocket(_In_ PBYTE buf, _In_ DWORD buflen);
 
 
 private:
-	char* ReallocBuffer(char *buf, int oldlen, int newlen);
-	void Close();
+	PBYTE ReallocBuffer(_In_ PBYTE buf, _In_ DWORD oldlen, _In_ DWORD newlen);
+	VOID Close();
 
 	SOCKET sock;
-	char *buf;
-	long buflen;
-	long bufoff;
-	bool conv;
+	PBYTE buf;
+	DWORD buflen;
+	DWORD bufoff;
+	BOOL conv;
 };
+
+typedef WINSANE_Socket* PWINSANE_Socket;
 
 #endif

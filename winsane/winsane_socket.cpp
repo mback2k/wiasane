@@ -5,7 +5,7 @@
 #include <malloc.h>
 #include <algorithm>
 
-WINSANE_Socket::WINSANE_Socket(SOCKET sock)
+WINSANE_Socket::WINSANE_Socket(_In_ SOCKET sock)
 {
 	this->sock = sock;
 	this->conv = FALSE;
@@ -27,22 +27,22 @@ SOCKET WINSANE_Socket::GetSocket()
 }
 
 
-void WINSANE_Socket::SetConverting(bool converting)
+VOID WINSANE_Socket::SetConverting(_In_ BOOL converting)
 {
 	this->conv = converting;
 }
 
-bool WINSANE_Socket::IsConverting()
+BOOL WINSANE_Socket::IsConverting()
 {
 	return this->conv;
 }
 
 
-int WINSANE_Socket::Flush()
+DWORD WINSANE_Socket::Flush()
 {
-	int size = 0, offset = 0, result = 0;
+	DWORD result, offset, size;
 
-	while (offset < this->buflen) {
+	for (offset = 0; offset < this->buflen; ) {
 		result = this->WriteSocket(this->buf + offset, this->buflen - offset);
 		if (result > 0) {
 			offset += result;
@@ -64,7 +64,7 @@ int WINSANE_Socket::Flush()
 	return offset;
 }
 
-void WINSANE_Socket::Clear()
+VOID WINSANE_Socket::Clear()
 {
 	if (this->buf) {
 		if (this->buflen) {
@@ -79,18 +79,20 @@ void WINSANE_Socket::Clear()
 	this->bufoff = 0;
 }
 
-char* WINSANE_Socket::ReallocBuffer(char *buf, int oldlen, int newlen)
+PBYTE WINSANE_Socket::ReallocBuffer(_In_ PBYTE buf, _In_ DWORD oldlen, _In_ DWORD newlen)
 {
-	char *newbuf = NULL;
+	PBYTE newbuf;
+
+	newbuf = NULL;
 
 	if (buf && oldlen) {
 		if (newlen) {
-			newbuf = (char *)realloc(buf, newlen);
+			newbuf = (PBYTE) realloc(buf, newlen);
 		} else {
 			free(buf);
 		}
 	} else if (newlen) {
-		newbuf = (char *)malloc(newlen);
+		newbuf = (PBYTE) malloc(newlen);
 	}
 
 	if (newbuf && newlen > oldlen) {
@@ -100,7 +102,7 @@ char* WINSANE_Socket::ReallocBuffer(char *buf, int oldlen, int newlen)
 	return newbuf;
 }
 
-void WINSANE_Socket::Close()
+VOID WINSANE_Socket::Close()
 {
 	if (this->sock != INVALID_SOCKET) {
 		closesocket(this->sock);
@@ -109,22 +111,24 @@ void WINSANE_Socket::Close()
 }
 
 
-int WINSANE_Socket::WriteSocket(const char *buf, int buflen)
+int WINSANE_Socket::WriteSocket(_In_ CONST PBYTE buf, _In_ DWORD buflen)
 {
-	return send(this->sock, buf, buflen, 0);
+	return send(this->sock, (const char*) buf, buflen, 0);
 }
 
-int WINSANE_Socket::ReadSocket(char *buf, int buflen)
+int WINSANE_Socket::ReadSocket(_In_ PBYTE buf, _In_ DWORD buflen)
 {
-	return recv(this->sock, buf, buflen, MSG_WAITALL);
+	return recv(this->sock, (char*) buf, buflen, MSG_WAITALL);
 }
 
-int WINSANE_Socket::WritePlain(const char *buf, int buflen)
+int WINSANE_Socket::WritePlain(_In_ CONST PBYTE buf, _In_ DWORD buflen)
 {
-	int size = 0, space = 0;
+	DWORD space, size;
 
 	if (this->buf && this->buflen)
 		space = this->buflen - this->bufoff;
+	else
+		space = 0;
 
 	if (space < buflen) {
 		size = this->bufoff + buflen;
@@ -138,18 +142,18 @@ int WINSANE_Socket::WritePlain(const char *buf, int buflen)
 	return buflen;
 }
 
-int WINSANE_Socket::ReadPlain(char *buf, int buflen)
+int WINSANE_Socket::ReadPlain(_In_ PBYTE buf, _In_ DWORD buflen)
 {
 	return this->ReadSocket(buf, buflen);
 }
 
 
-int WINSANE_Socket::Write(const char *buf, int buflen)
+int WINSANE_Socket::Write(_In_ CONST PBYTE buf, _In_ DWORD buflen)
 {
-	char *buftmp;
+	PBYTE buftmp;
 	int result;
 
-	buftmp = (char *)malloc(buflen);
+	buftmp = (PBYTE) malloc(buflen);
 	if (!buftmp)
 		return 0;
 
@@ -167,12 +171,12 @@ int WINSANE_Socket::Write(const char *buf, int buflen)
 	return result;
 }
 
-int WINSANE_Socket::Read(char *buf, int buflen)
+int WINSANE_Socket::Read(_In_ PBYTE buf, _In_ DWORD buflen)
 {
-	char *buftmp;
+	PBYTE buftmp;
 	int result;
 
-	buftmp = (char *)malloc(buflen);
+	buftmp = (PBYTE) malloc(buflen);
 	if (!buftmp)
 		return 0;
 
@@ -191,85 +195,101 @@ int WINSANE_Socket::Read(char *buf, int buflen)
 }
 
 
-int WINSANE_Socket::WriteByte(SANE_Byte b)
+int WINSANE_Socket::WriteByte(_In_ SANE_Byte b)
 {
-	return this->Write((char *)&b, sizeof(SANE_Byte));
+	return this->Write((PBYTE) &b, sizeof(SANE_Byte));
 }
 
-int WINSANE_Socket::WriteWord(SANE_Word w)
+int WINSANE_Socket::WriteWord(_In_ SANE_Word w)
 {
-	return this->Write((char *)&w, sizeof(SANE_Word));
+	return this->Write((PBYTE) &w, sizeof(SANE_Word));
 }
 
-int WINSANE_Socket::WriteChar(SANE_Char c)
+int WINSANE_Socket::WriteChar(_In_ SANE_Char c)
 {
-	return this->Write(&c, sizeof(SANE_Char));
+	return this->Write((PBYTE) &c, sizeof(SANE_Char));
 }
 
-int WINSANE_Socket::WriteString(SANE_String_Const s)
+int WINSANE_Socket::WriteString(_In_ SANE_String_Const s)
 {
-	int written = 0;
-	SANE_Word l = (SANE_Word)strlen(s) + 1;
-	written += this->WriteWord(l);
-	written += this->WritePlain(s, l);
+	SANE_Word length;
+	int written;
+	
+	length = (SANE_Word) strlen(s) + 1;
+	written = this->WriteWord(length);
+	written += this->WritePlain((PBYTE) s, length);
+
 	return written;
 }
 
-int WINSANE_Socket::WriteHandle(SANE_Handle h)
+int WINSANE_Socket::WriteHandle(_In_ SANE_Handle h)
 {
-	return this->WriteWord((SANE_Word)h);
+	return this->WriteWord((SANE_Word) h);
 }
 
-int WINSANE_Socket::WriteStatus(SANE_Status s)
+int WINSANE_Socket::WriteStatus(_In_ SANE_Status s)
 {
-	return this->WriteWord((SANE_Word)s);
+	return this->WriteWord((SANE_Word) s);
 }
 
 
 SANE_Byte WINSANE_Socket::ReadByte()
 {
-	SANE_Byte b = 0;
-	this->Read((char *)&b, sizeof(SANE_Byte));
+	SANE_Byte b;
+
+	if (this->Read((PBYTE) &b, sizeof(SANE_Byte)) != sizeof(SANE_Byte))
+		b = 0;
+
 	return b;
 }
 
 SANE_Word WINSANE_Socket::ReadWord()
 {
-	SANE_Word w = 0;
-	this->Read((char *)&w, sizeof(SANE_Word));
+	SANE_Word w;
+
+	if (this->Read((PBYTE) &w, sizeof(SANE_Word)) != sizeof(SANE_Word))
+		w = 0;
+
 	return w;
 }
 
 SANE_Char WINSANE_Socket::ReadChar()
 {
-	SANE_Char c = 0;
-	this->Read(&c, sizeof(SANE_Char));
+	SANE_Char c;
+
+	if (this->Read((PBYTE) &c, sizeof(SANE_Char)) != sizeof(SANE_Char))
+		c = 0;
+
 	return c;
 }
 
 SANE_String WINSANE_Socket::ReadString()
 {
-	SANE_Word l = 0;
-	SANE_String s = NULL;
-	l = this->ReadWord();
-	if (l) {
-		s = new SANE_Char[l+1];
-		this->ReadPlain(s, l);
-		s[l] = '\0';
+	SANE_Word length;
+	SANE_String s;
+
+	length = this->ReadWord();
+	if (length > 0) {
+		s = new SANE_Char[length+1];
+		if (this->ReadPlain((PBYTE) s, length) == length) {
+			s[length] = '\0';
+		} else {
+			delete[] s;
+			s = NULL;
+		}
+	} else {
+		s = NULL;
 	}
+
 	return s;
 }
 
 SANE_Handle WINSANE_Socket::ReadHandle()
 {
-	SANE_Handle h = NULL;
-	h = (SANE_Handle)this->ReadWord();
-	return h;
+	return (SANE_Handle) this->ReadWord();
 }
 
 SANE_Status WINSANE_Socket::ReadStatus()
 {
-	SANE_Status s = SANE_STATUS_GOOD;
-	s = (SANE_Status)this->ReadWord();
-	return s;
+	return (SANE_Status) this->ReadWord();
 }

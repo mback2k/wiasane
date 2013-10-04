@@ -1,7 +1,7 @@
 #include "winsane_device.h"
 #include "winsane_internal.h"
 
-WINSANE_Device::WINSANE_Device(WINSANE_Session *session, WINSANE_Socket *sock, SANE_Device *sane_device)
+WINSANE_Device::WINSANE_Device(_In_ PWINSANE_Session session, _In_ PWINSANE_Socket sock, _In_ PSANE_Device sane_device)
 {
 	this->opened = FALSE;
 	this->started = FALSE;
@@ -60,12 +60,12 @@ SANE_String_Const WINSANE_Device::GetType()
 }
 
 
-bool WINSANE_Device::Open()
+BOOL WINSANE_Device::Open()
 {
 	SANE_Status status;
 	SANE_Handle handle;
 	SANE_String resource;
-	int written;
+	DWORD written;
 
 	written = this->sock->WriteWord(WINSANE_NET_OPEN);
 	written += this->sock->WriteString(this->sane_device->name);
@@ -87,9 +87,9 @@ bool WINSANE_Device::Open()
 	return TRUE;
 }
 
-bool WINSANE_Device::Close()
+BOOL WINSANE_Device::Close()
 {
-	int written;
+	DWORD written;
 
 	if (!this->opened)
 		return FALSE;
@@ -108,9 +108,11 @@ bool WINSANE_Device::Close()
 
 int WINSANE_Device::FetchOptions()
 {
-	SANE_Option_Descriptor **sane_options;
+	PSANE_Option_Descriptor *sane_options;
+	PSANE_Option_Descriptor sane_option;
 	SANE_Word num_options, num_values, null_pointer;
-	int written, index, value;
+	DWORD written;
+	int index, value;
 
 	if (!this->opened)
 		return 0;
@@ -126,24 +128,24 @@ int WINSANE_Device::FetchOptions()
 
 	this->num_options = 0;
 
-	sane_options = new SANE_Option_Descriptor*[num_options];
+	sane_options = new PSANE_Option_Descriptor[num_options];
 
 	for (index = 0; index < num_options; index++) {
 		null_pointer = this->sock->ReadWord();
 		if (null_pointer)
 			continue;
 
-		SANE_Option_Descriptor *sane_option = new SANE_Option_Descriptor();
+		sane_option = new SANE_Option_Descriptor();
 		sane_option->name = this->sock->ReadString();
 		sane_option->title = this->sock->ReadString();
 		sane_option->desc = this->sock->ReadString();
 
-		sane_option->type = (SANE_Value_Type)this->sock->ReadWord();
-		sane_option->unit = (SANE_Unit)this->sock->ReadWord();
+		sane_option->type = (SANE_Value_Type) this->sock->ReadWord();
+		sane_option->unit = (SANE_Unit) this->sock->ReadWord();
 		sane_option->size = this->sock->ReadWord();
 		sane_option->cap = this->sock->ReadWord();
 
-		sane_option->constraint_type = (SANE_Constraint_Type)this->sock->ReadWord();
+		sane_option->constraint_type = (SANE_Constraint_Type) this->sock->ReadWord();
 		switch (sane_option->constraint_type) {
 		case SANE_CONSTRAINT_NONE:
 			break;
@@ -179,11 +181,10 @@ int WINSANE_Device::FetchOptions()
 		this->num_options++;
 	}
 
-	this->options = new WINSANE_Option*[this->num_options];
+	this->options = new PWINSANE_Option[this->num_options];
 
 	for (index = 0; index < this->num_options; index++) {
-		WINSANE_Option *option = new WINSANE_Option(this, this->sock, sane_options[index], this->sane_handle, index);
-		this->options[index] = option;
+		this->options[index] = new WINSANE_Option(this, this->sock, sane_options[index], this->sane_handle, index);
 	}
 
 	delete[] sane_options;
@@ -191,7 +192,7 @@ int WINSANE_Device::FetchOptions()
 	return this->num_options;
 }
 
-WINSANE_Option* WINSANE_Device::GetOption(int index)
+PWINSANE_Option WINSANE_Device::GetOption(_In_ int index)
 {
 	if (!this->opened)
 		return NULL;
@@ -199,7 +200,7 @@ WINSANE_Option* WINSANE_Device::GetOption(int index)
 	return this->options[index];
 }
 
-WINSANE_Option* WINSANE_Device::GetOption(SANE_String_Const name)
+PWINSANE_Option WINSANE_Device::GetOption(_In_ SANE_String_Const name)
 {
 	SANE_String_Const option_name;
 	int index;
@@ -217,7 +218,7 @@ WINSANE_Option* WINSANE_Device::GetOption(SANE_String_Const name)
 	return NULL;
 }
 
-void WINSANE_Device::ClearOptions()
+VOID WINSANE_Device::ClearOptions()
 {
 	int index;
 
@@ -232,11 +233,11 @@ void WINSANE_Device::ClearOptions()
 }
 
 
-WINSANE_Params* WINSANE_Device::GetParams()
+PWINSANE_Params WINSANE_Device::GetParams()
 {
 	SANE_Status status;
 	SANE_Parameters *sane_params;
-	int written;
+	DWORD written;
 
 	if (!this->opened)
 		return NULL;
@@ -265,13 +266,13 @@ WINSANE_Params* WINSANE_Device::GetParams()
 }
 
 
-WINSANE_Scan* WINSANE_Device::Start()
+PWINSANE_Scan WINSANE_Device::Start()
 {
 	SANE_Status status;
 	SANE_Word port;
 	SANE_Word byte_order;
 	SANE_String resource;
-	int written;
+	DWORD written;
 
 	if (!this->opened || this->started)
 		return NULL;
@@ -295,9 +296,9 @@ WINSANE_Scan* WINSANE_Device::Start()
 	return new WINSANE_Scan(this, this->sock, port, byte_order);
 }
 
-bool WINSANE_Device::Cancel()
+BOOL WINSANE_Device::Cancel()
 {
-	int written;
+	DWORD written;
 
 	if (!this->opened || !this->started)
 		return FALSE;

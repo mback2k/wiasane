@@ -15,7 +15,7 @@
 class WINSANE_API WINSANE_Device {
 public:
 	/* Constructer & Deconstructer */
-	WINSANE_Device(WINSANE_Session *session, WINSANE_Socket *sock, SANE_Device *device);
+	WINSANE_Device(_In_ PWINSANE_Session session, _In_ PWINSANE_Socket sock, _In_ PSANE_Device device);
 	~WINSANE_Device();
 
 
@@ -25,28 +25,28 @@ public:
 	SANE_String_Const GetModel();
 	SANE_String_Const GetType();
 
-	bool Open();
-	bool Close();
+	BOOL Open();
+	BOOL Close();
 
 	int FetchOptions();
-	WINSANE_Option* GetOption(int index);
-	WINSANE_Option* GetOption(SANE_String_Const name);
-	void ClearOptions();
+	PWINSANE_Option GetOption(_In_ int index);
+	PWINSANE_Option GetOption(_In_ SANE_String_Const name);
+	VOID ClearOptions();
 
-	WINSANE_Params* GetParams();
+	PWINSANE_Params GetParams();
 
-	WINSANE_Scan* Start();
-	bool Cancel();
+	PWINSANE_Scan Start();
+	BOOL Cancel();
 
 private:
 	int num_options;
-	WINSANE_Option **options;
+	PWINSANE_Option *options;
 
-	bool opened;
-	bool started;
-	WINSANE_Session *session;
-	WINSANE_Socket *sock;
-	SANE_Device *sane_device;
+	BOOL opened;
+	BOOL started;
+	PWINSANE_Session session;
+	PWINSANE_Socket sock;
+	PSANE_Device sane_device;
 	SANE_Handle sane_handle;
 };
 

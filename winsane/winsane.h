@@ -21,6 +21,12 @@ class WINSANE_API WINSANE_Option;
 class WINSANE_API WINSANE_Params;
 class WINSANE_API WINSANE_Scan;
 
+typedef WINSANE_Session* PWINSANE_Session;
+typedef WINSANE_Device* PWINSANE_Device;
+typedef WINSANE_Option* PWINSANE_Option;
+typedef WINSANE_Params* PWINSANE_Params;
+typedef WINSANE_Scan* PWINSANE_Scan;
+
 #include "winsane_session.h"
 #include "winsane_device.h"
 #include "winsane_option.h"

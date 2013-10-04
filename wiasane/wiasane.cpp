@@ -234,9 +234,9 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_bytes_(lLength) PBYTE pBuffer, LONG lLength, _Out_ LONG *plReceived)
 {
 	WIASANE_Context *context;
-	LONG aquire, aquired;
+	LONG idx, aquired;
+	DWORD aquire;
 	HRESULT hr;
-	LONG idx;
 
 	if (plReceived)
 		*plReceived = 0;
@@ -300,7 +300,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				aquire = context->task->xbytegap ? min(lLength, pScanInfo->WidthBytes) : lLength;
 				aquired = 0;
 
-				while (context->task->scan->AquireImage((char*) (pBuffer + *plReceived + aquired), &aquire) == CONTINUE) {
+				while (context->task->scan->AquireImage((pBuffer + *plReceived + aquired), &aquire) == CONTINUE) {
 					if (aquire > 0) {
 						if (context->task->xbytegap) {
 							aquired += aquire;
@@ -310,9 +310,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 									*plReceived += context->task->xbytegap;
 								aquired = 0;
 							}
-							aquire = pScanInfo->WidthBytes - aquired;
-							if (lLength - *plReceived < aquire)
+							if (lLength - *plReceived < pScanInfo->WidthBytes - aquired)
 								break;
+							aquire = pScanInfo->WidthBytes - aquired;
 						} else {
 							*plReceived += aquire;
 							aquire = lLength - *plReceived;
