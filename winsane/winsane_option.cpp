@@ -259,7 +259,7 @@ SANE_Bool WINSANE_Option::SetValueBool(_In_ SANE_Bool value_bool)
 		return 0;
 
 	value = (void*) &value_bool;
-	value = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Word), &value);
+	value = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Word), value);
 	if (value) {
 		value_bool = *((SANE_Bool*) value);
 		delete value;
