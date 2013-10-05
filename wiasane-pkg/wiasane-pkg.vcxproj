@@ -67,6 +67,11 @@
     <VerifyFlags>133563</VerifyFlags>
     <PackageDir>$(OutDir)wiasane-pkg</PackageDir>
   </PropertyGroup>
+  <ItemDefinitionGroup>
+    <Inf2Cat>
+      <UseLocalTime>True</UseLocalTime>
+    </Inf2Cat>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <FilesToPackage Include="@(Inf->'%(CopyOutput)')" Condition="'@(Inf)'!=''" />
   </ItemGroup>
