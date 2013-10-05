@@ -69,13 +69,40 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hD
 
 INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
-	UNREFERENCED_PARAMETER(hwndDlg);
+	LPPROPSHEETPAGE lpPropSheetPage;
+	PCOISANE_Data privateData;
+
 	UNREFERENCED_PARAMETER(wParam);
-	UNREFERENCED_PARAMETER(lParam);
 
 	switch (uMsg) {
 		case WM_INITDIALOG:
 			Trace(TEXT("WM_INITDIALOG"));
+			lpPropSheetPage = (LPPROPSHEETPAGE) lParam;
+			privateData = (PCOISANE_Data) lpPropSheetPage->lParam;
+
+			InitPropertyPageAdvanced(hwndDlg, privateData);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
+			break;
+
+		case WM_NOTIFY:
+			Trace(TEXT("WM_NOTIFY"));
+			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			privateData = (PCOISANE_Data) lpPropSheetPage->lParam;
+
+			switch (((LPNMHDR) lParam)->code) {
+				case PSN_APPLY:
+					Trace(TEXT("PSN_APPLY"));
+					if (!ExitPropertyPageAdvanced(hwndDlg, privateData)) {
+						MessageBox(hwndDlg, TEXT("Unable to select the specified scanner!"), TEXT("Error"), MB_OK | MB_ICONERROR);
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
+						return TRUE;
+					}
+					break;
+
+				case PSN_RESET:
+					Trace(TEXT("PSN_RESET"));
+					break;
+			}
 			break;
 	}
 
@@ -135,4 +162,138 @@ UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uM
 	}
 
 	return ret;
+}
+
+BOOL InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
+{
+	WINSANE_Session *session;
+	WINSANE_Device *device;
+	int devices, i;
+	HWND hwnd;
+	BOOL res;
+
+	QueryDeviceData(privateData);
+
+	if (!privateData->lpHost)
+		privateData->lpHost = _tcsdup(TEXT("localhost"));
+
+	if (!privateData->usPort)
+		privateData->usPort = WINSANE_DEFAULT_PORT;
+
+	session = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
+	if (session) {
+		if (session->Init(NULL, NULL)) {
+			hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER);
+			devices = session->GetDevices();
+			for (i = 0; i < devices; i++) {
+				device = session->GetDevice(i);
+				if (device) {
+					SendMessageA(hwnd, CB_ADDSTRING, 0, (LPARAM) device->GetName());
+				}
+			}
+			res = session->Exit();
+		} else {
+			res = FALSE;
+		}
+		delete session;
+	} else {
+		res = FALSE;
+	}
+
+	if (privateData->lpName)
+		SetDlgItemText(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, privateData->lpName);
+
+	if (privateData->lpUsername)
+		SetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, privateData->lpUsername);
+
+	if (privateData->lpPassword)
+		SetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, privateData->lpPassword);
+
+	return res;
+}
+
+BOOL ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
+{
+	SP_DEVINSTALL_PARAMS devInstallParams;
+	WINSANE_Session *session;
+	WINSANE_Device *device;
+	int devices;
+	LPTSTR lpName;
+	LPTSTR lpUsername;
+	LPTSTR lpPassword;
+	BOOL res;
+
+	lpName = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
+	if (lpName) {
+		res = GetDlgItemText(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, lpName, MAX_PATH);
+		if (res) {
+			if (privateData->lpName) {
+				free(privateData->lpName);
+			}
+			privateData->lpName = _tcsdup(lpName);
+		}
+		HeapFree(privateData->hHeap, 0, lpName);
+	} else {
+		res = FALSE;
+	}
+
+	if (res) {
+		lpUsername = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
+		if (lpUsername) {
+			if (GetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, lpUsername, MAX_PATH)) {
+				if (privateData->lpUsername) {
+					free(privateData->lpUsername);
+				}
+				privateData->lpUsername = _tcsdup(lpUsername);
+			}
+			HeapFree(privateData->hHeap, 0, lpUsername);
+		}
+
+		lpPassword = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
+		if (lpPassword) {
+			if (GetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, lpPassword, MAX_PATH)) {
+				if (privateData->lpPassword) {
+					free(privateData->lpPassword);
+				}
+				privateData->lpPassword = _tcsdup(lpPassword);
+			}
+			HeapFree(privateData->hHeap, 0, lpPassword);
+		}
+
+		session = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
+		if (session) {
+			if (session->Init(NULL, NULL)) {
+				devices = session->GetDevices();
+				if (devices > 0) {
+					device = session->GetDevice(privateData->lpName);
+					if (device) {
+						UpdateDeviceInfo(privateData, device);
+						UpdateDeviceData(privateData, device);
+
+						ZeroMemory(&devInstallParams, sizeof(SP_DEVINSTALL_PARAMS));
+						devInstallParams.cbSize = sizeof(SP_DEVINSTALL_PARAMS);
+						res = SetupDiGetDeviceInstallParams(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, &devInstallParams);
+						if (res) {
+							devInstallParams.FlagsEx |= DI_FLAGSEX_PROPCHANGE_PENDING;
+							res = SetupDiSetDeviceInstallParams(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, &devInstallParams);
+						}
+					} else {
+						res = FALSE;
+					}
+				} else {
+					res = FALSE;
+				}
+				if (!session->Exit()) {
+					res = FALSE;
+				}
+			} else {
+				res = FALSE;
+			}
+			delete session;
+		} else {
+			res = FALSE;
+		}
+	}
+
+	return res;
 }

@@ -145,6 +145,96 @@ DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 }
 
 
+DWORD QueryDeviceData(_In_ PCOISANE_Data privateData)
+{
+	HKEY hDeviceKey, hDeviceDataKey;
+	DWORD cbData, dwType, dwPort;
+	PTSTR lpString;
+	LONG res;
+
+	hDeviceKey = SetupDiOpenDevRegKey(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_ENUMERATE_SUB_KEYS);
+	if (hDeviceKey == INVALID_HANDLE_VALUE)
+		return GetLastError();
+
+	res = RegOpenKeyEx(hDeviceKey, TEXT("DeviceData"), 0, KEY_QUERY_VALUE, &hDeviceDataKey);
+	if (res == ERROR_SUCCESS) {
+		res = RegQueryValueEx(hDeviceDataKey, TEXT("Port"), NULL, &dwType, NULL, &cbData);
+		if (res == ERROR_SUCCESS && dwType == REG_DWORD && cbData == sizeof(DWORD)) {
+			res = RegQueryValueEx(hDeviceDataKey, TEXT("Port"), NULL, &dwType, (LPBYTE) &dwPort, &cbData);
+			if (res == ERROR_SUCCESS) {
+				privateData->usPort = (USHORT) dwPort;
+			}
+		}
+
+		res = RegQueryValueEx(hDeviceDataKey, TEXT("Host"), NULL, &dwType, NULL, &cbData);
+		if (res == ERROR_SUCCESS && dwType == REG_SZ) {
+			lpString = (LPTSTR) realloc(privateData->lpHost, cbData);
+			if (lpString) {
+				privateData->lpHost = lpString;
+				ZeroMemory(lpString, cbData);
+				res = RegQueryValueEx(hDeviceDataKey, TEXT("Host"), NULL, &dwType, (LPBYTE) lpString, &cbData);
+				if (res == ERROR_SUCCESS) {
+					privateData->lpHost = lpString;
+				} else {
+					privateData->lpHost = NULL;
+					free(lpString);
+				}
+			}
+		}
+
+		res = RegQueryValueEx(hDeviceDataKey, TEXT("Name"), NULL, &dwType, NULL, &cbData);
+		if (res == ERROR_SUCCESS && dwType == REG_SZ) {
+			lpString = (LPTSTR) realloc(privateData->lpName, cbData);
+			if (lpString) {
+				ZeroMemory(lpString, cbData);
+				res = RegQueryValueEx(hDeviceDataKey, TEXT("Name"), NULL, &dwType, (LPBYTE) lpString, &cbData);
+				if (res == ERROR_SUCCESS) {
+					privateData->lpName = lpString;
+				} else {
+					privateData->lpName = NULL;
+					free(lpString);
+				}
+			}
+		}
+
+		res = RegQueryValueEx(hDeviceDataKey, TEXT("Username"), NULL, &dwType, NULL, &cbData);
+		if (res == ERROR_SUCCESS && dwType == REG_SZ) {
+			lpString = (LPTSTR) realloc(privateData->lpUsername, cbData);
+			if (lpString) {
+				ZeroMemory(lpString, cbData);
+				res = RegQueryValueEx(hDeviceDataKey, TEXT("Username"), NULL, &dwType, (LPBYTE) lpString, &cbData);
+				if (res == ERROR_SUCCESS) {
+					privateData->lpUsername = lpString;
+				} else {
+					privateData->lpUsername = NULL;
+					free(lpString);
+				}
+			}
+		}
+
+		res = RegQueryValueEx(hDeviceDataKey, TEXT("Password"), NULL, &dwType, NULL, &cbData);
+		if (res == ERROR_SUCCESS && dwType == REG_SZ) {
+			lpString = (LPTSTR) realloc(privateData->lpPassword, cbData);
+			if (lpString) {
+				ZeroMemory(lpString, cbData);
+				res = RegQueryValueEx(hDeviceDataKey, TEXT("Password"), NULL, &dwType, (LPBYTE) lpString, &cbData);
+				if (res == ERROR_SUCCESS) {
+					privateData->lpPassword = lpString;
+				} else {
+					privateData->lpPassword = NULL;
+					free(lpString);
+				}
+			}
+		}
+
+		RegCloseKey(hDeviceDataKey);
+	}
+
+	RegCloseKey(hDeviceKey);
+
+	return NO_ERROR;
+}
+
 DWORD UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
 {
 	HKEY hDeviceKey, hDeviceDataKey;
