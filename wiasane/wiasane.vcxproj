@@ -100,6 +100,10 @@
       <EnableCOMDATFolding>True</EnableCOMDATFolding>
       <OptimizeReferences>True</OptimizeReferences>
     </Link>
+    <PostBuildEvent>
+      <Command>signtool sign /t "http://timestamp.comodoca.com/authenticode" /a /i "Object" "$(TargetPath)"</Command>
+      <Message>SignTool</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <Content Include="$(SolutionDir)winsane\$(OutDir)winsane.dll">
