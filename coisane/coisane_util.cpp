@@ -173,32 +173,32 @@ DWORD UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 	if (res == ERROR_SUCCESS) {
 		if (privateData->usPort) {
 			dwPort = (DWORD) privateData->usPort;
-			RegSetKeyValue(hDeviceDataKey, NULL, TEXT("Port"), REG_DWORD, &dwPort, sizeof(DWORD));
+			RegSetValueEx(hDeviceDataKey, TEXT("Port"), 0, REG_DWORD, (LPBYTE) &dwPort, sizeof(DWORD));
 		}
 
 		if (privateData->lpHost) {
 			cbData = (DWORD) _msize(privateData->lpHost);
-			RegSetKeyValue(hDeviceDataKey, NULL, TEXT("Host"), REG_SZ, privateData->lpHost, cbData);
+			RegSetValueEx(hDeviceDataKey, TEXT("Host"), 0, REG_SZ, (LPBYTE) privateData->lpHost, cbData);
 		}
 
 		if (privateData->lpName) {
 			cbData = (DWORD) _msize(privateData->lpName);
-			RegSetKeyValue(hDeviceDataKey, NULL, TEXT("Name"), REG_SZ, privateData->lpName, cbData);
+			RegSetValueEx(hDeviceDataKey, TEXT("Name"), 0, REG_SZ, (LPBYTE) privateData->lpName, cbData);
 		}
 
 		if (privateData->lpUsername) {
 			cbData = (DWORD) _msize(privateData->lpUsername);
-			RegSetKeyValue(hDeviceDataKey, NULL, TEXT("Username"), REG_SZ, privateData->lpUsername, cbData);
+			RegSetValueEx(hDeviceDataKey, TEXT("Username"), 0, REG_SZ, (LPBYTE) privateData->lpUsername, cbData);
 		}
 
 		if (privateData->lpPassword) {
 			cbData = (DWORD) _msize(privateData->lpPassword);
-			RegSetKeyValue(hDeviceDataKey, NULL, TEXT("Password"), REG_SZ, privateData->lpPassword, cbData);
+			RegSetValueEx(hDeviceDataKey, TEXT("Password"), 0, REG_SZ, (LPBYTE) privateData->lpPassword, cbData);
 		}
 
 		if (lpResolutions) {
 			cbData = (DWORD) cbResolutions;
-			RegSetKeyValue(hDeviceDataKey, NULL, TEXT("Resolutions"), REG_SZ, lpResolutions, cbData);
+			RegSetValueEx(hDeviceDataKey, TEXT("Resolutions"), 0, REG_SZ, (LPBYTE) lpResolutions, cbData);
 		}
 
 		RegCloseKey(hDeviceDataKey);
