@@ -27,13 +27,13 @@ HRESULT StringCchAVPrintfW( _In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_
 #ifdef UNICODE
 #define StringCbAPrintf StringCbAPrintfW
 #define StringCchAPrintf StringCchAPrintfW
-#define StringCbAVPrintf StringCbAPrintfW
-#define StringCchAVPrintf StringCchAPrintfW
+#define StringCbAVPrintf StringCbAVPrintfW
+#define StringCchAVPrintf StringCchAVPrintfW
 #else
 #define StringCbAPrintf StringCbAPrintfA
 #define StringCchAPrintf StringCchAPrintfA
-#define StringCbAVPrintf StringCbAPrintfA
-#define StringCchAVPrintf StringCchAPrintfA
+#define StringCbAVPrintf StringCbAVPrintfA
+#define StringCchAVPrintf StringCchAVPrintfA
 #endif
 
 #endif
