@@ -21,10 +21,10 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 
 UINT CALLBACK PropSheetPageProcWizardPage(_In_ HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp);
 
-BOOL InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data PrivateData);
-BOOL NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data PrivateData);
+BOOL InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData);
+BOOL NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData);
 
-BOOL InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data PrivateData);
-BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data PrivateData);
+BOOL InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData);
+BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData);
 
 #endif

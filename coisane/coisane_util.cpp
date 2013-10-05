@@ -71,6 +71,7 @@ HINF OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfo
 	return FileHandle;
 }
 
+
 DWORD ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD StateChange, _In_ DWORD Scope)
 {
 	SP_PROPCHANGE_PARAMS propChangeParams;
@@ -94,7 +95,7 @@ DWORD ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDev
 	return NO_ERROR;
 }
 
-DWORD UpdateDeviceInfo(_Inout_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
+DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
 {
 	SANE_String_Const name, type, model, vendor;
 	size_t cbLen;
@@ -143,7 +144,8 @@ DWORD UpdateDeviceInfo(_Inout_ PCOISANE_Data privateData, _In_ PWINSANE_Device d
 	return NO_ERROR;
 }
 
-DWORD UpdateDeviceData(_Inout_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
+
+DWORD UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
 {
 	HKEY hDeviceKey, hDeviceDataKey;
 	DWORD cbData, dwPort;
@@ -210,7 +212,8 @@ DWORD UpdateDeviceData(_Inout_ PCOISANE_Data privateData, _In_ PWINSANE_Device d
 	return NO_ERROR;
 }
 
-size_t CreateResolutionList(_Inout_ PCOISANE_Data privateData, _In_ PWINSANE_Device device, _Inout_ LPTSTR *ppszResolutions)
+
+size_t CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device, _Inout_ LPTSTR *ppszResolutions)
 {
 	PWINSANE_Option resolution;
 	PSANE_Word pWordList;
