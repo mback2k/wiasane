@@ -2,3 +2,6 @@ LIBRARY COISANE
 
 EXPORTS
 	CoInstaller
+	DriverInstall
+	DriverUninstall
+	DeviceInstall
