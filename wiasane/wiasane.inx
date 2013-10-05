@@ -21,7 +21,7 @@ DefaultDestDir=11
 %WIASANE.Provider%=Models, NT$ARCH$
 
 [Models.NT$ARCH$]
-%WIASANE.DeviceDesc%=WIASANE.Scanner, PnPIDInformation
+%WIASANE.DeviceDesc%=WIASANE.Scanner, Image_Network_WIASANE
 
 [WIASANE.Scanner]
 Include=sti.inf
