@@ -105,9 +105,9 @@ PSANE_String_Const WINSANE_Option::GetConstraintStringList()
 	return this->sane_option->constraint.string_list;
 }
 
-BOOL WINSANE_Option::IsValidValue(_In_ SANE_Word value)
+BOOL WINSANE_Option::IsValidValue(_In_ double value)
 {
-	SANE_Word *word_list, word_list_length;
+	SANE_Word *word_list, word_list_length, word;
 	SANE_Range *range;
 	BOOL is_valid;
 	int index;
@@ -116,20 +116,32 @@ BOOL WINSANE_Option::IsValidValue(_In_ SANE_Word value)
 		case SANE_CONSTRAINT_RANGE:
 			is_valid = TRUE;
 			range = this->sane_option->constraint.range;
-			if (value < range->min)
-				is_valid = FALSE;
-			else if (value > range->max)
-				is_valid = FALSE;
-			else if (range->quant && ((value - range->min) % range->quant))
-				is_valid = FALSE;
+			if (this->sane_option->type == SANE_TYPE_FIXED) {
+				if (value < SANE_UNFIX(range->min))
+					is_valid = FALSE;
+				else if (value > SANE_UNFIX(range->max))
+					is_valid = FALSE;
+			} else {
+				word = (SANE_Word) value;
+				if (word < range->min)
+					is_valid = FALSE;
+				else if (word > range->max)
+					is_valid = FALSE;
+				else if (range->quant && ((word - range->min) % range->quant))
+					is_valid = FALSE;
+			}
 			break;
 
 		case SANE_CONSTRAINT_WORD_LIST:
 			is_valid = FALSE;
 			word_list = this->sane_option->constraint.word_list;
 			word_list_length = *word_list;
+			if (this->sane_option->type == SANE_TYPE_FIXED)
+				word = SANE_FIX(value);
+			else
+				word = (SANE_Word) value;
 			for (index = 1; index <= word_list_length; index++) {
-				if (value == word_list[index]) {
+				if (word == word_list[index]) {
 					is_valid = TRUE;
 					break;
 				}
@@ -149,7 +161,7 @@ BOOL WINSANE_Option::IsValidValue(_In_ SANE_Word value)
 	return is_valid;
 }
 
-BOOL WINSANE_Option::IsValidValue(_In_ SANE_String value)
+BOOL WINSANE_Option::IsValidValue(_In_ SANE_String_Const value)
 {
 	SANE_String_Const *string_list;
 	BOOL is_valid;

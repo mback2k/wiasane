@@ -101,8 +101,6 @@ HRESULT GetOptionMaxValueInch(WINSANE_Option *option, double *value)
 
 HRESULT IsValidOptionValueInch(WINSANE_Option *option, double value)
 {
-	SANE_Word word;
-
 	if (!option)
 		return E_INVALIDARG;
 
@@ -116,20 +114,7 @@ HRESULT IsValidOptionValueInch(WINSANE_Option *option, double value)
 			break;
 	}
 
-	switch (option->GetType()) {
-		case SANE_TYPE_INT:
-			word = (SANE_Int) value;
-			break;
-
-		case SANE_TYPE_FIXED:
-			word = (SANE_Fixed) SANE_FIX(value);
-			break;
-
-		default:
-			return E_INVALIDARG;
-	}
-
-	return option->IsValidValue(word) ? S_OK : E_INVALIDARG;
+	return option->IsValidValue(value) ? S_OK : E_INVALIDARG;
 }
 
 HRESULT SetOptionValueInch(WINSANE_Option *option, double value)

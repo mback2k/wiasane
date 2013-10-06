@@ -30,8 +30,8 @@ public:
 	PSANE_Word GetConstraintWordList();
 	PSANE_String_Const GetConstraintStringList();
 
-	BOOL IsValidValue(_In_ SANE_Word value);
-	BOOL IsValidValue(_In_ SANE_String value);
+	BOOL IsValidValue(_In_ double value);
+	BOOL IsValidValue(_In_ SANE_String_Const value);
 
 	HRESULT GetValue(_Inout_ double *value);
 	HRESULT GetValueBool(_Inout_ PSANE_Bool value_bool);
