@@ -395,6 +395,106 @@ VOID CALLBACK DeviceInstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR lps
 	HeapFree(hHeap, 0, lpInfPath);
 }
 
+VOID CALLBACK DeviceUninstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR lpszCmdLine, _In_ int nCmdShow)
+{
+	LPTSTR lpInfPath, lpDsInfPath, lpClassName, lpHardwareIds;
+	DWORD dwType, cbDsInfPath, cbClassName, cbHardwareIds;
+	SP_DEVINFO_DATA deviceInfoData;
+	HDEVINFO hDeviceInfoSet;
+	HANDLE hHeap;
+	HRESULT hr;
+	DWORD res;
+	GUID guid;
+	int i;
+
+	UNREFERENCED_PARAMETER(hInst);
+	UNREFERENCED_PARAMETER(nCmdShow);
+
+	if (!lpszCmdLine)
+		return Trace(TEXT("Missing parameters"));
+
+	Trace(TEXT("DeviceUninstall(%08X, %08X, %hs, %d)"), hwnd, hInst, lpszCmdLine, nCmdShow);
+
+	hHeap = GetProcessHeap();
+	if (!hHeap)
+		return Trace(TEXT("Missing heap"));
+
+	hr = CreateInstallInfo(hHeap, lpszCmdLine, &lpInfPath, NULL);
+	if (FAILED(hr))
+		return Trace(TEXT("Missing install info"));
+
+	res = DriverPackageGetPath(lpInfPath, NULL, &cbDsInfPath);
+	if (res == ERROR_INSUFFICIENT_BUFFER) {
+		lpDsInfPath = (LPTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbDsInfPath * sizeof(TCHAR));
+		if (lpDsInfPath) {
+			res = DriverPackageGetPath(lpInfPath, lpDsInfPath, &cbDsInfPath);
+			if (res == ERROR_SUCCESS) {
+				Trace(TEXT("DsInfPath: %s"), lpDsInfPath);
+
+				res = SetupDiGetINFClass(lpDsInfPath, &guid, NULL, 0, &cbClassName);
+				if (!res && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+					lpClassName = (LPTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbClassName * sizeof(TCHAR));
+					if (lpClassName) {
+						res = SetupDiGetINFClass(lpDsInfPath, &guid, lpClassName, cbClassName, &cbClassName);
+						if (res) {
+							Trace(TEXT("ClassName: %s"), lpClassName);
+
+							hDeviceInfoSet = SetupDiGetClassDevs(&guid, NULL, hwnd, 0);
+							if (hDeviceInfoSet != INVALID_HANDLE_VALUE) {
+								ZeroMemory(&deviceInfoData, sizeof(SP_DEVINFO_DATA));
+								deviceInfoData.cbSize = sizeof(SP_DEVINFO_DATA);
+
+								for (i = 0; deviceInfoData.cbSize; i++) {
+									res = SetupDiEnumDeviceInfo(hDeviceInfoSet, i, &deviceInfoData);
+									if (res) {
+										res = SetupDiGetDeviceRegistryProperty(hDeviceInfoSet, &deviceInfoData, SPDRP_HARDWAREID, &dwType, NULL, 0, &cbHardwareIds);
+										if (!res && GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
+											lpHardwareIds = (LPTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbHardwareIds);
+											if (lpHardwareIds) {
+												res = SetupDiGetDeviceRegistryProperty(hDeviceInfoSet, &deviceInfoData, SPDRP_HARDWAREID, &dwType, (PBYTE) lpHardwareIds, cbHardwareIds, &cbHardwareIds);
+												if (res) {
+													if ((dwType == REG_SZ || dwType == REG_MULTI_SZ) && lstrcmp(lpHardwareIds, TEXT("Image_Network_WIASANE\0")) == 0) {
+														res = SetupDiCallClassInstaller(DIF_REMOVE, hDeviceInfoSet, &deviceInfoData);
+														if (!res)
+															Trace(TEXT("SetupDiCallClassInstaller failed: %08X"), GetLastError());
+													}
+												} else
+													Trace(TEXT("SetupDiGetDeviceRegistryProperty 2 failed: %08X"), GetLastError());
+
+												HeapFree(hHeap, 0, lpHardwareIds);
+											} else
+												Trace(TEXT("HeapAlloc failed"));
+										} else
+											Trace(TEXT("SetupDiGetDeviceRegistryProperty 1 failed: %08X"), GetLastError());
+									} else if (GetLastError() == ERROR_NO_MORE_ITEMS) {
+										break;
+									} else
+										Trace(TEXT("SetupDiEnumDeviceInfo failed: %08X"), GetLastError());
+								}
+
+								SetupDiDestroyDeviceInfoList(hDeviceInfoSet);
+							} else
+								Trace(TEXT("SetupDiGetClassDevs failed: %08X"), GetLastError());
+						} else
+							Trace(TEXT("SetupDiGetINFClass 2 failed: %08X"), GetLastError());
+
+						HeapFree(hHeap, 0, lpClassName);
+					} else
+						Trace(TEXT("HeapAlloc failed"));
+				} else
+					Trace(TEXT("SetupDiGetINFClass 1 failed: %08X"), GetLastError());
+			} else
+				Trace(TEXT("DriverPackageGetPath 2 failed: %08X"), res);
+
+			HeapFree(hHeap, 0, lpDsInfPath);
+		} else
+			Trace(TEXT("HeapAlloc failed"));
+	} else
+		Trace(TEXT("DriverPackageGetPath 1 failed: %08X"), res);
+
+	HeapFree(hHeap, 0, lpInfPath);
+}
+
 
 DWORD UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags)
 {
