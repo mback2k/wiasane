@@ -17,6 +17,7 @@ __user_code
 VOID Trace(_In_ LPCTSTR pszFormat, ...);
 HINF OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _Out_opt_ PUINT ErrorLine);
 
+DWORD UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags);
 DWORD ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD StateChange, _In_ DWORD Scope);
 DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device);
 
@@ -24,5 +25,7 @@ DWORD QueryDeviceData(_In_ PCOISANE_Data privateData);
 DWORD UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device);
 
 size_t CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device, _Inout_ LPTSTR *ppszResolutions);
+
+HRESULT CreateInstallInfo(_In_ HANDLE hHeap, _In_ LPSTR lpszCmdLine, _Inout_ LPTSTR *lpInfPath, _Out_opt_ PINSTALLERINFO pInstallerInfo);
 
 #endif

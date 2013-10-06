@@ -31,8 +31,4 @@ VOID CALLBACK DriverUninstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR l
 VOID CALLBACK DeviceInstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR lpszCmdLine, _In_ int nCmdShow);
 VOID CALLBACK DeviceUninstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR lpszCmdLine, _In_ int nCmdShow);
 
-DWORD UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags);
-
-HRESULT CreateInstallInfo(_In_ HANDLE hHeap, _In_ LPSTR lpszCmdLine, _Inout_ LPTSTR *lpInfPath, _Out_opt_ PINSTALLERINFO pInstallerInfo);
-
 #endif

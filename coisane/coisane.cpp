@@ -494,39 +494,3 @@ VOID CALLBACK DeviceUninstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR l
 
 	HeapFree(hHeap, 0, lpInfPath);
 }
-
-
-DWORD UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags)
-{
-	SP_DEVINSTALL_PARAMS devInstallParams;
-	BOOL res;
-
-	ZeroMemory(&devInstallParams, sizeof(devInstallParams));
-	devInstallParams.cbSize = sizeof(devInstallParams);
-	res = SetupDiGetDeviceInstallParams(hDeviceInfoSet, pDeviceInfoData, &devInstallParams);
-	if (!res)
-		return GetLastError();
-
-	devInstallParams.Flags |= dwFlags;
-	res = SetupDiSetDeviceInstallParams(hDeviceInfoSet, pDeviceInfoData, &devInstallParams);
-	if (!res)
-		return GetLastError();
-
-	return NO_ERROR;
-}
-
-
-HRESULT CreateInstallInfo(_In_ HANDLE hHeap, _In_ LPSTR lpszCmdLine, _Inout_ LPTSTR *lpInfPath, _Out_opt_ PINSTALLERINFO pInstallerInfo)
-{
-	size_t cbInfPath;
-
-	if (pInstallerInfo) {
-		ZeroMemory(pInstallerInfo, sizeof(INSTALLERINFO));
-		pInstallerInfo->pApplicationId = TEXT("{B7D5E900-AF40-11DD-AD8B-0800200C9A65}");
-		pInstallerInfo->pDisplayName = TEXT("Scanner Access Now Easy - WIA Driver");
-		pInstallerInfo->pProductName = pInstallerInfo->pDisplayName;
-		pInstallerInfo->pMfgName = TEXT("Marc Hörsken");
-	}
-
-	return StringCchAPrintf(hHeap, lpInfPath, &cbInfPath, TEXT("%hs"), lpszCmdLine);
-}
