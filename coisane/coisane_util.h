@@ -26,6 +26,6 @@ DWORD UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 
 size_t CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device, _Inout_ LPTSTR *ppszResolutions);
 
-HRESULT CreateInstallInfo(_In_ HANDLE hHeap, _In_ LPSTR lpszCmdLine, _Inout_ LPTSTR *lpInfPath, _Out_opt_ PINSTALLERINFO pInstallerInfo);
+DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Inout_ PINSTALLERINFO pInstallerInfo, _Inout_ LPVOID *plpData);
 
 #endif

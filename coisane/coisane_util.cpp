@@ -8,6 +8,8 @@
 #include <strsafe.h>
 #include <malloc.h>
 
+#include "dllmain.h"
+#include "resource.h"
 #include "coisane_str.h"
 
 
@@ -368,17 +370,79 @@ size_t CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device
 }
 
 
-HRESULT CreateInstallInfo(_In_ HANDLE hHeap, _In_ LPSTR lpszCmdLine, _Inout_ LPTSTR *lpInfPath, _Out_opt_ PINSTALLERINFO pInstallerInfo)
+DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Inout_ PINSTALLERINFO pInstallerInfo, _Inout_ LPVOID *plpData)
 {
-	size_t cbInfPath;
+	TCHAR szModuleFileName[MAX_PATH + 1];
+	LPTSTR lpszSubBlock, lpszValue;
+	LPWORD lpwLanguage;
+	DWORD dwLen, dwHandle;
+	size_t cbSubBlock;
+	HMODULE hModule;
+	UINT cbSize;
+	HRESULT hr;
+	BOOL res;
 
-	if (pInstallerInfo) {
-		ZeroMemory(pInstallerInfo, sizeof(INSTALLERINFO));
-		pInstallerInfo->pApplicationId = TEXT("{B7D5E900-AF40-11DD-AD8B-0800200C9A65}");
-		pInstallerInfo->pDisplayName = TEXT("Scanner Access Now Easy - WIA Driver");
-		pInstallerInfo->pProductName = pInstallerInfo->pDisplayName;
-		pInstallerInfo->pMfgName = TEXT("Marc Hörsken");
-	}
+	if (!pInstallerInfo || !plpData)
+		return ERROR_INVALID_PARAMETER;
 
-	return StringCchAPrintf(hHeap, lpInfPath, &cbInfPath, TEXT("%hs"), lpszCmdLine);
+	hModule = GetModuleInstance();
+	if (!hModule)
+		return ERROR_OUTOFMEMORY;
+
+	dwLen = GetModuleFileName(hModule, szModuleFileName, MAX_PATH);
+	if (!dwLen)
+		return GetLastError();
+
+	dwLen = GetFileVersionInfoSize(szModuleFileName, &dwHandle);
+	if (!dwLen)
+		return GetLastError();
+
+	*plpData = HeapAlloc(hHeap, HEAP_ZERO_MEMORY, dwLen);
+	if (!*plpData)
+		return ERROR_OUTOFMEMORY;
+
+	ZeroMemory(pInstallerInfo, sizeof(INSTALLERINFO));
+	LoadString(hModule, IDS_APPLICATION_ID, (LPWSTR) &pInstallerInfo->pApplicationId, 0);
+
+	res = GetFileVersionInfo(szModuleFileName, dwHandle, dwLen, *plpData);
+	if (res) {
+		res = VerQueryValue(*plpData, TEXT("\\VarFileInfo\\Translation"), (LPVOID*) &lpwLanguage, &cbSize);
+		if (res) {
+			Trace(TEXT("Translation: %04x%04x (%d)"), lpwLanguage[0], lpwLanguage[1], cbSize);
+
+			hr = StringCbAPrintf(hHeap, &lpszSubBlock, &cbSubBlock, TEXT("\\StringFileInfo\\%04x%04x\\ProductName"), lpwLanguage[0], lpwLanguage[1]);
+			if (SUCCEEDED(hr)) {
+				Trace(TEXT("SubBlock: %s (%d)"), lpszSubBlock, cbSubBlock);
+
+				res = VerQueryValue(*plpData, lpszSubBlock, (LPVOID*) &lpszValue, &cbSize);
+				if (res) {
+					pInstallerInfo->pDisplayName = lpszValue;
+					pInstallerInfo->pProductName = lpszValue;
+				} else
+					Trace(TEXT("VerQueryValue 2 failed: %08X"), GetLastError());
+			} else
+				Trace(TEXT("StringCbAPrintf 1 failed: %08X"), hr);
+
+			hr = StringCbAPrintf(hHeap, &lpszSubBlock, &cbSubBlock, TEXT("\\StringFileInfo\\%04x%04x\\CompanyName"), lpwLanguage[0], lpwLanguage[1]);
+			if (SUCCEEDED(hr)) {
+				Trace(TEXT("SubBlock: %s (%d)"), lpszSubBlock, cbSubBlock);
+
+				res = VerQueryValue(*plpData, lpszSubBlock, (LPVOID*) &lpszValue, &cbSize);
+				if (res) {
+					pInstallerInfo->pMfgName = lpszValue;
+				} else
+					Trace(TEXT("VerQueryValue 3 failed: %08X"), GetLastError());
+			} else
+				Trace(TEXT("StringCbAPrintf 2 failed: %08X"), hr);
+		} else
+			Trace(TEXT("VerQueryValue 1 failed: %08X"), GetLastError());
+	} else
+		Trace(TEXT("GetFileVersionInfo failed: %08X"), GetLastError());
+
+	Trace(TEXT("ApplicationID: %s"), pInstallerInfo->pApplicationId);
+	Trace(TEXT("DisplayName:   %s"), pInstallerInfo->pDisplayName);
+	Trace(TEXT("ProductName:   %s"), pInstallerInfo->pProductName);
+	Trace(TEXT("MfgName:       %s"), pInstallerInfo->pMfgName);
+
+	return ERROR_SUCCESS;
 }

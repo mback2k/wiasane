@@ -178,8 +178,10 @@ VOID CALLBACK DriverInstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR lps
 {
 	INSTALLERINFO installerInfo;
 	LPTSTR lpInfPath;
+	size_t cbInfPath;
 	DWORD dwFlags;
 	BOOL needReboot;
+	LPVOID lpData;
 	HANDLE hHeap;
 	HRESULT hr;
 	DWORD res;
@@ -196,18 +198,23 @@ VOID CALLBACK DriverInstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR lps
 	if (!hHeap)
 		return Trace(TEXT("Missing heap"));
 
-	hr = CreateInstallInfo(hHeap, lpszCmdLine, &lpInfPath, &installerInfo);
+	hr = StringCchAPrintf(hHeap, &lpInfPath, &cbInfPath, TEXT("%hs"), lpszCmdLine);
 	if (FAILED(hr))
 		return Trace(TEXT("Missing install info"));
 
-	if (nCmdShow == SW_HIDE)
-		dwFlags = DRIVER_PACKAGE_SILENT;
-	else
-		dwFlags = 0;
+	res = CreateInstallInfo(hHeap, &installerInfo, &lpData);
+	if (res == ERROR_SUCCESS) {
+		if (nCmdShow == SW_HIDE)
+			dwFlags = DRIVER_PACKAGE_SILENT;
+		else
+			dwFlags = 0;
 
-	res = DriverPackageInstall(lpInfPath, dwFlags, &installerInfo, &needReboot);
-	if (res != ERROR_SUCCESS && res != ERROR_NO_SUCH_DEVINST)
-		Trace(TEXT("DriverPackageInstall failed: %08X"), res);
+		res = DriverPackageInstall(lpInfPath, dwFlags, &installerInfo, &needReboot);
+		if (res != ERROR_SUCCESS && res != ERROR_NO_SUCH_DEVINST)
+			Trace(TEXT("DriverPackageInstall failed: %08X"), res);
+
+		HeapFree(hHeap, 0, lpData);
+	}
 
 	HeapFree(hHeap, 0, lpInfPath);
 }
@@ -217,7 +224,9 @@ VOID CALLBACK DriverUninstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR l
 	INSTALLERINFO installerInfo;
 	LPTSTR lpInfPath, lpDsInfPath;
 	DWORD dwFlags, cbDsInfPath;
+	size_t cbInfPath;
 	BOOL needReboot;
+	LPVOID lpData;
 	HANDLE hHeap;
 	HRESULT hr;
 	DWORD res;
@@ -234,7 +243,7 @@ VOID CALLBACK DriverUninstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR l
 	if (!hHeap)
 		return Trace(TEXT("Missing heap"));
 
-	hr = CreateInstallInfo(hHeap, lpszCmdLine, &lpInfPath, &installerInfo);
+	hr = StringCchAPrintf(hHeap, &lpInfPath, &cbInfPath, TEXT("%hs"), lpszCmdLine);
 	if (FAILED(hr))
 		return Trace(TEXT("Missing install info"));
 
@@ -246,14 +255,19 @@ VOID CALLBACK DriverUninstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR l
 			if (res == ERROR_SUCCESS) {
 				Trace(TEXT("DsInfPath: %s"), lpDsInfPath);
 
-				if (nCmdShow == SW_HIDE)
-					dwFlags = DRIVER_PACKAGE_SILENT;
-				else
-					dwFlags = 0;
+				res = CreateInstallInfo(hHeap, &installerInfo, &lpData);
+				if (res == ERROR_SUCCESS) {
+					if (nCmdShow == SW_HIDE)
+						dwFlags = DRIVER_PACKAGE_SILENT;
+					else
+						dwFlags = 0;
 
-				res = DriverPackageUninstall(lpDsInfPath, dwFlags, &installerInfo, &needReboot);
-				if (res != ERROR_SUCCESS)
-					Trace(TEXT("DriverPackageUninstall failed: %08X"), res);
+					res = DriverPackageUninstall(lpDsInfPath, dwFlags, &installerInfo, &needReboot);
+					if (res != ERROR_SUCCESS)
+						Trace(TEXT("DriverPackageUninstall failed: %08X"), res);
+
+					HeapFree(hHeap, 0, lpData);
+				}
 			} else
 				Trace(TEXT("DriverPackageGetPath 2 failed: %08X"), res);
 
@@ -270,9 +284,9 @@ VOID CALLBACK DeviceInstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR lps
 {
 	LPTSTR lpInfPath, lpDsInfPath, lpClassName, lpHardwareId, lpHardwareIds;
 	DWORD dwFlags, cbDsInfPath, cbClassName, cbHardwareId;
+	size_t cbInfPath, cbHardwareIds;
 	SP_DEVINFO_DATA deviceInfoData;
 	HDEVINFO hDeviceInfoSet;
-	size_t cbHardwareIds;
 	HANDLE hHeap;
 	HRESULT hr;
 	DWORD res;
@@ -290,7 +304,7 @@ VOID CALLBACK DeviceInstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR lps
 	if (!hHeap)
 		return Trace(TEXT("Missing heap"));
 
-	hr = CreateInstallInfo(hHeap, lpszCmdLine, &lpInfPath, NULL);
+	hr = StringCchAPrintf(hHeap, &lpInfPath, &cbInfPath, TEXT("%hs"), lpszCmdLine);
 	if (FAILED(hr))
 		return Trace(TEXT("Missing install info"));
 
@@ -401,6 +415,7 @@ VOID CALLBACK DeviceUninstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR l
 	DWORD dwType, cbDsInfPath, cbClassName, cbHardwareIds;
 	SP_DEVINFO_DATA deviceInfoData;
 	HDEVINFO hDeviceInfoSet;
+	size_t cbInfPath;
 	HANDLE hHeap;
 	HRESULT hr;
 	DWORD res;
@@ -419,7 +434,7 @@ VOID CALLBACK DeviceUninstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR l
 	if (!hHeap)
 		return Trace(TEXT("Missing heap"));
 
-	hr = CreateInstallInfo(hHeap, lpszCmdLine, &lpInfPath, NULL);
+	hr = StringCchAPrintf(hHeap, &lpInfPath, &cbInfPath, TEXT("%hs"), lpszCmdLine);
 	if (FAILED(hr))
 		return Trace(TEXT("Missing install info"));
 
