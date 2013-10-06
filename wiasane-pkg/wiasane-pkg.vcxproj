@@ -43,14 +43,19 @@
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)'=='Debug'">
     <UseDebugLibraries>True</UseDebugLibraries>
+    <SignMode>TestSign</SignMode>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)'=='Release'">
     <UseDebugLibraries>False</UseDebugLibraries>
+    <SignMode>ProductionSign</SignMode>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
   </ImportGroup>
+  <ItemGroup>
+    <PropertyPageSchema Include="$(WDKContentRoot)build\1033\sign.xml" />
+  </ItemGroup>
   <PropertyGroup>
     <OutDir>$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\Temp\</IntDir>
@@ -66,6 +71,7 @@
     <VerifyDrivers />
     <VerifyFlags>133563</VerifyFlags>
     <PackageDir>$(OutDir)wiasane-pkg</PackageDir>
+    <TimeStampServer>http://timestamp.comodoca.com/authenticode</TimeStampServer>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Inf2Cat>

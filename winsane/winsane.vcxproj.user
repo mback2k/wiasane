@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <ProductionCertificate>E=info@marc-hoersken.de, CN=Marc Hörsken, L=Oberhausen, S=Nordrhein-Westfalen, C=DE, Description=iIR2G9Yg1O9171rQ | A134190D4A6EF60CFF10754897CEBFBDEA705255</ProductionCertificate>
+  </PropertyGroup>
+</Project>

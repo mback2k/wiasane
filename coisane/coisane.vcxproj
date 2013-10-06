@@ -42,20 +42,26 @@
     <UseDebugLibraries>True</UseDebugLibraries>
     <LinkIncremental>True</LinkIncremental>
     <WholeProgramOptimization>False</WholeProgramOptimization>
+    <SignMode>TestSign</SignMode>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)'=='Release'">
     <UseDebugLibraries>False</UseDebugLibraries>
     <LinkIncremental>False</LinkIncremental>
     <WholeProgramOptimization>True</WholeProgramOptimization>
+    <SignMode>ProductionSign</SignMode>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
     <OutDir>$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\Temp\</IntDir>
+    <TimeStampServer>http://timestamp.comodoca.com/authenticode</TimeStampServer>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
   </ImportGroup>
+  <ItemGroup>
+    <PropertyPageSchema Include="$(WDKContentRoot)build\1033\sign.xml" />
+  </ItemGroup>
   <ItemDefinitionGroup>
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
@@ -94,10 +100,6 @@
       <EnableCOMDATFolding>True</EnableCOMDATFolding>
       <OptimizeReferences>True</OptimizeReferences>
     </Link>
-    <PostBuildEvent>
-      <Command>signtool sign /t "http://timestamp.comodoca.com/authenticode" /a /i "Object" "$(TargetPath)"</Command>
-      <Message>SignTool</Message>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
