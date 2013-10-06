@@ -12,9 +12,9 @@ Source: {#SourceDir64bit}\coisane.dll; DestDir: {app}; Flags: overwritereadonly 
 Source: {#SourceDir64bit}\wiasane.inf; DestDir: {app}; Flags: overwritereadonly restartreplace 64bit; Check: Is64BitInstallMode
 Source: {#SourceDir64bit}\wiasane.cat; DestDir: {app}; Flags: overwritereadonly restartreplace 64bit; Check: Is64BitInstallMode
 [Icons]
-Name: {group}\{cm:StartInstallDevice}; Filename: {sys}\rundll32.exe; Parameters: .\coisane.dll,DeviceInstall {app}\wiasane.inf; WorkingDir: {app}; IconFilename: {uninstallexe}; AfterInstall: SetRunAsAdminFlag('{group}\{cm:StartInstallDevice}.lnk')
-Name: {group}\{cm:StartUninstallDevice}; Filename: {sys}\rundll32.exe; Parameters: .\coisane.dll,DeviceUninstall {app}\wiasane.inf; WorkingDir: {app}; IconFilename: {uninstallexe}; AfterInstall: SetRunAsAdminFlag('{group}\{cm:StartUninstallDevice}.lnk')
-Name: {group}\{cm:StartUninstallDriver}; Filename: {uninstallexe}; IconFilename: {uninstallexe}
+Name: {group}\{cm:StartInstallDevice}; Filename: {sys}\rundll32.exe; Parameters: .\coisane.dll,DeviceInstall {app}\wiasane.inf; WorkingDir: {app}; IconFilename: sti.dll; AfterInstall: SetRunAsAdminFlag('{group}\{cm:StartInstallDevice}.lnk')
+Name: {group}\{cm:StartUninstallDevice}; Filename: {sys}\rundll32.exe; Parameters: .\coisane.dll,DeviceUninstall {app}\wiasane.inf; WorkingDir: {app}; IconFilename: sti.dll; AfterInstall: SetRunAsAdminFlag('{group}\{cm:StartUninstallDevice}.lnk')
+Name: {group}\{cm:StartUninstallDriver}; Filename: {uninstallexe}; IconFilename: devmgr.dll; IconIndex: 4
 [Setup]
 OutputDir=.
 MinVersion=0,6.1.7600
