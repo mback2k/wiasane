@@ -19,7 +19,7 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDevi
 	switch (InstallFunction) {
 		case DIF_INSTALLDEVICE:
 			Trace(TEXT("DIF_INSTALLDEVICE"));
-			ret = InstallDevice(hDeviceInfoSet, pDeviceInfoData);
+			ret = UpdateInstallDeviceFlags(hDeviceInfoSet, pDeviceInfoData, DI_INSTALLDISABLED);
 			break;
 
 		case DIF_REMOVE:
@@ -137,6 +137,7 @@ DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDevi
 
 		case DIF_INSTALLINTERFACES:
 			Trace(TEXT("DIF_INSTALLINTERFACES"));
+			ret = UpdateInstallDeviceFlags(hDeviceInfoSet, pDeviceInfoData, DI_INSTALLDISABLED);
 			break;
 
 		case DIF_DETECTCANCEL:
@@ -395,7 +396,7 @@ VOID CALLBACK DeviceInstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR lps
 }
 
 
-DWORD InstallDevice(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
+DWORD UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags)
 {
 	SP_DEVINSTALL_PARAMS devInstallParams;
 	BOOL res;
@@ -406,7 +407,7 @@ DWORD InstallDevice(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceI
 	if (!res)
 		return GetLastError();
 
-	devInstallParams.Flags |= DI_INSTALLDISABLED;
+	devInstallParams.Flags |= dwFlags;
 	res = SetupDiSetDeviceInstallParams(hDeviceInfoSet, pDeviceInfoData, &devInstallParams);
 	if (!res)
 		return GetLastError();
