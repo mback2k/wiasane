@@ -246,9 +246,10 @@ VOID CALLBACK DriverUninstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR l
 			if (res == ERROR_SUCCESS) {
 				Trace(TEXT("DsInfPath: %s"), lpDsInfPath);
 
-				dwFlags = DRIVER_PACKAGE_DELETE_FILES | DRIVER_PACKAGE_FORCE;
 				if (nCmdShow == SW_HIDE)
-					dwFlags |= DRIVER_PACKAGE_SILENT;
+					dwFlags = DRIVER_PACKAGE_SILENT;
+				else
+					dwFlags = 0;
 
 				res = DriverPackageUninstall(lpDsInfPath, dwFlags, &installerInfo, &needReboot);
 				if (res != ERROR_SUCCESS)
@@ -278,7 +279,6 @@ VOID CALLBACK DeviceInstall(_In_ HWND hwnd, _In_ HINSTANCE hInst, _In_ LPSTR lps
 	GUID guid;
 	int i;
 
-	UNREFERENCED_PARAMETER(hwnd);
 	UNREFERENCED_PARAMETER(hInst);
 
 	if (!lpszCmdLine)
