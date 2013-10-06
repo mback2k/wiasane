@@ -102,6 +102,10 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 				case PSN_RESET:
 					Trace(TEXT("PSN_RESET"));
 					break;
+
+				case PSN_QUERYCANCEL:
+					Trace(TEXT("PSN_QUERYCANCEL"));
+					break;
 			}
 			break;
 	}

@@ -134,6 +134,11 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 				case PSN_WIZFINISH:
 					Trace(TEXT("PSN_WIZFINISH"));
 					break;
+
+				case PSN_QUERYCANCEL:
+					Trace(TEXT("PSN_QUERYCANCEL"));
+					ChangeDeviceState(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_DISABLE, DICS_FLAG_GLOBAL);
+					break;
 			}
 			break;
 	}
@@ -184,6 +189,11 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 
 				case PSN_WIZFINISH:
 					Trace(TEXT("PSN_WIZFINISH"));
+					break;
+
+				case PSN_QUERYCANCEL:
+					Trace(TEXT("PSN_QUERYCANCEL"));
+					ChangeDeviceState(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_DISABLE, DICS_FLAG_GLOBAL);
 					break;
 			}
 			break;
