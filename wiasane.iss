@@ -12,7 +12,8 @@ Source: {#SourceDir64bit}\coisane.dll; DestDir: {app}; Flags: overwritereadonly 
 Source: {#SourceDir64bit}\wiasane.inf; DestDir: {app}; Flags: overwritereadonly restartreplace 64bit; Check: Is64BitInstallMode
 Source: {#SourceDir64bit}\wiasane.cat; DestDir: {app}; Flags: overwritereadonly restartreplace 64bit; Check: Is64BitInstallMode
 [Icons]
-Name: {group}\{cm:StartInstallScanner}; Filename: {sys}\rundll32.exe; Parameters: .\coisane.dll,DeviceInstall {app}\wiasane.inf; WorkingDir: {app}; IconFilename: {uninstallexe}; AfterInstall: SetRunAsAdminFlag('{group}\{cm:StartInstallScanner}.lnk')
+Name: {group}\{cm:StartInstallDevice}; Filename: {sys}\rundll32.exe; Parameters: .\coisane.dll,DeviceInstall {app}\wiasane.inf; WorkingDir: {app}; IconFilename: {uninstallexe}; AfterInstall: SetRunAsAdminFlag('{group}\{cm:StartInstallDevice}.lnk')
+Name: {group}\{cm:StartUninstallDevice}; Filename: {sys}\rundll32.exe; Parameters: .\coisane.dll,DeviceUninstall {app}\wiasane.inf; WorkingDir: {app}; IconFilename: {uninstallexe}; AfterInstall: SetRunAsAdminFlag('{group}\{cm:StartUninstallDevice}.lnk')
 Name: {group}\{cm:StartUninstallDriver}; Filename: {uninstallexe}; IconFilename: {uninstallexe}
 [Setup]
 OutputDir=.
@@ -39,6 +40,7 @@ SignTool=signtool
 Filename: {sys}\rundll32.exe; Parameters: .\coisane.dll,DriverInstall {app}\wiasane.inf; WorkingDir: {app}; Flags: waituntilterminated; StatusMsg: {cm:InstallDriver}
 Filename: {sys}\rundll32.exe; Parameters: .\coisane.dll,DeviceInstall {app}\wiasane.inf; WorkingDir: {app}; Flags: waituntilterminated; StatusMsg: {cm:InstallDevice}
 [UninstallRun]
+Filename: {sys}\rundll32.exe; Parameters: .\coisane.dll,DeviceUninstall {app}\wiasane.inf; WorkingDir: {app}; Flags: runhidden waituntilterminated; StatusMsg: {cm:UninstallDevice}
 Filename: {sys}\rundll32.exe; Parameters: .\coisane.dll,DriverUninstall {app}\wiasane.inf; WorkingDir: {app}; Flags: runhidden waituntilterminated; StatusMsg: {cm:UninstallDriver}
 [UninstallDelete]
 Name: {app}; Type: filesandordirs
@@ -46,15 +48,19 @@ Name: {app}; Type: filesandordirs
 Name: English; MessagesFile: compiler:Default.isl
 Name: German; MessagesFile: compiler:Languages\German.isl
 [CustomMessages]
-StartInstallScanner=Install scanner
+StartInstallDevice=Install scanner
+StartUninstallDevice=Uninstall scanners
 StartUninstallDriver=Uninstall driver
 InstallDriver=Installing driver ...
 InstallDevice=Installing device ...
+UninstallDevice=Uninstalling devices ...
 UninstallDriver=Uninstalling driver ...
-German.StartInstallScanner=Scanner installieren
+German.StartInstallDevice=Scanner installieren
+German.StartUninstallDevice=Scanner deinstallieren
 German.StartUninstallDriver=Treiber deinstallieren
 German.InstallDriver=Installiere Treiber ...
 German.InstallDevice=Installiere Gerät ...
+German.UninstallDevice=Deinstalliere Geräte ...
 German.UninstallDriver=Deinstalliere Treiber ...
 [Code]
 const
