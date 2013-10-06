@@ -306,9 +306,6 @@ HRESULT WINSANE_Option::SetValue(_In_ double value)
 {
 	HRESULT hr;
 
-	if (!value)
-		return E_INVALIDARG;
-
 	switch (this->sane_option->type) {
 		case SANE_TYPE_BOOL:
 			hr = this->SetValueBool((SANE_Bool) value);

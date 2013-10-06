@@ -103,7 +103,7 @@ HRESULT IsValidOptionValueInch(WINSANE_Option *option, double value)
 {
 	SANE_Word word;
 
-	if (!option || !value)
+	if (!option)
 		return E_INVALIDARG;
 
 	switch (option->GetUnit()) {
