@@ -3,8 +3,9 @@ Signature="$WINDOWS NT$"
 Class=Image
 ClassGUID={6BDD1FC6-810F-11D0-BEC7-08002BE2092F}
 Provider=%WIASANE.Provider%
-DriverVer=20/10/2012,0.1.0.0
 CatalogFile=wiasane.cat
+DriverVer=20/10/2012,0.1.0.0
+DriverPackageDisplayName=%WIASANE.DeviceDesc%
 
 [SourceDisksFiles.$ARCH$]
 winsane.dll=1
@@ -71,4 +72,4 @@ coisane.dll
 [Strings]
 WIASANE.Provider="Marc Hörsken"
 WIASANE.Location="Install Source"
-WIASANE.DeviceDesc="Scanner Access Now Easy"
+WIASANE.DeviceDesc="Scanner Access Now Easy - WIA Driver"
