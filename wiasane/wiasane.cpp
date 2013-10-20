@@ -4,7 +4,6 @@
 #include <math.h>
 #include <winioctl.h>
 #include <usbscan.h>
-#include <stdlib.h>
 #include <tchar.h>
 
 #include "wiasane_opt.h"
@@ -475,15 +474,15 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 	hKey = (HKEY) pScanInfo->DeviceIOHandles[2];
 	hOpenKey = NULL;
 
-	if (pContext->pszHost)
-		free(pContext->pszHost);
-
-	if (pContext->pszName)
-		free(pContext->pszName);
-
 	pContext->usPort = WINSANE_DEFAULT_PORT;
-	pContext->pszHost = _tcsdup(TEXT("localhost"));
-	pContext->pszName = NULL;
+	if (pContext->pszHost) {
+		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszHost);
+		pContext->pszHost = NULL;
+	}
+	if (pContext->pszName) {
+		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszName);
+		pContext->pszName = NULL;
+	}
 
 	//
 	// Open DeviceData section to read driver specific information
@@ -511,14 +510,11 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 			if (pszHost) {
 				st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)pszHost, &dwWritten);
 				if (st == ERROR_SUCCESS) {
-					if (pContext->pszHost)
-						free(pContext->pszHost);
-
-					pContext->pszHost = _tcsdup(pszHost);
-				} else
+					pContext->pszHost = pszHost;
+				} else {
+					HeapFree(pScanInfo->DeviceIOHandles[1], 0, pszHost);
 					hr = E_FAIL;
-
-				HeapFree(pScanInfo->DeviceIOHandles[1], 0, pszHost);
+				}
 			} else
 				hr = E_OUTOFMEMORY;
 		} else
@@ -534,14 +530,11 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 			if (pszName) {
 				st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)pszName, &dwWritten);
 				if (st == ERROR_SUCCESS) {
-					if (pContext->pszName)
-						free(pContext->pszName);
-
-					pContext->pszName = _tcsdup(pszName);
-				} else
+					pContext->pszName = pszName;
+				} else {
+					HeapFree(pScanInfo->DeviceIOHandles[1], 0, pszName);
 					hr = E_FAIL;
-
-				HeapFree(pScanInfo->DeviceIOHandles[1], 0, pszName);
+				}
 			} else
 				hr = E_OUTOFMEMORY;
 		} else
@@ -602,10 +595,10 @@ HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 HRESULT FreeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
 	if (pContext->pszHost)
-		free(pContext->pszHost);
+		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszHost);
 
 	if (pContext->pszName)
-		free(pContext->pszName);
+		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszName);
 
 	ZeroMemory(pContext, sizeof(WIASANE_Context));
 	HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext);
