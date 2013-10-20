@@ -14,7 +14,7 @@
 WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 {
 	PWIASANE_Context pContext;
-	PWINSANE_Option option;
+	PWINSANE_Option oOption;
 	PWINSANE_Params params;
 	HANDLE hHeap;
 	HRESULT hr;
@@ -130,12 +130,12 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_SETXRESOLUTION:
 		case CMD_SETYRESOLUTION:
 			if (pContext && pContext->session && pContext->device) {
-				option = pContext->device->GetOption("resolution");
-				if (!option) {
+				oOption = pContext->device->GetOption("resolution");
+				if (!oOption) {
 					hr = E_NOTIMPL;
 					break;
 				}
-				if (!option->IsValidValue(pValue->lVal)) {
+				if (!oOption->IsValidValue(pValue->lVal)) {
 					hr = E_INVALIDARG;
 					break;
 				}
@@ -159,12 +159,12 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_SETCONTRAST:
 			if (pContext && pContext->session && pContext->device) {
-				option = pContext->device->GetOption("contrast");
-				if (!option) {
+				oOption = pContext->device->GetOption("contrast");
+				if (!oOption) {
 					hr = E_NOTIMPL;
 					break;
 				}
-				if (!option->IsValidValue(pValue->lVal)) {
+				if (!oOption->IsValidValue(pValue->lVal)) {
 					hr = E_INVALIDARG;
 					break;
 				}
@@ -180,12 +180,12 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_SETINTENSITY:
 			if (pContext && pContext->session && pContext->device) {
-				option = pContext->device->GetOption("brightness");
-				if (!option) {
+				oOption = pContext->device->GetOption("brightness");
+				if (!oOption) {
 					hr = E_NOTIMPL;
 					break;
 				}
-				if (!option->IsValidValue(pValue->lVal)) {
+				if (!oOption->IsValidValue(pValue->lVal)) {
 					hr = E_INVALIDARG;
 					break;
 				}
@@ -387,7 +387,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y, LONG xExtent, LONG yExtent)
 {
 	PWIASANE_Context pContext;
-	PWINSANE_Option opt_tl_x, opt_tl_y, opt_br_x, opt_br_y;
+	PWINSANE_Option oOptionTLx, oOptionTLy, oOptionBRx, oOptionBRy;
 	HRESULT hr;
 	double tl_x, tl_y, br_x, br_y;
 
@@ -401,12 +401,12 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 	if (!pContext->session || !pContext->device)
 		return E_FAIL;
 
-	opt_tl_x = pContext->device->GetOption("tl-x");
-	opt_tl_y = pContext->device->GetOption("tl-y");
-	opt_br_x = pContext->device->GetOption("br-x");
-	opt_br_y = pContext->device->GetOption("br-y");
+	oOptionTLx = pContext->device->GetOption("tl-x");
+	oOptionTLy = pContext->device->GetOption("tl-y");
+	oOptionBRx = pContext->device->GetOption("br-x");
+	oOptionBRy = pContext->device->GetOption("br-y");
 
-	if (!opt_tl_x || !opt_tl_y || !opt_br_x || !opt_br_y)
+	if (!oOptionTLx || !oOptionTLy || !oOptionBRx || !oOptionBRy)
 		return E_INVALIDARG;
 
 	tl_x = ((double) x) / ((double) pScanInfo->Xresolution);
@@ -414,35 +414,35 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 	br_x = ((double) (x + xExtent)) / ((double) pScanInfo->Xresolution);
 	br_y = ((double) (y + yExtent)) / ((double) pScanInfo->Yresolution);
 
-	hr = IsValidOptionValueInch(opt_tl_x, tl_x);
+	hr = IsValidOptionValueInch(oOptionTLx, tl_x);
 	if (FAILED(hr))
 		return hr;
 
-	hr = IsValidOptionValueInch(opt_tl_y, tl_y);
+	hr = IsValidOptionValueInch(oOptionTLy, tl_y);
 	if (FAILED(hr))
 		return hr;
 
-	hr = IsValidOptionValueInch(opt_br_x, br_x);
+	hr = IsValidOptionValueInch(oOptionBRx, br_x);
 	if (FAILED(hr))
 		return hr;
 
-	hr = IsValidOptionValueInch(opt_br_y, br_y);
+	hr = IsValidOptionValueInch(oOptionBRy, br_y);
 	if (FAILED(hr))
 		return hr;
 
-	hr = SetOptionValueInch(opt_tl_x, tl_x);
+	hr = SetOptionValueInch(oOptionTLx, tl_x);
 	if (FAILED(hr))
 		return hr;
 
-	hr = SetOptionValueInch(opt_tl_y, tl_y);
+	hr = SetOptionValueInch(oOptionTLy, tl_y);
 	if (FAILED(hr))
 		return hr;
 
-	hr = SetOptionValueInch(opt_br_x, br_x);
+	hr = SetOptionValueInch(oOptionBRx, br_x);
 	if (FAILED(hr))
 		return hr;
 
-	hr = SetOptionValueInch(opt_br_y, br_y);
+	hr = SetOptionValueInch(oOptionBRy, br_y);
 	if (FAILED(hr))
 		return hr;
 
@@ -615,7 +615,7 @@ HRESULT FreeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pConte
 
 HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	PWINSANE_Option option;
+	PWINSANE_Option oOption;
 	PSANE_String_Const string_list;
 	PSANE_Range range;
 	HRESULT hr;
@@ -629,9 +629,9 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 		pScanInfo->SupportedCompressionType = 0;
 		pScanInfo->SupportedDataTypes       = 0;
 
-		option = pContext->device->GetOption("mode");
-		if (option && option->GetType() == SANE_TYPE_STRING && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
-			string_list = option->GetConstraintStringList();
+		oOption = pContext->device->GetOption("mode");
+		if (oOption && oOption->GetType() == SANE_TYPE_STRING && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
+			string_list = oOption->GetConstraintStringList();
 			for (index = 0; string_list[index] != NULL; index++) {
 				if (strcmp(string_list[index], "Lineart") == 0) {
 					pScanInfo->SupportedDataTypes |= SUPPORT_BW;
@@ -646,16 +646,16 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 		pScanInfo->BedWidth  = 8500;  // 1000's of an inch (WIA compatible unit)
 		pScanInfo->BedHeight = 11000; // 1000's of an inch (WIA compatible unit)
 
-		option = pContext->device->GetOption("br-x");
-		if (option) {
-			hr = GetOptionMaxValueInch(option, &dbl);
+		oOption = pContext->device->GetOption("br-x");
+		if (oOption) {
+			hr = GetOptionMaxValueInch(oOption, &dbl);
 			if (SUCCEEDED(hr)) {
 				pScanInfo->BedWidth = (LONG) (dbl * 1000.0);
 			}
 		}
-		option = pContext->device->GetOption("br-y");
-		if (option) {
-			hr = GetOptionMaxValueInch(option, &dbl);
+		oOption = pContext->device->GetOption("br-y");
+		if (oOption) {
+			hr = GetOptionMaxValueInch(oOption, &dbl);
 			if (SUCCEEDED(hr)) {
 				pScanInfo->BedHeight = (LONG) (dbl * 1000.0);
 			}
@@ -664,13 +664,13 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 		pScanInfo->OpticalXResolution = 300;
 		pScanInfo->Xresolution = pScanInfo->OpticalXResolution;
 
-		option = pContext->device->GetOption("resolution");
-		if (option) {
-			hr = GetOptionMaxValue(option, &dbl);
+		oOption = pContext->device->GetOption("resolution");
+		if (oOption) {
+			hr = GetOptionMaxValue(oOption, &dbl);
 			if (SUCCEEDED(hr)) {
 				pScanInfo->OpticalXResolution = (LONG) dbl;
 			}
-			hr = option->GetValue(&dbl);
+			hr = oOption->GetValue(&dbl);
 			if (SUCCEEDED(hr) == S_OK) {
 				pScanInfo->Xresolution = (LONG) dbl;
 			}
@@ -684,16 +684,16 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 		pScanInfo->ContrastRange.lMax  = 100;
 		pScanInfo->ContrastRange.lStep = 1;
 
-		option = pContext->device->GetOption("contrast");
-		if (option) {
-			if (option->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
-				range = option->GetConstraintRange();
+		oOption = pContext->device->GetOption("contrast");
+		if (oOption) {
+			if (oOption->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
+				range = oOption->GetConstraintRange();
 				pScanInfo->Contrast            = (range->min + range->max) / 2;
 				pScanInfo->ContrastRange.lMin  = range->min;
 				pScanInfo->ContrastRange.lMax  = range->max;
 				pScanInfo->ContrastRange.lStep = range->quant ? range->quant : 1;
 			}
-			hr = option->GetValue(&dbl);
+			hr = oOption->GetValue(&dbl);
 			if (SUCCEEDED(hr)) {
 				pScanInfo->Contrast = (LONG) dbl;
 			}
@@ -704,15 +704,15 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 		pScanInfo->IntensityRange.lMax  = 100;
 		pScanInfo->IntensityRange.lStep = 1;
 
-		option = pContext->device->GetOption("brightness");
-		if (option) {
-			if (option->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
-				range = option->GetConstraintRange();
+		oOption = pContext->device->GetOption("brightness");
+		if (oOption) {
+			if (oOption->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
+				range = oOption->GetConstraintRange();
 				pScanInfo->IntensityRange.lMin  = (range->min + range->max) / 2;
 				pScanInfo->IntensityRange.lMax  = range->max;
 				pScanInfo->IntensityRange.lStep = range->quant ? range->quant : 1;
 			}
-			hr = option->GetValue(&dbl);
+			hr = oOption->GetValue(&dbl);
 			if (SUCCEEDED(hr)) {
 				pScanInfo->Intensity = (LONG) dbl;
 			}
@@ -750,21 +750,21 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 
 HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	PWINSANE_Option option;
+	PWINSANE_Option oOption;
 	HRESULT hr;
 
 	if (pContext && pContext->session && pContext->device) {
-		option = pContext->device->GetOption("mode");
-		if (option && option->GetType() == SANE_TYPE_STRING) {
+		oOption = pContext->device->GetOption("mode");
+		if (oOption && oOption->GetType() == SANE_TYPE_STRING) {
 			switch (pScanInfo->DataType) {
 				case WIA_DATA_THRESHOLD:
-					hr = option->SetValueString("Lineart");
+					hr = oOption->SetValueString("Lineart");
 					break;
 				case WIA_DATA_GRAYSCALE:
-					hr = option->SetValueString("Gray");
+					hr = oOption->SetValueString("Gray");
 					break;
 				case WIA_DATA_COLOR:
-					hr = option->SetValueString("Color");
+					hr = oOption->SetValueString("Color");
 					break;
 				default:
 					hr = E_INVALIDARG;
@@ -775,24 +775,24 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 		} else
 			return E_NOTIMPL;
 
-		option = pContext->device->GetOption("resolution");
-		if (option) {
-			hr = option->SetValue(pScanInfo->Xresolution);
+		oOption = pContext->device->GetOption("resolution");
+		if (oOption) {
+			hr = oOption->SetValue(pScanInfo->Xresolution);
 			if (FAILED(hr))
 				return hr;
 		} else
 			return E_NOTIMPL;
 
-		option = pContext->device->GetOption("contrast");
-		if (option) {
-			hr = option->SetValue(pScanInfo->Contrast);
+		oOption = pContext->device->GetOption("contrast");
+		if (oOption) {
+			hr = oOption->SetValue(pScanInfo->Contrast);
 			if (FAILED(hr) && hr != E_NOTIMPL)
 				return hr;
 		}
 
-		option = pContext->device->GetOption("brightness");
-		if (option) {
-			hr = option->SetValue(pScanInfo->Intensity);
+		oOption = pContext->device->GetOption("brightness");
+		if (oOption) {
+			hr = oOption->SetValue(pScanInfo->Intensity);
 			if (FAILED(hr) && hr != E_NOTIMPL)
 				return hr;
 		}
@@ -875,7 +875,7 @@ HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _In_ LONG lScanMode)
 {
 	PWIASANE_Context pContext;
-	PWINSANE_Option option;
+	PWINSANE_Option oOption;
 	PSANE_String_Const string_list;
 	HRESULT hr;
 
@@ -890,17 +890,17 @@ HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _In_ LONG lScanMode)
 			Trace(TEXT("Final Scan"));
 
 			if (pContext->session && pContext->device) {
-				option = pContext->device->GetOption("preview");
-				if (option && option->GetType() == SANE_TYPE_BOOL) {
-					option->SetValueBool(SANE_FALSE);
+				oOption = pContext->device->GetOption("preview");
+				if (oOption && oOption->GetType() == SANE_TYPE_BOOL) {
+					oOption->SetValueBool(SANE_FALSE);
 				}
 
-				option = pContext->device->GetOption("compression");
-				if (option && option->GetType() == SANE_TYPE_STRING
-				 && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
-					string_list = option->GetConstraintStringList();
+				oOption = pContext->device->GetOption("compression");
+				if (oOption && oOption->GetType() == SANE_TYPE_STRING
+				 && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
+					string_list = oOption->GetConstraintStringList();
 					if (string_list[0] != NULL) {
-						option->SetValueString(string_list[0]);
+						oOption->SetValueString(string_list[0]);
 					}
 				}
 			}
@@ -912,17 +912,17 @@ HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _In_ LONG lScanMode)
 			Trace(TEXT("Preview Scan"));
 
 			if (pContext->session && pContext->device) {
-				option = pContext->device->GetOption("preview");
-				if (option && option->GetType() == SANE_TYPE_BOOL) {
-					option->SetValueBool(SANE_TRUE);
+				oOption = pContext->device->GetOption("preview");
+				if (oOption && oOption->GetType() == SANE_TYPE_BOOL) {
+					oOption->SetValueBool(SANE_TRUE);
 				}
 
-				option = pContext->device->GetOption("compression");
-				if (option && option->GetType() == SANE_TYPE_STRING
-				 && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
-					string_list = option->GetConstraintStringList();
+				oOption = pContext->device->GetOption("compression");
+				if (oOption && oOption->GetType() == SANE_TYPE_STRING
+				 && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
+					string_list = oOption->GetConstraintStringList();
 					if (string_list[0] != NULL && string_list[1] != NULL) {
-						option->SetValueString(string_list[1]);
+						oOption->SetValueString(string_list[1]);
 					}
 				}
 			}
