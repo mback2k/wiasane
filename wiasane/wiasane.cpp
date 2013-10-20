@@ -872,7 +872,7 @@ HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	return hr;
 }
 
-HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _Inout_ LONG lScanMode)
+HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _In_ LONG lScanMode)
 {
 	PWIASANE_Context pContext;
 	PWINSANE_Option option;
