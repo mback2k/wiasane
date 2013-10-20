@@ -30,13 +30,13 @@ typedef struct _WIASANE_Context {
 	PTSTR name;
 } WIASANE_Context, *PWIASANE_Context;
 
-HRESULT ReadRegistryInformation(WIASANE_Context *context, HANDLE *pHandle);
-HRESULT InitializeScanner(WIASANE_Context *context);
-HRESULT UninitializeScanner(WIASANE_Context *context);
-HRESULT FreeScanner(WIASANE_Context *context);
-HRESULT InitScannerDefaults(PSCANINFO pScanInfo, WIASANE_Context *context);
-HRESULT SetScannerSettings(PSCANINFO pScanInfo, WIASANE_Context *context);
-HRESULT FetchScannerParams(PSCANINFO pScanInfo, WIASANE_Context *context);
+HRESULT ReadRegistryInformation(PWIASANE_Context context, HANDLE *pHandle);
+HRESULT InitializeScanner(PWIASANE_Context context);
+HRESULT UninitializeScanner(PWIASANE_Context context);
+HRESULT FreeScanner(HANDLE hHeap, PWIASANE_Context context);
+HRESULT InitScannerDefaults(PSCANINFO pScanInfo, PWIASANE_Context context);
+HRESULT SetScannerSettings(PSCANINFO pScanInfo, PWIASANE_Context context);
+HRESULT FetchScannerParams(PSCANINFO pScanInfo, PWIASANE_Context context);
 HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode);
 
 #endif
