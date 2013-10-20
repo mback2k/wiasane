@@ -54,7 +54,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_INITIALIZE:
 			if (pContext) {
-				if (pContext->session)
+				if (pContext->oSession)
 					hr = UninitializeScanner(pValue->pScanInfo, pContext);
 				else
 					hr = S_OK;
@@ -73,7 +73,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_UNINITIALIZE:
 			if (pContext) {
-				if (pContext->session)
+				if (pContext->oSession)
 					hr = UninitializeScanner(pValue->pScanInfo, pContext);
 				else
 					hr = S_OK;
@@ -92,7 +92,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_RESETSCANNER:
 		case CMD_STI_DEVICERESET:
-			if (pContext && pContext->session && pContext->device) {
+			if (pContext && pContext->oSession && pContext->device) {
 				if (!pContext->device->Cancel()) {
 					hr = E_FAIL;
 					break;
@@ -103,7 +103,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_STI_DIAGNOSTIC:
-			if (pContext && pContext->session && pContext->device) {
+			if (pContext && pContext->oSession && pContext->device) {
 				if (!pContext->device->FetchOptions()) {
 					hr = E_FAIL;
 					break;
@@ -117,7 +117,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			pValue->lVal = MCRO_ERROR_OFFLINE;
 			pValue->pGuid = (GUID*) &GUID_NULL;
 
-			if (pContext && pContext->session && pContext->device) {
+			if (pContext && pContext->oSession && pContext->device) {
 				oParams = pContext->device->GetParams();
 				if (oParams) {
 					pValue->lVal = MCRO_STATUS_OK;
@@ -129,7 +129,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_SETXRESOLUTION:
 		case CMD_SETYRESOLUTION:
-			if (pContext && pContext->session && pContext->device) {
+			if (pContext && pContext->oSession && pContext->device) {
 				oOption = pContext->device->GetOption("resolution");
 				if (!oOption) {
 					hr = E_NOTIMPL;
@@ -158,7 +158,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_SETCONTRAST:
-			if (pContext && pContext->session && pContext->device) {
+			if (pContext && pContext->oSession && pContext->device) {
 				oOption = pContext->device->GetOption("contrast");
 				if (!oOption) {
 					hr = E_NOTIMPL;
@@ -179,7 +179,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_SETINTENSITY:
-			if (pContext && pContext->session && pContext->device) {
+			if (pContext && pContext->oSession && pContext->device) {
 				oOption = pContext->device->GetOption("brightness");
 				if (!oOption) {
 					hr = E_NOTIMPL;
@@ -270,7 +270,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			// first phase
 			//
 
-			if (pContext->session && pContext->device) {
+			if (pContext->oSession && pContext->device) {
 				hr = SetScannerSettings(pScanInfo, pContext);
 				if (FAILED(hr))
 					return hr;
@@ -306,7 +306,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			// next phase, get data from the scanner and set plReceived value
 			//
 
-			if (pContext->session && pContext->device && pContext->task && pContext->task->scan) {
+			if (pContext->oSession && pContext->device && pContext->task && pContext->task->scan) {
 				memset(pBuffer, 0, lLength);
 
 				aquire = pContext->task->xbytegap ? min(lLength, pScanInfo->WidthBytes) : lLength;
@@ -364,7 +364,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			// for cancelled scans.
 			//
 
-			if (pContext->session && pContext->device) {
+			if (pContext->oSession && pContext->device) {
 				if (pContext->task->scan) {
 					delete pContext->task->scan;
 					pContext->task->scan = NULL;
@@ -398,7 +398,7 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 	if (!pContext)
 		return E_OUTOFMEMORY;
 
-	if (!pContext->session || !pContext->device)
+	if (!pContext->oSession || !pContext->device)
 		return E_FAIL;
 
 	oOptionTLx = pContext->device->GetOption("tl-x");
@@ -557,9 +557,9 @@ HRESULT InitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 	UNREFERENCED_PARAMETER(pScanInfo);
 
 	pContext->task = NULL;
-	pContext->session = WINSANE_Session::Remote(pContext->host, pContext->port);
-	if (pContext->session && pContext->session->Init(NULL, NULL) && pContext->session->GetDevices() > 0) {
-		pContext->device = pContext->session->GetDevice(pContext->name);
+	pContext->oSession = WINSANE_Session::Remote(pContext->host, pContext->port);
+	if (pContext->oSession && pContext->oSession->Init(NULL, NULL) && pContext->oSession->GetDevices() > 0) {
+		pContext->device = pContext->oSession->GetDevice(pContext->name);
 		if (pContext->device && pContext->device->Open()) {
 			pContext->device->FetchOptions();
 		} else {
@@ -576,7 +576,7 @@ HRESULT InitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 
 HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	if (pContext->session) {
+	if (pContext->oSession) {
 		if (pContext->device) {
 			if (pContext->task) {
 				if (pContext->task->scan) {
@@ -591,9 +591,9 @@ HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 			pContext->device->Close();
 			pContext->device = NULL;
 		}
-		pContext->session->Exit();
-		delete pContext->session;
-		pContext->session = NULL;
+		pContext->oSession->Exit();
+		delete pContext->oSession;
+		pContext->oSession = NULL;
 	}
 
 	return S_OK;
@@ -622,7 +622,7 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	double dbl;
 	int index;
 
-	if (pContext && pContext->session && pContext->device) {
+	if (pContext && pContext->oSession && pContext->device) {
 		pScanInfo->ADF                = 0; // set to no ADF in Test device
 		pScanInfo->bNeedDataAlignment = TRUE;
 
@@ -753,7 +753,7 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	PWINSANE_Option oOption;
 	HRESULT hr;
 
-	if (pContext && pContext->session && pContext->device) {
+	if (pContext && pContext->oSession && pContext->device) {
 		oOption = pContext->device->GetOption("mode");
 		if (oOption && oOption->GetType() == SANE_TYPE_STRING) {
 			switch (pScanInfo->DataType) {
@@ -889,7 +889,7 @@ HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _In_ LONG lScanMode)
 		case SCANMODE_FINALSCAN:
 			Trace(TEXT("Final Scan"));
 
-			if (pContext->session && pContext->device) {
+			if (pContext->oSession && pContext->device) {
 				oOption = pContext->device->GetOption("preview");
 				if (oOption && oOption->GetType() == SANE_TYPE_BOOL) {
 					oOption->SetValueBool(SANE_FALSE);
@@ -911,7 +911,7 @@ HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _In_ LONG lScanMode)
 		case SCANMODE_PREVIEWSCAN:
 			Trace(TEXT("Preview Scan"));
 
-			if (pContext->session && pContext->device) {
+			if (pContext->oSession && pContext->device) {
 				oOption = pContext->device->GetOption("preview");
 				if (oOption && oOption->GetType() == SANE_TYPE_BOOL) {
 					oOption->SetValueBool(SANE_TRUE);
