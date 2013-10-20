@@ -9,10 +9,10 @@
 
 #include "winsane.h"
 
-HRESULT GetOptionMaxValue(WINSANE_Option *option, double *value);
-HRESULT GetOptionValueInch(WINSANE_Option *option, double *value);
-HRESULT GetOptionMaxValueInch(WINSANE_Option *option, double *value);
-HRESULT IsValidOptionValueInch(WINSANE_Option *option, double value);
-HRESULT SetOptionValueInch(WINSANE_Option *option, double value);
+HRESULT GetOptionMaxValue(_In_ PWINSANE_Option option, _Out_ double *value);
+HRESULT GetOptionValueInch(_In_ PWINSANE_Option option, _Out_ double *value);
+HRESULT GetOptionMaxValueInch(_In_ PWINSANE_Option option, _Out_ double *value);
+HRESULT IsValidOptionValueInch(_In_ PWINSANE_Option option, _In_ double value);
+HRESULT SetOptionValueInch(_In_ PWINSANE_Option option, _In_ double value);
 
 #endif

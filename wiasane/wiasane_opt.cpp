@@ -1,6 +1,6 @@
 #include "wiasane_opt.h"
 
-HRESULT GetOptionMaxValue(WINSANE_Option *option, double *value)
+HRESULT GetOptionMaxValue(_In_ PWINSANE_Option option, _Out_ double *value)
 {
 	SANE_Word *word_list, word;
 	SANE_Range *range;
@@ -43,7 +43,7 @@ HRESULT GetOptionMaxValue(WINSANE_Option *option, double *value)
 	return E_NOTIMPL;
 }
 
-HRESULT GetOptionValueInch(WINSANE_Option *option, double *value)
+HRESULT GetOptionValueInch(_In_ PWINSANE_Option option, _Out_ double *value)
 {
 	HRESULT hr;
 
@@ -71,7 +71,7 @@ HRESULT GetOptionValueInch(WINSANE_Option *option, double *value)
 	return hr;
 }
 
-HRESULT GetOptionMaxValueInch(WINSANE_Option *option, double *value)
+HRESULT GetOptionMaxValueInch(_In_ PWINSANE_Option option, _Out_ double *value)
 {
 	HRESULT hr;
 
@@ -99,7 +99,7 @@ HRESULT GetOptionMaxValueInch(WINSANE_Option *option, double *value)
 	return hr;
 }
 
-HRESULT IsValidOptionValueInch(WINSANE_Option *option, double value)
+HRESULT IsValidOptionValueInch(_In_ PWINSANE_Option option, _In_ double value)
 {
 	if (!option)
 		return E_INVALIDARG;
@@ -117,7 +117,7 @@ HRESULT IsValidOptionValueInch(WINSANE_Option *option, double value)
 	return option->IsValidValue(value) ? S_OK : E_INVALIDARG;
 }
 
-HRESULT SetOptionValueInch(WINSANE_Option *option, double value)
+HRESULT SetOptionValueInch(_In_ PWINSANE_Option option, _In_ double value)
 {
 	switch (option->GetUnit()) {
 		case SANE_UNIT_PIXEL:
