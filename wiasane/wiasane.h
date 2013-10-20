@@ -25,9 +25,9 @@ typedef struct _WIASANE_Context {
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
 	PWIASANE_Task pTask;
-	USHORT port;
-	PTSTR host;
-	PTSTR name;
+	USHORT usPort;
+	PTSTR pszHost;
+	PTSTR pszName;
 } WIASANE_Context, *PWIASANE_Context;
 
 HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);

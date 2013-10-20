@@ -467,7 +467,7 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 {
 	HKEY hKey, hOpenKey;
 	DWORD dwWritten, dwType, dwPort;
-	PTSTR ptHost, ptName;
+	PTSTR pszHost, pszName;
 	LSTATUS st;
 	HRESULT hr;
 
@@ -475,15 +475,15 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 	hKey = (HKEY) pScanInfo->DeviceIOHandles[2];
 	hOpenKey = NULL;
 
-	if (pContext->host)
-		free(pContext->host);
+	if (pContext->pszHost)
+		free(pContext->pszHost);
 
-	if (pContext->name)
-		free(pContext->name);
+	if (pContext->pszName)
+		free(pContext->pszName);
 
-	pContext->port = WINSANE_DEFAULT_PORT;
-	pContext->host = _tcsdup(TEXT("localhost"));
-	pContext->name = NULL;
+	pContext->usPort = WINSANE_DEFAULT_PORT;
+	pContext->pszHost = _tcsdup(TEXT("localhost"));
+	pContext->pszName = NULL;
 
 	//
 	// Open DeviceData section to read driver specific information
@@ -497,28 +497,28 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 
 		st = RegQueryValueEx(hOpenKey, TEXT("Port"), NULL, &dwType, (LPBYTE)&dwPort, &dwWritten);
 		if (st == ERROR_SUCCESS) {
-			pContext->port = (USHORT) dwPort;
+			pContext->usPort = (USHORT) dwPort;
 		} else
 			hr = E_FAIL;
 
 		dwWritten = 0;
 		dwType = REG_SZ;
-		ptHost = NULL;
+		pszHost = NULL;
 
-		st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)ptHost, &dwWritten);
+		st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)pszHost, &dwWritten);
 		if (st == ERROR_SUCCESS && dwWritten > 0) {
-			ptHost = (PTSTR) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, dwWritten);
-			if (ptHost) {
-				st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)ptHost, &dwWritten);
+			pszHost = (PTSTR) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, dwWritten);
+			if (pszHost) {
+				st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)pszHost, &dwWritten);
 				if (st == ERROR_SUCCESS) {
-					if (pContext->host)
-						free(pContext->host);
+					if (pContext->pszHost)
+						free(pContext->pszHost);
 
-					pContext->host = _tcsdup(ptHost);
+					pContext->pszHost = _tcsdup(pszHost);
 				} else
 					hr = E_FAIL;
 
-				HeapFree(pScanInfo->DeviceIOHandles[1], 0, ptHost);
+				HeapFree(pScanInfo->DeviceIOHandles[1], 0, pszHost);
 			} else
 				hr = E_OUTOFMEMORY;
 		} else
@@ -526,22 +526,22 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 
 		dwWritten = 0;
 		dwType = REG_SZ;
-		ptName = NULL;
+		pszName = NULL;
 
-		st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)ptName, &dwWritten);
+		st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)pszName, &dwWritten);
 		if (st == ERROR_SUCCESS && dwWritten > 0) {
-			ptName = (PTSTR) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, dwWritten);
-			if (ptName) {
-				st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)ptName, &dwWritten);
+			pszName = (PTSTR) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, dwWritten);
+			if (pszName) {
+				st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)pszName, &dwWritten);
 				if (st == ERROR_SUCCESS) {
-					if (pContext->name)
-						free(pContext->name);
+					if (pContext->pszName)
+						free(pContext->pszName);
 
-					pContext->name = _tcsdup(ptName);
+					pContext->pszName = _tcsdup(pszName);
 				} else
 					hr = E_FAIL;
 
-				HeapFree(pScanInfo->DeviceIOHandles[1], 0, ptName);
+				HeapFree(pScanInfo->DeviceIOHandles[1], 0, pszName);
 			} else
 				hr = E_OUTOFMEMORY;
 		} else
@@ -557,9 +557,9 @@ HRESULT InitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 	UNREFERENCED_PARAMETER(pScanInfo);
 
 	pContext->pTask = NULL;
-	pContext->oSession = WINSANE_Session::Remote(pContext->host, pContext->port);
+	pContext->oSession = WINSANE_Session::Remote(pContext->pszHost, pContext->usPort);
 	if (pContext->oSession && pContext->oSession->Init(NULL, NULL) && pContext->oSession->GetDevices() > 0) {
-		pContext->oDevice = pContext->oSession->GetDevice(pContext->name);
+		pContext->oDevice = pContext->oSession->GetDevice(pContext->pszName);
 		if (pContext->oDevice && pContext->oDevice->Open()) {
 			pContext->oDevice->FetchOptions();
 		} else {
@@ -601,11 +601,11 @@ HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 
 HRESULT FreeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	if (pContext->host)
-		free(pContext->host);
+	if (pContext->pszHost)
+		free(pContext->pszHost);
 
-	if (pContext->name)
-		free(pContext->name);
+	if (pContext->pszName)
+		free(pContext->pszName);
 
 	ZeroMemory(pContext, sizeof(WIASANE_Context));
 	HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext);
