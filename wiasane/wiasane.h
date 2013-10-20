@@ -14,7 +14,7 @@ _Analysis_mode_(_Analysis_code_type_user_driver_)
 #include "winsane.h"
 
 typedef struct _WIASANE_Task {
-	WINSANE_Scan *scan;
+	PWINSANE_Scan scan;
 	UINT total;
 	UINT received;
 	LONG xbytegap;
@@ -22,9 +22,9 @@ typedef struct _WIASANE_Task {
 } WIASANE_Task, *PWIASANE_Task;
 
 typedef struct _WIASANE_Context {
-	WINSANE_Session *session;
-	WINSANE_Device *device;
-	WIASANE_Task *task;
+	PWINSANE_Session session;
+	PWINSANE_Device device;
+	PWIASANE_Task task;
 	USHORT port;
 	PTSTR host;
 	PTSTR name;
