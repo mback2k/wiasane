@@ -275,12 +275,12 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				if (FAILED(hr))
 					return hr;
 
-				pContext->task = (PWIASANE_Task) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(WIASANE_Task));
-				if (!pContext->task)
+				pContext->pTask = (PWIASANE_Task) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(WIASANE_Task));
+				if (!pContext->pTask)
 					return E_OUTOFMEMORY;
 
-				pContext->task->scan = pContext->oDevice->Start();
-				if (pContext->task->scan->Connect() != CONTINUE)
+				pContext->pTask->scan = pContext->oDevice->Start();
+				if (pContext->pTask->scan->Connect() != CONTINUE)
 					return E_FAIL;
 
 				hr = FetchScannerParams(pScanInfo, pContext);
@@ -288,14 +288,14 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					return hr;
 
 				if (pScanInfo->PixelBits > 1)
-					pContext->task->xbytegap = (pScanInfo->Window.xExtent * pScanInfo->PixelBits / 8) - pScanInfo->WidthBytes;
+					pContext->pTask->xbytegap = (pScanInfo->Window.xExtent * pScanInfo->PixelBits / 8) - pScanInfo->WidthBytes;
 				else
-					pContext->task->xbytegap = ((LONG) floor(pScanInfo->Window.xExtent + 7.0) / 8) - pScanInfo->WidthBytes;
-				pContext->task->ybytegap = (pScanInfo->Window.yExtent - pScanInfo->Lines) * pScanInfo->WidthBytes;
+					pContext->pTask->xbytegap = ((LONG) floor(pScanInfo->Window.xExtent + 7.0) / 8) - pScanInfo->WidthBytes;
+				pContext->pTask->ybytegap = (pScanInfo->Window.yExtent - pScanInfo->Lines) * pScanInfo->WidthBytes;
 
-				pContext->task->total = pScanInfo->WidthBytes * pScanInfo->Lines;
-				pContext->task->received = 0;
-				Trace(TEXT("Data: %d/%d"), pContext->task->received, pContext->task->total);
+				pContext->pTask->total = pScanInfo->WidthBytes * pScanInfo->Lines;
+				pContext->pTask->received = 0;
+				Trace(TEXT("Data: %d/%d"), pContext->pTask->received, pContext->pTask->total);
 			}
 
 		case SCAN_NEXT: // SCAN_FIRST will fall through to SCAN_NEXT (because it is expecting data)
@@ -306,20 +306,20 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			// next phase, get data from the scanner and set plReceived value
 			//
 
-			if (pContext->oSession && pContext->oDevice && pContext->task && pContext->task->scan) {
+			if (pContext->oSession && pContext->oDevice && pContext->pTask && pContext->pTask->scan) {
 				memset(pBuffer, 0, lLength);
 
-				aquire = pContext->task->xbytegap ? min(lLength, pScanInfo->WidthBytes) : lLength;
+				aquire = pContext->pTask->xbytegap ? min(lLength, pScanInfo->WidthBytes) : lLength;
 				aquired = 0;
 
-				while (pContext->task->scan->AquireImage((pBuffer + *plReceived + aquired), &aquire) == CONTINUE) {
+				while (pContext->pTask->scan->AquireImage((pBuffer + *plReceived + aquired), &aquire) == CONTINUE) {
 					if (aquire > 0) {
-						if (pContext->task->xbytegap) {
+						if (pContext->pTask->xbytegap) {
 							aquired += aquire;
 							if (aquired == pScanInfo->WidthBytes) {
 								*plReceived += aquired;
-								if (lLength - *plReceived >= pContext->task->xbytegap)
-									*plReceived += pContext->task->xbytegap;
+								if (lLength - *plReceived >= pContext->pTask->xbytegap)
+									*plReceived += pContext->pTask->xbytegap;
 								aquired = 0;
 							}
 							if (lLength - *plReceived < pScanInfo->WidthBytes - aquired)
@@ -334,8 +334,8 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 						break;
 				}
 
-				if (pContext->task->ybytegap > 0 && *plReceived < lLength) {
-					aquired = min(lLength - *plReceived, pContext->task->ybytegap);
+				if (pContext->pTask->ybytegap > 0 && *plReceived < lLength) {
+					aquired = min(lLength - *plReceived, pContext->pTask->ybytegap);
 					memset(pBuffer + *plReceived, -1, aquired);
 					*plReceived += aquired;
 				}
@@ -346,9 +346,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					}
 				}
 
-				pContext->task->total = pScanInfo->WidthBytes * pScanInfo->Lines;
-				pContext->task->received += *plReceived;
-				Trace(TEXT("Data: %d/%d -> %d/%d"), pContext->task->received, pContext->task->total, pContext->task->total - pContext->task->received, lLength);
+				pContext->pTask->total = pScanInfo->WidthBytes * pScanInfo->Lines;
+				pContext->pTask->received += *plReceived;
+				Trace(TEXT("Data: %d/%d -> %d/%d"), pContext->pTask->received, pContext->pTask->total, pContext->pTask->total - pContext->pTask->received, lLength);
 			}
 
 			break;
@@ -365,14 +365,14 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			//
 
 			if (pContext->oSession && pContext->oDevice) {
-				if (pContext->task->scan) {
-					delete pContext->task->scan;
-					pContext->task->scan = NULL;
+				if (pContext->pTask->scan) {
+					delete pContext->pTask->scan;
+					pContext->pTask->scan = NULL;
 				}
-				if (pContext->task) {
-					ZeroMemory(pContext->task, sizeof(WIASANE_Task));
-					HeapFree(hHeap, 0, pContext->task);
-					pContext->task = NULL;
+				if (pContext->pTask) {
+					ZeroMemory(pContext->pTask, sizeof(WIASANE_Task));
+					HeapFree(hHeap, 0, pContext->pTask);
+					pContext->pTask = NULL;
 				}
 
 				pContext->oDevice->Cancel();
@@ -556,7 +556,7 @@ HRESULT InitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 {
 	UNREFERENCED_PARAMETER(pScanInfo);
 
-	pContext->task = NULL;
+	pContext->pTask = NULL;
 	pContext->oSession = WINSANE_Session::Remote(pContext->host, pContext->port);
 	if (pContext->oSession && pContext->oSession->Init(NULL, NULL) && pContext->oSession->GetDevices() > 0) {
 		pContext->oDevice = pContext->oSession->GetDevice(pContext->name);
@@ -578,15 +578,15 @@ HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 {
 	if (pContext->oSession) {
 		if (pContext->oDevice) {
-			if (pContext->task) {
-				if (pContext->task->scan) {
+			if (pContext->pTask) {
+				if (pContext->pTask->scan) {
 					pContext->oDevice->Cancel();
-					delete pContext->task->scan;
-					pContext->task->scan = NULL;
+					delete pContext->pTask->scan;
+					pContext->pTask->scan = NULL;
 				}
-				ZeroMemory(pContext->task, sizeof(WIASANE_Task));
-				HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->task);
-				pContext->task = NULL;
+				ZeroMemory(pContext->pTask, sizeof(WIASANE_Task));
+				HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pTask);
+				pContext->pTask = NULL;
 			}
 			pContext->oDevice->Close();
 			pContext->oDevice = NULL;
