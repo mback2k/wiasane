@@ -30,13 +30,13 @@ typedef struct _WIASANE_Context {
 	PTSTR name;
 } WIASANE_Context, *PWIASANE_Context;
 
-HRESULT ReadRegistryInformation(PWIASANE_Context context, HANDLE *pHandle);
-HRESULT InitializeScanner(PWIASANE_Context context);
-HRESULT UninitializeScanner(PWIASANE_Context context);
-HRESULT FreeScanner(HANDLE hHeap, PWIASANE_Context context);
-HRESULT InitScannerDefaults(PSCANINFO pScanInfo, PWIASANE_Context context);
-HRESULT SetScannerSettings(PSCANINFO pScanInfo, PWIASANE_Context context);
-HRESULT FetchScannerParams(PSCANINFO pScanInfo, PWIASANE_Context context);
-HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode);
+HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
+HRESULT InitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
+HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
+HRESULT FreeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
+HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
+HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
+HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
+HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, LONG lScanMode);
 
 #endif

@@ -13,15 +13,11 @@
 
 WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 {
-	WIASANE_Context *context;
-	WINSANE_Option *option;
-	WINSANE_Params *params;
+	PWIASANE_Context pContext;
+	PWINSANE_Option option;
+	PWINSANE_Params params;
 	HANDLE hHeap;
 	HRESULT hr;
-
-	hHeap = GetProcessHeap();
-	if (!hHeap)
-		return E_OUTOFMEMORY;
 
 #ifdef _DEBUG
 	if (lCommand != CMD_STI_GETSTATUS)
@@ -31,61 +27,73 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 	if (!pValue || !pValue->pScanInfo)
 		return E_INVALIDARG;
 
+	if (!pValue->pScanInfo->DeviceIOHandles[1])
+		pValue->pScanInfo->DeviceIOHandles[1] = GetProcessHeap();
+
+	hHeap = pValue->pScanInfo->DeviceIOHandles[1];
+	if (!hHeap)
+		return E_OUTOFMEMORY;
+
 	if (!pValue->pScanInfo->pMicroDriverContext)
 		pValue->pScanInfo->pMicroDriverContext = HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(WIASANE_Context));
 
 	hr = E_NOTIMPL;
-	context = (PWIASANE_Context) pValue->pScanInfo->pMicroDriverContext;
+	pContext = (PWIASANE_Context) pValue->pScanInfo->pMicroDriverContext;
 
     switch (lCommand) {
 		case CMD_SETSTIDEVICEHKEY:
-			if (context)
-				hr = ReadRegistryInformation(context, pValue->pHandle);
+			if (pValue->pHandle)
+				pValue->pScanInfo->DeviceIOHandles[2] = *pValue->pHandle;
+
+			if (pContext)
+				hr = ReadRegistryInformation(pValue->pScanInfo, pContext);
 			else
 				hr = E_FAIL;
 
 			break;
 
 		case CMD_INITIALIZE:
-			if (context) {
-				if (context->session)
-					hr = UninitializeScanner(context);
+			if (pContext) {
+				if (pContext->session)
+					hr = UninitializeScanner(pValue->pScanInfo, pContext);
 				else
 					hr = S_OK;
 
 				if (SUCCEEDED(hr))
-					hr = InitializeScanner(context);
+					hr = InitializeScanner(pValue->pScanInfo, pContext);
 			} else
 				hr = E_FAIL;
 
 			if (SUCCEEDED(hr))
-				hr = InitScannerDefaults(pValue->pScanInfo, context);
+				hr = InitScannerDefaults(pValue->pScanInfo, pContext);
+
+			pValue->pScanInfo->DeviceIOHandles[2] = NULL;
 
 			break;
 
 		case CMD_UNINITIALIZE:
-			if (context) {
-				if (context->session)
-					hr = UninitializeScanner(context);
+			if (pContext) {
+				if (pContext->session)
+					hr = UninitializeScanner(pValue->pScanInfo, pContext);
 				else
 					hr = S_OK;
 
 				if (SUCCEEDED(hr))
-					hr = FreeScanner(hHeap, context);
+					hr = FreeScanner(pValue->pScanInfo, pContext);
 
 				if (SUCCEEDED(hr))
-					context = NULL;
+					pContext = NULL;
 			} else
 				hr = S_OK;
 
-			pValue->pScanInfo->pMicroDriverContext = context;
+			pValue->pScanInfo->pMicroDriverContext = pContext;
 
 			break;
 
 		case CMD_RESETSCANNER:
 		case CMD_STI_DEVICERESET:
-			if (context && context->session && context->device) {
-				if (!context->device->Cancel()) {
+			if (pContext && pContext->session && pContext->device) {
+				if (!pContext->device->Cancel()) {
 					hr = E_FAIL;
 					break;
 				}
@@ -95,8 +103,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_STI_DIAGNOSTIC:
-			if (context && context->session && context->device) {
-				if (!context->device->FetchOptions()) {
+			if (pContext && pContext->session && pContext->device) {
+				if (!pContext->device->FetchOptions()) {
 					hr = E_FAIL;
 					break;
 				}
@@ -109,8 +117,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			pValue->lVal = MCRO_ERROR_OFFLINE;
 			pValue->pGuid = (GUID*) &GUID_NULL;
 
-			if (context && context->session && context->device) {
-				params = context->device->GetParams();
+			if (pContext && pContext->session && pContext->device) {
+				params = pContext->device->GetParams();
 				if (params) {
 					pValue->lVal = MCRO_STATUS_OK;
 				}
@@ -121,8 +129,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_SETXRESOLUTION:
 		case CMD_SETYRESOLUTION:
-			if (context && context->session && context->device) {
-				option = context->device->GetOption("resolution");
+			if (pContext && pContext->session && pContext->device) {
+				option = pContext->device->GetOption("resolution");
 				if (!option) {
 					hr = E_NOTIMPL;
 					break;
@@ -150,8 +158,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_SETCONTRAST:
-			if (context && context->session && context->device) {
-				option = context->device->GetOption("contrast");
+			if (pContext && pContext->session && pContext->device) {
+				option = pContext->device->GetOption("contrast");
 				if (!option) {
 					hr = E_NOTIMPL;
 					break;
@@ -171,8 +179,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_SETINTENSITY:
-			if (context && context->session && context->device) {
-				option = context->device->GetOption("brightness");
+			if (pContext && pContext->session && pContext->device) {
+				option = pContext->device->GetOption("brightness");
 				if (!option) {
 					hr = E_NOTIMPL;
 					break;
@@ -232,7 +240,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_bytes_(lLength) PBYTE pBuffer, LONG lLength, _Out_ LONG *plReceived)
 {
-	WIASANE_Context *context;
+	PWIASANE_Context pContext;
 	LONG idx, aquired;
 	DWORD aquire;
 	HANDLE hHeap;
@@ -246,12 +254,12 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 	if (pScanInfo == NULL)
 		return E_INVALIDARG;
 
-	hHeap = GetProcessHeap();
+	hHeap = pScanInfo->DeviceIOHandles[1];
 	if (!hHeap)
 		return E_OUTOFMEMORY;
 
-	context = (PWIASANE_Context) pScanInfo->pMicroDriverContext;
-	if (!context)
+	pContext = (PWIASANE_Context) pScanInfo->pMicroDriverContext;
+	if (!pContext)
 		return E_OUTOFMEMORY;
 
     switch (lPhase) {
@@ -262,32 +270,32 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			// first phase
 			//
 
-			if (context->session && context->device) {
-				hr = SetScannerSettings(pScanInfo, context);
+			if (pContext->session && pContext->device) {
+				hr = SetScannerSettings(pScanInfo, pContext);
 				if (FAILED(hr))
 					return hr;
 
-				context->task = (PWIASANE_Task) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(WIASANE_Task));
-				if (!context->task)
+				pContext->task = (PWIASANE_Task) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(WIASANE_Task));
+				if (!pContext->task)
 					return E_OUTOFMEMORY;
 
-				context->task->scan = context->device->Start();
-				if (context->task->scan->Connect() != CONTINUE)
+				pContext->task->scan = pContext->device->Start();
+				if (pContext->task->scan->Connect() != CONTINUE)
 					return E_FAIL;
 
-				hr = FetchScannerParams(pScanInfo, context);
+				hr = FetchScannerParams(pScanInfo, pContext);
 				if (FAILED(hr))
 					return hr;
 
 				if (pScanInfo->PixelBits > 1)
-					context->task->xbytegap = (pScanInfo->Window.xExtent * pScanInfo->PixelBits / 8) - pScanInfo->WidthBytes;
+					pContext->task->xbytegap = (pScanInfo->Window.xExtent * pScanInfo->PixelBits / 8) - pScanInfo->WidthBytes;
 				else
-					context->task->xbytegap = ((LONG) floor(pScanInfo->Window.xExtent + 7.0) / 8) - pScanInfo->WidthBytes;
-				context->task->ybytegap = (pScanInfo->Window.yExtent - pScanInfo->Lines) * pScanInfo->WidthBytes;
+					pContext->task->xbytegap = ((LONG) floor(pScanInfo->Window.xExtent + 7.0) / 8) - pScanInfo->WidthBytes;
+				pContext->task->ybytegap = (pScanInfo->Window.yExtent - pScanInfo->Lines) * pScanInfo->WidthBytes;
 
-				context->task->total = pScanInfo->WidthBytes * pScanInfo->Lines;
-				context->task->received = 0;
-				Trace(TEXT("Data: %d/%d"), context->task->received, context->task->total);
+				pContext->task->total = pScanInfo->WidthBytes * pScanInfo->Lines;
+				pContext->task->received = 0;
+				Trace(TEXT("Data: %d/%d"), pContext->task->received, pContext->task->total);
 			}
 
 		case SCAN_NEXT: // SCAN_FIRST will fall through to SCAN_NEXT (because it is expecting data)
@@ -298,20 +306,20 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			// next phase, get data from the scanner and set plReceived value
 			//
 
-			if (context->session && context->device && context->task && context->task->scan) {
+			if (pContext->session && pContext->device && pContext->task && pContext->task->scan) {
 				memset(pBuffer, 0, lLength);
 
-				aquire = context->task->xbytegap ? min(lLength, pScanInfo->WidthBytes) : lLength;
+				aquire = pContext->task->xbytegap ? min(lLength, pScanInfo->WidthBytes) : lLength;
 				aquired = 0;
 
-				while (context->task->scan->AquireImage((pBuffer + *plReceived + aquired), &aquire) == CONTINUE) {
+				while (pContext->task->scan->AquireImage((pBuffer + *plReceived + aquired), &aquire) == CONTINUE) {
 					if (aquire > 0) {
-						if (context->task->xbytegap) {
+						if (pContext->task->xbytegap) {
 							aquired += aquire;
 							if (aquired == pScanInfo->WidthBytes) {
 								*plReceived += aquired;
-								if (lLength - *plReceived >= context->task->xbytegap)
-									*plReceived += context->task->xbytegap;
+								if (lLength - *plReceived >= pContext->task->xbytegap)
+									*plReceived += pContext->task->xbytegap;
 								aquired = 0;
 							}
 							if (lLength - *plReceived < pScanInfo->WidthBytes - aquired)
@@ -326,8 +334,8 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 						break;
 				}
 
-				if (context->task->ybytegap > 0 && *plReceived < lLength) {
-					aquired = min(lLength - *plReceived, context->task->ybytegap);
+				if (pContext->task->ybytegap > 0 && *plReceived < lLength) {
+					aquired = min(lLength - *plReceived, pContext->task->ybytegap);
 					memset(pBuffer + *plReceived, -1, aquired);
 					*plReceived += aquired;
 				}
@@ -338,9 +346,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					}
 				}
 
-				context->task->total = pScanInfo->WidthBytes * pScanInfo->Lines;
-				context->task->received += *plReceived;
-				Trace(TEXT("Data: %d/%d -> %d/%d"), context->task->received, context->task->total, context->task->total - context->task->received, lLength);
+				pContext->task->total = pScanInfo->WidthBytes * pScanInfo->Lines;
+				pContext->task->received += *plReceived;
+				Trace(TEXT("Data: %d/%d -> %d/%d"), pContext->task->received, pContext->task->total, pContext->task->total - pContext->task->received, lLength);
 			}
 
 			break;
@@ -356,18 +364,18 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			// for cancelled scans.
 			//
 
-			if (context->session && context->device) {
-				if (context->task->scan) {
-					delete context->task->scan;
-					context->task->scan = NULL;
+			if (pContext->session && pContext->device) {
+				if (pContext->task->scan) {
+					delete pContext->task->scan;
+					pContext->task->scan = NULL;
 				}
-				if (context->task) {
-					ZeroMemory(context->task, sizeof(WIASANE_Task));
-					HeapFree(hHeap, 0, context->task);
-					context->task = NULL;
+				if (pContext->task) {
+					ZeroMemory(pContext->task, sizeof(WIASANE_Task));
+					HeapFree(hHeap, 0, pContext->task);
+					pContext->task = NULL;
 				}
 
-				context->device->Cancel();
+				pContext->device->Cancel();
 			}
 
 			break;
@@ -378,22 +386,25 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 
 WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y, LONG xExtent, LONG yExtent)
 {
-	WIASANE_Context *context;
-	WINSANE_Option *opt_tl_x, *opt_tl_y, *opt_br_x, *opt_br_y;
+	PWIASANE_Context pContext;
+	PWINSANE_Option opt_tl_x, opt_tl_y, opt_br_x, opt_br_y;
 	HRESULT hr;
 	double tl_x, tl_y, br_x, br_y;
 
     if (pScanInfo == NULL)
         return E_INVALIDARG;
 
-	context = (WIASANE_Context*) pScanInfo->pMicroDriverContext;
-	if (!context || !context->session || !context->device)
+	pContext = (PWIASANE_Context) pScanInfo->pMicroDriverContext;
+	if (!pContext)
+		return E_OUTOFMEMORY;
+
+	if (!pContext->session || !pContext->device)
 		return E_FAIL;
 
-	opt_tl_x = context->device->GetOption("tl-x");
-	opt_tl_y = context->device->GetOption("tl-y");
-	opt_br_x = context->device->GetOption("br-x");
-	opt_br_y = context->device->GetOption("br-y");
+	opt_tl_x = pContext->device->GetOption("tl-x");
+	opt_tl_y = pContext->device->GetOption("tl-y");
+	opt_br_x = pContext->device->GetOption("br-x");
+	opt_br_y = pContext->device->GetOption("br-y");
 
 	if (!opt_tl_x || !opt_tl_y || !opt_br_x || !opt_br_y)
 		return E_INVALIDARG;
@@ -452,35 +463,27 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 }
 
 
-HRESULT ReadRegistryInformation(PWIASANE_Context context, HANDLE *pHandle)
+HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
 	HKEY hKey, hOpenKey;
 	DWORD dwWritten, dwType, dwPort;
 	PTSTR ptHost, ptName;
-	HANDLE hHeap;
 	LSTATUS st;
 	HRESULT hr;
 
-	if (!pHandle)
-		return E_INVALIDARG;
-
-	hHeap = GetProcessHeap();
-	if (!hHeap)
-		return E_OUTOFMEMORY;
-
 	hr = S_OK;
-	hKey = (HKEY) *pHandle;
+	hKey = (HKEY) pScanInfo->DeviceIOHandles[2];
 	hOpenKey = NULL;
 
-	if (context->host)
-		free(context->host);
+	if (pContext->host)
+		free(pContext->host);
 
-	if (context->name)
-		free(context->name);
+	if (pContext->name)
+		free(pContext->name);
 
-	context->port = WINSANE_DEFAULT_PORT;
-	context->host = _tcsdup(TEXT("localhost"));
-	context->name = NULL;
+	pContext->port = WINSANE_DEFAULT_PORT;
+	pContext->host = _tcsdup(TEXT("localhost"));
+	pContext->name = NULL;
 
 	//
 	// Open DeviceData section to read driver specific information
@@ -494,7 +497,7 @@ HRESULT ReadRegistryInformation(PWIASANE_Context context, HANDLE *pHandle)
 
 		st = RegQueryValueEx(hOpenKey, TEXT("Port"), NULL, &dwType, (LPBYTE)&dwPort, &dwWritten);
 		if (st == ERROR_SUCCESS) {
-			context->port = (USHORT) dwPort;
+			pContext->port = (USHORT) dwPort;
 		} else
 			hr = E_FAIL;
 
@@ -504,18 +507,18 @@ HRESULT ReadRegistryInformation(PWIASANE_Context context, HANDLE *pHandle)
 
 		st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)ptHost, &dwWritten);
 		if (st == ERROR_SUCCESS && dwWritten > 0) {
-			ptHost = (PTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, dwWritten);
+			ptHost = (PTSTR) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, dwWritten);
 			if (ptHost) {
 				st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)ptHost, &dwWritten);
 				if (st == ERROR_SUCCESS) {
-					if (context->host)
-						free(context->host);
+					if (pContext->host)
+						free(pContext->host);
 
-					context->host = _tcsdup(ptHost);
+					pContext->host = _tcsdup(ptHost);
 				} else
 					hr = E_FAIL;
 
-				HeapFree(hHeap, 0, ptHost);
+				HeapFree(pScanInfo->DeviceIOHandles[1], 0, ptHost);
 			} else
 				hr = E_OUTOFMEMORY;
 		} else
@@ -527,18 +530,18 @@ HRESULT ReadRegistryInformation(PWIASANE_Context context, HANDLE *pHandle)
 
 		st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)ptName, &dwWritten);
 		if (st == ERROR_SUCCESS && dwWritten > 0) {
-			ptName = (PTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, dwWritten);
+			ptName = (PTSTR) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, dwWritten);
 			if (ptName) {
 				st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)ptName, &dwWritten);
 				if (st == ERROR_SUCCESS) {
-					if (context->name)
-						free(context->name);
+					if (pContext->name)
+						free(pContext->name);
 
-					context->name = _tcsdup(ptName);
+					pContext->name = _tcsdup(ptName);
 				} else
 					hr = E_FAIL;
 
-				HeapFree(hHeap, 0, ptName);
+				HeapFree(pScanInfo->DeviceIOHandles[1], 0, ptName);
 			} else
 				hr = E_OUTOFMEMORY;
 		} else
@@ -549,82 +552,84 @@ HRESULT ReadRegistryInformation(PWIASANE_Context context, HANDLE *pHandle)
 	return hr;
 }
 
-HRESULT InitializeScanner(PWIASANE_Context context)
+HRESULT InitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	context->task = NULL;
-	context->session = WINSANE_Session::Remote(context->host, context->port);
-	if (context->session && context->session->Init(NULL, NULL) && context->session->GetDevices() > 0) {
-		context->device = context->session->GetDevice(context->name);
-		if (context->device && context->device->Open()) {
-			context->device->FetchOptions();
+	UNREFERENCED_PARAMETER(pScanInfo);
+
+	pContext->task = NULL;
+	pContext->session = WINSANE_Session::Remote(pContext->host, pContext->port);
+	if (pContext->session && pContext->session->Init(NULL, NULL) && pContext->session->GetDevices() > 0) {
+		pContext->device = pContext->session->GetDevice(pContext->name);
+		if (pContext->device && pContext->device->Open()) {
+			pContext->device->FetchOptions();
 		} else {
-			context->device = NULL;
+			pContext->device = NULL;
 			return E_FAIL;
 		}
 	} else {
-		context->device = NULL;
+		pContext->device = NULL;
 		return E_FAIL;
 	}
 
     return S_OK;
 }
 
-HRESULT UninitializeScanner(PWIASANE_Context context)
+HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	if (context->session) {
-		if (context->device) {
-			if (context->task) {
-				if (context->task->scan) {
-					context->device->Cancel();
-					delete context->task->scan;
-					context->task->scan = NULL;
+	if (pContext->session) {
+		if (pContext->device) {
+			if (pContext->task) {
+				if (pContext->task->scan) {
+					pContext->device->Cancel();
+					delete pContext->task->scan;
+					pContext->task->scan = NULL;
 				}
-				ZeroMemory(context->task, sizeof(WIASANE_Task));
-				delete context->task;
-				context->task = NULL;
+				ZeroMemory(pContext->task, sizeof(WIASANE_Task));
+				HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->task);
+				pContext->task = NULL;
 			}
-			context->device->Close();
-			context->device = NULL;
+			pContext->device->Close();
+			pContext->device = NULL;
 		}
-		context->session->Exit();
-		delete context->session;
-		context->session = NULL;
+		pContext->session->Exit();
+		delete pContext->session;
+		pContext->session = NULL;
 	}
 
 	return S_OK;
 }
 
-HRESULT FreeScanner(HANDLE hHeap, PWIASANE_Context context)
+HRESULT FreeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	if (context->host)
-		free(context->host);
+	if (pContext->host)
+		free(pContext->host);
 
-	if (context->name)
-		free(context->name);
+	if (pContext->name)
+		free(pContext->name);
 
-	ZeroMemory(context, sizeof(WIASANE_Context));
-	HeapFree(hHeap, 0, context);
+	ZeroMemory(pContext, sizeof(WIASANE_Context));
+	HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext);
 
 	return S_OK;
 }
 
-HRESULT InitScannerDefaults(PSCANINFO pScanInfo, PWIASANE_Context context)
+HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	WINSANE_Option *option;
-	SANE_String_Const *string_list;
-	SANE_Range *range;
+	PWINSANE_Option option;
+	PSANE_String_Const string_list;
+	PSANE_Range range;
 	HRESULT hr;
 	double dbl;
 	int index;
 
-	if (context && context->session && context->device) {
+	if (pContext && pContext->session && pContext->device) {
 		pScanInfo->ADF                = 0; // set to no ADF in Test device
 		pScanInfo->bNeedDataAlignment = TRUE;
 
 		pScanInfo->SupportedCompressionType = 0;
 		pScanInfo->SupportedDataTypes       = 0;
 
-		option = context->device->GetOption("mode");
+		option = pContext->device->GetOption("mode");
 		if (option && option->GetType() == SANE_TYPE_STRING && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
 			string_list = option->GetConstraintStringList();
 			for (index = 0; string_list[index] != NULL; index++) {
@@ -641,14 +646,14 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, PWIASANE_Context context)
 		pScanInfo->BedWidth  = 8500;  // 1000's of an inch (WIA compatible unit)
 		pScanInfo->BedHeight = 11000; // 1000's of an inch (WIA compatible unit)
 
-		option = context->device->GetOption("br-x");
+		option = pContext->device->GetOption("br-x");
 		if (option) {
 			hr = GetOptionMaxValueInch(option, &dbl);
 			if (SUCCEEDED(hr)) {
 				pScanInfo->BedWidth = (LONG) (dbl * 1000.0);
 			}
 		}
-		option = context->device->GetOption("br-y");
+		option = pContext->device->GetOption("br-y");
 		if (option) {
 			hr = GetOptionMaxValueInch(option, &dbl);
 			if (SUCCEEDED(hr)) {
@@ -659,7 +664,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, PWIASANE_Context context)
 		pScanInfo->OpticalXResolution = 300;
 		pScanInfo->Xresolution = pScanInfo->OpticalXResolution;
 
-		option = context->device->GetOption("resolution");
+		option = pContext->device->GetOption("resolution");
 		if (option) {
 			hr = GetOptionMaxValue(option, &dbl);
 			if (SUCCEEDED(hr)) {
@@ -679,7 +684,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, PWIASANE_Context context)
 		pScanInfo->ContrastRange.lMax  = 100;
 		pScanInfo->ContrastRange.lStep = 1;
 
-		option = context->device->GetOption("contrast");
+		option = pContext->device->GetOption("contrast");
 		if (option) {
 			if (option->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
 				range = option->GetConstraintRange();
@@ -699,7 +704,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, PWIASANE_Context context)
 		pScanInfo->IntensityRange.lMax  = 100;
 		pScanInfo->IntensityRange.lStep = 1;
 
-		option = context->device->GetOption("brightness");
+		option = pContext->device->GetOption("brightness");
 		if (option) {
 			if (option->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
 				range = option->GetConstraintRange();
@@ -730,7 +735,7 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, PWIASANE_Context context)
 		pScanInfo->ToneMap                = 0;
 		pScanInfo->Compression            = 0;
 
-		hr = FetchScannerParams(pScanInfo, context);
+		hr = FetchScannerParams(pScanInfo, pContext);
 		if (FAILED(hr))
 			return hr;
 	}
@@ -743,13 +748,13 @@ HRESULT InitScannerDefaults(PSCANINFO pScanInfo, PWIASANE_Context context)
 	return S_OK;
 }
 
-HRESULT SetScannerSettings(PSCANINFO pScanInfo, PWIASANE_Context context)
+HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	WINSANE_Option *option;
+	PWINSANE_Option option;
 	HRESULT hr;
 
-	if (context && context->session && context->device) {
-		option = context->device->GetOption("mode");
+	if (pContext && pContext->session && pContext->device) {
+		option = pContext->device->GetOption("mode");
 		if (option && option->GetType() == SANE_TYPE_STRING) {
 			switch (pScanInfo->DataType) {
 				case WIA_DATA_THRESHOLD:
@@ -770,7 +775,7 @@ HRESULT SetScannerSettings(PSCANINFO pScanInfo, PWIASANE_Context context)
 		} else
 			return E_NOTIMPL;
 
-		option = context->device->GetOption("resolution");
+		option = pContext->device->GetOption("resolution");
 		if (option) {
 			hr = option->SetValue(pScanInfo->Xresolution);
 			if (FAILED(hr))
@@ -778,14 +783,14 @@ HRESULT SetScannerSettings(PSCANINFO pScanInfo, PWIASANE_Context context)
 		} else
 			return E_NOTIMPL;
 
-		option = context->device->GetOption("contrast");
+		option = pContext->device->GetOption("contrast");
 		if (option) {
 			hr = option->SetValue(pScanInfo->Contrast);
 			if (FAILED(hr) && hr != E_NOTIMPL)
 				return hr;
 		}
 
-		option = context->device->GetOption("brightness");
+		option = pContext->device->GetOption("brightness");
 		if (option) {
 			hr = option->SetValue(pScanInfo->Intensity);
 			if (FAILED(hr) && hr != E_NOTIMPL)
@@ -796,14 +801,14 @@ HRESULT SetScannerSettings(PSCANINFO pScanInfo, PWIASANE_Context context)
     return S_OK;
 }
 
-HRESULT FetchScannerParams(PSCANINFO pScanInfo, PWIASANE_Context context)
+HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	WINSANE_Params *params;
+	PWINSANE_Params params;
 	SANE_Frame frame;
 	SANE_Int depth;
 	HRESULT hr;
 
-	params = context->device->GetParams();
+	params = pContext->device->GetParams();
 	if (!params)
 		return E_FAIL;
 
@@ -867,15 +872,15 @@ HRESULT FetchScannerParams(PSCANINFO pScanInfo, PWIASANE_Context context)
 	return hr;
 }
 
-HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
+HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _Inout_ LONG lScanMode)
 {
-	WIASANE_Context *context;
-	WINSANE_Option *option;
-	SANE_String_Const *string_list;
+	PWIASANE_Context pContext;
+	PWINSANE_Option option;
+	PSANE_String_Const string_list;
 	HRESULT hr;
 
-	context = (PWIASANE_Context) pScanInfo->pMicroDriverContext;
-	if (!context)
+	pContext = (PWIASANE_Context) pScanInfo->pMicroDriverContext;
+	if (!pContext)
 		return E_OUTOFMEMORY;
 
 	hr = E_NOTIMPL;
@@ -884,13 +889,13 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 		case SCANMODE_FINALSCAN:
 			Trace(TEXT("Final Scan"));
 
-			if (context->session && context->device) {
-				option = context->device->GetOption("preview");
+			if (pContext->session && pContext->device) {
+				option = pContext->device->GetOption("preview");
 				if (option && option->GetType() == SANE_TYPE_BOOL) {
 					option->SetValueBool(SANE_FALSE);
 				}
 
-				option = context->device->GetOption("compression");
+				option = pContext->device->GetOption("compression");
 				if (option && option->GetType() == SANE_TYPE_STRING
 				 && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
 					string_list = option->GetConstraintStringList();
@@ -906,13 +911,13 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 		case SCANMODE_PREVIEWSCAN:
 			Trace(TEXT("Preview Scan"));
 
-			if (context->session && context->device) {
-				option = context->device->GetOption("preview");
+			if (pContext->session && pContext->device) {
+				option = pContext->device->GetOption("preview");
 				if (option && option->GetType() == SANE_TYPE_BOOL) {
 					option->SetValueBool(SANE_TRUE);
 				}
 
-				option = context->device->GetOption("compression");
+				option = pContext->device->GetOption("compression");
 				if (option && option->GetType() == SANE_TYPE_STRING
 				 && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
 					string_list = option->GetConstraintStringList();
