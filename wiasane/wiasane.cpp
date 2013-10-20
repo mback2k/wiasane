@@ -878,6 +878,11 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 			Trace(TEXT("Final Scan"));
 
 			if (context && context->session && context->device) {
+				option = context->device->GetOption("preview");
+				if (option && option->GetType() == SANE_TYPE_BOOL) {
+					option->SetValueBool(SANE_FALSE);
+				}
+
 				option = context->device->GetOption("compression");
 				if (option && option->GetType() == SANE_TYPE_STRING
 				 && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
@@ -895,6 +900,11 @@ HRESULT SetScanMode(PSCANINFO pScanInfo, LONG lScanMode)
 			Trace(TEXT("Preview Scan"));
 
 			if (context && context->session && context->device) {
+				option = context->device->GetOption("preview");
+				if (option && option->GetType() == SANE_TYPE_BOOL) {
+					option->SetValueBool(SANE_TRUE);
+				}
+
 				option = context->device->GetOption("compression");
 				if (option && option->GetType() == SANE_TYPE_STRING
 				 && option->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
