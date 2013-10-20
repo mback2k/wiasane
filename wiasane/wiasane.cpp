@@ -15,7 +15,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 {
 	PWIASANE_Context pContext;
 	PWINSANE_Option oOption;
-	PWINSANE_Params params;
+	PWINSANE_Params oParams;
 	HANDLE hHeap;
 	HRESULT hr;
 
@@ -118,8 +118,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			pValue->pGuid = (GUID*) &GUID_NULL;
 
 			if (pContext && pContext->session && pContext->device) {
-				params = pContext->device->GetParams();
-				if (params) {
+				oParams = pContext->device->GetParams();
+				if (oParams) {
 					pValue->lVal = MCRO_STATUS_OK;
 				}
 			}
@@ -803,17 +803,17 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 
 HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	PWINSANE_Params params;
+	PWINSANE_Params oParams;
 	SANE_Frame frame;
 	SANE_Int depth;
 	HRESULT hr;
 
-	params = pContext->device->GetParams();
-	if (!params)
+	oParams = pContext->device->GetParams();
+	if (!oParams)
 		return E_FAIL;
 
-	frame = params->GetFormat();
-	depth = params->GetDepth();
+	frame = oParams->GetFormat();
+	depth = oParams->GetDepth();
 
 	switch (frame) {
 		case SANE_FRAME_GRAY:
@@ -848,12 +848,12 @@ HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	}
 
 	if (SUCCEEDED(hr)) {
-		pScanInfo->WidthBytes = params->GetBytesPerLine();
-		pScanInfo->WidthPixels = params->GetPixelsPerLine();
-		pScanInfo->Lines = params->GetLines();
+		pScanInfo->WidthBytes = oParams->GetBytesPerLine();
+		pScanInfo->WidthPixels = oParams->GetPixelsPerLine();
+		pScanInfo->Lines = oParams->GetLines();
 	}
 
-	delete params;
+	delete oParams;
 
 #ifdef _DEBUG
     Trace(TEXT("Scanner parameters"));
