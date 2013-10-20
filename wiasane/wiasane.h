@@ -23,7 +23,7 @@ typedef struct _WIASANE_Task {
 
 typedef struct _WIASANE_Context {
 	PWINSANE_Session oSession;
-	PWINSANE_Device device;
+	PWINSANE_Device oDevice;
 	PWIASANE_Task task;
 	USHORT port;
 	PTSTR host;
