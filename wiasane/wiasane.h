@@ -13,6 +13,12 @@ _Analysis_mode_(_Analysis_code_type_user_driver_)
 
 #include "winsane.h"
 
+typedef struct _WIASANE_Values {
+	SANE_String_Const pszcModeThreshold;
+	SANE_String_Const pszcModeGrayscale;
+	SANE_String_Const pszcModeColor;
+} WIASANE_Values, *PWIASANE_Values;
+
 typedef struct _WIASANE_Task {
 	PWINSANE_Scan oScan;
 	UINT uiTotal;
@@ -24,6 +30,7 @@ typedef struct _WIASANE_Task {
 typedef struct _WIASANE_Context {
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
+	PWIASANE_Values pValues;
 	PWIASANE_Task pTask;
 	USHORT usPort;
 	PTSTR pszHost;

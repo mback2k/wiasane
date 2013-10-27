@@ -585,6 +585,11 @@ HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 				HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pTask);
 				pContext->pTask = NULL;
 			}
+			if (pContext->pValues) {
+				ZeroMemory(pContext->pValues, sizeof(WIASANE_Values));
+				HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues);
+				pContext->pValues = NULL;
+			}
 			pContext->oDevice->Close();
 			pContext->oDevice = NULL;
 		}
@@ -620,6 +625,10 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	int index;
 
 	if (pContext && pContext->oSession && pContext->oDevice) {
+		pContext->pValues = (PWIASANE_Values) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, sizeof(WIASANE_Values));
+		if (!pContext->pValues)
+			return E_OUTOFMEMORY;
+
 		pScanInfo->ADF                = 0; // set to no ADF in Test device
 		pScanInfo->bNeedDataAlignment = TRUE;
 
@@ -630,12 +639,17 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 		if (oOption && oOption->GetType() == SANE_TYPE_STRING && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
 			string_list = oOption->GetConstraintStringList();
 			for (index = 0; string_list[index] != NULL; index++) {
-				if (strcmp(string_list[index], "Lineart") == 0) {
+				if (_stricmp(string_list[index], "lineart") == 0 ||
+					_stricmp(string_list[index], "threshold") == 0) {
 					pScanInfo->SupportedDataTypes |= SUPPORT_BW;
-				} else if (strcmp(string_list[index], "Gray") == 0) {
+					pContext->pValues->pszcModeThreshold = string_list[index];
+				} else if (_stricmp(string_list[index], "gray") == 0 ||
+					       _stricmp(string_list[index], "grayscale") == 0) {
 					pScanInfo->SupportedDataTypes |= SUPPORT_GRAYSCALE;
-				} else if (strcmp(string_list[index], "Color") == 0) {
+					pContext->pValues->pszcModeGrayscale = string_list[index];
+				} else if (_stricmp(string_list[index], "color") == 0) {
 					pScanInfo->SupportedDataTypes |= SUPPORT_COLOR;
+					pContext->pValues->pszcModeColor = string_list[index];
 				}
 			}
 		}
@@ -755,13 +769,16 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 		if (oOption && oOption->GetType() == SANE_TYPE_STRING) {
 			switch (pScanInfo->DataType) {
 				case WIA_DATA_THRESHOLD:
-					hr = oOption->SetValueString("Lineart");
+					hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcModeThreshold ?
+					                             pContext->pValues->pszcModeThreshold : "lineart");
 					break;
 				case WIA_DATA_GRAYSCALE:
-					hr = oOption->SetValueString("Gray");
+					hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcModeGrayscale ?
+					                             pContext->pValues->pszcModeGrayscale : "gray");
 					break;
 				case WIA_DATA_COLOR:
-					hr = oOption->SetValueString("Color");
+					hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcModeColor ?
+					                             pContext->pValues->pszcModeColor : "color");
 					break;
 				default:
 					hr = E_INVALIDARG;
