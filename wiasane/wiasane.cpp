@@ -103,7 +103,10 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_STI_DIAGNOSTIC:
 			if (pContext && pContext->oSession && pContext->oDevice) {
-				if (!pContext->oDevice->FetchOptions()) {
+				oParams = pContext->oDevice->GetParams();
+				if (oParams) {
+					delete oParams;
+				} else {
 					hr = E_FAIL;
 					break;
 				}
@@ -119,6 +122,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			if (pContext && pContext->oSession && pContext->oDevice) {
 				oParams = pContext->oDevice->GetParams();
 				if (oParams) {
+					delete oParams;
 					pValue->lVal = MCRO_STATUS_OK;
 				}
 			}
