@@ -287,14 +287,14 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					return hr;
 
 				if (pScanInfo->PixelBits > 1)
-					pContext->pTask->xbytegap = (pScanInfo->Window.xExtent * pScanInfo->PixelBits / 8) - pScanInfo->WidthBytes;
+					pContext->pTask->lByteGapX = (pScanInfo->Window.xExtent * pScanInfo->PixelBits / 8) - pScanInfo->WidthBytes;
 				else
-					pContext->pTask->xbytegap = ((LONG) floor(pScanInfo->Window.xExtent + 7.0) / 8) - pScanInfo->WidthBytes;
-				pContext->pTask->ybytegap = (pScanInfo->Window.yExtent - pScanInfo->Lines) * pScanInfo->WidthBytes;
+					pContext->pTask->lByteGapX = ((LONG) floor(pScanInfo->Window.xExtent + 7.0) / 8) - pScanInfo->WidthBytes;
+				pContext->pTask->lByteGapY = (pScanInfo->Window.yExtent - pScanInfo->Lines) * pScanInfo->WidthBytes;
 
-				pContext->pTask->total = pScanInfo->WidthBytes * pScanInfo->Lines;
-				pContext->pTask->received = 0;
-				Trace(TEXT("Data: %d/%d"), pContext->pTask->received, pContext->pTask->total);
+				pContext->pTask->uiTotal = pScanInfo->WidthBytes * pScanInfo->Lines;
+				pContext->pTask->uiReceived = 0;
+				Trace(TEXT("Data: %d/%d"), pContext->pTask->uiReceived, pContext->pTask->uiTotal);
 			}
 
 		case SCAN_NEXT: // SCAN_FIRST will fall through to SCAN_NEXT (because it is expecting data)
@@ -308,17 +308,17 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			if (pContext->oSession && pContext->oDevice && pContext->pTask && pContext->pTask->oScan) {
 				memset(pBuffer, 0, lLength);
 
-				aquire = pContext->pTask->xbytegap ? min(lLength, pScanInfo->WidthBytes) : lLength;
+				aquire = pContext->pTask->lByteGapX ? min(lLength, pScanInfo->WidthBytes) : lLength;
 				aquired = 0;
 
 				while (pContext->pTask->oScan->AquireImage((pBuffer + *plReceived + aquired), &aquire) == CONTINUE) {
 					if (aquire > 0) {
-						if (pContext->pTask->xbytegap) {
+						if (pContext->pTask->lByteGapX) {
 							aquired += aquire;
 							if (aquired == pScanInfo->WidthBytes) {
 								*plReceived += aquired;
-								if (lLength - *plReceived >= pContext->pTask->xbytegap)
-									*plReceived += pContext->pTask->xbytegap;
+								if (lLength - *plReceived >= pContext->pTask->lByteGapX)
+									*plReceived += pContext->pTask->lByteGapX;
 								aquired = 0;
 							}
 							if (lLength - *plReceived < pScanInfo->WidthBytes - aquired)
@@ -333,8 +333,8 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 						break;
 				}
 
-				if (pContext->pTask->ybytegap > 0 && *plReceived < lLength) {
-					aquired = min(lLength - *plReceived, pContext->pTask->ybytegap);
+				if (pContext->pTask->lByteGapY > 0 && *plReceived < lLength) {
+					aquired = min(lLength - *plReceived, pContext->pTask->lByteGapY);
 					memset(pBuffer + *plReceived, -1, aquired);
 					*plReceived += aquired;
 				}
@@ -345,9 +345,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					}
 				}
 
-				pContext->pTask->total = pScanInfo->WidthBytes * pScanInfo->Lines;
-				pContext->pTask->received += *plReceived;
-				Trace(TEXT("Data: %d/%d -> %d/%d"), pContext->pTask->received, pContext->pTask->total, pContext->pTask->total - pContext->pTask->received, lLength);
+				pContext->pTask->uiTotal = pScanInfo->WidthBytes * pScanInfo->Lines;
+				pContext->pTask->uiReceived += *plReceived;
+				Trace(TEXT("Data: %d/%d -> %d/%d"), pContext->pTask->uiReceived, pContext->pTask->uiTotal, pContext->pTask->uiTotal - pContext->pTask->uiReceived, lLength);
 			}
 
 			break;

@@ -15,10 +15,10 @@ _Analysis_mode_(_Analysis_code_type_user_driver_)
 
 typedef struct _WIASANE_Task {
 	PWINSANE_Scan oScan;
-	UINT total;
-	UINT received;
-	LONG xbytegap;
-	LONG ybytegap;
+	UINT uiTotal;
+	UINT uiReceived;
+	LONG lByteGapX;
+	LONG lByteGapY;
 } WIASANE_Task, *PWIASANE_Task;
 
 typedef struct _WIASANE_Context {
