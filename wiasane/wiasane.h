@@ -17,6 +17,9 @@ typedef struct _WIASANE_Values {
 	SANE_String_Const pszcModeThreshold;
 	SANE_String_Const pszcModeGrayscale;
 	SANE_String_Const pszcModeColor;
+	SANE_String_Const pszcSourceFlatbed;
+	SANE_String_Const pszcSourceADF;
+	SANE_String_Const pszcSourceDuplex;
 } WIASANE_Values, *PWIASANE_Values;
 
 typedef struct _WIASANE_Task {

@@ -214,9 +214,37 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_GETADFSTATUS:
 		case CMD_GETADFHASPAPER:
-			// pValue->lVal = MCRO_ERROR_PAPER_EMPTY;
-			// hr = S_OK;
+			// TODO: check if there is actually paper in ADF
+			pValue->lVal = MCRO_STATUS_OK;
+			hr = S_OK;
 			break;
+
+		case CMD_LOAD_ADF:
+			if (pContext && pContext->oSession && pContext->oDevice) {
+				oOption = pContext->oDevice->GetOption("source");
+				if (oOption) {
+					switch (pValue->pScanInfo->ADF) {
+						case 1:
+							hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcSourceADF ?
+							                             pContext->pValues->pszcSourceADF : "adf");
+							break;
+
+						case 2:
+							hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcSourceDuplex ?
+							                             pContext->pValues->pszcSourceDuplex : "duplex");
+							break;
+					}
+				}
+			}
+
+		case CMD_UNLOAD_ADF:
+			if (pContext && pContext->oSession && pContext->oDevice) {
+				oOption = pContext->oDevice->GetOption("source");
+				if (oOption) {
+					hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcSourceFlatbed ?
+							                     pContext->pValues->pszcSourceFlatbed : "flatbed");
+				}
+			}
 
 		case CMD_GET_INTERRUPT_EVENT:
 			break;
@@ -631,6 +659,23 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 
 		pScanInfo->ADF                = 0; // set to no ADF in Test device
 		pScanInfo->bNeedDataAlignment = TRUE;
+
+		oOption = pContext->oDevice->GetOption("source");
+		if (oOption && oOption->GetType() == SANE_TYPE_STRING && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
+			string_list = oOption->GetConstraintStringList();
+			for (index = 0; string_list[index] != NULL; index++) {
+				if (_stricmp(string_list[index], "adf") == 0 ||
+					_stricmp(string_list[index], "automatic document feeder") == 0) {
+					pScanInfo->ADF = max(pScanInfo->ADF, 1);
+					pContext->pValues->pszcSourceADF = string_list[index];
+				} else if (_stricmp(string_list[index], "duplex") == 0) {
+					pScanInfo->ADF = max(pScanInfo->ADF, 2);
+					pContext->pValues->pszcSourceDuplex = string_list[index];
+				} else if (!pContext->pValues->pszcSourceFlatbed) {
+					pContext->pValues->pszcSourceFlatbed = string_list[index];
+				}
+			}
+		}
 
 		pScanInfo->SupportedCompressionType = 0;
 		pScanInfo->SupportedDataTypes       = 0;
