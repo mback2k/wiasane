@@ -14,7 +14,7 @@ _Analysis_mode_(_Analysis_code_type_user_driver_)
 #include "winsane.h"
 
 typedef struct _WIASANE_Task {
-	PWINSANE_Scan scan;
+	PWINSANE_Scan oScan;
 	UINT total;
 	UINT received;
 	LONG xbytegap;
