@@ -69,7 +69,7 @@
       <Culture>0x0009</Culture>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)winsane;%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)strutil;$(SolutionDir)winsane;%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ISOLATION_AWARE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>
       </ExceptionHandling>
@@ -81,8 +81,8 @@
     </Midl>
     <Link>
       <ModuleDefinitionFile>coisane.def</ModuleDefinitionFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies);setupapi.lib;difxapi.lib;newdev.lib;comctl32.lib;version.lib;winsane.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)strutil\$(OutDir);$(SolutionDir)winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);setupapi.lib;difxapi.lib;newdev.lib;comctl32.lib;version.lib;strutil.lib;winsane.lib</AdditionalDependencies>
       <GenerateDebugInformation>True</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -106,7 +106,6 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="coisane.h" />
-    <ClInclude Include="coisane_str.h" />
     <ClInclude Include="coisane_util.h" />
     <ClInclude Include="coisane_prop.h" />
     <ClInclude Include="coisane_wizard.h" />
@@ -114,7 +113,6 @@
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="coisane.cpp" />
-    <ClCompile Include="coisane_str.cpp" />
     <ClCompile Include="coisane_util.cpp" />
     <ClCompile Include="coisane_prop.cpp" />
     <ClCompile Include="coisane_wizard.cpp" />
@@ -129,6 +127,9 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\strutil\strutil.vcxproj">
+      <Project>{abe9a9db-5ba2-4c99-99f0-cf120ea3cf44}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\winsane\winsane.vcxproj">
       <Project>{b210e114-bf47-442f-8a8e-6719b6359eb8}</Project>
     </ProjectReference>

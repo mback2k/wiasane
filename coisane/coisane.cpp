@@ -2,7 +2,7 @@
 
 #include <newdev.h>
 
-#include "coisane_str.h"
+#include "strutil.h"
 #include "coisane_util.h"
 #include "coisane_prop.h"
 #include "coisane_wizard.h"

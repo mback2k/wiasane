@@ -1,7 +1,8 @@
-#include "coisane_str.h"
+#include "strutil.h"
 
 #include <stdio.h>
 #include <stdarg.h>
+
 
 HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...)
 {

@@ -21,9 +21,6 @@
     <ClCompile Include="coisane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="coisane_str.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="coisane_util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -42,9 +39,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="coisane.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="coisane_str.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="coisane_util.h">

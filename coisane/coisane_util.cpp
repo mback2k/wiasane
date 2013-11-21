@@ -10,7 +10,7 @@
 
 #include "dllmain.h"
 #include "resource.h"
-#include "coisane_str.h"
+#include "strutil.h"
 
 
 VOID Trace(_In_ LPCTSTR pszFormat, ...)

@@ -1,5 +1,5 @@
-#ifndef COISANE_STR_H
-#define COISANE_STR_H
+#ifndef STRUTIL_H
+#define STRUTIL_H
 
 #if _MSC_VER > 1000
 #pragma once

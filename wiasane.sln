@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "strutil", "strutil\strutil.vcxproj", "{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}"
+EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winsane", "winsane\winsane.vcxproj", "{B210E114-BF47-442F-8A8E-6719B6359EB8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wiasane", "wiasane\wiasane.vcxproj", "{6F8F9679-52F6-4B8E-9EDF-67DE89EC3CFA}"
@@ -9,6 +11,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wiasane", "wiasane\wiasane.
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "coisane", "coisane\coisane.vcxproj", "{CB743D7C-09B3-41AF-9067-807F2CED7AD8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44} = {ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}
+	EndProjectSection
 	ProjectSection(ProjectDependencies) = postProject
 		{B210E114-BF47-442F-8A8E-6719B6359EB8} = {B210E114-BF47-442F-8A8E-6719B6359EB8}
 	EndProjectSection
@@ -33,6 +38,18 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}.Debug|Win32.Build.0 = Debug|Win32
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}.Debug|Win32.Deploy.0 = Debug|Win32
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}.Debug|x64.ActiveCfg = Debug|x64
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}.Debug|x64.Build.0 = Debug|x64
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}.Debug|x64.Deploy.0 = Debug|x64
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}.Release|Win32.ActiveCfg = Release|Win32
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}.Release|Win32.Build.0 = Release|Win32
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}.Release|Win32.Deploy.0 = Release|Win32
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}.Release|x64.ActiveCfg = Release|x64
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}.Release|x64.Build.0 = Release|x64
+		{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}.Release|x64.Deploy.0 = Release|x64
 		{B210E114-BF47-442F-8A8E-6719B6359EB8}.Debug|Win32.ActiveCfg = Debug|Win32
 		{B210E114-BF47-442F-8A8E-6719B6359EB8}.Debug|Win32.Build.0 = Debug|Win32
 		{B210E114-BF47-442F-8A8E-6719B6359EB8}.Debug|Win32.Deploy.0 = Debug|Win32
