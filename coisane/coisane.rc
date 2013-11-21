@@ -153,11 +153,6 @@ BEGIN
     IDS_WIZARD_PAGE_SCANNER_HEADER_SUBTITLE "Scanner Configuration (2/2)"
 END
 
-STRINGTABLE
-BEGIN
-    IDS_APPLICATION_ID      "{B7D5E900-AF40-11DD-AD8B-0800200C9A65}"
-END
-
 #endif    // Neutral resources
 /////////////////////////////////////////////////////////////////////////////
 

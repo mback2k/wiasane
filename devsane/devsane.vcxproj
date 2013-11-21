@@ -21,13 +21,13 @@
   <PropertyGroup Label="PropertySheets">
     <DriverType />
     <PlatformToolset>WindowsApplicationForDrivers8.0</PlatformToolset>
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Globals">
     <DebuggerFlavor Condition="'$(IsKernelModeToolset)'=='True'">DbgengKernelDebugger</DebuggerFlavor>
     <DebuggerFlavor Condition="'$(IsUserModeToolset)'=='True'">DbgengRemoteDebugger</DebuggerFlavor>
-    <ProjectGuid>{CB743D7C-09B3-41AF-9067-807F2CED7AD8}</ProjectGuid>
-    <ProjectName>coisane</ProjectName>
+    <ProjectGuid>{9A97A3C5-D74A-400E-9AAA-1588190924B7}</ProjectGuid>
+    <ProjectName>devsane</ProjectName>
     <RootNamespace>$(MSBuildProjectName)</RootNamespace>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
@@ -35,7 +35,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
-    <TargetVersion>Win7</TargetVersion>
+    <TargetVersion>Windows7</TargetVersion>
     <TargetName>$(MSBuildProjectName)</TargetName>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -69,7 +69,7 @@
       <Culture>0x0009</Culture>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)strutil;$(SolutionDir)winsane;%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)strutil;%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>ISOLATION_AWARE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>
       </ExceptionHandling>
@@ -80,9 +80,9 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
     </Midl>
     <Link>
-      <ModuleDefinitionFile>coisane.def</ModuleDefinitionFile>
-      <AdditionalLibraryDirectories>$(SolutionDir)strutil\$(OutDir);$(SolutionDir)winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies);setupapi.lib;difxapi.lib;comctl32.lib;version.lib;strutil.lib;winsane.lib</AdditionalDependencies>
+      <UACExecutionLevel>RequireAdministrator</UACExecutionLevel>
+      <AdditionalLibraryDirectories>$(SolutionDir)strutil\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);setupapi.lib;difxapi.lib;newdev.lib;version.lib;strutil.lib</AdditionalDependencies>
       <GenerateDebugInformation>True</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -104,24 +104,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="dllmain.h" />
-    <ClInclude Include="coisane.h" />
-    <ClInclude Include="coisane_util.h" />
-    <ClInclude Include="coisane_prop.h" />
-    <ClInclude Include="coisane_wizard.h" />
+    <ClInclude Include="devsane.h" />
+    <ClInclude Include="devsane_util.h" />
+    <ClInclude Include="devsane_driver.h" />
+    <ClInclude Include="devsane_device.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="coisane.cpp" />
-    <ClCompile Include="coisane_util.cpp" />
-    <ClCompile Include="coisane_prop.cpp" />
-    <ClCompile Include="coisane_wizard.cpp" />
+    <ClCompile Include="devsane.cpp" />
+    <ClCompile Include="devsane_util.cpp" />
+    <ClCompile Include="devsane_driver.cpp" />
+    <ClCompile Include="devsane_device.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="coisane.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="coisane.def" />
+    <ResourceCompile Include="devsane.rc" />
   </ItemGroup>
   <ItemGroup>
     <FilesToPackage Include="$(TargetPath)" />

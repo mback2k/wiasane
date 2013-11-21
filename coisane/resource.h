@@ -2,7 +2,6 @@
 // Von Microsoft Visual C++ generierte Includedatei.
 // Verwendet durch coisane.rc
 //
-#define IDS_APPLICATION_ID              100
 #define IDD_WIZARD_PAGE_SERVER          801
 #define IDS_WIZARD_PAGE_SERVER_HEADER_TITLE 802
 #define IDD_PROPERTIES                  803
