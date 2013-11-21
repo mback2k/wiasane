@@ -35,6 +35,7 @@ OutputBaseFilename=wiasane
 ShowLanguageDialog=no
 WizardImageFile=compiler:wizmodernimage.bmp
 WizardSmallImageFile=compiler:wizmodernsmallimage.bmp
+LicenseFile=COPYING
 CloseApplications=no
 SolidCompression=yes
 SignTool=signtool

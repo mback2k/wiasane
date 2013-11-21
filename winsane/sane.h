@@ -1,18 +1,43 @@
-/* sane - Scanner Access Now Easy.
-   Copyright (C) 1997-1999 David Mosberger-Tang and Andreas Beck
-   This file is part of the SANE package.
-
-   This file is in the public domain.  You may use and modify it as
-   you see fit, as long as this copyright message is included and
-   that there is an indication as to what modifications have been
-   made (if any).
-
-   SANE is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-   FITNESS FOR A PARTICULAR PURPOSE.
-
-   This file declares SANE application interface.  See the SANE
-   standard for a detailed explanation of the interface.  */
+/***************************************************************************
+ *                  _       ___       _____
+ *  Project        | |     / (_)___ _/ ___/____ _____  ___
+ *                 | | /| / / / __ `/\__ \/ __ `/ __ \/ _ \
+ *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
+ *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this software distribution.
+ *
+ * You may opt to use, copy, modify, and distribute this software for any
+ * purpose with or without fee, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either expressed or implied.
+ *
+ * This file is generously provided by the SANE project and was modified
+ * in order to be used within the WIASANE network protocol implementation.
+ * The modifications are currently limitted to the file structure and the
+ * definition of typedefs as well as pointer alias-typedefs for these.
+ *
+ * The following copyright and permission notice applies to this file:
+ *
+ *    sane - Scanner Access Now Easy.
+ *    Copyright (C) 1997-1999 David Mosberger-Tang and Andreas Beck
+ *    This file is part of the SANE package.
+ *
+ *    This file is in the public domain.  You may use and modify it as
+ *    you see fit, as long as this copyright message is included and
+ *    that there is an indication as to what modifications have been
+ *    made (if any).
+ *
+ *    SANE is distributed in the hope that it will be useful, but WITHOUT
+ *    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *    FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ *    This file declares SANE application interface.  See the SANE
+ *    standard for a detailed explanation of the interface.
+ *
+ ***************************************************************************/
 
 #ifndef SANE_H
 #define SANE_H

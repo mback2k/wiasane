@@ -1,0 +1,40 @@
+COPYRIGHT AND PERMISSION NOTICE
+
+Copyright (c) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+
+All rights reserved.
+
+Permission to use, copy, modify, and distribute this software for any purpose
+with or without fee is hereby granted, provided that the above copyright
+notice and this permission notice appear in all copies.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF THIRD PARTY RIGHTS. IN
+NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder shall not
+be used in advertising or otherwise to promote the sale, use or other dealings
+in this software without prior written authorization of the copyright holder.
+
+The following copyright and permission notice applies to the contents of the
+C header file 'sane.h' which is distributed alongside this software:
+
+   sane - Scanner Access Now Easy.
+   Copyright (C) 1997-1999 David Mosberger-Tang and Andreas Beck
+   This file is part of the SANE package.
+
+   This file is in the public domain.  You may use and modify it as
+   you see fit, as long as this copyright message is included and
+   that there is an indication as to what modifications have been
+   made (if any).
+
+   SANE is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+   FITNESS FOR A PARTICULAR PURPOSE.
+
+   This file declares SANE application interface.  See the SANE
+   standard for a detailed explanation of the interface.
