@@ -15,7 +15,6 @@ Source: {#SourceDir64bit}\wiasane.inf; DestDir: {app}; Flags: overwritereadonly 
 Source: {#SourceDir64bit}\wiasane.cat; DestDir: {app}; Flags: overwritereadonly restartreplace 64bit; Check: Is64BitInstallMode
 [Icons]
 Name: {group}\{cm:StartInstallDevice}; Filename: {app}\devsane.exe; Parameters: device install wiasane.inf; WorkingDir: {app}; IconFilename: sti.dll
-Name: {group}\{cm:StartUninstallDevice}; Filename: {app}\devsane.exe; Parameters: device uninstall wiasane.inf; WorkingDir: {app}; IconFilename: sti.dll
 Name: {group}\{cm:StartUninstallDriver}; Filename: {uninstallexe}; IconFilename: devmgr.dll; IconIndex: 4
 [Setup]
 OutputDir=.
