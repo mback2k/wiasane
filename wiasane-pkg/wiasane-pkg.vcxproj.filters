@@ -3,7 +3,7 @@
   <ItemGroup>
     <Filter Include="Driver Files">
       <UniqueIdentifier>{8E41214B-6785-4CFE-B992-037D68949A14}</UniqueIdentifier>
-      <Extensions>inf;inv;inx;mof;mc;</Extensions>
+      <Extensions>inf;inv;inx;mof;mc</Extensions>
     </Filter>
   </ItemGroup>
 </Project>
