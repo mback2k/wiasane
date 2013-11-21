@@ -130,7 +130,7 @@
     <ResourceCompile Include="wiasane.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="wiasane.inx" />
+    <None Include="wiasane.def" />
   </ItemGroup>
   <ItemGroup>
     <Inf Exclude="@(Inf)" Include="*.inf" />

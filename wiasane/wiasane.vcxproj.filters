@@ -51,8 +51,13 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="wiasane.inx">
+    <None Include="wiasane.def">
       <Filter>Resource Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Inf Include="wiasane.inx">
+      <Filter>Resource Files</Filter>
+    </Inf>
   </ItemGroup>
 </Project>

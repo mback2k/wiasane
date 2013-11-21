@@ -122,6 +122,9 @@
     <ResourceCompile Include="coisane.rc" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="coisane.def" />
+  </ItemGroup>
+  <ItemGroup>
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
