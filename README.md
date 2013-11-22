@@ -22,7 +22,7 @@ Features
 - Support for color, grayscale and lineart/threshold scan modes
 - Support for preview and final scan types
 - Support for contrast and brightness settings
-- Support for single-sided scanning from a flatbet
+- Support for single-sided scanning from a flatbed
 - Integrated wizard during driver/device installation
 
 To be implemented
@@ -33,8 +33,8 @@ To be implemented
 
 To be improved
 --------------
-- Make WIA driver use use asynchronous network connections
-- Make wizard and property pages use asynchronous device I/O
+- Make WIA driver use asynchronous network connections
+- Make wizard and property pages use asynchronous network connections
 - Handling of rounding issues while converting between units of length
 
 Development and Build environment
