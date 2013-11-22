@@ -1,5 +1,14 @@
+#ifndef Configuration
+#define Configuration "Release"
+#endif
+#if Configuration == "Release"
 #define SourceDir32bit "wiasane-pkg\Release\Win32\wiasane-pkg"
 #define SourceDir64bit "wiasane-pkg\Release\x64\wiasane-pkg"
+#endif
+#if Configuration == "Debug"
+#define SourceDir32bit "wiasane-pkg\Debug\Win32\wiasane-pkg"
+#define SourceDir64bit "wiasane-pkg\Debug\x64\wiasane-pkg"
+#endif
 [Files]
 Source: {#SourceDir32bit}\winsane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace 32bit; Check: Not Is64BitInstallMode
 Source: {#SourceDir32bit}\wiasane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace 32bit; Check: Not Is64BitInstallMode
