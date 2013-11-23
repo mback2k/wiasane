@@ -119,7 +119,7 @@ begin
   begin
     UninstallProgressForm.StatusLabel.Caption := CustomMessage('UninstallDevice');
     if not Exec(ExpandConstant('{app}\devsane.exe'), ExpandConstant('device uninstall wiasane.inf'), ExpandConstant('{app}'), SW_HIDE, ewWaitUntilTerminated, ResultCode)
-        or (ResultCode <> 0) then
+        or ((ResultCode <> 0) and (ResultCode <> ERROR_DRIVER_PACKAGE_NOT_IN_STORE)) then
       RaiseException(FmtMessage(CustomMessage('FailedUninstallDevice'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]));
     UninstallProgressForm.StatusLabel.Caption := CustomMessage('UninstallDriver');
     if not Exec(ExpandConstant('{app}\devsane.exe'), ExpandConstant('driver uninstall wiasane.inf'), ExpandConstant('{app}'), SW_HIDE, ewWaitUntilTerminated, ResultCode)
