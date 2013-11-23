@@ -261,6 +261,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 					}
 				}
 			}
+			break;
 
 		case CMD_UNLOAD_ADF:
 			if (pContext && pContext->oSession && pContext->oDevice) {
@@ -270,6 +271,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 							                     pContext->pValues->pszcSourceFlatbed : "flatbed");
 				}
 			}
+			break;
 
 		case CMD_GET_INTERRUPT_EVENT:
 			break;
