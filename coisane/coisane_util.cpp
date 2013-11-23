@@ -139,26 +139,34 @@ DWORD ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDev
 DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
 {
 	SANE_String_Const name, type, model, vendor;
+	HKEY hDeviceKey;
 	size_t cbLen;
 	PTSTR lpStr;
 	HRESULT hr;
+	DWORD ret;
 	BOOL res;
 
 	if (!device)
 		return ERROR_INVALID_PARAMETER;
+
+	ret = NO_ERROR;
 
 	name = device->GetName();
 	type = device->GetType();
 	model = device->GetModel();
 	vendor = device->GetVendor();
 
+	hDeviceKey = SetupDiOpenDevRegKey(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_SET_VALUE);
+
 	if (vendor && model) {
 		hr = StringCbAPrintf(privateData->hHeap, &lpStr, &cbLen, TEXT("%hs %hs"), vendor, model);
 		if (SUCCEEDED(hr)) {
 			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) lpStr, (DWORD) cbLen);
+			if (hDeviceKey != INVALID_HANDLE_VALUE)
+				RegSetValueEx(hDeviceKey, TEXT("FriendlyName"), 0, REG_SZ, (LPBYTE) lpStr, (DWORD) cbLen);
 			HeapFree(privateData->hHeap, 0, lpStr);
 			if (!res)
-				return GetLastError();
+				ret = GetLastError();
 		}
 	}
 
@@ -168,7 +176,7 @@ DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) lpStr, (DWORD) cbLen);
 			HeapFree(privateData->hHeap, 0, lpStr);
 			if (!res)
-				return GetLastError();
+				ret = GetLastError();
 		}
 	}
 
@@ -176,13 +184,18 @@ DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 		hr = StringCbAPrintf(privateData->hHeap, &lpStr, &cbLen, TEXT("%hs"), vendor);
 		if (SUCCEEDED(hr)) {
 			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_MFG, (PBYTE) (PBYTE) lpStr, (DWORD) cbLen);
+			if (hDeviceKey != INVALID_HANDLE_VALUE)
+				RegSetValueEx(hDeviceKey, TEXT("Vendor"), 0, REG_SZ, (LPBYTE) lpStr, (DWORD) cbLen);
 			HeapFree(privateData->hHeap, 0, lpStr);
 			if (!res)
-				return GetLastError();
+				ret = GetLastError();
 		}
 	}
 
-	return NO_ERROR;
+	if (hDeviceKey != INVALID_HANDLE_VALUE)
+		RegCloseKey(hDeviceKey);
+
+	return ret;
 }
 
 
