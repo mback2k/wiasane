@@ -77,11 +77,8 @@ German.FailedUninstallDevice=Deinstallation der Geräte fehlgeschlagen!%n%nFehler
 German.FailedUninstallDriver=Deinstallation des Treibers fehlgeschlagen!%n%nFehler = %1%n%nFehler Code = %2
 [Code]
 const
+  ERROR_NO_SUCH_DEVINST             = $E000020B;
   ERROR_DRIVER_PACKAGE_NOT_IN_STORE = $E0000302;
-function IsUpgrade(): boolean;
-begin
-  Result := (WizardForm.PrevAppDir <> '');
-end;
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ResultCode: integer;
@@ -100,9 +97,9 @@ begin
   begin
     WizardForm.StatusLabel.Caption := CustomMessage('InstallDriver');
     if not Exec(ExpandConstant('{app}\devsane.exe'), ExpandConstant('driver install wiasane.inf {hwnd}'), ExpandConstant('{app}'), SW_SHOW, ewWaitUntilTerminated, ResultCode)
-        or (ResultCode <> 0) then
+        or ((ResultCode <> 0) and (ResultCode <> ERROR_NO_SUCH_DEVINST)) then
       RaiseException(FmtMessage(CustomMessage('FailedInstallDriver'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]));
-    if not IsUpgrade() then
+    if ResultCode = ERROR_NO_SUCH_DEVINST then
     begin
       WizardForm.StatusLabel.Caption := CustomMessage('InstallDevice');
       if not Exec(ExpandConstant('{app}\devsane.exe'), ExpandConstant('device install wiasane.inf {hwnd}'), ExpandConstant('{app}'), SW_SHOW, ewWaitUntilTerminated, ResultCode)
