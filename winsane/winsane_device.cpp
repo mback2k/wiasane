@@ -21,12 +21,14 @@
 #include "winsane_device.h"
 #include "winsane_internal.h"
 
+#define INVALID_SANE_HANDLE ((SANE_Handle)-1)
+
 WINSANE_Device::WINSANE_Device(_In_ PWINSANE_Session session, _In_ PWINSANE_Socket sock, _In_ PSANE_Device sane_device)
 {
 	this->session = session;
 	this->sock = sock;
 	this->sane_device = sane_device;
-	this->sane_handle = 0;
+	this->sane_handle = INVALID_SANE_HANDLE;
 	this->num_options = 0;
 	this->options = NULL;
 }
@@ -49,7 +51,7 @@ WINSANE_Device::~WINSANE_Device()
 
 	this->session = NULL;
 	this->sock = NULL;
-	this->sane_handle = 0;
+	this->sane_handle = INVALID_SANE_HANDLE;
 	this->num_options = 0;
 	this->options = NULL;
 }
@@ -106,7 +108,7 @@ BOOL WINSANE_Device::Close()
 {
 	DWORD written;
 
-	if (!this->sane_handle)
+	if (this->sane_handle == INVALID_SANE_HANDLE)
 		return FALSE;
 
 	written = this->sock->WriteWord(WINSANE_NET_CLOSE);
@@ -116,7 +118,7 @@ BOOL WINSANE_Device::Close()
 
 	this->sock->ReadWord();
 
-	this->sane_handle = 0;
+	this->sane_handle = INVALID_SANE_HANDLE;
 
 	return TRUE;
 }
@@ -130,7 +132,7 @@ int WINSANE_Device::FetchOptions()
 	DWORD written;
 	int index, value;
 
-	if (!this->sane_handle)
+	if (this->sane_handle == INVALID_SANE_HANDLE)
 		return 0;
 
 	written = this->sock->WriteWord(WINSANE_NET_GET_OPTION_DESCRIPTORS);
@@ -210,7 +212,7 @@ int WINSANE_Device::FetchOptions()
 
 PWINSANE_Option WINSANE_Device::GetOption(_In_ int index)
 {
-	if (!this->sane_handle || !this->options)
+	if (this->sane_handle == INVALID_SANE_HANDLE || !this->options)
 		return NULL;
 
 	return this->options[index];
@@ -221,7 +223,7 @@ PWINSANE_Option WINSANE_Device::GetOption(_In_ SANE_String_Const name)
 	SANE_String_Const option_name;
 	int index;
 
-	if (!this->sane_handle || !this->options)
+	if (this->sane_handle == INVALID_SANE_HANDLE || !this->options)
 		return NULL;
 
 	for (index = 0; index < this->num_options; index++) {
@@ -255,7 +257,7 @@ PWINSANE_Params WINSANE_Device::GetParams()
 	SANE_Parameters *sane_params;
 	DWORD written;
 
-	if (!this->sane_handle)
+	if (this->sane_handle == INVALID_SANE_HANDLE)
 		return NULL;
 
 	written = this->sock->WriteWord(WINSANE_NET_GET_PARAMETERS);
@@ -290,7 +292,7 @@ PWINSANE_Scan WINSANE_Device::Start()
 	SANE_String resource;
 	DWORD written;
 
-	if (!this->sane_handle)
+	if (this->sane_handle == INVALID_SANE_HANDLE)
 		return NULL;
 
 	written = this->sock->WriteWord(WINSANE_NET_START);
@@ -315,7 +317,7 @@ BOOL WINSANE_Device::Cancel()
 {
 	DWORD written;
 
-	if (!this->sane_handle)
+	if (this->sane_handle == INVALID_SANE_HANDLE)
 		return FALSE;
 
 	written = this->sock->WriteWord(WINSANE_NET_CANCEL);
