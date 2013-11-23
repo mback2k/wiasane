@@ -62,8 +62,6 @@ private:
 	int num_options;
 	PWINSANE_Option *options;
 
-	BOOL opened;
-	BOOL started;
 	PWINSANE_Session session;
 	PWINSANE_Socket sock;
 	PSANE_Device sane_device;
