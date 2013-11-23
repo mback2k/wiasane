@@ -287,7 +287,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		default:
-			Trace(TEXT("Unknown Command (%d)"),lCommand);
+			Trace(TEXT("Unknown Command (%d)"), lCommand);
 			break;
     }
 
@@ -686,7 +686,7 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 		if (!pContext->pValues)
 			return E_OUTOFMEMORY;
 
-		pScanInfo->ADF                = 0; // set to no ADF in Test device
+		pScanInfo->ADF                = 0;
 		pScanInfo->bNeedDataAlignment = TRUE;
 
 		oOption = pContext->oDevice->GetOption("source");
