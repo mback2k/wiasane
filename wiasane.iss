@@ -10,18 +10,18 @@
 #define SourceDir64bit "wiasane-pkg\Debug\x64\wiasane-pkg"
 #endif
 [Files]
-Source: {#SourceDir32bit}\winsane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace 32bit; Check: Not Is64BitInstallMode
-Source: {#SourceDir32bit}\wiasane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace 32bit; Check: Not Is64BitInstallMode
-Source: {#SourceDir32bit}\coisane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace 32bit; Check: Not Is64BitInstallMode
-Source: {#SourceDir32bit}\devsane.exe; DestDir: {app}; Flags: overwritereadonly restartreplace 32bit; Check: Not Is64BitInstallMode
-Source: {#SourceDir32bit}\wiasane.inf; DestDir: {app}; Flags: overwritereadonly restartreplace 32bit; Check: Not Is64BitInstallMode
-Source: {#SourceDir32bit}\wiasane.cat; DestDir: {app}; Flags: overwritereadonly restartreplace 32bit; Check: Not Is64BitInstallMode
-Source: {#SourceDir64bit}\winsane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace 64bit; Check: Is64BitInstallMode
-Source: {#SourceDir64bit}\wiasane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace 64bit; Check: Is64BitInstallMode
-Source: {#SourceDir64bit}\coisane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace 64bit; Check: Is64BitInstallMode
-Source: {#SourceDir64bit}\devsane.exe; DestDir: {app}; Flags: overwritereadonly restartreplace 64bit; Check: Is64BitInstallMode
-Source: {#SourceDir64bit}\wiasane.inf; DestDir: {app}; Flags: overwritereadonly restartreplace 64bit; Check: Is64BitInstallMode
-Source: {#SourceDir64bit}\wiasane.cat; DestDir: {app}; Flags: overwritereadonly restartreplace 64bit; Check: Is64BitInstallMode
+Source: {#SourceDir32bit}\winsane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace uninsrestartdelete 32bit solidbreak; Check: Not Is64BitInstallMode
+Source: {#SourceDir32bit}\wiasane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace uninsrestartdelete 32bit; Check: Not Is64BitInstallMode
+Source: {#SourceDir32bit}\coisane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace uninsrestartdelete 32bit; Check: Not Is64BitInstallMode
+Source: {#SourceDir32bit}\devsane.exe; DestDir: {app}; Flags: overwritereadonly restartreplace uninsrestartdelete 32bit; Check: Not Is64BitInstallMode
+Source: {#SourceDir32bit}\wiasane.inf; DestDir: {app}; Flags: overwritereadonly restartreplace uninsrestartdelete 32bit; Check: Not Is64BitInstallMode
+Source: {#SourceDir32bit}\wiasane.cat; DestDir: {app}; Flags: overwritereadonly restartreplace uninsrestartdelete 32bit; Check: Not Is64BitInstallMode
+Source: {#SourceDir64bit}\winsane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace uninsrestartdelete 64bit solidbreak; Check: Is64BitInstallMode
+Source: {#SourceDir64bit}\wiasane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace uninsrestartdelete 64bit; Check: Is64BitInstallMode
+Source: {#SourceDir64bit}\coisane.dll; DestDir: {app}; Flags: overwritereadonly restartreplace uninsrestartdelete 64bit; Check: Is64BitInstallMode
+Source: {#SourceDir64bit}\devsane.exe; DestDir: {app}; Flags: overwritereadonly restartreplace uninsrestartdelete 64bit; Check: Is64BitInstallMode
+Source: {#SourceDir64bit}\wiasane.inf; DestDir: {app}; Flags: overwritereadonly restartreplace uninsrestartdelete 64bit; Check: Is64BitInstallMode
+Source: {#SourceDir64bit}\wiasane.cat; DestDir: {app}; Flags: overwritereadonly restartreplace uninsrestartdelete 64bit; Check: Is64BitInstallMode
 [Icons]
 Name: {group}\{cm:StartInstallDevice}; Filename: {app}\devsane.exe; Parameters: device install wiasane.inf; WorkingDir: {app}; IconFilename: sti.dll
 Name: {group}\{cm:StartUninstallDriver}; Filename: {uninstallexe}; IconFilename: devmgr.dll; IconIndex: 4
