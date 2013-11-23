@@ -238,9 +238,27 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_GETADFSTATUS:
+			if (pContext && pContext->oSession && pContext->oDevice) {
+				pValue->lVal = MCRO_STATUS_OK;
+			} else {
+				pValue->lVal = MCRO_ERROR_OFFLINE;
+			}
+			hr = S_OK;
+			break;
+
 		case CMD_GETADFHASPAPER:
-			// TODO: check if there is actually paper in ADF
-			pValue->lVal = MCRO_STATUS_OK;
+			if (pContext && pContext->oSession && pContext->oDevice) {
+				if (!pContext->pTask) {
+					MicroEntry(CMD_LOAD_ADF, pValue);
+				}
+				if (pContext->pTask && pContext->pTask->bUsingADF) {
+					pValue->lVal = MCRO_STATUS_OK;
+				} else {
+					pValue->lVal = MCRO_ERROR_PAPER_EMPTY;
+				}
+			} else {
+				pValue->lVal = MCRO_ERROR_OFFLINE;
+			}
 			hr = S_OK;
 			break;
 
@@ -259,6 +277,16 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 							                             pContext->pValues->pszcSourceDuplex : "duplex");
 							break;
 					}
+					if (hr == S_OK) {
+						hr = Scan(pValue->pScanInfo, SCAN_FIRST, NULL, 0, NULL);
+						if (pContext->pTask) {
+							if (hr == S_OK) {
+								pContext->pTask->bUsingADF = TRUE;
+							} else {
+								Scan(pValue->pScanInfo, SCAN_FINISHED, NULL, 0, NULL);
+							}
+						}
+					}
 				}
 			}
 			break;
@@ -269,6 +297,12 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 				if (oOption) {
 					hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcSourceFlatbed ?
 							                     pContext->pValues->pszcSourceFlatbed : "flatbed");
+					if (hr == S_OK) {
+						if (pContext->pTask) {
+							pContext->pTask->bUsingADF = FALSE;
+						}
+						hr = Scan(pValue->pScanInfo, SCAN_FINISHED, NULL, 0, NULL);
+					}
 				}
 			}
 			break;
@@ -328,12 +362,14 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			// first phase
 			//
 
-			if (pContext->oSession && pContext->oDevice) {
+			if (pContext->oSession && pContext->oDevice && (!pContext->pTask || !pContext->pTask->oScan)) {
 				hr = SetScannerSettings(pScanInfo, pContext);
 				if (FAILED(hr))
 					return hr;
 
-				pContext->pTask = (PWIASANE_Task) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(WIASANE_Task));
+				if (!pContext->pTask)
+					pContext->pTask = (PWIASANE_Task) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(WIASANE_Task));
+
 				if (!pContext->pTask)
 					return E_OUTOFMEMORY;
 
@@ -362,6 +398,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 		case SCAN_NEXT: // SCAN_FIRST will fall through to SCAN_NEXT (because it is expecting data)
 			if (lPhase == SCAN_NEXT)
 				Trace(TEXT("SCAN_NEXT"));
+
+			if (!pBuffer)
+				break;
 
 			//
 			// next phase, get data from the scanner and set plReceived value
