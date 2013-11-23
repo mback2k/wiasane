@@ -336,6 +336,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					return E_OUTOFMEMORY;
 
 				pContext->pTask->oScan = pContext->oDevice->Start();
+				if (!pContext->pTask->oScan)
+					return E_FAIL;
+
 				if (pContext->pTask->oScan->Connect() != CONTINUE)
 					return E_FAIL;
 
@@ -421,11 +424,12 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			//
 
 			if (pContext->oSession && pContext->oDevice) {
-				if (pContext->pTask->oScan) {
-					delete pContext->pTask->oScan;
-					pContext->pTask->oScan = NULL;
-				}
 				if (pContext->pTask) {
+					if (pContext->pTask->oScan) {
+						delete pContext->pTask->oScan;
+						pContext->pTask->oScan = NULL;
+					}
+
 					ZeroMemory(pContext->pTask, sizeof(WIASANE_Task));
 					HeapFree(hHeap, 0, pContext->pTask);
 					pContext->pTask = NULL;
