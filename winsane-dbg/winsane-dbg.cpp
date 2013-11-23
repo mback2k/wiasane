@@ -69,13 +69,13 @@ VOID DebugSessionDevice(WINSANE_Session *session, WINSANE_Device *device)
 	WINSANE_Params *params;
 	int options, i;
 
-	if (device->Open()) {
-		printf("------------------------------------------------------------\n");
-		printf("Name:\t%s\n", device->GetName());
-		printf("Vendor:\t%s\n", device->GetVendor());
-		printf("Model:\t%s\n", device->GetModel());
-		printf("Type:\t%s\n", device->GetType());
+	printf("------------------------------------------------------------\n");
+	printf("Name:\t%s\n", device->GetName());
+	printf("Vendor:\t%s\n", device->GetVendor());
+	printf("Model:\t%s\n", device->GetModel());
+	printf("Type:\t%s\n", device->GetType());
 
+	if (device->Open()) {
 		options = device->FetchOptions();
 
 		for (i = 0; i < options; i++) {
