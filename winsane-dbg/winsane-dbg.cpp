@@ -259,11 +259,15 @@ VOID DebugSessionDeviceScan(WINSANE_Session *session, WINSANE_Device *device)
 	DWORD written;
 	DWORD length;
 	PBYTE buffer;
+	BOOL doscan;
 
 	UNREFERENCED_PARAMETER(session);
 
 	printf("Scan? (y/n)\n");
-	if (fgetc(stdin) == 'y') {
+	doscan = fgetc(stdin) == 'y';
+	while (fgetc(stdin) != '\n');
+
+	if (doscan) {
 		scan = device->Start();
 		if (scan) {
 			printf("Begin scanning image ...\n");
