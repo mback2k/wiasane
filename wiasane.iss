@@ -90,7 +90,9 @@ begin
       WizardForm.StatusLabel.Caption := CustomMessage('UninstallDriver');
       if not Exec(ExpandConstant('{app}\devsane.exe'), ExpandConstant('driver uninstall wiasane.inf'), ExpandConstant('{app}'), SW_HIDE, ewWaitUntilTerminated, ResultCode)
           or ((ResultCode <> 0) and (ResultCode <> ERROR_DRIVER_PACKAGE_NOT_IN_STORE)) then
-        RaiseException(FmtMessage(CustomMessage('FailedUninstallDriver'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]));
+        RaiseException(FmtMessage(CustomMessage('FailedUninstallDriver'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]))
+      else
+        Sleep(1000);
     end;
   end
   else if CurStep = ssPostInstall then
@@ -98,13 +100,17 @@ begin
     WizardForm.StatusLabel.Caption := CustomMessage('InstallDriver');
     if not Exec(ExpandConstant('{app}\devsane.exe'), ExpandConstant('driver install wiasane.inf {hwnd}'), ExpandConstant('{app}'), SW_SHOW, ewWaitUntilTerminated, ResultCode)
         or ((ResultCode <> 0) and (ResultCode <> ERROR_NO_SUCH_DEVINST)) then
-      RaiseException(FmtMessage(CustomMessage('FailedInstallDriver'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]));
+      RaiseException(FmtMessage(CustomMessage('FailedInstallDriver'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]))
+    else
+      Sleep(500);
     if ResultCode = ERROR_NO_SUCH_DEVINST then
     begin
       WizardForm.StatusLabel.Caption := CustomMessage('InstallDevice');
       if not Exec(ExpandConstant('{app}\devsane.exe'), ExpandConstant('device install wiasane.inf {hwnd}'), ExpandConstant('{app}'), SW_SHOW, ewWaitUntilTerminated, ResultCode)
           or (ResultCode <> 0) then
-        RaiseException(FmtMessage(CustomMessage('FailedInstallDevice'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]));
+        RaiseException(FmtMessage(CustomMessage('FailedInstallDevice'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]))
+      else
+        Sleep(500);
     end;
   end;
 end;
@@ -117,11 +123,15 @@ begin
     UninstallProgressForm.StatusLabel.Caption := CustomMessage('UninstallDevice');
     if not Exec(ExpandConstant('{app}\devsane.exe'), ExpandConstant('device uninstall wiasane.inf'), ExpandConstant('{app}'), SW_HIDE, ewWaitUntilTerminated, ResultCode)
         or ((ResultCode <> 0) and (ResultCode <> ERROR_DRIVER_PACKAGE_NOT_IN_STORE)) then
-      RaiseException(FmtMessage(CustomMessage('FailedUninstallDevice'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]));
+      RaiseException(FmtMessage(CustomMessage('FailedUninstallDevice'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]))
+    else
+      Sleep(500);
     UninstallProgressForm.StatusLabel.Caption := CustomMessage('UninstallDriver');
     if not Exec(ExpandConstant('{app}\devsane.exe'), ExpandConstant('driver uninstall wiasane.inf'), ExpandConstant('{app}'), SW_HIDE, ewWaitUntilTerminated, ResultCode)
         or ((ResultCode <> 0) and (ResultCode <> ERROR_DRIVER_PACKAGE_NOT_IN_STORE)) then
-      RaiseException(FmtMessage(CustomMessage('FailedUninstallDriver'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]));
+      RaiseException(FmtMessage(CustomMessage('FailedUninstallDriver'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]))
+    else
+      Sleep(500);
   end;
 end;
 [_ISTool]
