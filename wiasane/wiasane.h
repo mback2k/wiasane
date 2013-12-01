@@ -33,6 +33,18 @@ _Analysis_mode_(_Analysis_code_type_user_driver_)
 
 #include "winsane.h"
 
+#define WIASANE_OPTION_BR_X			"br-x"
+#define WIASANE_OPTION_BR_Y			"br-y"
+#define WIASANE_OPTION_BRIGHTNESS	"brightness"
+#define WIASANE_OPTION_COMPRESSION	"compression"
+#define WIASANE_OPTION_CONTRAST		"contrast"
+#define WIASANE_OPTION_MODE			"mode"
+#define WIASANE_OPTION_PREVIEW		"preview"
+#define WIASANE_OPTION_RESOLUTION	"resolution"
+#define WIASANE_OPTION_SOURCE		"source"
+#define WIASANE_OPTION_TL_X			"tl-x"
+#define WIASANE_OPTION_TL_Y			"tl-y"
+
 typedef struct _WIASANE_Values {
 	SANE_String_Const pszcModeThreshold;
 	SANE_String_Const pszcModeGrayscale;
