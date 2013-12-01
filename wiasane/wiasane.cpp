@@ -286,6 +286,13 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 								Scan(pValue->pScanInfo, SCAN_FINISHED, NULL, 0, NULL);
 							}
 						}
+						if (!pContext->pTask || !pContext->pTask->bUsingADF) {
+							oOption = pContext->oDevice->GetOption("source");
+							if (oOption) {
+								oOption->SetValueString(pContext->pValues && pContext->pValues->pszcSourceFlatbed ?
+														pContext->pValues->pszcSourceFlatbed : "flatbed");
+							}
+						}
 					}
 				}
 			}
@@ -1064,14 +1071,6 @@ HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _In_ LONG lScanMode)
 
 			hr = E_FAIL;
 			break;
-	}
-
-	if (hr == S_OK && pContext->oSession && pContext->oDevice && !pContext->pTask) {
-		oOption = pContext->oDevice->GetOption("source");
-		if (oOption) {
-			oOption->SetValueString(pContext->pValues && pContext->pValues->pszcSourceFlatbed ?
-			                        pContext->pValues->pszcSourceFlatbed : "flatbed");
-		}
 	}
 
 	return hr;
