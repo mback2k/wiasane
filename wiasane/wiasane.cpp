@@ -30,6 +30,7 @@
 #include <winioctl.h>
 #include <usbscan.h>
 #include <tchar.h>
+#include <shlwapi.h>
 
 #include "wiasane_opt.h"
 #include "wiasane_util.h"
@@ -741,14 +742,14 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 		if (oOption && oOption->GetType() == SANE_TYPE_STRING && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
 			string_list = oOption->GetConstraintStringList();
 			for (index = 0; string_list[index] != NULL; index++) {
-				if (_stricmp(string_list[index], "adf") == 0 ||
-					_stricmp(string_list[index], "automatic document feeder") == 0) {
+				if (StrStrIA(string_list[index], WIASANE_SOURCE_ADF) ||
+					StrStrIA(string_list[index], WIASANE_SOURCE_ADF_EX)) {
 					pScanInfo->ADF = max(pScanInfo->ADF, 1);
 					pContext->pValues->pszcSourceADF = string_list[index];
-				} else if (_stricmp(string_list[index], "duplex") == 0) {
+				} else if (StrStrIA(string_list[index], WIASANE_SOURCE_DUPLEX)) {
 					pScanInfo->ADF = max(pScanInfo->ADF, 2);
 					pContext->pValues->pszcSourceDuplex = string_list[index];
-				} else if (_stricmp(string_list[index], "flatbed") == 0 ||
+				} else if (StrStrIA(string_list[index], WIASANE_SOURCE_FLATBED) ||
 					       !pContext->pValues->pszcSourceFlatbed) {
 					pContext->pValues->pszcSourceFlatbed = string_list[index];
 				}
@@ -762,15 +763,15 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 		if (oOption && oOption->GetType() == SANE_TYPE_STRING && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
 			string_list = oOption->GetConstraintStringList();
 			for (index = 0; string_list[index] != NULL; index++) {
-				if (_stricmp(string_list[index], "lineart") == 0 ||
-					_stricmp(string_list[index], "threshold") == 0) {
+				if (StrCmpIA(string_list[index], WIASANE_MODE_LINEART) == 0 ||
+					StrCmpIA(string_list[index], WIASANE_MODE_THRESHOLD) == 0) {
 					pScanInfo->SupportedDataTypes |= SUPPORT_BW;
 					pContext->pValues->pszcModeThreshold = string_list[index];
-				} else if (_stricmp(string_list[index], "gray") == 0 ||
-					       _stricmp(string_list[index], "grayscale") == 0) {
+				} else if (StrCmpIA(string_list[index], WIASANE_MODE_GRAY) == 0 ||
+					       StrCmpIA(string_list[index], WIASANE_MODE_GRAYSCALE) == 0) {
 					pScanInfo->SupportedDataTypes |= SUPPORT_GRAYSCALE;
 					pContext->pValues->pszcModeGrayscale = string_list[index];
-				} else if (_stricmp(string_list[index], "color") == 0) {
+				} else if (StrCmpIA(string_list[index], WIASANE_MODE_COLOR) == 0) {
 					pScanInfo->SupportedDataTypes |= SUPPORT_COLOR;
 					pContext->pValues->pszcModeColor = string_list[index];
 				}

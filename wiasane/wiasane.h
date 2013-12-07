@@ -45,6 +45,17 @@ _Analysis_mode_(_Analysis_code_type_user_driver_)
 #define WIASANE_OPTION_TL_X			"tl-x"
 #define WIASANE_OPTION_TL_Y			"tl-y"
 
+#define WIASANE_SOURCE_ADF			"adf"
+#define WIASANE_SOURCE_ADF_EX		"automatic document feeder"
+#define WIASANE_SOURCE_DUPLEX		"duplex"
+#define WIASANE_SOURCE_FLATBED		"flatbed"
+
+#define WIASANE_MODE_LINEART		"lineart"
+#define WIASANE_MODE_THRESHOLD		"threshold"
+#define WIASANE_MODE_GRAY			"gray"
+#define WIASANE_MODE_GRAYSCALE		"grayscale"
+#define WIASANE_MODE_COLOR			"color"
+
 typedef struct _WIASANE_Values {
 	SANE_String_Const pszcModeThreshold;
 	SANE_String_Const pszcModeGrayscale;

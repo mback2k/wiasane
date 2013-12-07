@@ -89,7 +89,7 @@
     <Link>
       <ModuleDefinitionFile>wiasane.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(SolutionDir)winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies);winsane.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);shlwapi.lib;winsane.lib</AdditionalDependencies>
       <GenerateDebugInformation>True</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
