@@ -748,7 +748,8 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 				} else if (_stricmp(string_list[index], "duplex") == 0) {
 					pScanInfo->ADF = max(pScanInfo->ADF, 2);
 					pContext->pValues->pszcSourceDuplex = string_list[index];
-				} else if (!pContext->pValues->pszcSourceFlatbed) {
+				} else if (_stricmp(string_list[index], "flatbed") == 0 ||
+					       !pContext->pValues->pszcSourceFlatbed) {
 					pContext->pValues->pszcSourceFlatbed = string_list[index];
 				}
 			}
