@@ -264,18 +264,16 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_LOAD_ADF:
-			if (pContext && pContext->oSession && pContext->oDevice) {
+			if (pContext && pContext->oSession && pContext->oDevice && pContext->pValues) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SOURCE);
 				if (oOption) {
 					switch (pValue->pScanInfo->ADF) {
 						case 1:
-							hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcSourceADF ?
-							                             pContext->pValues->pszcSourceADF : "adf");
+							hr = oOption->SetValueString(pContext->pValues->pszcSourceADF);
 							break;
 
 						case 2:
-							hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcSourceDuplex ?
-							                             pContext->pValues->pszcSourceDuplex : "duplex");
+							hr = oOption->SetValueString(pContext->pValues->pszcSourceDuplex);
 							break;
 					}
 					if (hr == S_OK) {
@@ -290,8 +288,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 						if (!pContext->pTask || !pContext->pTask->bUsingADF) {
 							oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SOURCE);
 							if (oOption) {
-								oOption->SetValueString(pContext->pValues && pContext->pValues->pszcSourceFlatbed ?
-														pContext->pValues->pszcSourceFlatbed : "flatbed");
+								oOption->SetValueString(pContext->pValues->pszcSourceFlatbed);
 							}
 						}
 					}
@@ -300,11 +297,10 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_UNLOAD_ADF:
-			if (pContext && pContext->oSession && pContext->oDevice) {
+			if (pContext && pContext->oSession && pContext->oDevice && pContext->pValues) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SOURCE);
 				if (oOption) {
-					hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcSourceFlatbed ?
-							                     pContext->pValues->pszcSourceFlatbed : "flatbed");
+					hr = oOption->SetValueString(pContext->pValues->pszcSourceFlatbed);
 					if (hr == S_OK) {
 						if (pContext->pTask) {
 							pContext->pTask->bUsingADF = FALSE;
@@ -888,21 +884,18 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	PWINSANE_Option oOption;
 	HRESULT hr;
 
-	if (pContext && pContext->oSession && pContext->oDevice) {
+	if (pContext && pContext->oSession && pContext->oDevice && pContext->pValues) {
 		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_MODE);
 		if (oOption && oOption->GetType() == SANE_TYPE_STRING) {
 			switch (pScanInfo->DataType) {
 				case WIA_DATA_THRESHOLD:
-					hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcModeThreshold ?
-					                             pContext->pValues->pszcModeThreshold : "lineart");
+					hr = oOption->SetValueString(pContext->pValues->pszcModeThreshold);
 					break;
 				case WIA_DATA_GRAYSCALE:
-					hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcModeGrayscale ?
-					                             pContext->pValues->pszcModeGrayscale : "gray");
+					hr = oOption->SetValueString(pContext->pValues->pszcModeGrayscale);
 					break;
 				case WIA_DATA_COLOR:
-					hr = oOption->SetValueString(pContext->pValues && pContext->pValues->pszcModeColor ?
-					                             pContext->pValues->pszcModeColor : "color");
+					hr = oOption->SetValueString(pContext->pValues->pszcModeColor);
 					break;
 				default:
 					hr = E_INVALIDARG;
