@@ -24,8 +24,11 @@
 #include <strsafe.h>
 #include <malloc.h>
 
+#include "winsane.h"
+
 #include "dllmain.h"
 #include "resource.h"
+#include "strutil_res.h"
 #include "coisane_util.h"
 
 DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
@@ -62,6 +65,7 @@ DWORD AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hD
 		return ERROR_OUTOFMEMORY;
 
 	privateData->hHeap = hHeap;
+	privateData->hInstance = hInstance;
 	privateData->hDeviceInfoSet = hDeviceInfoSet;
 	privateData->pDeviceInfoData = pDeviceInfoData;
 
@@ -113,7 +117,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 				case PSN_APPLY:
 					Trace(TEXT("PSN_APPLY"));
 					if (!ExitPropertyPageAdvanced(hwndDlg, privateData)) {
-						MessageBox(hwndDlg, TEXT("Unable to select the specified scanner!"), TEXT("Error"), MB_OK | MB_ICONERROR);
+						MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
 						return TRUE;
 					}
@@ -128,6 +132,74 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 					break;
 			}
 			break;
+
+		case WM_COMMAND:
+			Trace(TEXT("WM_COMMAND"));
+			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			privateData = (PCOISANE_Data) lpPropSheetPage->lParam;
+
+			switch (HIWORD(wParam)) {
+				case BN_CLICKED:
+					Trace(TEXT("BN_CLICKED"));
+					return DialogProcPropertyPageAdvancedBtnClicked(hwndDlg, LOWORD(wParam), privateData);
+					break;
+			}
+			break;
+	}
+
+	return FALSE;
+}
+
+INT_PTR CALLBACK DialogProcPropertyPageAdvancedBtnClicked(_In_ HWND hwndDlg, _In_ UINT hwndDlgItem, _Inout_ PCOISANE_Data privateData)
+{
+	PWINSANE_Session oSession;
+	PWINSANE_Device oDevice;
+	PWINSANE_Params oParams;
+	int iDevices;
+
+	oSession = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
+	if (oSession) {
+		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
+			iDevices = oSession->GetDevices();
+			if (iDevices > 0) {
+				oDevice = oSession->GetDevice(privateData->lpName);
+				if (oDevice) {
+					if (oDevice->Open() == SANE_STATUS_GOOD) {
+						switch (hwndDlgItem) {
+							case IDC_PROPERTIES_BUTTON_CHECK:
+								if (oDevice->GetParams(&oParams) == SANE_STATUS_GOOD) {
+									delete oParams;
+									MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_CHECK_SUCCESSFUL, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONINFORMATION | MB_OK);
+								} else {
+									MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_CHECK_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+								}
+								break;
+
+							case IDC_PROPERTIES_BUTTON_RESET:
+								if (oDevice->Cancel() == SANE_STATUS_GOOD) {
+									MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_RESET_SUCCESSFUL, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONINFORMATION | MB_OK);
+								} else {
+									MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_RESET_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+								}
+								break;
+						}
+						oDevice->Close();
+					} else {
+						MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+					}
+				} else {
+					MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+				}
+			} else {
+				MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+			}
+			oSession->Exit();
+		} else {
+			MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+		}
+		delete oSession;
+	} else {
+		MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
 	}
 
 	return FALSE;

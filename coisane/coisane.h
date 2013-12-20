@@ -34,6 +34,7 @@ __user_code
 typedef struct _COISANE_Data {
 	UINT uiReferences;
 	HANDLE hHeap;
+	HINSTANCE hInstance;
 	HDEVINFO hDeviceInfoSet;
 	PSP_DEVINFO_DATA pDeviceInfoData;
 	USHORT usPort;

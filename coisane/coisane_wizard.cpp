@@ -28,6 +28,7 @@
 
 #include "dllmain.h"
 #include "resource.h"
+#include "strutil_res.h"
 #include "coisane_util.h"
 
 DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
@@ -64,6 +65,7 @@ DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVIN
 		return ERROR_OUTOFMEMORY;
 
 	privateData->hHeap = hHeap;
+	privateData->hInstance = hInstance;
 	privateData->hDeviceInfoSet = hDeviceInfoSet;
 	privateData->pDeviceInfoData = pDeviceInfoData;
 
@@ -145,7 +147,7 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 				case PSN_WIZNEXT:
 					Trace(TEXT("PSN_WIZNEXT"));
 					if (!NextWizardPageServer(hwndDlg, privateData)) {
-						MessageBox(hwndDlg, TEXT("Unable to connect to the specified server!"), TEXT("Error"), MB_OK | MB_ICONERROR);
+						MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
 						return TRUE;
 					}
@@ -201,7 +203,7 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 				case PSN_WIZNEXT:
 					Trace(TEXT("PSN_WIZNEXT"));
 					if (!NextWizardPageScanner(hwndDlg, privateData)) {
-						MessageBox(hwndDlg, TEXT("Unable to select the specified scanner!"), TEXT("Error"), MB_OK | MB_ICONERROR);
+						MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
 						return TRUE;
 					}

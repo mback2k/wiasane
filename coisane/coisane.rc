@@ -151,6 +151,17 @@ BEGIN
     IDS_WIZARD_PAGE_SERVER_HEADER_SUBTITLE "Server Configuration (1/2)"
     IDS_WIZARD_PAGE_SCANNER_HEADER_TITLE "Scanner Access Now Easy"
     IDS_WIZARD_PAGE_SCANNER_HEADER_SUBTITLE "Scanner Configuration (2/2)"
+    IDS_PROPERTIES_SCANNER_DEVICE "Scanner Device"
+    IDS_PROPERTIES_SCANNER_CHECK_SUCCESSFUL 
+                            "Scanner device was successfully checked."
+    IDS_PROPERTIES_SCANNER_CHECK_FAILED "Scanner device could not be checked."
+    IDS_PROPERTIES_SCANNER_RESET_SUCCESSFUL 
+                            "Scanner device was successfully reset."
+    IDS_PROPERTIES_SCANNER_RESET_FAILED "Scanner device could not be reset."
+    IDS_DEVICE_OPEN_FAILED  "Scanner device could not be opened."
+    IDS_DEVICE_FIND_FAILED  "Scanner device could not be found."
+    IDS_SESSION_INIT_FAILED "Scanner session initialization failed."
+    IDS_SESSION_CONNECT_FAILED "Scanner session connect failed."
 END
 
 #endif    // Neutral resources
