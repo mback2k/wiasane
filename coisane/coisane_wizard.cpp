@@ -362,7 +362,7 @@ BOOL NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 			session = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
 			if (session) {
 				if (session->Init(NULL, NULL) == SANE_STATUS_GOOD) {
-					res = session->Exit();
+					res = session->Exit() == SANE_STATUS_GOOD;
 				} else {
 					res = FALSE;
 				}
@@ -395,7 +395,7 @@ BOOL InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 					SendMessageA(hwnd, CB_ADDSTRING, 0, (LPARAM) device->GetName());
 				}
 			}
-			res = session->Exit();
+			res = session->Exit() == SANE_STATUS_GOOD;
 		} else {
 			res = FALSE;
 		}
@@ -474,7 +474,7 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 				} else {
 					res = FALSE;
 				}
-				if (!session->Exit()) {
+				if (session->Exit() != SANE_STATUS_GOOD) {
 					res = FALSE;
 				}
 			} else {

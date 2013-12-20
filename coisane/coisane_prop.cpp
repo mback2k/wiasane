@@ -215,7 +215,7 @@ BOOL InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 					SendMessageA(hwnd, CB_ADDSTRING, (WPARAM) 0, (LPARAM) device->GetName());
 				}
 			}
-			res = session->Exit();
+			res = session->Exit() == SANE_STATUS_GOOD;
 		} else {
 			res = FALSE;
 		}
@@ -307,7 +307,7 @@ BOOL ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 				} else {
 					res = FALSE;
 				}
-				if (!session->Exit()) {
+				if (session->Exit() != SANE_STATUS_GOOD) {
 					res = FALSE;
 				}
 			} else {
