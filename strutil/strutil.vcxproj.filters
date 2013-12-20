@@ -18,9 +18,15 @@
     <ClCompile Include="strutil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="strutil_res.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="strutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="strutil_res.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -59,9 +59,11 @@
   </ImportGroup>
   <ItemGroup>
     <ClCompile Include="strutil.cpp" />
+    <ClCompile Include="strutil_res.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="strutil.h" />
+    <ClInclude Include="strutil_res.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
