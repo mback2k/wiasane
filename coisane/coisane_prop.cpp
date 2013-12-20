@@ -212,7 +212,7 @@ BOOL InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 			for (i = 0; i < devices; i++) {
 				device = session->GetDevice(i);
 				if (device) {
-					SendMessageA(hwnd, CB_ADDSTRING, 0, (LPARAM) device->GetName());
+					SendMessageA(hwnd, CB_ADDSTRING, (WPARAM) 0, (LPARAM) device->GetName());
 				}
 			}
 			res = session->Exit();
@@ -225,7 +225,7 @@ BOOL InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 	}
 
 	if (privateData->lpName)
-		SetDlgItemText(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, privateData->lpName);
+		SendDlgItemMessage(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, CB_SELECTSTRING, (WPARAM) -1, (LPARAM) privateData->lpName);
 
 	if (privateData->lpUsername)
 		SetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, privateData->lpUsername);
