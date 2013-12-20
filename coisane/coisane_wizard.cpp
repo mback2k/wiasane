@@ -361,7 +361,7 @@ BOOL NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 
 			session = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
 			if (session) {
-				if (session->Init(NULL, NULL)) {
+				if (session->Init(NULL, NULL) == SANE_STATUS_GOOD) {
 					res = session->Exit();
 				} else {
 					res = FALSE;
@@ -386,7 +386,7 @@ BOOL InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 
 	session = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
 	if (session) {
-		if (session->Init(NULL, NULL)) {
+		if (session->Init(NULL, NULL) == SANE_STATUS_GOOD) {
 			hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER);
 			devices = session->GetDevices();
 			for (i = 0; i < devices; i++) {
@@ -456,7 +456,7 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 
 		session = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
 		if (session) {
-			if (session->Init(NULL, NULL)) {
+			if (session->Init(NULL, NULL) == SANE_STATUS_GOOD) {
 				devices = session->GetDevices();
 				if (devices > 0) {
 					device = session->GetDevice(privateData->lpName);

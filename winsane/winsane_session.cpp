@@ -150,7 +150,7 @@ PWINSANE_Socket WINSANE_Session::GetSocket()
 }
 
 
-BOOL WINSANE_Session::Init(_In_ PSANE_Int version, _In_ SANE_Auth_Callback authorize)
+SANE_Status WINSANE_Session::Init(_In_ PSANE_Int version, _In_ SANE_Auth_Callback authorize)
 {
 	SANE_Word version_code;
 	SANE_Status status;
@@ -172,36 +172,36 @@ BOOL WINSANE_Session::Init(_In_ PSANE_Int version, _In_ SANE_Auth_Callback autho
 
 	user_name_len = SANE_MAX_USERNAME_LEN;
 	if (!GetUserNameA(user_name, &user_name_len))
-		return FALSE;
+		return SANE_STATUS_NO_MEM;
 
 	written = this->sock->WriteWord(WINSANE_NET_INIT);
 	written += this->sock->WriteWord(version_code);
 	written += this->sock->WriteString(user_name);
 	if (this->sock->Flush() != written)
-		return FALSE;
+		return SANE_STATUS_IO_ERROR;
 
 	status = this->sock->ReadStatus();
 	version_code = this->sock->ReadWord();
 	if (status != SANE_STATUS_GOOD)
-		return FALSE;
+		return status;
 
 	this->initialized = TRUE;
-	return TRUE;
+	return SANE_STATUS_GOOD;
 }
 
-BOOL WINSANE_Session::Exit()
+SANE_Status WINSANE_Session::Exit()
 {
 	DWORD written;
 
 	if (!this->initialized)
-		return FALSE;
+		return SANE_STATUS_INVAL;
 
 	written = this->sock->WriteWord(WINSANE_NET_EXIT);
 	if (this->sock->Flush() != written)
-		return FALSE;
+		return SANE_STATUS_IO_ERROR;
 
 	this->initialized = FALSE;
-	return TRUE;
+	return SANE_STATUS_GOOD;
 }
 
 

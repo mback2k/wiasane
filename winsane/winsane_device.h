@@ -45,18 +45,18 @@ public:
 	SANE_String_Const GetModel();
 	SANE_String_Const GetType();
 
-	BOOL Open();
-	BOOL Close();
+	SANE_Status Open();
+	SANE_Status Close();
 
 	int FetchOptions();
 	PWINSANE_Option GetOption(_In_ int index);
 	PWINSANE_Option GetOption(_In_ SANE_String_Const name);
 	VOID ClearOptions();
 
-	PWINSANE_Params GetParams();
+	SANE_Status GetParams(_Inout_ PWINSANE_Params *params);
 
-	PWINSANE_Scan Start();
-	BOOL Cancel();
+	SANE_Status Start(_Inout_ PWINSANE_Scan *scan);
+	SANE_Status Cancel();
 
 private:
 	int num_options;

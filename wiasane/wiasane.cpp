@@ -118,7 +118,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_RESETSCANNER:
 		case CMD_STI_DEVICERESET:
 			if (pContext && pContext->oSession && pContext->oDevice) {
-				if (!pContext->oDevice->Cancel()) {
+				if (pContext->oDevice->Cancel() != SANE_STATUS_GOOD) {
 					hr = E_FAIL;
 					break;
 				}
@@ -129,8 +129,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_STI_DIAGNOSTIC:
 			if (pContext && pContext->oSession && pContext->oDevice) {
-				oParams = pContext->oDevice->GetParams();
-				if (oParams) {
+				if (pContext->oDevice->GetParams(&oParams) == SANE_STATUS_GOOD) {
 					delete oParams;
 				} else {
 					hr = E_FAIL;
@@ -146,8 +145,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			pValue->pGuid = (GUID*) &GUID_NULL;
 
 			if (pContext && pContext->oSession && pContext->oDevice) {
-				oParams = pContext->oDevice->GetParams();
-				if (oParams) {
+				if (pContext->oDevice->GetParams(&oParams) == SANE_STATUS_GOOD) {
 					delete oParams;
 					pValue->lVal = MCRO_STATUS_OK;
 				}
@@ -377,8 +375,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				if (!pContext->pTask)
 					return E_OUTOFMEMORY;
 
-				pContext->pTask->oScan = pContext->oDevice->Start();
-				if (!pContext->pTask->oScan)
+				if (pContext->oDevice->Start(&pContext->pTask->oScan) != SANE_STATUS_GOOD)
 					return E_FAIL;
 
 				if (pContext->pTask->oScan->Connect() != CONTINUE)
@@ -657,20 +654,21 @@ HRESULT InitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 
 	pContext->pTask = NULL;
 	pContext->oSession = WINSANE_Session::Remote(pContext->pszHost, pContext->usPort);
-	if (pContext->oSession && pContext->oSession->Init(NULL, NULL) && pContext->oSession->GetDevices() > 0) {
-		pContext->oDevice = pContext->oSession->GetDevice(pContext->pszName);
-		if (pContext->oDevice && pContext->oDevice->Open()) {
-			pContext->oDevice->FetchOptions();
-		} else {
-			pContext->oDevice = NULL;
-			return E_FAIL;
+	if (pContext->oSession) {
+		if (pContext->oSession->Init(NULL, NULL) == SANE_STATUS_GOOD && pContext->oSession->GetDevices() > 0) {
+			pContext->oDevice = pContext->oSession->GetDevice(pContext->pszName);
+			if (pContext->oDevice && pContext->oDevice->Open() == SANE_STATUS_GOOD) {
+				if (pContext->oDevice->FetchOptions() > 0) {
+					return S_OK;
+				}
+			}
+			pContext->oSession->Exit();
 		}
-	} else {
-		pContext->oDevice = NULL;
-		return E_FAIL;
+		delete pContext->oSession;
+		pContext->oSession = NULL;
 	}
-
-    return S_OK;
+	pContext->oDevice = NULL;
+	return E_FAIL;
 }
 
 HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
@@ -939,8 +937,7 @@ HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	SANE_Int depth;
 	HRESULT hr;
 
-	oParams = pContext->oDevice->GetParams();
-	if (!oParams)
+	if (pContext->oDevice->GetParams(&oParams) != SANE_STATUS_GOOD)
 		return E_FAIL;
 
 	frame = oParams->GetFormat();

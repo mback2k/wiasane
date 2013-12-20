@@ -49,7 +49,7 @@ VOID DebugSession(WINSANE_Session *session)
 	WINSANE_Device *device;
 	int devices, i;
 
-	if (session->Init(NULL, NULL)) {
+	if (session->Init(NULL, NULL) == SANE_STATUS_GOOD) {
 		devices = session->GetDevices();
 
 		for (i = 0; i < devices; i++) {
@@ -75,7 +75,7 @@ VOID DebugSessionDevice(WINSANE_Session *session, WINSANE_Device *device)
 	printf("Model:\t%s\n", device->GetModel());
 	printf("Type:\t%s\n", device->GetType());
 
-	if (device->Open()) {
+	if (device->Open() == SANE_STATUS_GOOD) {
 		options = device->FetchOptions();
 
 		for (i = 0; i < options; i++) {
@@ -85,9 +85,7 @@ VOID DebugSessionDevice(WINSANE_Session *session, WINSANE_Device *device)
 			}
 		}
 
-		params = device->GetParams();
-
-		if (params) {
+		if (device->GetParams(&params) == SANE_STATUS_GOOD) {
 			DebugSessionDeviceParams(session, device, params);
 			delete params;
 		}
@@ -268,8 +266,7 @@ VOID DebugSessionDeviceScan(WINSANE_Session *session, WINSANE_Device *device)
 	while (fgetc(stdin) != '\n');
 
 	if (doscan) {
-		scan = device->Start();
-		if (scan) {
+		if (device->Start(&scan) == SANE_STATUS_GOOD) {
 			printf("Begin scanning image ...\n");
 			output = CreateFile(L"winsane-dbg.scan", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 

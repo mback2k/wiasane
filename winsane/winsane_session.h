@@ -53,8 +53,8 @@ public:
 
 
 	/* Public API */
-	BOOL Init(_In_ PSANE_Int version, _In_ SANE_Auth_Callback authorize);
-	BOOL Exit();
+	SANE_Status Init(_In_ PSANE_Int version, _In_ SANE_Auth_Callback authorize);
+	SANE_Status Exit();
 
 	int GetDevices();
 	WINSANE_Device* GetDevice(_In_ int index);

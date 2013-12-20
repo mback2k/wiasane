@@ -304,7 +304,7 @@ DWORD UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 	if (hDeviceKey == INVALID_HANDLE_VALUE)
 		return GetLastError();
 
-	if (device->Open()) {
+	if (device->Open() == SANE_STATUS_GOOD) {
 		cbResolutions = CreateResolutionList(privateData, device, &lpResolutions);
 
 		device->Close();

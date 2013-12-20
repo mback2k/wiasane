@@ -78,7 +78,7 @@ SANE_String_Const WINSANE_Device::GetType()
 }
 
 
-BOOL WINSANE_Device::Open()
+SANE_Status WINSANE_Device::Open()
 {
 	SANE_Status status;
 	SANE_Handle handle;
@@ -88,7 +88,7 @@ BOOL WINSANE_Device::Open()
 	written = this->sock->WriteWord(WINSANE_NET_OPEN);
 	written += this->sock->WriteString(this->sane_device->name);
 	if (this->sock->Flush() != written)
-		return FALSE;
+		return SANE_STATUS_IO_ERROR;
 
 	status = this->sock->ReadStatus();
 	handle = this->sock->ReadHandle();
@@ -97,30 +97,30 @@ BOOL WINSANE_Device::Open()
 	delete resource;
 
 	if (status != SANE_STATUS_GOOD)
-		return FALSE;
+		return status;
 
 	this->sane_handle = handle;
 
-	return TRUE;
+	return SANE_STATUS_GOOD;
 }
 
-BOOL WINSANE_Device::Close()
+SANE_Status WINSANE_Device::Close()
 {
 	DWORD written;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
-		return FALSE;
+		return SANE_STATUS_INVAL;
 
 	written = this->sock->WriteWord(WINSANE_NET_CLOSE);
 	written += this->sock->WriteHandle(this->sane_handle);
 	if (this->sock->Flush() != written)
-		return FALSE;
+		return SANE_STATUS_IO_ERROR;
 
 	this->sock->ReadWord();
 
 	this->sane_handle = INVALID_SANE_HANDLE;
 
-	return TRUE;
+	return SANE_STATUS_GOOD;
 }
 
 
@@ -251,19 +251,19 @@ VOID WINSANE_Device::ClearOptions()
 }
 
 
-PWINSANE_Params WINSANE_Device::GetParams()
+SANE_Status WINSANE_Device::GetParams(_Inout_ PWINSANE_Params *params)
 {
 	SANE_Status status;
 	SANE_Parameters *sane_params;
 	DWORD written;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
-		return NULL;
+		return SANE_STATUS_INVAL;
 
 	written = this->sock->WriteWord(WINSANE_NET_GET_PARAMETERS);
 	written += this->sock->WriteHandle(this->sane_handle);
 	if (this->sock->Flush() != written)
-		return NULL;
+		return SANE_STATUS_IO_ERROR;
 
 	status = this->sock->ReadStatus();
 
@@ -277,14 +277,15 @@ PWINSANE_Params WINSANE_Device::GetParams()
 
 	if (status != SANE_STATUS_GOOD) {
 		delete sane_params;
-		return NULL;
+		return status;
 	}
 
-	return new WINSANE_Params(this, this->sock, sane_params);
+	*params = new WINSANE_Params(this, this->sock, sane_params);
+	return SANE_STATUS_GOOD;
 }
 
 
-PWINSANE_Scan WINSANE_Device::Start()
+SANE_Status WINSANE_Device::Start(_Inout_ PWINSANE_Scan *scan)
 {
 	SANE_Status status;
 	SANE_Word port;
@@ -293,12 +294,12 @@ PWINSANE_Scan WINSANE_Device::Start()
 	DWORD written;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
-		return NULL;
+		return SANE_STATUS_INVAL;
 
 	written = this->sock->WriteWord(WINSANE_NET_START);
 	written += this->sock->WriteHandle(this->sane_handle);
 	if (this->sock->Flush() != written)
-		return NULL;
+		return SANE_STATUS_IO_ERROR;
 
 	status = this->sock->ReadStatus();
 	port = this->sock->ReadWord();
@@ -308,24 +309,25 @@ PWINSANE_Scan WINSANE_Device::Start()
 	delete resource;
 
 	if (status != SANE_STATUS_GOOD)
-		return NULL;
+		return status;
 
-	return new WINSANE_Scan(this, this->sock, port, byte_order);
+	*scan = new WINSANE_Scan(this, this->sock, port, byte_order);
+	return SANE_STATUS_GOOD;
 }
 
-BOOL WINSANE_Device::Cancel()
+SANE_Status WINSANE_Device::Cancel()
 {
 	DWORD written;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
-		return FALSE;
+		return SANE_STATUS_INVAL;
 
 	written = this->sock->WriteWord(WINSANE_NET_CANCEL);
 	written += this->sock->WriteHandle(this->sane_handle);
 	if (this->sock->Flush() != written)
-		return FALSE;
+		return SANE_STATUS_IO_ERROR;
 
 	this->sock->ReadWord();
 
-	return TRUE;
+	return SANE_STATUS_GOOD;
 }
