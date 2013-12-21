@@ -155,13 +155,11 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvancedBtnClicked(_In_ HWND hwndDlg, _In
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
 	PWINSANE_Params oParams;
-	int iDevices;
 
 	oSession = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
 	if (oSession) {
 		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
-			iDevices = oSession->GetDevices();
-			if (iDevices > 0) {
+			if (oSession->GetDevices() > 0) {
 				oDevice = oSession->GetDevice(privateData->lpName);
 				if (oDevice) {
 					if (oDevice->Open() == SANE_STATUS_GOOD) {
@@ -262,9 +260,9 @@ UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uM
 
 BOOL InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 {
-	WINSANE_Session *session;
-	WINSANE_Device *device;
-	int devices, i;
+	PWINSANE_Session oSession;
+	PWINSANE_Device oDevice;
+	int iNumDevices, i;
 	HWND hwnd;
 	BOOL res;
 
@@ -276,22 +274,22 @@ BOOL InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 	if (!privateData->usPort)
 		privateData->usPort = WINSANE_DEFAULT_PORT;
 
-	session = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
-	if (session) {
-		if (session->Init(NULL, NULL) == SANE_STATUS_GOOD) {
+	oSession = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
+	if (oSession) {
+		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
 			hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER);
-			devices = session->GetDevices();
-			for (i = 0; i < devices; i++) {
-				device = session->GetDevice(i);
-				if (device) {
-					SendMessageA(hwnd, CB_ADDSTRING, (WPARAM) 0, (LPARAM) device->GetName());
+			iNumDevices = oSession->GetDevices();
+			for (i = 0; i < iNumDevices; i++) {
+				oDevice = oSession->GetDevice(i);
+				if (oDevice) {
+					SendMessageA(hwnd, CB_ADDSTRING, (WPARAM) 0, (LPARAM) oDevice->GetName());
 				}
 			}
-			res = session->Exit() == SANE_STATUS_GOOD;
+			res = oSession->Exit() == SANE_STATUS_GOOD;
 		} else {
 			res = FALSE;
 		}
-		delete session;
+		delete oSession;
 	} else {
 		res = FALSE;
 	}
@@ -311,9 +309,8 @@ BOOL InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 BOOL ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 {
 	SP_DEVINSTALL_PARAMS devInstallParams;
-	WINSANE_Session *session;
-	WINSANE_Device *device;
-	int devices;
+	PWINSANE_Session oSession;
+	PWINSANE_Device oDevice;
 	LPTSTR lpName;
 	LPTSTR lpUsername;
 	LPTSTR lpPassword;
@@ -356,15 +353,14 @@ BOOL ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 			HeapFree(privateData->hHeap, 0, lpPassword);
 		}
 
-		session = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
-		if (session) {
-			if (session->Init(NULL, NULL) == SANE_STATUS_GOOD) {
-				devices = session->GetDevices();
-				if (devices > 0) {
-					device = session->GetDevice(privateData->lpName);
-					if (device) {
-						UpdateDeviceInfo(privateData, device);
-						UpdateDeviceData(privateData, device);
+		oSession = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
+		if (oSession) {
+			if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
+				if (oSession->GetDevices() > 0) {
+					oDevice = oSession->GetDevice(privateData->lpName);
+					if (oDevice) {
+						UpdateDeviceInfo(privateData, oDevice);
+						UpdateDeviceData(privateData, oDevice);
 
 						ZeroMemory(&devInstallParams, sizeof(SP_DEVINSTALL_PARAMS));
 						devInstallParams.cbSize = sizeof(SP_DEVINSTALL_PARAMS);
@@ -379,13 +375,13 @@ BOOL ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 				} else {
 					res = FALSE;
 				}
-				if (session->Exit() != SANE_STATUS_GOOD) {
+				if (oSession->Exit() != SANE_STATUS_GOOD) {
 					res = FALSE;
 				}
 			} else {
 				res = FALSE;
 			}
-			delete session;
+			delete oSession;
 		} else {
 			res = FALSE;
 		}
