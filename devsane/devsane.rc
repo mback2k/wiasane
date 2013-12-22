@@ -70,8 +70,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,0,0,1
- PRODUCTVERSION 0,0,0,1
+ FILEVERSION 0,0,0,2
+ PRODUCTVERSION 0,0,0,2
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x9L
@@ -88,12 +88,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "Marc Hörsken"
             VALUE "FileDescription", "Scanner Access Now Easy - Driver/Device Installer"
-            VALUE "FileVersion", "0.0.0.1"
+            VALUE "FileVersion", "0.0.0.2"
             VALUE "InternalName", "devsane.exe"
             VALUE "LegalCopyright", "Copyright © 2013 Marc Hörsken. All rights reserved."
             VALUE "OriginalFilename", "devsane.exe"
             VALUE "ProductName", "Scanner Access Now Easy - WIA Driver"
-            VALUE "ProductVersion", "0.0.0.1"
+            VALUE "ProductVersion", "0.0.0.2"
         END
     END
     BLOCK "VarFileInfo"
