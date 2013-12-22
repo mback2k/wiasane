@@ -222,61 +222,64 @@ DWORD QueryDeviceData(_In_ PCOISANE_Data privateData)
 
 		res = RegQueryValueEx(hDeviceDataKey, TEXT("Host"), NULL, &dwType, NULL, &cbData);
 		if (res == ERROR_SUCCESS && dwType == REG_SZ) {
-			lpString = (LPTSTR) realloc(privateData->lpHost, cbData);
+			lpString = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, cbData);
 			if (lpString) {
-				privateData->lpHost = lpString;
-				ZeroMemory(lpString, cbData);
 				res = RegQueryValueEx(hDeviceDataKey, TEXT("Host"), NULL, &dwType, (LPBYTE) lpString, &cbData);
 				if (res == ERROR_SUCCESS) {
+					if (privateData->lpHost) {
+						HeapFree(privateData->hHeap, 0, privateData->lpHost);
+					}
 					privateData->lpHost = lpString;
 				} else {
-					privateData->lpHost = NULL;
-					free(lpString);
+					HeapFree(privateData->hHeap, 0, lpString);
 				}
 			}
 		}
 
 		res = RegQueryValueEx(hDeviceDataKey, TEXT("Name"), NULL, &dwType, NULL, &cbData);
 		if (res == ERROR_SUCCESS && dwType == REG_SZ) {
-			lpString = (LPTSTR) realloc(privateData->lpName, cbData);
+			lpString = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, cbData);
 			if (lpString) {
-				ZeroMemory(lpString, cbData);
 				res = RegQueryValueEx(hDeviceDataKey, TEXT("Name"), NULL, &dwType, (LPBYTE) lpString, &cbData);
 				if (res == ERROR_SUCCESS) {
+					if (privateData->lpName) {
+						HeapFree(privateData->hHeap, 0, privateData->lpName);
+					}
 					privateData->lpName = lpString;
 				} else {
-					privateData->lpName = NULL;
-					free(lpString);
+					HeapFree(privateData->hHeap, 0, lpString);
 				}
 			}
 		}
 
 		res = RegQueryValueEx(hDeviceDataKey, TEXT("Username"), NULL, &dwType, NULL, &cbData);
 		if (res == ERROR_SUCCESS && dwType == REG_SZ) {
-			lpString = (LPTSTR) realloc(privateData->lpUsername, cbData);
+			lpString = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, cbData);
 			if (lpString) {
-				ZeroMemory(lpString, cbData);
 				res = RegQueryValueEx(hDeviceDataKey, TEXT("Username"), NULL, &dwType, (LPBYTE) lpString, &cbData);
 				if (res == ERROR_SUCCESS) {
+					if (privateData->lpUsername) {
+						HeapFree(privateData->hHeap, 0, privateData->lpUsername);
+					}
 					privateData->lpUsername = lpString;
 				} else {
-					privateData->lpUsername = NULL;
-					free(lpString);
+					HeapFree(privateData->hHeap, 0, lpString);
 				}
 			}
 		}
 
 		res = RegQueryValueEx(hDeviceDataKey, TEXT("Password"), NULL, &dwType, NULL, &cbData);
 		if (res == ERROR_SUCCESS && dwType == REG_SZ) {
-			lpString = (LPTSTR) realloc(privateData->lpPassword, cbData);
+			lpString = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, cbData);
 			if (lpString) {
-				ZeroMemory(lpString, cbData);
 				res = RegQueryValueEx(hDeviceDataKey, TEXT("Password"), NULL, &dwType, (LPBYTE) lpString, &cbData);
 				if (res == ERROR_SUCCESS) {
+					if (privateData->lpPassword) {
+						HeapFree(privateData->hHeap, 0, privateData->lpPassword);
+					}
 					privateData->lpPassword = lpString;
 				} else {
-					privateData->lpPassword = NULL;
-					free(lpString);
+					HeapFree(privateData->hHeap, 0, lpString);
 				}
 			}
 		}
@@ -294,7 +297,8 @@ DWORD UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 	HKEY hDeviceKey, hDeviceDataKey;
 	DWORD cbData, dwPort;
 	LPTSTR lpResolutions;
-	size_t cbResolutions;
+	size_t cbResolutions, cbLength;
+	HRESULT hr;
 	LONG res;
 
 	if (!device)
@@ -321,23 +325,35 @@ DWORD UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 		}
 
 		if (privateData->lpHost) {
-			cbData = (DWORD) _msize(privateData->lpHost);
-			RegSetValueEx(hDeviceDataKey, TEXT("Host"), 0, REG_SZ, (LPBYTE) privateData->lpHost, cbData);
+			hr = StringCbLength(privateData->lpHost, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
+			if (SUCCEEDED(hr)) {
+				cbData = (DWORD) cbLength + sizeof(TCHAR);
+				RegSetValueEx(hDeviceDataKey, TEXT("Host"), 0, REG_SZ, (LPBYTE) privateData->lpHost, cbData);
+			}
 		}
 
 		if (privateData->lpName) {
-			cbData = (DWORD) _msize(privateData->lpName);
-			RegSetValueEx(hDeviceDataKey, TEXT("Name"), 0, REG_SZ, (LPBYTE) privateData->lpName, cbData);
+			hr = StringCbLength(privateData->lpName, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
+			if (SUCCEEDED(hr)) {
+				cbData = (DWORD) cbLength + sizeof(TCHAR);
+				RegSetValueEx(hDeviceDataKey, TEXT("Name"), 0, REG_SZ, (LPBYTE) privateData->lpName, cbData);
+			}
 		}
 
 		if (privateData->lpUsername) {
-			cbData = (DWORD) _msize(privateData->lpUsername);
-			RegSetValueEx(hDeviceDataKey, TEXT("Username"), 0, REG_SZ, (LPBYTE) privateData->lpUsername, cbData);
+			hr = StringCbLength(privateData->lpUsername, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
+			if (SUCCEEDED(hr)) {
+				cbData = (DWORD) cbLength + sizeof(TCHAR);
+				RegSetValueEx(hDeviceDataKey, TEXT("Username"), 0, REG_SZ, (LPBYTE) privateData->lpUsername, cbData);
+			}
 		}
 
 		if (privateData->lpPassword) {
-			cbData = (DWORD) _msize(privateData->lpPassword);
-			RegSetValueEx(hDeviceDataKey, TEXT("Password"), 0, REG_SZ, (LPBYTE) privateData->lpPassword, cbData);
+			hr = StringCbLength(privateData->lpPassword, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
+			if (SUCCEEDED(hr)) {
+				cbData = (DWORD) cbLength + sizeof(TCHAR);
+				RegSetValueEx(hDeviceDataKey, TEXT("Password"), 0, REG_SZ, (LPBYTE) privateData->lpPassword, cbData);
+			}
 		}
 
 		if (lpResolutions) {

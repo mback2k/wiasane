@@ -28,6 +28,7 @@
 
 #include "dllmain.h"
 #include "resource.h"
+#include "strutil.h"
 #include "strutil_res.h"
 #include "coisane_util.h"
 
@@ -266,13 +267,13 @@ UINT CALLBACK PropSheetPageProcWizardPage(_In_ HWND hwnd, _In_ UINT uMsg, _Inout
 
 				if (privateData->uiReferences == 0) {
 					if (privateData->lpHost)
-						free(privateData->lpHost);
+						HeapFree(privateData->hHeap, 0, privateData->lpHost);
 					if (privateData->lpName)
-						free(privateData->lpName);
+						HeapFree(privateData->hHeap, 0, privateData->lpName);
 					if (privateData->lpUsername)
-						free(privateData->lpUsername);
+						HeapFree(privateData->hHeap, 0, privateData->lpUsername);
 					if (privateData->lpPassword)
-						free(privateData->lpPassword);
+						HeapFree(privateData->hHeap, 0, privateData->lpPassword);
 
 					HeapFree(privateData->hHeap, 0, privateData);
 					ppsp->lParam = NULL;
@@ -305,9 +306,10 @@ BOOL InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 					if (res) {
 						res = SetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_HOST, strField);
 
-						privateData->lpHost = _tcsdup(strField);
+						privateData->lpHost = strField;
+					} else {
+						HeapFree(privateData->hHeap, 0, strField);
 					}
-					HeapFree(privateData->hHeap, 0, strField);
 				} else {
 					res = FALSE;
 				}
@@ -332,7 +334,7 @@ BOOL InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 	}
 
 	if (!privateData->lpHost)
-		privateData->lpHost = _tcsdup(TEXT("localhost"));
+		privateData->lpHost = StringAClone(privateData->hHeap, TEXT("localhost"));
 
 	if (!privateData->usPort)
 		privateData->usPort = WINSANE_DEFAULT_PORT;
@@ -352,11 +354,12 @@ BOOL NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 		res = GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_HOST, lpHost, MAX_PATH);
 		if (res) {
 			if (privateData->lpHost) {
-				free(privateData->lpHost);
+				HeapFree(privateData->hHeap, 0, privateData->lpHost);
 			}
-			privateData->lpHost = _tcsdup(lpHost);
+			privateData->lpHost = lpHost;
+		} else {
+			HeapFree(privateData->hHeap, 0, lpHost);
 		}
-		HeapFree(privateData->hHeap, 0, lpHost);
 	} else {
 		res = FALSE;
 	}
@@ -428,11 +431,12 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 		res = GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER, lpName, MAX_PATH);
 		if (res) {
 			if (privateData->lpName) {
-				free(privateData->lpName);
+				HeapFree(privateData->hHeap, 0, privateData->lpName);
 			}
-			privateData->lpName = _tcsdup(lpName);
+			privateData->lpName = lpName;
+		} else {
+			HeapFree(privateData->hHeap, 0, lpName);
 		}
-		HeapFree(privateData->hHeap, 0, lpName);
 	} else {
 		res = FALSE;
 	}
@@ -442,22 +446,24 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 		if (lpUsername) {
 			if (GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SCANNER_EDIT_USERNAME, lpUsername, MAX_PATH)) {
 				if (privateData->lpUsername) {
-					free(privateData->lpUsername);
+					HeapFree(privateData->hHeap, 0, privateData->lpUsername);
 				}
-				privateData->lpUsername = _tcsdup(lpUsername);
+				privateData->lpUsername = lpUsername;
+			} else {
+				HeapFree(privateData->hHeap, 0, lpUsername);
 			}
-			HeapFree(privateData->hHeap, 0, lpUsername);
 		}
 
 		lpPassword = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
 		if (lpPassword) {
 			if (GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SCANNER_EDIT_PASSWORD, lpPassword, MAX_PATH)) {
 				if (privateData->lpPassword) {
-					free(privateData->lpPassword);
+					HeapFree(privateData->hHeap, 0, privateData->lpPassword);
 				}
-				privateData->lpPassword = _tcsdup(lpPassword);
+				privateData->lpPassword = lpPassword;
+			} else {
+				HeapFree(privateData->hHeap, 0, lpPassword);
 			}
-			HeapFree(privateData->hHeap, 0, lpPassword);
 		}
 
 		oSession = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);

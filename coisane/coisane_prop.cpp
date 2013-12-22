@@ -28,6 +28,7 @@
 
 #include "dllmain.h"
 #include "resource.h"
+#include "strutil.h"
 #include "strutil_res.h"
 #include "coisane_util.h"
 
@@ -250,13 +251,13 @@ UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uM
 
 				if (privateData->uiReferences == 0) {
 					if (privateData->lpHost)
-						free(privateData->lpHost);
+						HeapFree(privateData->hHeap, 0, privateData->lpHost);
 					if (privateData->lpName)
-						free(privateData->lpName);
+						HeapFree(privateData->hHeap, 0, privateData->lpName);
 					if (privateData->lpUsername)
-						free(privateData->lpUsername);
+						HeapFree(privateData->hHeap, 0, privateData->lpUsername);
 					if (privateData->lpPassword)
-						free(privateData->lpPassword);
+						HeapFree(privateData->hHeap, 0, privateData->lpPassword);
 
 					HeapFree(privateData->hHeap, 0, privateData);
 					ppsp->lParam = NULL;
@@ -279,7 +280,7 @@ BOOL InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 	QueryDeviceData(privateData);
 
 	if (!privateData->lpHost)
-		privateData->lpHost = _tcsdup(TEXT("localhost"));
+		privateData->lpHost = StringAClone(privateData->hHeap, TEXT("localhost"));
 
 	if (!privateData->usPort)
 		privateData->usPort = WINSANE_DEFAULT_PORT;
@@ -331,11 +332,12 @@ BOOL ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 		res = GetDlgItemText(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, lpName, MAX_PATH);
 		if (res) {
 			if (privateData->lpName) {
-				free(privateData->lpName);
+				HeapFree(privateData->hHeap, 0, privateData->lpName);
 			}
-			privateData->lpName = _tcsdup(lpName);
+			privateData->lpName = lpName;
+		} else {
+			HeapFree(privateData->hHeap, 0, lpName);
 		}
-		HeapFree(privateData->hHeap, 0, lpName);
 	} else {
 		res = FALSE;
 	}
@@ -345,22 +347,24 @@ BOOL ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 		if (lpUsername) {
 			if (GetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, lpUsername, MAX_PATH)) {
 				if (privateData->lpUsername) {
-					free(privateData->lpUsername);
+					HeapFree(privateData->hHeap, 0, privateData->lpUsername);
 				}
-				privateData->lpUsername = _tcsdup(lpUsername);
+				privateData->lpUsername = lpUsername;
+			} else {
+				HeapFree(privateData->hHeap, 0, lpUsername);
 			}
-			HeapFree(privateData->hHeap, 0, lpUsername);
 		}
 
 		lpPassword = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
 		if (lpPassword) {
 			if (GetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, lpPassword, MAX_PATH)) {
 				if (privateData->lpPassword) {
-					free(privateData->lpPassword);
+					HeapFree(privateData->hHeap, 0, privateData->lpPassword);
 				}
-				privateData->lpPassword = _tcsdup(lpPassword);
+				privateData->lpPassword = lpPassword;
+			} else {
+				HeapFree(privateData->hHeap, 0, lpPassword);
 			}
-			HeapFree(privateData->hHeap, 0, lpPassword);
 		}
 
 		oSession = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
