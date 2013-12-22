@@ -437,8 +437,10 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 
 				if (pContext->pTask->lByteGapY > 0 && *plReceived < lLength) {
 					aquired = min(lLength - *plReceived, pContext->pTask->lByteGapY);
-					memset(pBuffer + *plReceived, -1, aquired);
-					*plReceived += aquired;
+					if (aquired > 0) {
+						memset(pBuffer + *plReceived, -1, aquired);
+						*plReceived += aquired;
+					}
 				}
 
 				if (pScanInfo->DataType == WIA_DATA_THRESHOLD) {

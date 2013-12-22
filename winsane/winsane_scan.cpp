@@ -149,6 +149,9 @@ WINSANE_Scan_Result WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD l
 		}
 
 		this->buf = (PBYTE) malloc(record_size);
+		if (!this->buf)
+			return MEMORY_ERROR;
+
 		this->buflen = record_size;
 		this->bufoff = 0;
 		this->bufpos = 0;
