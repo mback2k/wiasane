@@ -132,7 +132,12 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 		case WM_NOTIFY:
 			Trace(TEXT("WM_NOTIFY"));
 			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			if (!lpPropSheetPage)
+				break;
+
 			privateData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!privateData)
+				break;
 
 			switch (((LPNMHDR) lParam)->code) {
 				case PSN_SETACTIVE:

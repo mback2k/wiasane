@@ -111,7 +111,12 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 		case WM_NOTIFY:
 			Trace(TEXT("WM_NOTIFY"));
 			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			if (!lpPropSheetPage)
+				break;
+
 			privateData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!privateData)
+				break;
 
 			switch (((LPNMHDR) lParam)->code) {
 				case PSN_APPLY:
@@ -136,7 +141,12 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 		case WM_COMMAND:
 			Trace(TEXT("WM_COMMAND"));
 			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			if (!lpPropSheetPage)
+				break;
+
 			privateData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!privateData)
+				break;
 
 			switch (HIWORD(wParam)) {
 				case BN_CLICKED:
