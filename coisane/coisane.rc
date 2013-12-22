@@ -76,7 +76,7 @@ BEGIN
     EDITTEXT        IDC_PROPERTIES_EDIT_PASSWORD,12,144,186,14,ES_PASSWORD | ES_AUTOHSCROLL
     PUSHBUTTON      "Check Device",IDC_PROPERTIES_BUTTON_CHECK,6,174,96,14
     PUSHBUTTON      "Reset Device",IDC_PROPERTIES_BUTTON_RESET,108,174,96,14
-    LTEXT           "This page allows you to select one of the scanners available on the remote SANE server. If the selected scanner requires authentification, the required credentials also needs to be specified here.",IDC_PROPERTIES_TEXT_INFO,6,6,198,36
+    LTEXT           "This page allows you to select one of the scanners available on the remote SANE server. If the selected scanner requires authentification, the required credentials also need to be specified here.",IDC_PROPERTIES_TEXT_INFO,6,6,198,36
 END
 
 IDD_WIZARD_PAGE_SERVER DIALOGEX 0, 0, 317, 143
