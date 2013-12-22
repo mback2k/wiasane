@@ -24,6 +24,33 @@
 #include <stdarg.h>
 
 
+LPTSTR StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString)
+{
+	LPTSTR pszCopy;
+	size_t cbCopy;
+	HRESULT hr;
+
+	if (!pszString)
+		return NULL;
+
+	hr = StringCbLength(pszString, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbCopy);
+	if (FAILED(hr))
+		return NULL;
+
+	pszCopy = (PTCHAR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbCopy + sizeof(TCHAR));
+	if (!pszCopy)
+		return NULL;
+
+	hr = StringCbCopy(pszCopy, cbCopy + sizeof(TCHAR), pszString);
+	if (FAILED(hr)) {
+		HeapFree(hHeap, 0, pszCopy);
+		return NULL;
+	}
+
+	return pszCopy;
+}
+
+
 HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...)
 {
 	va_list argList;

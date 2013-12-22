@@ -32,6 +32,8 @@ __user_code
 #include <tchar.h>
 #include <strsafe.h>
 
+LPTSTR StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString);
+
 HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...);
 HRESULT StringCbAPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...);
 
