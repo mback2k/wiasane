@@ -53,7 +53,7 @@ public:
 
 
 	/* Public API */
-	SANE_Status Init(_In_ PSANE_Int version, _In_ SANE_Auth_Callback authorize);
+	SANE_Status Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth_Callback authorize);
 	SANE_Status Exit();
 
 	int GetDevices();

@@ -99,7 +99,7 @@ VOID WINSANE_Socket::Clear()
 	this->bufoff = 0;
 }
 
-PBYTE WINSANE_Socket::ReallocBuffer(_In_ PBYTE buf, _In_ DWORD oldlen, _In_ DWORD newlen)
+PBYTE WINSANE_Socket::ReallocBuffer(_In_opt_ PBYTE buf, _In_opt_ DWORD oldlen, _In_ DWORD newlen)
 {
 	PBYTE newbuf;
 

@@ -72,7 +72,7 @@ protected:
 
 
 private:
-	PBYTE ReallocBuffer(_In_ PBYTE buf, _In_ DWORD oldlen, _In_ DWORD newlen);
+	PBYTE ReallocBuffer(_In_opt_ PBYTE buf, _In_opt_ DWORD oldlen, _In_ DWORD newlen);
 	VOID Close();
 
 	SOCKET sock;

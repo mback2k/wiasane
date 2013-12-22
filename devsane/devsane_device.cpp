@@ -28,7 +28,7 @@
 #include "devsane_util.h"
 
 
-DWORD CALLBACK DeviceInstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_ HWND hwnd, _In_ int nCmdShow)
+DWORD CALLBACK DeviceInstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_opt_ HWND hwnd, _In_ int nCmdShow)
 {
 	LPTSTR lpDsInfPath, lpClassName, lpHardwareId, lpHardwareIds;
 	DWORD dwFlags, cbDsInfPath, cbClassName, cbHardwareId;
@@ -144,7 +144,7 @@ DWORD CALLBACK DeviceInstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_ HWND
 	return res;
 }
 
-DWORD CALLBACK DeviceUninstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_ HWND hwnd, _In_ int nCmdShow)
+DWORD CALLBACK DeviceUninstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_opt_ HWND hwnd, _In_ int nCmdShow)
 {
 	LPTSTR lpDsInfPath, lpClassName, lpHardwareIds;
 	DWORD dwType, cbDsInfPath, cbClassName, cbHardwareIds;

@@ -703,7 +703,7 @@ HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	return S_OK;
 }
 
-HRESULT FreeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
+HRESULT FreeScanner(_Inout_ PSCANINFO pScanInfo, _In_ PWIASANE_Context pContext)
 {
 	if (pContext->pszHost)
 		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszHost);

@@ -150,7 +150,7 @@ PWINSANE_Socket WINSANE_Session::GetSocket()
 }
 
 
-SANE_Status WINSANE_Session::Init(_In_ PSANE_Int version, _In_ SANE_Auth_Callback authorize)
+SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth_Callback authorize)
 {
 	SANE_Word version_code;
 	SANE_Status status;
