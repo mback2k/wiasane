@@ -10,6 +10,13 @@ protocol. It is referred to as Scanner Access Now Easy - WIA Driver.
 In order to access those scanner devices either the scanner itself or
 a SANE daemon needs to provide a SANE network frontend to be used.
 
+Usage
+-----
+In order to use the SANE device created by this driver you will need to
+make use of a WIA-compatible scanning application. Examples include:
+- [Windows Fax and Scan](http://bit.ly/windowsfaxandscan)
+- [Not Another PDF Scanner 2](http://sourceforge.net/projects/naps2/)
+
 Requirements
 ------------
 This software is currently build and tested against Windows 7.
