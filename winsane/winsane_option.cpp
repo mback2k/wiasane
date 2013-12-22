@@ -35,21 +35,21 @@ WINSANE_Option::~WINSANE_Option()
 	int index;
 
 	if (this->sane_option->name)
-		delete this->sane_option->name;
+		delete[] this->sane_option->name;
 	if (this->sane_option->title)
-		delete this->sane_option->title;
+		delete[] this->sane_option->title;
 	if (this->sane_option->desc)
-		delete this->sane_option->desc;
+		delete[] this->sane_option->desc;
 
 	if (this->sane_option->constraint_type == SANE_CONSTRAINT_RANGE) {
 		delete this->sane_option->constraint.range;
 	} else if (this->sane_option->constraint_type == SANE_CONSTRAINT_WORD_LIST) {
-		delete this->sane_option->constraint.word_list;
+		delete[] this->sane_option->constraint.word_list;
 	} else if (this->sane_option->constraint_type == SANE_CONSTRAINT_STRING_LIST) {
 		for (index = 0; this->sane_option->constraint.string_list[index] != NULL; index++) {
-			delete this->sane_option->constraint.string_list[index];
+			delete[] this->sane_option->constraint.string_list[index];
 		}
-		delete this->sane_option->constraint.string_list;
+		delete[] this->sane_option->constraint.string_list;
 	}
 
 	delete this->sane_option;

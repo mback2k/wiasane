@@ -39,13 +39,13 @@ WINSANE_Device::~WINSANE_Device()
 		this->ClearOptions();
 
 	if (this->sane_device->name)
-		delete this->sane_device->name;
+		delete[] this->sane_device->name;
 	if (this->sane_device->vendor)
-		delete this->sane_device->vendor;
+		delete[] this->sane_device->vendor;
 	if (this->sane_device->model)
-		delete this->sane_device->model;
+		delete[] this->sane_device->model;
 	if (this->sane_device->type)
-		delete this->sane_device->type;
+		delete[] this->sane_device->type;
 
 	delete this->sane_device;
 
@@ -94,7 +94,7 @@ SANE_Status WINSANE_Device::Open()
 	handle = this->sock->ReadHandle();
 	resource = this->sock->ReadString();
 
-	delete resource;
+	delete[] resource;
 
 	if (status != SANE_STATUS_GOOD)
 		return status;
@@ -244,7 +244,7 @@ VOID WINSANE_Device::ClearOptions()
 		delete this->options[index];
 	}
 
-	delete this->options;
+	delete[] this->options;
 
 	this->options = NULL;
 	this->num_options = 0;
@@ -306,7 +306,7 @@ SANE_Status WINSANE_Device::Start(_Inout_ PWINSANE_Scan *scan)
 	byte_order = this->sock->ReadWord();
 	resource = this->sock->ReadString();
 
-	delete resource;
+	delete[] resource;
 
 	if (status != SANE_STATUS_GOOD)
 		return status;
