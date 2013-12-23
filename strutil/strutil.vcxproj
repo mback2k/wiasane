@@ -57,6 +57,22 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
   </ImportGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>True</FunctionLevelLinking>
+      <IntrinsicFunctions>True</IntrinsicFunctions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>True</EnableCOMDATFolding>
+      <OptimizeReferences>True</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="strutil.cpp" />
     <ClCompile Include="strutil_res.cpp" />
