@@ -21,7 +21,7 @@
 #include "strutil_res.h"
 
 
-int WINAPI LoadAString(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ UINT uID, _Inout_ LPTSTR *ppszBuffer)
+int WINAPI LoadAString(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ UINT uID, _Out_ LPTSTR *ppszBuffer)
 {
 	int length;
 

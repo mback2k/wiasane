@@ -51,7 +51,7 @@ LPTSTR StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString)
 }
 
 
-HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...)
+HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...)
 {
 	va_list argList;
 	HRESULT hr;
@@ -63,7 +63,7 @@ HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ siz
 	return hr;
 }
 
-HRESULT StringCbAPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...)
+HRESULT StringCbAPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...)
 {
 	va_list argList;
 	HRESULT hr;
@@ -76,7 +76,7 @@ HRESULT StringCbAPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ si
 }
 
 
-HRESULT StringCchAPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...)
+HRESULT StringCchAPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...)
 {
 	va_list argList;
 	HRESULT hr;
@@ -88,7 +88,7 @@ HRESULT StringCchAPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ si
 	return hr;
 }
 
-HRESULT StringCchAPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...)
+HRESULT StringCchAPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...)
 {
 	va_list argList;
 	HRESULT hr;
@@ -101,7 +101,7 @@ HRESULT StringCchAPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ s
 }
 
 
-HRESULT StringCbAVPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, _In_ va_list argList)
+HRESULT StringCbAVPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, _In_ va_list argList)
 {
 	HRESULT hr;
 
@@ -113,7 +113,7 @@ HRESULT StringCbAVPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ si
 	return hr;
 }
 
-HRESULT StringCbAVPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList)
+HRESULT StringCbAVPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList)
 {
 	HRESULT hr;
 
@@ -126,13 +126,16 @@ HRESULT StringCbAVPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ s
 }
 
 
-HRESULT StringCchAVPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCSTR pszFormat, _In_ va_list argList)
+HRESULT StringCchAVPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, _In_ va_list argList)
 {
 	LPSTR pszDest;
 	int cbDest;
 
 	if (!hHeap || !ppszDest || !pcbDest || !pszFormat)
 		return STRSAFE_E_INVALID_PARAMETER;
+
+	*ppszDest = NULL;
+	*pcbDest = 0;
 
 	cbDest = _vscprintf(pszFormat, argList);
 	if (cbDest < 0 || cbDest > STRSAFE_MAX_CCH)
@@ -154,13 +157,16 @@ HRESULT StringCchAVPrintfA(_In_ HANDLE hHeap, _Inout_ LPSTR *ppszDest, _Inout_ s
 	return STRSAFE_E_INSUFFICIENT_BUFFER;
 }
 
-HRESULT StringCchAVPrintfW(_In_ HANDLE hHeap, _Inout_ LPWSTR *ppszDest, _Inout_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList)
+HRESULT StringCchAVPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList)
 {
 	LPWSTR pszDest;
 	int cbDest;
 
 	if (!hHeap || !ppszDest || !pcbDest || !pszFormat)
 		return STRSAFE_E_INVALID_PARAMETER;
+
+	*ppszDest = NULL;
+	*pcbDest = 0;
 
 	cbDest = _vscwprintf(pszFormat, argList);
 	if (cbDest < 0 || cbDest > STRSAFE_MAX_CCH)

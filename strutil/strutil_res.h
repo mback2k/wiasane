@@ -32,7 +32,7 @@ __user_code
 #include <tchar.h>
 #include <strsafe.h>
 
-int WINAPI LoadAString(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ UINT uID, _Inout_ LPTSTR *ppszBuffer);
+int WINAPI LoadAString(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ UINT uID, _Out_ LPTSTR *ppszBuffer);
 int WINAPI MessageBoxR(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ HWND hwnd, _In_ UINT uText, _In_ UINT uCaption, _In_ UINT uType);
 
 #endif
