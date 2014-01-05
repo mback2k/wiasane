@@ -267,24 +267,27 @@ VOID DebugSessionDeviceScan(WINSANE_Session *session, WINSANE_Device *device)
 
 	if (doscan) {
 		if (device->Start(&scan) == SANE_STATUS_GOOD) {
-			printf("Begin scanning image ...\n");
-			output = CreateFile(L"winsane-dbg.scan", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+			if (scan) {
+				printf("Begin scanning image ...\n");
+				output = CreateFile(L"winsane-dbg.scan", GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 
-			buffer = new BYTE[1024];
-			if (buffer) {
-				length = 1024;
-				while (scan->AquireImage(buffer, &length) == CONTINUE) {
-					printf("Received %d bytes of scanned image ...\n", length);
-					WriteFile(output, buffer, length, &written, NULL);
+				buffer = new BYTE[1024];
+				if (buffer) {
 					length = 1024;
+					ZeroMemory(buffer, length);
+					while (scan->AquireImage(buffer, &length) == CONTINUE) {
+						printf("Received %d bytes of scanned image ...\n", length);
+						WriteFile(output, buffer, length, &written, NULL);
+						length = 1024;
+					}
+					delete[] buffer;
 				}
-				delete[] buffer;
+
+				CloseHandle(output);
+				printf("Finished scanning image!\n");
+
+				delete scan;
 			}
-
-			CloseHandle(output);
-			printf("Finished scanning image!\n");
-
-			delete scan;
 
 			device->Cancel();
 		}
