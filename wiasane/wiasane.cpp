@@ -378,6 +378,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				if (pContext->oDevice->Start(&pContext->pTask->oScan) != SANE_STATUS_GOOD)
 					return E_FAIL;
 
+				if (!pContext->pTask->oScan)
+					return E_OUTOFMEMORY;
+
 				if (pContext->pTask->oScan->Connect() != CONTINUE)
 					return E_FAIL;
 
@@ -941,6 +944,9 @@ HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 
 	if (pContext->oDevice->GetParams(&oParams) != SANE_STATUS_GOOD)
 		return E_FAIL;
+
+	if (!oParams)
+		return E_OUTOFMEMORY;
 
 	frame = oParams->GetFormat();
 	depth = oParams->GetDepth();
