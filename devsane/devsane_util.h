@@ -36,6 +36,6 @@ __user_code
 
 VOID Trace(_In_ LPCTSTR pszFormat, ...);
 
-DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Inout_ PINSTALLERINFO pInstallerInfo, _Inout_ LPVOID *plpData);
+DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Out_ PINSTALLERINFO pInstallerInfo, _Outptr_result_maybenull_ LPVOID *plpData);
 
 #endif

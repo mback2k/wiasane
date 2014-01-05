@@ -65,6 +65,7 @@ DWORD DriverUninstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_ int nCmdSho
 
 	Trace(TEXT("DriverUninstall(%s, %d)"), lpInfPath, nCmdShow);
 
+	cbDsInfPath = 0;
 	res = DriverPackageGetPath(lpInfPath, NULL, &cbDsInfPath);
 	if (res == ERROR_INSUFFICIENT_BUFFER) {
 		lpDsInfPath = (LPTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbDsInfPath * sizeof(TCHAR));

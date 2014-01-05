@@ -42,6 +42,7 @@ DWORD CALLBACK DeviceInstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_opt_ 
 
 	Trace(TEXT("DeviceInstall(%s, %d)"), lpInfPath, nCmdShow);
 
+	cbDsInfPath = 0;
 	res = DriverPackageGetPath(lpInfPath, NULL, &cbDsInfPath);
 	if (res == ERROR_INSUFFICIENT_BUFFER) {
 		lpDsInfPath = (LPTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbDsInfPath * sizeof(TCHAR));
@@ -156,6 +157,7 @@ DWORD CALLBACK DeviceUninstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_opt
 
 	Trace(TEXT("DeviceUninstall(%s, %d)"), lpInfPath, nCmdShow);
 
+	cbDsInfPath = 0;
 	res = DriverPackageGetPath(lpInfPath, NULL, &cbDsInfPath);
 	if (res == ERROR_INSUFFICIENT_BUFFER) {
 		lpDsInfPath = (LPTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbDsInfPath * sizeof(TCHAR));

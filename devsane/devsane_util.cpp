@@ -61,7 +61,7 @@ VOID Trace(_In_ LPCTSTR pszFormat, ...)
 }
 
 
-DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Inout_ PINSTALLERINFO pInstallerInfo, _Inout_ LPVOID *plpData)
+DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Out_ PINSTALLERINFO pInstallerInfo, _Outptr_result_maybenull_ LPVOID *plpData)
 {
 	TCHAR szModuleFileName[MAX_PATH + 1];
 	LPTSTR lpszSubBlock, lpszValue;
@@ -75,6 +75,9 @@ DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Inout_ PINSTALLERINFO pInstallerInfo
 
 	if (!pInstallerInfo || !plpData)
 		return ERROR_INVALID_PARAMETER;
+
+	ZeroMemory(pInstallerInfo, sizeof(INSTALLERINFO));
+	*plpData = NULL;
 
 	hModule = GetModuleInstance();
 	if (!hModule)
@@ -92,7 +95,6 @@ DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Inout_ PINSTALLERINFO pInstallerInfo
 	if (!*plpData)
 		return ERROR_OUTOFMEMORY;
 
-	ZeroMemory(pInstallerInfo, sizeof(INSTALLERINFO));
 	LoadString(hModule, IDS_APPLICATION_ID, (LPWSTR) &pInstallerInfo->pApplicationId, 0);
 
 	res = GetFileVersionInfo(szModuleFileName, dwHandle, dwLen, *plpData);
