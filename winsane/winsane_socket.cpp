@@ -131,17 +131,17 @@ VOID WINSANE_Socket::Close()
 }
 
 
-int WINSANE_Socket::WriteSocket(_In_ CONST PBYTE buf, _In_ DWORD buflen)
+int WINSANE_Socket::WriteSocket(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD buflen)
 {
 	return send(this->sock, (const char*) buf, buflen, 0);
 }
 
-int WINSANE_Socket::ReadSocket(_In_ PBYTE buf, _In_ DWORD buflen)
+int WINSANE_Socket::ReadSocket(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen)
 {
 	return recv(this->sock, (char*) buf, buflen, MSG_WAITALL);
 }
 
-int WINSANE_Socket::WritePlain(_In_ CONST PBYTE buf, _In_ DWORD buflen)
+int WINSANE_Socket::WritePlain(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD buflen)
 {
 	DWORD space, size;
 
@@ -162,13 +162,13 @@ int WINSANE_Socket::WritePlain(_In_ CONST PBYTE buf, _In_ DWORD buflen)
 	return buflen;
 }
 
-int WINSANE_Socket::ReadPlain(_In_ PBYTE buf, _In_ DWORD buflen)
+int WINSANE_Socket::ReadPlain(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen)
 {
 	return this->ReadSocket(buf, buflen);
 }
 
 
-int WINSANE_Socket::Write(_In_ CONST PBYTE buf, _In_ DWORD buflen)
+int WINSANE_Socket::Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD buflen)
 {
 	PBYTE buftmp;
 	int result;
@@ -191,7 +191,7 @@ int WINSANE_Socket::Write(_In_ CONST PBYTE buf, _In_ DWORD buflen)
 	return result;
 }
 
-int WINSANE_Socket::Read(_In_ PBYTE buf, _In_ DWORD buflen)
+int WINSANE_Socket::Read(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen)
 {
 	PBYTE buftmp;
 	int result;

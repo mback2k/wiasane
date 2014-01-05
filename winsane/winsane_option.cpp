@@ -214,7 +214,7 @@ BOOL WINSANE_Option::IsValidValue(_In_ SANE_String_Const value)
 }
 
 
-HRESULT WINSANE_Option::GetValue(_Inout_ double *value)
+HRESULT WINSANE_Option::GetValue(_Out_ double *value)
 {
 	SANE_Bool value_bool;
 	SANE_Int value_int;
@@ -254,7 +254,7 @@ HRESULT WINSANE_Option::GetValue(_Inout_ double *value)
 	return hr;
 }
 
-HRESULT WINSANE_Option::GetValueBool(_Inout_ PSANE_Bool value_bool)
+HRESULT WINSANE_Option::GetValueBool(_Out_ PSANE_Bool value_bool)
 {
 	PVOID value;
 
@@ -274,7 +274,7 @@ HRESULT WINSANE_Option::GetValueBool(_Inout_ PSANE_Bool value_bool)
 	return E_FAIL;
 }
 
-HRESULT WINSANE_Option::GetValueInt(_Inout_ PSANE_Int value_int)
+HRESULT WINSANE_Option::GetValueInt(_Out_ PSANE_Int value_int)
 {
 	PVOID value;
 
@@ -294,7 +294,7 @@ HRESULT WINSANE_Option::GetValueInt(_Inout_ PSANE_Int value_int)
 	return E_FAIL;
 }
 
-HRESULT WINSANE_Option::GetValueFixed(_Inout_ PSANE_Fixed value_fixed)
+HRESULT WINSANE_Option::GetValueFixed(_Out_ PSANE_Fixed value_fixed)
 {
 	PVOID value;
 
@@ -314,7 +314,7 @@ HRESULT WINSANE_Option::GetValueFixed(_Inout_ PSANE_Fixed value_fixed)
 	return E_FAIL;
 }
 
-HRESULT WINSANE_Option::GetValueString(_Inout_ PSANE_String value_string)
+HRESULT WINSANE_Option::GetValueString(_Out_ PSANE_String value_string)
 {
 	PVOID value;
 

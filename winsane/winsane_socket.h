@@ -45,11 +45,11 @@ public:
 	DWORD Flush();
 	VOID Clear();
 
-	int WritePlain(_In_ CONST PBYTE buf, _In_ DWORD buflen);
-	int ReadPlain(_In_ PBYTE buf, _In_ DWORD buflen);
+	int WritePlain(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD buflen);
+	int ReadPlain(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen);
 
-	int Write(_In_ CONST PBYTE buf, _In_ DWORD buflen);
-	int Read(_In_ PBYTE buf, _In_ DWORD buflen);
+	int Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD buflen);
+	int Read(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen);
 
 	int WriteByte(_In_ SANE_Byte b);
 	int WriteWord(_In_ SANE_Word w);
@@ -67,8 +67,8 @@ public:
 
 
 protected:
-	int WriteSocket(_In_ CONST PBYTE buf, _In_ DWORD buflen);
-	int ReadSocket(_In_ PBYTE buf, _In_ DWORD buflen);
+	int WriteSocket(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD buflen);
+	int ReadSocket(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen);
 
 
 private:

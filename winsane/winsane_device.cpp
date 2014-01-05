@@ -251,11 +251,16 @@ VOID WINSANE_Device::ClearOptions()
 }
 
 
-SANE_Status WINSANE_Device::GetParams(_Inout_ PWINSANE_Params *params)
+SANE_Status WINSANE_Device::GetParams(_Outptr_result_maybenull_ PWINSANE_Params *params)
 {
 	SANE_Status status;
 	SANE_Parameters *sane_params;
 	DWORD written;
+
+	if (!params)
+		return SANE_STATUS_INVAL;
+
+	*params = NULL;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
 		return SANE_STATUS_INVAL;
@@ -281,17 +286,25 @@ SANE_Status WINSANE_Device::GetParams(_Inout_ PWINSANE_Params *params)
 	}
 
 	*params = new WINSANE_Params(this, this->sock, sane_params);
+	if (!*params)
+		return SANE_STATUS_NO_MEM;
+
 	return SANE_STATUS_GOOD;
 }
 
 
-SANE_Status WINSANE_Device::Start(_Inout_ PWINSANE_Scan *scan)
+SANE_Status WINSANE_Device::Start(_Outptr_result_maybenull_ PWINSANE_Scan *scan)
 {
 	SANE_Status status;
 	SANE_Word port;
 	SANE_Word byte_order;
 	SANE_String resource;
 	DWORD written;
+
+	if (!scan)
+		return SANE_STATUS_INVAL;
+
+	*scan = NULL;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
 		return SANE_STATUS_INVAL;
@@ -312,6 +325,9 @@ SANE_Status WINSANE_Device::Start(_Inout_ PWINSANE_Scan *scan)
 		return status;
 
 	*scan = new WINSANE_Scan(this, this->sock, port, byte_order);
+	if (!*scan)
+		return SANE_STATUS_NO_MEM;
+
 	return SANE_STATUS_GOOD;
 }
 

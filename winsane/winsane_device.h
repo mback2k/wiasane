@@ -53,9 +53,9 @@ public:
 	PWINSANE_Option GetOption(_In_ SANE_String_Const name);
 	VOID ClearOptions();
 
-	SANE_Status GetParams(_Inout_ PWINSANE_Params *params);
+	SANE_Status GetParams(_Outptr_result_maybenull_ PWINSANE_Params *params);
 
-	SANE_Status Start(_Inout_ PWINSANE_Scan *scan);
+	SANE_Status Start(_Outptr_result_maybenull_ PWINSANE_Scan *scan);
 	SANE_Status Cancel();
 
 private:
