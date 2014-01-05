@@ -41,6 +41,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 	PWIASANE_Context pContext;
 	PWINSANE_Option oOption;
 	PWINSANE_Params oParams;
+	LONG lReceived;
 	HANDLE hHeap;
 	HRESULT hr;
 
@@ -275,12 +276,12 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 							break;
 					}
 					if (hr == S_OK) {
-						hr = Scan(pValue->pScanInfo, SCAN_FIRST, NULL, 0, NULL);
+						hr = Scan(pValue->pScanInfo, SCAN_FIRST, NULL, 0, &lReceived);
 						if (pContext->pTask) {
 							if (hr == S_OK) {
 								pContext->pTask->bUsingADF = TRUE;
 							} else {
-								Scan(pValue->pScanInfo, SCAN_FINISHED, NULL, 0, NULL);
+								Scan(pValue->pScanInfo, SCAN_FINISHED, NULL, 0, &lReceived);
 							}
 						}
 						if (!pContext->pTask || !pContext->pTask->bUsingADF) {
@@ -303,7 +304,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 						if (pContext->pTask) {
 							pContext->pTask->bUsingADF = FALSE;
 						}
-						hr = Scan(pValue->pScanInfo, SCAN_FINISHED, NULL, 0, NULL);
+						hr = Scan(pValue->pScanInfo, SCAN_FINISHED, NULL, 0, &lReceived);
 					}
 				}
 			}
