@@ -448,7 +448,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				}
 
 				if (pScanInfo->DataType == WIA_DATA_THRESHOLD) {
-					for (idx = 0; idx < *plReceived; idx++) {
+					for (idx = 0; idx < lLength; idx++) {
 						pBuffer[idx] = ~pBuffer[idx];
 					}
 				}
