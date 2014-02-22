@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -173,15 +173,15 @@ LONG WINSANE_Socket::Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG b
 	PBYTE buftmp;
 	LONG result;
 
+	if (!this->conv)
+		return this->WritePlain(buf, buflen);
+
 	buftmp = (PBYTE) malloc(buflen);
 	if (!buftmp)
 		return 0;
 
-	memset(buftmp, 0, buflen);
 	memcpy(buftmp, buf, buflen);
-
-	if (this->conv)
-		std::reverse(buftmp, buftmp + buflen);
+	std::reverse(buftmp, buftmp + buflen);
 
 	result = this->WritePlain(buftmp, buflen);
 
@@ -196,18 +196,20 @@ LONG WINSANE_Socket::Read(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen
 	PBYTE buftmp;
 	LONG result;
 
+	if (!this->conv)
+		return this->ReadPlain(buf, buflen);
+
 	buftmp = (PBYTE) malloc(buflen);
 	if (!buftmp)
 		return 0;
 
-	memset(buftmp, 0, buflen);
-
 	result = this->ReadPlain(buftmp, buflen);
 
-	if (this->conv)
-		std::reverse(buftmp, buftmp + buflen);
+	if (result > 0 && result <= buflen) {
+		std::reverse(buftmp, buftmp + result);
+		memcpy(buf, buftmp, result);
+	}
 
-	memcpy(buf, buftmp, buflen);
 	memset(buftmp, 0, buflen);
 	free(buftmp);
 
