@@ -42,7 +42,7 @@ public:
 	VOID SetConverting(_In_ BOOL converting);
 	BOOL IsConverting();
 
-	DWORD Flush();
+	LONG Flush();
 	VOID Clear();
 
 	LONG WritePlain(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen);
@@ -77,8 +77,8 @@ private:
 
 	SOCKET sock;
 	PBYTE buf;
-	DWORD buflen;
-	DWORD bufoff;
+	ULONG buflen;
+	ULONG bufoff;
 	BOOL conv;
 };
 

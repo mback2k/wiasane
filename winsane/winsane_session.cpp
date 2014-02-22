@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -158,7 +158,7 @@ SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth
 	DWORD user_name_len;
 	unsigned short ns;
 	unsigned char *p;
-	DWORD written;
+	LONG written;
 
 	ns = 0x1234;
 	p = (unsigned char*) &ns;
@@ -191,7 +191,7 @@ SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth
 
 SANE_Status WINSANE_Session::Exit()
 {
-	DWORD written;
+	LONG written;
 
 	if (!this->initialized)
 		return SANE_STATUS_INVAL;
@@ -212,7 +212,7 @@ int WINSANE_Session::GetDevices()
 	SANE_Handle pointer;
 	PSANE_Device *sane_devices;
 	PSANE_Device sane_device;
-	DWORD written;
+	LONG written;
 	int index;
 
 	if (!this->initialized)

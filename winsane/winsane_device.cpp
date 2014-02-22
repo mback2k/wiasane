@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -83,7 +83,7 @@ SANE_Status WINSANE_Device::Open()
 	SANE_Status status;
 	SANE_Handle handle;
 	SANE_String resource;
-	DWORD written;
+	LONG written;
 
 	written = this->sock->WriteWord(WINSANE_NET_OPEN);
 	written += this->sock->WriteString(this->sane_device->name);
@@ -106,7 +106,7 @@ SANE_Status WINSANE_Device::Open()
 
 SANE_Status WINSANE_Device::Close()
 {
-	DWORD written;
+	LONG written;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
 		return SANE_STATUS_INVAL;
@@ -129,7 +129,7 @@ int WINSANE_Device::FetchOptions()
 	PSANE_Option_Descriptor *sane_options;
 	PSANE_Option_Descriptor sane_option;
 	SANE_Word num_options, num_values, null_pointer;
-	DWORD written;
+	LONG written;
 	int index, value;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
@@ -255,7 +255,7 @@ SANE_Status WINSANE_Device::GetParams(_Outptr_result_maybenull_ PWINSANE_Params 
 {
 	SANE_Status status;
 	SANE_Parameters *sane_params;
-	DWORD written;
+	LONG written;
 
 	if (!params)
 		return SANE_STATUS_INVAL;
@@ -299,7 +299,7 @@ SANE_Status WINSANE_Device::Start(_Outptr_result_maybenull_ PWINSANE_Scan *scan)
 	SANE_Word port;
 	SANE_Word byte_order;
 	SANE_String resource;
-	DWORD written;
+	LONG written;
 
 	if (!scan)
 		return SANE_STATUS_INVAL;
@@ -333,7 +333,7 @@ SANE_Status WINSANE_Device::Start(_Outptr_result_maybenull_ PWINSANE_Scan *scan)
 
 SANE_Status WINSANE_Device::Cancel()
 {
-	DWORD written;
+	LONG written;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
 		return SANE_STATUS_INVAL;

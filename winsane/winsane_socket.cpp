@@ -58,9 +58,10 @@ BOOL WINSANE_Socket::IsConverting()
 }
 
 
-DWORD WINSANE_Socket::Flush()
+LONG WINSANE_Socket::Flush()
 {
-	DWORD result, offset, size;
+	ULONG offset, size;
+	LONG result;
 
 	for (offset = 0; offset < this->buflen; ) {
 		result = this->WriteSocket(this->buf + offset, this->buflen - offset);
