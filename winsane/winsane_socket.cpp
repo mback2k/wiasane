@@ -136,12 +136,51 @@ VOID WINSANE_Socket::Close()
 
 LONG WINSANE_Socket::WriteSocket(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen)
 {
-	return send(this->sock, (const char*) buf, buflen, 0);
+	LONG result;
+
+	result = send(this->sock, (const char*) buf, buflen, 0);
+
+	if (result == SOCKET_ERROR) {
+		switch (WSAGetLastError()) {
+			case WSAENETDOWN:
+			case WSAENETRESET:
+			case WSAENOTCONN:
+			case WSAESHUTDOWN:
+			case WSAEHOSTUNREACH:
+			case WSAECONNABORTED:
+			case WSAECONNRESET:
+			case WSAETIMEDOUT:
+				this->Close();
+				break;
+		}
+	}
+
+	return result;
 }
 
 LONG WINSANE_Socket::ReadSocket(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen)
 {
-	return recv(this->sock, (char*) buf, buflen, MSG_WAITALL);
+	LONG result;
+
+	result = recv(this->sock, (char*) buf, buflen, MSG_WAITALL);
+
+	if (result == SOCKET_ERROR) {
+		switch (WSAGetLastError()) {
+			case WSAENETDOWN:
+			case WSAENOTCONN:
+			case WSAENETRESET:
+			case WSAESHUTDOWN:
+			case WSAECONNABORTED:
+			case WSAETIMEDOUT:
+			case WSAECONNRESET:
+				this->Close();
+				break;
+		}
+	} else if (buflen > 0 && result == 0) {
+		this->Close();
+	}
+
+	return result;
 }
 
 LONG WINSANE_Socket::WritePlain(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen)
