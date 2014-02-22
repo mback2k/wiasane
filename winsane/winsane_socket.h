@@ -45,18 +45,18 @@ public:
 	DWORD Flush();
 	VOID Clear();
 
-	int WritePlain(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD buflen);
-	int ReadPlain(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen);
+	LONG WritePlain(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen);
+	LONG ReadPlain(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen);
 
-	int Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD buflen);
-	int Read(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen);
+	LONG Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen);
+	LONG Read(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen);
 
-	int WriteByte(_In_ SANE_Byte b);
-	int WriteWord(_In_ SANE_Word w);
-	int WriteChar(_In_ SANE_Char c);
-	int WriteString(_In_ SANE_String_Const s);
-	int WriteHandle(_In_ SANE_Handle h);
-	int WriteStatus(_In_ SANE_Status s);
+	LONG WriteByte(_In_ SANE_Byte b);
+	LONG WriteWord(_In_ SANE_Word w);
+	LONG WriteChar(_In_ SANE_Char c);
+	LONG WriteString(_In_ SANE_String_Const s);
+	LONG WriteHandle(_In_ SANE_Handle h);
+	LONG WriteStatus(_In_ SANE_Status s);
 
 	SANE_Byte ReadByte();
 	SANE_Word ReadWord();
@@ -67,12 +67,12 @@ public:
 
 
 protected:
-	int WriteSocket(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD buflen);
-	int ReadSocket(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen);
+	LONG WriteSocket(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen);
+	LONG ReadSocket(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen);
 
 
 private:
-	PBYTE ReallocBuffer(_In_opt_ PBYTE buf, _In_opt_ DWORD oldlen, _In_ DWORD newlen);
+	PBYTE ReallocBuffer(_In_opt_ PBYTE buf, _In_opt_ LONG oldlen, _In_ LONG newlen);
 	VOID Close();
 
 	SOCKET sock;

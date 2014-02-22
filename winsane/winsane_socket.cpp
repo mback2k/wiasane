@@ -99,7 +99,7 @@ VOID WINSANE_Socket::Clear()
 	this->bufoff = 0;
 }
 
-PBYTE WINSANE_Socket::ReallocBuffer(_In_opt_ PBYTE buf, _In_opt_ DWORD oldlen, _In_ DWORD newlen)
+PBYTE WINSANE_Socket::ReallocBuffer(_In_opt_ PBYTE buf, _In_opt_ LONG oldlen, _In_ LONG newlen)
 {
 	PBYTE newbuf;
 
@@ -131,19 +131,19 @@ VOID WINSANE_Socket::Close()
 }
 
 
-int WINSANE_Socket::WriteSocket(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD buflen)
+LONG WINSANE_Socket::WriteSocket(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen)
 {
 	return send(this->sock, (const char*) buf, buflen, 0);
 }
 
-int WINSANE_Socket::ReadSocket(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen)
+LONG WINSANE_Socket::ReadSocket(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen)
 {
 	return recv(this->sock, (char*) buf, buflen, MSG_WAITALL);
 }
 
-int WINSANE_Socket::WritePlain(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD buflen)
+LONG WINSANE_Socket::WritePlain(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen)
 {
-	DWORD space, size;
+	LONG space, size;
 
 	if (this->buf && this->buflen)
 		space = this->buflen - this->bufoff;
@@ -162,16 +162,16 @@ int WINSANE_Socket::WritePlain(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DW
 	return buflen;
 }
 
-int WINSANE_Socket::ReadPlain(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen)
+LONG WINSANE_Socket::ReadPlain(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen)
 {
 	return this->ReadSocket(buf, buflen);
 }
 
 
-int WINSANE_Socket::Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD buflen)
+LONG WINSANE_Socket::Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen)
 {
 	PBYTE buftmp;
-	int result;
+	LONG result;
 
 	buftmp = (PBYTE) malloc(buflen);
 	if (!buftmp)
@@ -191,10 +191,10 @@ int WINSANE_Socket::Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ DWORD b
 	return result;
 }
 
-int WINSANE_Socket::Read(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen)
+LONG WINSANE_Socket::Read(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen)
 {
 	PBYTE buftmp;
-	int result;
+	LONG result;
 
 	buftmp = (PBYTE) malloc(buflen);
 	if (!buftmp)
@@ -215,25 +215,25 @@ int WINSANE_Socket::Read(_Out_writes_bytes_(buflen) PBYTE buf, _In_ DWORD buflen
 }
 
 
-int WINSANE_Socket::WriteByte(_In_ SANE_Byte b)
+LONG WINSANE_Socket::WriteByte(_In_ SANE_Byte b)
 {
 	return this->Write((PBYTE) &b, sizeof(SANE_Byte));
 }
 
-int WINSANE_Socket::WriteWord(_In_ SANE_Word w)
+LONG WINSANE_Socket::WriteWord(_In_ SANE_Word w)
 {
 	return this->Write((PBYTE) &w, sizeof(SANE_Word));
 }
 
-int WINSANE_Socket::WriteChar(_In_ SANE_Char c)
+LONG WINSANE_Socket::WriteChar(_In_ SANE_Char c)
 {
 	return this->Write((PBYTE) &c, sizeof(SANE_Char));
 }
 
-int WINSANE_Socket::WriteString(_In_ SANE_String_Const s)
+LONG WINSANE_Socket::WriteString(_In_ SANE_String_Const s)
 {
 	SANE_Word length;
-	int written;
+	LONG written;
 	
 	length = (SANE_Word) strlen(s) + 1;
 	written = this->WriteWord(length);
@@ -242,12 +242,12 @@ int WINSANE_Socket::WriteString(_In_ SANE_String_Const s)
 	return written;
 }
 
-int WINSANE_Socket::WriteHandle(_In_ SANE_Handle h)
+LONG WINSANE_Socket::WriteHandle(_In_ SANE_Handle h)
 {
 	return this->WriteWord((SANE_Word) h);
 }
 
-int WINSANE_Socket::WriteStatus(_In_ SANE_Status s)
+LONG WINSANE_Socket::WriteStatus(_In_ SANE_Status s)
 {
 	return this->WriteWord((SANE_Word) s);
 }
