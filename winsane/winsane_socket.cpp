@@ -72,14 +72,16 @@ LONG WINSANE_Socket::Flush()
 		}
 	}
 
-	if (offset < this->buflen) {
-		size = this->buflen - offset;
-		memmove(this->buf, this->buf + offset, size);
-		this->buf = this->ReallocBuffer(this->buf, this->buflen, size);
-		this->buflen = size;
-		this->bufoff = 0;
-	} else {
-		this->Clear();
+	if (offset > 0) {
+		if (offset < this->buflen) {
+			size = this->buflen - offset;
+			memmove(this->buf, this->buf + offset, size);
+			this->buf = this->ReallocBuffer(this->buf, this->buflen, size);
+			this->buflen = size;
+			this->bufoff = 0;
+		} else if (offset == this->buflen) {
+			this->Clear();
+		}
 	}
 
 	return offset;
