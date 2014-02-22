@@ -46,6 +46,11 @@ SOCKET WINSANE_Socket::GetSocket()
 	return this->sock;
 }
 
+BOOL WINSANE_Socket::IsConnected()
+{
+	return this->sock != INVALID_SOCKET;
+}
+
 
 VOID WINSANE_Socket::SetConverting(_In_ BOOL converting)
 {

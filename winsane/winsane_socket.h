@@ -38,6 +38,7 @@ public:
 
 	/* Internal API */
 	SOCKET GetSocket();
+	BOOL IsConnected();
 
 	VOID SetConverting(_In_ BOOL converting);
 	BOOL IsConverting();
