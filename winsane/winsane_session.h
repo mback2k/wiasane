@@ -49,7 +49,7 @@ public:
 
 
 	/* Internal API */
-	PWINSANE_Socket GetSocket();
+	BOOL IsConnected();
 
 
 	/* Public API */

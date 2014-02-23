@@ -144,9 +144,9 @@ PWINSANE_Session WINSANE_Session::Remote(_In_ PTSTR hostname, _In_ USHORT port)
 }
 
 
-PWINSANE_Socket WINSANE_Session::GetSocket()
+BOOL WINSANE_Session::IsConnected()
 {
-	return this->sock;
+	return this->sock->IsConnected();
 }
 
 
