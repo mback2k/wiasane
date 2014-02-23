@@ -257,6 +257,7 @@ HRESULT WINSANE_Option::GetValue(_Out_ double *value)
 HRESULT WINSANE_Option::GetValueBool(_Out_ PSANE_Bool value_bool)
 {
 	PVOID value;
+	HRESULT hr;
 
 	if (!value_bool)
 		return E_INVALIDARG;
@@ -264,7 +265,10 @@ HRESULT WINSANE_Option::GetValueBool(_Out_ PSANE_Bool value_bool)
 	if (this->sane_option->type != SANE_TYPE_BOOL)
 		return E_INVALIDARG;
 
-	value = this->GetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Bool));
+	hr = this->GetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Bool), &value);
+	if (FAILED(hr))
+		return hr;
+
 	if (value) {
 		*value_bool = *((PSANE_Bool) value);
 		delete[] value;
@@ -277,6 +281,7 @@ HRESULT WINSANE_Option::GetValueBool(_Out_ PSANE_Bool value_bool)
 HRESULT WINSANE_Option::GetValueInt(_Out_ PSANE_Int value_int)
 {
 	PVOID value;
+	HRESULT hr;
 
 	if (!value_int)
 		return E_INVALIDARG;
@@ -284,7 +289,10 @@ HRESULT WINSANE_Option::GetValueInt(_Out_ PSANE_Int value_int)
 	if (this->sane_option->type != SANE_TYPE_INT)
 		return E_INVALIDARG;
 
-	value = this->GetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Int));
+	hr = this->GetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Int), &value);
+	if (FAILED(hr))
+		return hr;
+
 	if (value) {
 		*value_int = *((PSANE_Int) value);
 		delete[] value;
@@ -297,6 +305,7 @@ HRESULT WINSANE_Option::GetValueInt(_Out_ PSANE_Int value_int)
 HRESULT WINSANE_Option::GetValueFixed(_Out_ PSANE_Fixed value_fixed)
 {
 	PVOID value;
+	HRESULT hr;
 
 	if (!value_fixed)
 		return E_INVALIDARG;
@@ -304,7 +313,10 @@ HRESULT WINSANE_Option::GetValueFixed(_Out_ PSANE_Fixed value_fixed)
 	if (this->sane_option->type != SANE_TYPE_FIXED)
 		return E_INVALIDARG;
 
-	value = this->GetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Fixed));
+	hr = this->GetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Fixed), &value);
+	if (FAILED(hr))
+		return hr;
+
 	if (value) {
 		*value_fixed = *((PSANE_Fixed) value);
 		delete[] value;
@@ -317,6 +329,7 @@ HRESULT WINSANE_Option::GetValueFixed(_Out_ PSANE_Fixed value_fixed)
 HRESULT WINSANE_Option::GetValueString(_Out_ PSANE_String value_string)
 {
 	PVOID value;
+	HRESULT hr;
 
 	if (!value_string)
 		return E_INVALIDARG;
@@ -324,7 +337,10 @@ HRESULT WINSANE_Option::GetValueString(_Out_ PSANE_String value_string)
 	if (this->sane_option->type != SANE_TYPE_STRING)
 		return E_INVALIDARG;
 
-	value = this->GetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size);
+	hr = this->GetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size, &value);
+	if (FAILED(hr))
+		return hr;
+
 	if (value) {
 		*value_string = (SANE_String) value;
 		return S_OK;
@@ -367,7 +383,10 @@ HRESULT WINSANE_Option::SetValueBool(_In_ SANE_Bool value_bool)
 	if (this->sane_option->type != SANE_TYPE_BOOL)
 		return E_INVALIDARG;
 
-	value = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Bool), (PVOID) &value_bool);
+	hr = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Bool), (PVOID) &value_bool, &value);
+	if (FAILED(hr))
+		return hr;
+
 	if (value) {
 		hr = value_bool == *((PSANE_Bool) value) ? S_OK : S_FALSE;
 		delete[] value;
@@ -385,7 +404,10 @@ HRESULT WINSANE_Option::SetValueInt(_In_ SANE_Int value_int)
 	if (this->sane_option->type != SANE_TYPE_INT)
 		return E_INVALIDARG;
 
-	value = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Int), (PVOID) &value_int);
+	hr = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Int), (PVOID) &value_int, &value);
+	if (FAILED(hr))
+		return hr;
+
 	if (value) {
 		hr = value_int == *((PSANE_Int) value) ? S_OK : S_FALSE;
 		delete[] value;
@@ -403,7 +425,10 @@ HRESULT WINSANE_Option::SetValueFixed(_In_ SANE_Fixed value_fixed)
 	if (this->sane_option->type != SANE_TYPE_FIXED)
 		return E_INVALIDARG;
 
-	value = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Fixed), (PVOID) &value_fixed);
+	hr = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Fixed), (PVOID) &value_fixed, &value);
+	if (FAILED(hr))
+		return hr;
+
 	if (value) {
 		hr = value_fixed == *((PSANE_Fixed) value) ? S_OK : S_FALSE;
 		delete[] value;
@@ -427,7 +452,10 @@ HRESULT WINSANE_Option::SetValueString(_In_ SANE_String_Const value_string)
 	else
 		value_size = 0;
 
-	value = this->SetValue(this->sane_option->type, value_size, value_size, (PVOID) value_string);
+	hr = this->SetValue(this->sane_option->type, value_size, value_size, (PVOID) value_string, &value);
+	if (FAILED(hr))
+		return hr;
+
 	if (value_string && value)
 		hr = strcmp(value_string, (SANE_String_Const) value) == 0 ? S_OK : FALSE;
 	else
@@ -437,13 +465,14 @@ HRESULT WINSANE_Option::SetValueString(_In_ SANE_String_Const value_string)
 }
 
 
-PVOID WINSANE_Option::GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count)
+HRESULT WINSANE_Option::GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _Out_ PVOID *value_result)
 {
-	SANE_Status status;
-	SANE_Word info, pointer;
-	SANE_String resource;
 	LONG written;
+	HRESULT hr;
 	PBYTE buf;
+
+	if (!value_result)
+		return E_INVALIDARG;
 
 	buf = new BYTE[value_size];
 	memset(buf, 0, value_size);
@@ -461,37 +490,29 @@ PVOID WINSANE_Option::GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_s
 		written += this->sock->Write(buf, value_size);
 	if (this->sock->Flush() != written) {
 		delete[] buf;
-		return NULL;
+		return E_ABORT;
 	}
 
-	status = this->sock->ReadStatus();
-	info = this->sock->ReadWord();
-	value_type = this->sock->ReadWord();
-	value_size = this->sock->ReadWord();
-	pointer = this->sock->ReadWord();
-	if (pointer) {
-		if (value_type == SANE_TYPE_STRING)
-			this->sock->ReadPlain(buf, value_size);
-		else
-			this->sock->Read(buf, value_size);
+	hr = this->ReadValueResult(value_type, value_size, buf);
+	if (FAILED(hr)) {
+		delete[] buf;
+		return hr;
 	}
-	pointer = this->sock->ReadWord();
-	if (pointer)
-		resource = this->sock->ReadString();
 
-	return buf;
+	*value_result = buf;
+	return S_OK;
 }
 
-PVOID WINSANE_Option::SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _In_ PVOID value)
+HRESULT WINSANE_Option::SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _In_ PVOID value, _Out_ PVOID *value_result)
 {
-	SANE_Status status;
-	SANE_Word info, pointer;
-	SANE_String resource;
 	LONG written;
+	HRESULT hr;
 	PBYTE buf;
 
+	if (!value_result)
+		return E_INVALIDARG;
+
 	buf = new BYTE[value_size];
-	memset(buf, 0, value_size);
 	memcpy(buf, value, value_size);
 
 	written = this->sock->WriteWord(WINSANE_NET_CONTROL_OPTION);
@@ -507,23 +528,71 @@ PVOID WINSANE_Option::SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_s
 		written += this->sock->Write(buf, value_size);
 	if (this->sock->Flush() != written) {
 		delete[] buf;
-		return NULL;
+		return E_ABORT;
 	}
 
-	status = this->sock->ReadStatus();
-	info = this->sock->ReadWord();
-	value_type = this->sock->ReadWord();
-	value_size = this->sock->ReadWord();
-	pointer = this->sock->ReadWord();
+	hr = this->ReadValueResult(value_type, value_size, buf);
+	if (FAILED(hr)) {
+		delete[] buf;
+		return hr;
+	}
+
+	*value_result = buf;
+	return S_OK;
+}
+
+
+HRESULT WINSANE_Option::ReadValueResult(_Inout_ SANE_Word value_type, _Inout_ SANE_Word value_size, _Inout_ PBYTE value_result)
+{
+	SANE_Status status;
+	SANE_Word info, pointer;
+	SANE_String resource;
+	LONG readlen;
+	HRESULT hr;
+
+	hr = this->sock->ReadStatus(&status);
+	if (FAILED(hr))
+		return hr;
+
+	hr = this->sock->ReadWord(&info);
+	if (FAILED(hr))
+		return hr;
+
+	hr = this->sock->ReadWord(&value_type);
+	if (FAILED(hr))
+		return hr;
+
+	hr = this->sock->ReadWord(&value_size);
+	if (FAILED(hr))
+		return hr;
+
+	hr = this->sock->ReadWord(&pointer);
+	if (FAILED(hr))
+		return hr;
+
 	if (pointer) {
 		if (value_type == SANE_TYPE_STRING)
-			this->sock->ReadPlain(buf, value_size);
+			readlen = this->sock->ReadPlain(value_result, value_size);
 		else
-			this->sock->Read(buf, value_size);
-	}
-	pointer = this->sock->ReadWord();
-	if (pointer)
-		resource = this->sock->ReadString();
+			readlen = this->sock->Read(value_result, value_size);
+	} else
+		readlen = 0;
 
-	return buf;
+	hr = this->sock->ReadWord(&pointer);
+	if (FAILED(hr))
+		return hr;
+
+	if (pointer) {
+		hr = this->sock->ReadString(&resource);
+		if (FAILED(hr))
+			return hr;
+	}
+
+	if (!this->sock->IsConnected())
+		return E_ABORT;
+
+	if (readlen != value_size)
+		return E_FAIL;
+
+	return S_OK;
 }

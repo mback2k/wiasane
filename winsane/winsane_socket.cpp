@@ -302,63 +302,110 @@ LONG WINSANE_Socket::WriteStatus(_In_ SANE_Status s)
 }
 
 
-SANE_Byte WINSANE_Socket::ReadByte()
+HRESULT WINSANE_Socket::ReadByte(_Out_ PSANE_Byte b)
 {
-	SANE_Byte b;
+	LONG readlen;
 
-	if (this->Read((PBYTE) &b, sizeof(SANE_Byte)) != sizeof(SANE_Byte))
-		b = 0;
+	if (!b)
+		return E_INVALIDARG;
 
-	return b;
+	*b = 0;
+
+	readlen = this->Read((PBYTE) b, sizeof(SANE_Byte));
+	if (readlen != sizeof(SANE_Byte))
+		return E_FAIL;
+
+	return S_OK;
 }
 
-SANE_Word WINSANE_Socket::ReadWord()
+HRESULT WINSANE_Socket::ReadWord(_Out_ PSANE_Word w)
 {
-	SANE_Word w;
+	LONG readlen;
 
-	if (this->Read((PBYTE) &w, sizeof(SANE_Word)) != sizeof(SANE_Word))
-		w = 0;
+	if (!w)
+		return E_INVALIDARG;
 
-	return w;
+	*w = 0;
+
+	readlen = this->Read((PBYTE) w, sizeof(SANE_Word));
+	if (readlen != sizeof(SANE_Word))
+		return E_FAIL;
+
+	return S_OK;
 }
 
-SANE_Char WINSANE_Socket::ReadChar()
+HRESULT WINSANE_Socket::ReadChar(_Out_ PSANE_Char c)
 {
-	SANE_Char c;
+	LONG readlen;
 
-	if (this->Read((PBYTE) &c, sizeof(SANE_Char)) != sizeof(SANE_Char))
-		c = 0;
+	if (!c)
+		return E_INVALIDARG;
 
-	return c;
+	*c = 0;
+
+	readlen = this->Read((PBYTE) c, sizeof(SANE_Char));
+	if (readlen != sizeof(SANE_Char))
+		return E_FAIL;
+
+	return S_OK;
 }
 
-SANE_String WINSANE_Socket::ReadString()
+HRESULT WINSANE_Socket::ReadString(_Out_ PSANE_String s)
 {
 	SANE_Word length;
-	SANE_String s;
+	HRESULT hr;
 
-	length = this->ReadWord();
+	if (!s)
+		return E_INVALIDARG;
+
+	hr = this->ReadWord(&length);
+	if (FAILED(hr))
+		return hr;
+
 	if (length > 0) {
-		s = new SANE_Char[length+1];
-		if (this->ReadPlain((PBYTE) s, length) == length) {
-			s[length] = '\0';
+		*s = new SANE_Char[length+1];
+		if (this->ReadPlain((PBYTE) *s, length) == length) {
+			(*s)[length] = '\0';
 		} else {
-			delete[] s;
-			s = NULL;
+			delete[] *s;
+			*s = NULL;
+			return E_FAIL;
 		}
 	} else {
-		s = NULL;
+		*s = NULL;
 	}
 
-	return s;
+	return S_OK;
 }
 
-SANE_Handle WINSANE_Socket::ReadHandle()
+HRESULT WINSANE_Socket::ReadHandle(_Out_ PSANE_Handle h)
 {
-	return (SANE_Handle) this->ReadWord();
+	SANE_Word w;
+	HRESULT hr;
+
+	if (!h)
+		return E_INVALIDARG;
+
+	hr = this->ReadWord(&w);
+	if (FAILED(hr))
+		return hr;
+
+	*h = (SANE_Handle) w;
+	return S_OK;
 }
 
-SANE_Status WINSANE_Socket::ReadStatus()
+HRESULT WINSANE_Socket::ReadStatus(_Out_ PSANE_Status s)
 {
-	return (SANE_Status) this->ReadWord();
+	SANE_Word w;
+	HRESULT hr;
+
+	if (!s)
+		return E_INVALIDARG;
+
+	hr = this->ReadWord(&w);
+	if (FAILED(hr))
+		return hr;
+
+	*s = (SANE_Status) w;
+	return S_OK;
 }

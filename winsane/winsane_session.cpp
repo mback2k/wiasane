@@ -159,6 +159,7 @@ SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth
 	unsigned short ns;
 	unsigned char *p;
 	LONG written;
+	HRESULT hr;
 
 	ns = 0x1234;
 	p = (unsigned char*) &ns;
@@ -180,8 +181,13 @@ SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth
 	if (this->sock->Flush() != written)
 		return SANE_STATUS_IO_ERROR;
 
-	status = this->sock->ReadStatus();
-	version_code = this->sock->ReadWord();
+	hr = this->sock->ReadStatus(&status);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
+
+	hr = this->sock->ReadWord(&version_code);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
 
 	if (!this->sock->IsConnected())
 		return SANE_STATUS_IO_ERROR;
@@ -217,6 +223,7 @@ int WINSANE_Session::GetDevices()
 	PSANE_Device *sane_devices;
 	PSANE_Device sane_device;
 	LONG written;
+	HRESULT hr;
 	int index;
 
 	if (!this->initialized)
@@ -226,8 +233,13 @@ int WINSANE_Session::GetDevices()
 	if (this->sock->Flush() != written)
 		return 0;
 
-	status = this->sock->ReadStatus();
-	array_length = this->sock->ReadWord();
+	hr = this->sock->ReadStatus(&status);
+	if (FAILED(hr))
+		return 0;
+
+	hr = this->sock->ReadWord(&array_length);
+	if (FAILED(hr))
+		return 0;
 
 	if (status != SANE_STATUS_GOOD)
 		return 0;
@@ -240,15 +252,38 @@ int WINSANE_Session::GetDevices()
 	sane_devices = new PSANE_Device[array_length];
 
 	for (index = 0; index < array_length; index++) {
-		pointer = this->sock->ReadHandle();
+		hr = this->sock->ReadHandle(&pointer);
+		if (FAILED(hr))
+			break;
+
 		if (pointer != NULL)
 			continue;
 
 		sane_device = new SANE_Device();
-		sane_device->name = this->sock->ReadString();
-		sane_device->vendor = this->sock->ReadString();
-		sane_device->model = this->sock->ReadString();
-		sane_device->type = this->sock->ReadString();
+
+		hr = this->sock->ReadString((PSANE_String) &sane_device->name);
+		if (FAILED(hr)) {
+			delete sane_device;
+			break;
+		}
+
+		hr = this->sock->ReadString((PSANE_String) &sane_device->vendor);
+		if (FAILED(hr)) {
+			delete sane_device;
+			break;
+		}
+
+		hr = this->sock->ReadString((PSANE_String) &sane_device->model);
+		if (FAILED(hr)) {
+			delete sane_device;
+			break;
+		}
+
+		hr = this->sock->ReadString((PSANE_String) &sane_device->type);
+		if (FAILED(hr)) {
+			delete sane_device;
+			break;
+		}
 
 		sane_devices[this->num_devices++] = sane_device;
 	}

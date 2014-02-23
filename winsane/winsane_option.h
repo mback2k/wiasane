@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -67,11 +67,13 @@ public:
 
 
 protected:
-	PVOID GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count);
-	PVOID SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _In_ PVOID value);
+	HRESULT GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _Out_ PVOID *value_result);
+	HRESULT SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _In_ PVOID value, _Out_ PVOID *value_result);
 
 
 private:
+	HRESULT ReadValueResult(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _Inout_ PBYTE value_result);
+
 	PWINSANE_Device device;
 	PWINSANE_Socket sock;
 	PSANE_Option_Descriptor sane_option;

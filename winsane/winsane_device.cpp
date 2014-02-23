@@ -84,15 +84,24 @@ SANE_Status WINSANE_Device::Open()
 	SANE_Handle handle;
 	SANE_String resource;
 	LONG written;
+	HRESULT hr;
 
 	written = this->sock->WriteWord(WINSANE_NET_OPEN);
 	written += this->sock->WriteString(this->sane_device->name);
 	if (this->sock->Flush() != written)
 		return SANE_STATUS_IO_ERROR;
 
-	status = this->sock->ReadStatus();
-	handle = this->sock->ReadHandle();
-	resource = this->sock->ReadString();
+	hr = this->sock->ReadStatus(&status);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
+
+	hr = this->sock->ReadHandle(&handle);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
+
+	hr = this->sock->ReadString(&resource);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
 
 	delete[] resource;
 
@@ -109,7 +118,9 @@ SANE_Status WINSANE_Device::Open()
 
 SANE_Status WINSANE_Device::Close()
 {
+	SANE_Word dummy;
 	LONG written;
+	HRESULT hr;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
 		return SANE_STATUS_INVAL;
@@ -119,7 +130,9 @@ SANE_Status WINSANE_Device::Close()
 	if (this->sock->Flush() != written)
 		return SANE_STATUS_IO_ERROR;
 
-	this->sock->ReadWord();
+	hr = this->sock->ReadWord(&dummy);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
 
 	if (!this->sock->IsConnected())
 		return SANE_STATUS_IO_ERROR;
@@ -136,6 +149,7 @@ int WINSANE_Device::FetchOptions()
 	PSANE_Option_Descriptor sane_option;
 	SANE_Word num_options, num_values, null_pointer;
 	LONG written;
+	HRESULT hr;
 	int index, value;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
@@ -146,7 +160,7 @@ int WINSANE_Device::FetchOptions()
 	if (this->sock->Flush() != written)
 		return 0;
 
-	num_options = this->sock->ReadWord();
+	this->sock->ReadWord(&num_options);
 	if (this->num_options > 0)
 		this->ClearOptions();
 
@@ -155,48 +169,51 @@ int WINSANE_Device::FetchOptions()
 	sane_options = new PSANE_Option_Descriptor[num_options];
 
 	for (index = 0; index < num_options; index++) {
-		null_pointer = this->sock->ReadWord();
+		hr = this->sock->ReadWord(&null_pointer);
+		if (FAILED(hr))
+			break;
+
 		if (null_pointer)
 			continue;
 
 		sane_option = new SANE_Option_Descriptor();
-		sane_option->name = this->sock->ReadString();
-		sane_option->title = this->sock->ReadString();
-		sane_option->desc = this->sock->ReadString();
+		this->sock->ReadString((PSANE_String) &sane_option->name);
+		this->sock->ReadString((PSANE_String) &sane_option->title);
+		this->sock->ReadString((PSANE_String) &sane_option->desc);
 
-		sane_option->type = (SANE_Value_Type) this->sock->ReadWord();
-		sane_option->unit = (SANE_Unit) this->sock->ReadWord();
-		sane_option->size = this->sock->ReadWord();
-		sane_option->cap = this->sock->ReadWord();
+		this->sock->ReadWord((PSANE_Word) &sane_option->type);
+		this->sock->ReadWord((PSANE_Word) &sane_option->unit);
+		this->sock->ReadWord((PSANE_Word) &sane_option->size);
+		this->sock->ReadWord((PSANE_Word) &sane_option->cap);
 
-		sane_option->constraint_type = (SANE_Constraint_Type) this->sock->ReadWord();
+		this->sock->ReadWord((PSANE_Word) &sane_option->constraint_type);
 		switch (sane_option->constraint_type) {
 		case SANE_CONSTRAINT_NONE:
 			break;
 
 		case SANE_CONSTRAINT_RANGE:
-			null_pointer = this->sock->ReadWord();
+			this->sock->ReadWord(&null_pointer);
 			if (null_pointer)
 				break;
 			sane_option->constraint.range = new SANE_Range();
-			sane_option->constraint.range->min = this->sock->ReadWord();
-			sane_option->constraint.range->max = this->sock->ReadWord();
-			sane_option->constraint.range->quant = this->sock->ReadWord();
+			this->sock->ReadWord(&sane_option->constraint.range->min);
+			this->sock->ReadWord(&sane_option->constraint.range->max);
+			this->sock->ReadWord(&sane_option->constraint.range->quant);
 			break;
 
 		case SANE_CONSTRAINT_WORD_LIST:
-			num_values = this->sock->ReadWord();
+			this->sock->ReadWord(&num_values);
 			sane_option->constraint.word_list = new SANE_Word[num_values];
 			for (value = 0; value < num_values; value++) {
-				sane_option->constraint.word_list[value] = this->sock->ReadWord();
+				this->sock->ReadWord(&sane_option->constraint.word_list[value]);
 			}
 			break;
 
 		case SANE_CONSTRAINT_STRING_LIST:
-			num_values = this->sock->ReadWord();
+			this->sock->ReadWord(&num_values);
 			sane_option->constraint.string_list = new SANE_String_Const[num_values];
 			for (value = 0; value < num_values; value++) {
-				sane_option->constraint.string_list[value] = this->sock->ReadString();
+				this->sock->ReadString((PSANE_String) &sane_option->constraint.string_list[value]);
 			}
 			break;
 		}
@@ -263,6 +280,7 @@ SANE_Status WINSANE_Device::GetParams(_Outptr_result_maybenull_ PWINSANE_Params 
 	SANE_Status status;
 	SANE_Parameters *sane_params;
 	LONG written;
+	HRESULT hr;
 
 	if (!params)
 		return SANE_STATUS_INVAL;
@@ -277,20 +295,38 @@ SANE_Status WINSANE_Device::GetParams(_Outptr_result_maybenull_ PWINSANE_Params 
 	if (this->sock->Flush() != written)
 		return SANE_STATUS_IO_ERROR;
 
-	status = this->sock->ReadStatus();
+	hr = this->sock->ReadStatus(&status);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
 
 	sane_params = new SANE_Parameters();
-	sane_params->format = (SANE_Frame)this->sock->ReadWord();
-	sane_params->last_frame = this->sock->ReadWord() == 1;
-	sane_params->bytes_per_line = this->sock->ReadWord();
-	sane_params->pixels_per_line = this->sock->ReadWord();
-	sane_params->lines = this->sock->ReadWord();
-	sane_params->depth = this->sock->ReadWord();
 
-	if (!this->sock->IsConnected()) {
-		delete sane_params;
-		return SANE_STATUS_IO_ERROR;
-	}
+	this->sock->ReadWord((PSANE_Word) &sane_params->format);
+	if (FAILED(hr))
+		goto fail;
+
+	this->sock->ReadWord(&sane_params->last_frame);
+	if (FAILED(hr))
+		goto fail;
+
+	this->sock->ReadWord(&sane_params->bytes_per_line);
+	if (FAILED(hr))
+		goto fail;
+
+	this->sock->ReadWord(&sane_params->pixels_per_line);
+	if (FAILED(hr))
+		goto fail;
+
+	this->sock->ReadWord(&sane_params->lines);
+	if (FAILED(hr))
+		goto fail;
+
+	this->sock->ReadWord(&sane_params->depth);
+	if (FAILED(hr))
+		goto fail;
+
+	if (!this->sock->IsConnected())
+		goto fail;
 
 	if (status != SANE_STATUS_GOOD) {
 		delete sane_params;
@@ -302,6 +338,10 @@ SANE_Status WINSANE_Device::GetParams(_Outptr_result_maybenull_ PWINSANE_Params 
 		return SANE_STATUS_NO_MEM;
 
 	return SANE_STATUS_GOOD;
+
+fail:
+	delete sane_params;
+	return SANE_STATUS_IO_ERROR;
 }
 
 
@@ -312,6 +352,7 @@ SANE_Status WINSANE_Device::Start(_Outptr_result_maybenull_ PWINSANE_Scan *scan)
 	SANE_Word byte_order;
 	SANE_String resource;
 	LONG written;
+	HRESULT hr;
 
 	if (!scan)
 		return SANE_STATUS_INVAL;
@@ -326,10 +367,21 @@ SANE_Status WINSANE_Device::Start(_Outptr_result_maybenull_ PWINSANE_Scan *scan)
 	if (this->sock->Flush() != written)
 		return SANE_STATUS_IO_ERROR;
 
-	status = this->sock->ReadStatus();
-	port = this->sock->ReadWord();
-	byte_order = this->sock->ReadWord();
-	resource = this->sock->ReadString();
+	hr = this->sock->ReadStatus(&status);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
+
+	hr = this->sock->ReadWord(&port);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
+
+	hr = this->sock->ReadWord(&byte_order);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
+
+	hr = this->sock->ReadString(&resource);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
 
 	delete[] resource;
 
@@ -348,7 +400,9 @@ SANE_Status WINSANE_Device::Start(_Outptr_result_maybenull_ PWINSANE_Scan *scan)
 
 SANE_Status WINSANE_Device::Cancel()
 {
+	SANE_Word dummy;
 	LONG written;
+	HRESULT hr;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
 		return SANE_STATUS_INVAL;
@@ -358,7 +412,9 @@ SANE_Status WINSANE_Device::Cancel()
 	if (this->sock->Flush() != written)
 		return SANE_STATUS_IO_ERROR;
 
-	this->sock->ReadWord();
+	hr = this->sock->ReadWord(&dummy);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
 
 	if (!this->sock->IsConnected())
 		return SANE_STATUS_IO_ERROR;

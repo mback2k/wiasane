@@ -59,12 +59,12 @@ public:
 	LONG WriteHandle(_In_ SANE_Handle h);
 	LONG WriteStatus(_In_ SANE_Status s);
 
-	SANE_Byte ReadByte();
-	SANE_Word ReadWord();
-	SANE_Char ReadChar();
-	SANE_String ReadString();
-	SANE_Handle ReadHandle();
-	SANE_Status ReadStatus();
+	HRESULT ReadByte(_Out_ PSANE_Byte b);
+	HRESULT ReadWord(_Out_ PSANE_Word w);
+	HRESULT ReadChar(_Out_ PSANE_Char c);
+	HRESULT ReadString(_Out_ PSANE_String s);
+	HRESULT ReadHandle(_Out_ PSANE_Handle h);
+	HRESULT ReadStatus(_Out_ PSANE_Status s);
 
 
 protected:
