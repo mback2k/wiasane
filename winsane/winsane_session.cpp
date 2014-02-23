@@ -329,8 +329,10 @@ VOID WINSANE_Session::ClearDevices()
 		delete this->devices[index];
 	}
 
-	delete[] this->devices;
+	if (this->devices) {
+		delete[] this->devices;
+		this->devices = NULL;
+	}
 
 	this->num_devices = 0;
-	this->devices = NULL;
 }

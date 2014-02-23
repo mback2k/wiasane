@@ -249,9 +249,11 @@ VOID WINSANE_Device::ClearOptions()
 		delete this->options[index];
 	}
 
-	delete[] this->options;
+	if (this->options) {
+		delete[] this->options;
+		this->options = NULL;
+	}
 
-	this->options = NULL;
 	this->num_options = 0;
 }
 
