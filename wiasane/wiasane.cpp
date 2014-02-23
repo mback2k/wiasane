@@ -46,8 +46,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 	HRESULT hr;
 
 #ifdef _DEBUG
-	if (lCommand != CMD_STI_GETSTATUS)
-		Trace(TEXT("Command Value (%d)"),lCommand);
+	Trace(TEXT("Command Value (%d)"), lCommand);
 #endif
 
 	if (!pValue || !pValue->pScanInfo)
@@ -68,6 +67,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
     switch (lCommand) {
 		case CMD_SETSTIDEVICEHKEY:
+			Trace(TEXT("CMD_SETSTIDEVICEHKEY"));
+
 			if (pValue->pHandle)
 				pValue->pScanInfo->DeviceIOHandles[2] = *pValue->pHandle;
 
@@ -79,6 +80,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_INITIALIZE:
+			Trace(TEXT("CMD_INITIALIZE"));
+
 			if (pContext) {
 				if (pContext->oSession)
 					hr = UninitializeScanner(pValue->pScanInfo, pContext);
@@ -98,6 +101,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_UNINITIALIZE:
+			Trace(TEXT("CMD_UNINITIALIZE"));
+
 			if (pContext) {
 				if (pContext->oSession)
 					hr = UninitializeScanner(pValue->pScanInfo, pContext);
@@ -117,7 +122,9 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_RESETSCANNER:
+			Trace(TEXT("CMD_RESETSCANNER"));
 		case CMD_STI_DEVICERESET:
+			Trace(TEXT("CMD_STI_DEVICERESET"));
 			if (pContext && pContext->oSession && pContext->oDevice) {
 				if (pContext->oDevice->Cancel() != SANE_STATUS_GOOD) {
 					hr = E_FAIL;
@@ -129,6 +136,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_STI_DIAGNOSTIC:
+			Trace(TEXT("CMD_STI_DIAGNOSTIC"));
+
 			if (pContext && pContext->oSession && pContext->oDevice) {
 				if (pContext->oDevice->GetParams(&oParams) == SANE_STATUS_GOOD) {
 					delete oParams;
@@ -142,6 +151,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_STI_GETSTATUS:
+			Trace(TEXT("CMD_STI_GETSTATUS"));
+
 			pValue->lVal = MCRO_ERROR_OFFLINE;
 			pValue->pGuid = (GUID*) &GUID_NULL;
 
@@ -156,7 +167,10 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_SETXRESOLUTION:
+			Trace(TEXT("CMD_SETXRESOLUTION"));
 		case CMD_SETYRESOLUTION:
+			Trace(TEXT("CMD_SETYRESOLUTION"));
+
 			if (pContext && pContext->oSession && pContext->oDevice) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_RESOLUTION);
 				if (!oOption) {
@@ -186,6 +200,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_SETCONTRAST:
+			Trace(TEXT("CMD_SETCONTRAST"));
+
 			if (pContext && pContext->oSession && pContext->oDevice) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_CONTRAST);
 				if (!oOption) {
@@ -207,6 +223,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_SETINTENSITY:
+			Trace(TEXT("CMD_SETINTENSITY"));
+
 			if (pContext && pContext->oSession && pContext->oDevice) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BRIGHTNESS);
 				if (!oOption) {
@@ -228,16 +246,22 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_SETDATATYPE:
+			Trace(TEXT("CMD_SETDATATYPE"));
+
 			pValue->pScanInfo->DataType = pValue->lVal;
 			hr = S_OK;
 			break;
 
 		case CMD_SETNEGATIVE:
+			Trace(TEXT("CMD_SETNEGATIVE"));
+
 			pValue->pScanInfo->Negative = pValue->lVal;
 			hr = S_OK;
 			break;
 
 		case CMD_GETADFSTATUS:
+			Trace(TEXT("CMD_GETADFSTATUS"));
+
 			if (pContext && pContext->oSession && pContext->oDevice) {
 				pValue->lVal = MCRO_STATUS_OK;
 			} else {
@@ -247,6 +271,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_GETADFHASPAPER:
+			Trace(TEXT("CMD_GETADFHASPAPER"));
+
 			if (pContext && pContext->oSession && pContext->oDevice) {
 				if (!pContext->pTask) {
 					MicroEntry(CMD_LOAD_ADF, pValue);
@@ -263,6 +289,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_LOAD_ADF:
+			Trace(TEXT("CMD_LOAD_ADF"));
+
 			if (pContext && pContext->oSession && pContext->oDevice && pContext->pValues) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SOURCE);
 				if (oOption) {
@@ -296,6 +324,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_UNLOAD_ADF:
+			Trace(TEXT("CMD_UNLOAD_ADF"));
+
 			if (pContext && pContext->oSession && pContext->oDevice && pContext->pValues) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SOURCE);
 				if (oOption) {
@@ -310,10 +340,9 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			}
 			break;
 
-		case CMD_GET_INTERRUPT_EVENT:
-			break;
-
 		case CMD_GETCAPABILITIES:
+			Trace(TEXT("CMD_GETCAPABILITIES"));
+
 			pValue->lVal = 0;
 			pValue->pGuid = NULL;
 			pValue->ppButtonNames = NULL;
@@ -322,6 +351,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 
 		case CMD_SETSCANMODE:
+			Trace(TEXT("CMD_SETSCANMODE"));
 			hr = SetScanMode(pValue->pScanInfo, pValue->lVal);
 			break;
 
@@ -333,7 +363,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 	if (pContext && pContext->oSession && !pContext->oSession->IsConnected())
 		pValue->lVal = MCRO_ERROR_OFFLINE;
 
-    return hr;
+	return hr;
 }
 
 WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_bytes_(lLength) PBYTE pBuffer, LONG lLength, _Out_ LONG *plReceived)
@@ -570,7 +600,7 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
     Trace(TEXT("yext  = %d"), pScanInfo->Window.yExtent);
 #endif
 
-    return S_OK;
+	return S_OK;
 }
 
 
