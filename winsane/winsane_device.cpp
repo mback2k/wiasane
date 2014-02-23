@@ -188,34 +188,34 @@ int WINSANE_Device::FetchOptions()
 
 		this->sock->ReadWord((PSANE_Word) &sane_option->constraint_type);
 		switch (sane_option->constraint_type) {
-		case SANE_CONSTRAINT_NONE:
-			break;
-
-		case SANE_CONSTRAINT_RANGE:
-			this->sock->ReadWord(&null_pointer);
-			if (null_pointer)
+			case SANE_CONSTRAINT_NONE:
 				break;
-			sane_option->constraint.range = new SANE_Range();
-			this->sock->ReadWord(&sane_option->constraint.range->min);
-			this->sock->ReadWord(&sane_option->constraint.range->max);
-			this->sock->ReadWord(&sane_option->constraint.range->quant);
-			break;
 
-		case SANE_CONSTRAINT_WORD_LIST:
-			this->sock->ReadWord(&num_values);
-			sane_option->constraint.word_list = new SANE_Word[num_values];
-			for (value = 0; value < num_values; value++) {
-				this->sock->ReadWord(&sane_option->constraint.word_list[value]);
-			}
-			break;
+			case SANE_CONSTRAINT_RANGE:
+				this->sock->ReadWord(&null_pointer);
+				if (null_pointer)
+					break;
+				sane_option->constraint.range = new SANE_Range();
+				this->sock->ReadWord(&sane_option->constraint.range->min);
+				this->sock->ReadWord(&sane_option->constraint.range->max);
+				this->sock->ReadWord(&sane_option->constraint.range->quant);
+				break;
 
-		case SANE_CONSTRAINT_STRING_LIST:
-			this->sock->ReadWord(&num_values);
-			sane_option->constraint.string_list = new SANE_String_Const[num_values];
-			for (value = 0; value < num_values; value++) {
-				this->sock->ReadString((PSANE_String) &sane_option->constraint.string_list[value]);
-			}
-			break;
+			case SANE_CONSTRAINT_WORD_LIST:
+				this->sock->ReadWord(&num_values);
+				sane_option->constraint.word_list = new SANE_Word[num_values];
+				for (value = 0; value < num_values; value++) {
+					this->sock->ReadWord(&sane_option->constraint.word_list[value]);
+				}
+				break;
+
+			case SANE_CONSTRAINT_STRING_LIST:
+				this->sock->ReadWord(&num_values);
+				sane_option->constraint.string_list = new SANE_String_Const[num_values];
+				for (value = 0; value < num_values; value++) {
+					this->sock->ReadString((PSANE_String) &sane_option->constraint.string_list[value]);
+				}
+				break;
 		}
 
 		sane_options[this->num_options++] = sane_option;
