@@ -56,15 +56,16 @@ public:
 	SANE_Status Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth_Callback authorize);
 	SANE_Status Exit();
 
-	int GetDevices();
-	WINSANE_Device* GetDevice(_In_ int index);
+	SANE_Status FetchDevices();
+	LONG GetDevices();
+	WINSANE_Device* GetDevice(_In_ LONG index);
 	WINSANE_Device* GetDevice(_In_ SANE_String_Const name);
 	WINSANE_Device* GetDevice(_In_ PTSTR ptName);
 	VOID ClearDevices();
 
 
 private:
-	int num_devices;
+	LONG num_devices;
 	PWINSANE_Device *devices;
 
 	BOOL initialized;

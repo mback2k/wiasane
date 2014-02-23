@@ -390,7 +390,7 @@ BOOL InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 {
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
-	int iNumDevices, i;
+	LONG index;
 	HWND hwnd;
 	BOOL res;
 
@@ -398,11 +398,12 @@ BOOL InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 	if (oSession) {
 		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
 			hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER);
-			iNumDevices = oSession->GetDevices();
-			for (i = 0; i < iNumDevices; i++) {
-				oDevice = oSession->GetDevice(i);
-				if (oDevice) {
-					SendMessageA(hwnd, CB_ADDSTRING, 0, (LPARAM) oDevice->GetName());
+			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
+				for (index = 0; index < oSession->GetDevices(); index++) {
+					oDevice = oSession->GetDevice(index);
+					if (oDevice) {
+						SendMessageA(hwnd, CB_ADDSTRING, 0, (LPARAM) oDevice->GetName());
+					}
 				}
 			}
 			res = oSession->Exit() == SANE_STATUS_GOOD;
@@ -469,7 +470,7 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 		oSession = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
 		if (oSession) {
 			if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
-				if (oSession->GetDevices() > 0) {
+				if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
 					oDevice = oSession->GetDevice(privateData->lpName);
 					if (oDevice) {
 						UpdateDeviceInfo(privateData, oDevice);

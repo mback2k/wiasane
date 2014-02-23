@@ -664,7 +664,7 @@ HRESULT InitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 	pContext->pTask = NULL;
 	pContext->oSession = WINSANE_Session::Remote(pContext->pszHost, pContext->usPort);
 	if (pContext->oSession) {
-		if (pContext->oSession->Init(NULL, NULL) == SANE_STATUS_GOOD && pContext->oSession->GetDevices() > 0) {
+		if (pContext->oSession->Init(NULL, NULL) == SANE_STATUS_GOOD && pContext->oSession->FetchDevices() == SANE_STATUS_GOOD) {
 			pContext->oDevice = pContext->oSession->GetDevice(pContext->pszName);
 			if (pContext->oDevice && pContext->oDevice->Open() == SANE_STATUS_GOOD) {
 				if (pContext->oDevice->FetchOptions() > 0) {

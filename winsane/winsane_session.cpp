@@ -215,34 +215,33 @@ SANE_Status WINSANE_Session::Exit()
 }
 
 
-int WINSANE_Session::GetDevices()
+SANE_Status WINSANE_Session::FetchDevices()
 {
 	SANE_Status status;
 	SANE_Word array_length;
 	SANE_Handle pointer;
 	PSANE_Device *sane_devices;
 	PSANE_Device sane_device;
-	LONG written;
+	LONG written, index;
 	HRESULT hr;
-	int index;
 
 	if (!this->initialized)
-		return 0;
+		return SANE_STATUS_INVAL;
 
 	written = this->sock->WriteWord(WINSANE_NET_GET_DEVICES);
 	if (this->sock->Flush() != written)
-		return 0;
+		return SANE_STATUS_IO_ERROR;
 
 	hr = this->sock->ReadStatus(&status);
 	if (FAILED(hr))
-		return 0;
+		return SANE_STATUS_IO_ERROR;
 
 	hr = this->sock->ReadWord(&array_length);
 	if (FAILED(hr))
-		return 0;
+		return SANE_STATUS_IO_ERROR;
 
 	if (status != SANE_STATUS_GOOD)
-		return 0;
+		return status;
 
 	if (this->num_devices > 0)
 		this->ClearDevices();
@@ -260,46 +259,58 @@ int WINSANE_Session::GetDevices()
 			continue;
 
 		sane_device = new SANE_Device();
-
-		hr = this->sock->ReadString((PSANE_String) &sane_device->name);
-		if (FAILED(hr)) {
-			delete sane_device;
-			break;
-		}
-
-		hr = this->sock->ReadString((PSANE_String) &sane_device->vendor);
-		if (FAILED(hr)) {
-			delete sane_device;
-			break;
-		}
-
-		hr = this->sock->ReadString((PSANE_String) &sane_device->model);
-		if (FAILED(hr)) {
-			delete sane_device;
-			break;
-		}
-
-		hr = this->sock->ReadString((PSANE_String) &sane_device->type);
-		if (FAILED(hr)) {
-			delete sane_device;
-			break;
-		}
+		this->sock->ReadString((PSANE_String) &sane_device->name);
+		this->sock->ReadString((PSANE_String) &sane_device->vendor);
+		this->sock->ReadString((PSANE_String) &sane_device->model);
+		this->sock->ReadString((PSANE_String) &sane_device->type);
 
 		sane_devices[this->num_devices++] = sane_device;
 	}
 
-	this->devices = new PWINSANE_Device[this->num_devices];
+	if (this->num_devices > 0) {
+		this->devices = new PWINSANE_Device[this->num_devices];
 
-	for (index = 0; index < this->num_devices; index++) {
-		this->devices[index] = new WINSANE_Device(this, this->sock, sane_devices[index]);
+		for (index = 0; index < this->num_devices; index++) {
+			this->devices[index] = new WINSANE_Device(this, this->sock, sane_devices[index]);
+		}
 	}
 
 	delete[] sane_devices;
 
+	if (FAILED(hr)) {
+		switch (hr) {
+			case E_ABORT:
+				status = SANE_STATUS_CANCELLED;
+				break;
+			case E_INVALIDARG:
+				status = SANE_STATUS_INVAL;
+				break;
+			case E_NOTIMPL:
+				status = SANE_STATUS_UNSUPPORTED;
+				break;
+			case E_OUTOFMEMORY:
+				status = SANE_STATUS_NO_MEM;
+				break;
+			default:
+				status = SANE_STATUS_IO_ERROR;
+				break;
+		}
+
+		this->ClearDevices();
+	}
+
+	return status;
+}
+
+LONG WINSANE_Session::GetDevices()
+{
+	if (!this->initialized || !this->devices)
+		return -1;
+
 	return this->num_devices;
 }
 
-PWINSANE_Device WINSANE_Session::GetDevice(_In_ int index)
+PWINSANE_Device WINSANE_Session::GetDevice(_In_ LONG index)
 {
 	if (!this->initialized || !this->devices)
 		return NULL;
@@ -313,7 +324,7 @@ PWINSANE_Device WINSANE_Session::GetDevice(_In_ int index)
 PWINSANE_Device WINSANE_Session::GetDevice(_In_ SANE_String_Const name)
 {
 	SANE_String_Const device_name;
-	int index;
+	LONG index;
 
 	if (!this->initialized || !this->devices)
 		return NULL;
@@ -361,7 +372,7 @@ PWINSANE_Device WINSANE_Session::GetDevice(_In_ PTSTR ptName)
 
 VOID WINSANE_Session::ClearDevices()
 {
-	int index;
+	LONG index;
 
 	for (index = 0; index < this->num_devices; index++) {
 		delete this->devices[index];

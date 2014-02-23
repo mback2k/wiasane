@@ -47,15 +47,15 @@ VOID Debug(PTSTR hostname)
 VOID DebugSession(WINSANE_Session *session)
 {
 	WINSANE_Device *device;
-	int devices, i;
+	LONG index;
 
 	if (session->Init(NULL, NULL) == SANE_STATUS_GOOD) {
-		devices = session->GetDevices();
-
-		for (i = 0; i < devices; i++) {
-			device = session->GetDevice(i);
-			if (device) {
-				DebugSessionDevice(session, device);
+		if (session->FetchDevices() == SANE_STATUS_GOOD) {
+			for (index = 0; index < session->GetDevices(); index++) {
+				device = session->GetDevice(index);
+				if (device) {
+					DebugSessionDevice(session, device);
+				}
 			}
 		}
 
