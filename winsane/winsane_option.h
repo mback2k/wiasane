@@ -72,7 +72,7 @@ protected:
 
 
 private:
-	HRESULT ReadValueResult(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _Inout_ PBYTE value_result);
+	HRESULT ReadValueResult(_Inout_ PSANE_Word value_type, _Inout_ PSANE_Word value_size, _Inout_ PBYTE value_result);
 
 	PWINSANE_Device device;
 	PWINSANE_Socket sock;

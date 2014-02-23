@@ -493,7 +493,7 @@ HRESULT WINSANE_Option::GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value
 		return E_ABORT;
 	}
 
-	hr = this->ReadValueResult(value_type, value_size, buf);
+	hr = this->ReadValueResult(&value_type, &value_size, buf);
 	if (FAILED(hr)) {
 		delete[] buf;
 		return hr;
@@ -531,7 +531,7 @@ HRESULT WINSANE_Option::SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value
 		return E_ABORT;
 	}
 
-	hr = this->ReadValueResult(value_type, value_size, buf);
+	hr = this->ReadValueResult(&value_type, &value_size, buf);
 	if (FAILED(hr)) {
 		delete[] buf;
 		return hr;
@@ -542,13 +542,16 @@ HRESULT WINSANE_Option::SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value
 }
 
 
-HRESULT WINSANE_Option::ReadValueResult(_Inout_ SANE_Word value_type, _Inout_ SANE_Word value_size, _Inout_ PBYTE value_result)
+HRESULT WINSANE_Option::ReadValueResult(_Inout_ PSANE_Word value_type, _Inout_ PSANE_Word value_size, _Inout_ PBYTE value_result)
 {
 	SANE_Status status;
 	SANE_Word info, pointer;
 	SANE_String resource;
 	LONG readlen;
 	HRESULT hr;
+
+	if (!value_type || !value_size || !value_result)
+		return E_INVALIDARG;
 
 	hr = this->sock->ReadStatus(&status);
 	if (FAILED(hr))
@@ -558,11 +561,11 @@ HRESULT WINSANE_Option::ReadValueResult(_Inout_ SANE_Word value_type, _Inout_ SA
 	if (FAILED(hr))
 		return hr;
 
-	hr = this->sock->ReadWord(&value_type);
+	hr = this->sock->ReadWord(value_type);
 	if (FAILED(hr))
 		return hr;
 
-	hr = this->sock->ReadWord(&value_size);
+	hr = this->sock->ReadWord(value_size);
 	if (FAILED(hr))
 		return hr;
 
@@ -571,10 +574,10 @@ HRESULT WINSANE_Option::ReadValueResult(_Inout_ SANE_Word value_type, _Inout_ SA
 		return hr;
 
 	if (pointer) {
-		if (value_type == SANE_TYPE_STRING)
-			readlen = this->sock->ReadPlain(value_result, value_size);
+		if (*value_type == SANE_TYPE_STRING)
+			readlen = this->sock->ReadPlain(value_result, *value_size);
 		else
-			readlen = this->sock->Read(value_result, value_size);
+			readlen = this->sock->Read(value_result, *value_size);
 	} else
 		readlen = 0;
 
@@ -591,7 +594,7 @@ HRESULT WINSANE_Option::ReadValueResult(_Inout_ SANE_Word value_type, _Inout_ SA
 	if (!this->sock->IsConnected())
 		return E_ABORT;
 
-	if (readlen != value_size)
+	if (readlen != *value_size)
 		return E_FAIL;
 
 	return S_OK;
