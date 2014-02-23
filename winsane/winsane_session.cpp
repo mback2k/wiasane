@@ -245,9 +245,8 @@ int WINSANE_Session::GetDevices()
 		sane_device->vendor = this->sock->ReadString();
 		sane_device->model = this->sock->ReadString();
 		sane_device->type = this->sock->ReadString();
-		sane_devices[index] = sane_device;
 
-		this->num_devices++;
+		sane_devices[this->num_devices++] = sane_device;
 	}
 
 	this->devices = new PWINSANE_Device[this->num_devices];

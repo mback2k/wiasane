@@ -195,8 +195,7 @@ int WINSANE_Device::FetchOptions()
 			break;
 		}
 
-		sane_options[index] = sane_option;
-		this->num_options++;
+		sane_options[this->num_options++] = sane_option;
 	}
 
 	this->options = new PWINSANE_Option[this->num_options];
