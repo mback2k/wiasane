@@ -387,7 +387,7 @@ size_t CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device
 	*ppszResolutions = NULL;
 	cbResolutions = 0;
 
-	if (device->FetchOptions() > 0) {
+	if (device->FetchOptions() == SANE_STATUS_GOOD) {
 		resolution = device->GetOption("resolution");
 		if (resolution && resolution->GetConstraintType() == SANE_CONSTRAINT_WORD_LIST) {
 			pWordList = resolution->GetConstraintWordList();

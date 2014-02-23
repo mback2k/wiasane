@@ -143,24 +143,30 @@ SANE_Status WINSANE_Device::Close()
 }
 
 
-int WINSANE_Device::FetchOptions()
+SANE_Status WINSANE_Device::FetchOptions()
 {
 	PSANE_Option_Descriptor *sane_options;
 	PSANE_Option_Descriptor sane_option;
 	SANE_Word num_options, num_values, null_pointer;
+	SANE_Status status;
 	LONG written;
 	HRESULT hr;
 	int index, value;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE)
-		return 0;
+		return SANE_STATUS_INVAL;
 
 	written = this->sock->WriteWord(WINSANE_NET_GET_OPTION_DESCRIPTORS);
 	written += this->sock->WriteHandle(this->sane_handle);
 	if (this->sock->Flush() != written)
-		return 0;
+		return SANE_STATUS_IO_ERROR;
 
-	this->sock->ReadWord(&num_options);
+	hr = this->sock->ReadWord(&num_options);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
+
+	status = SANE_STATUS_GOOD;
+
 	if (this->num_options > 0)
 		this->ClearOptions();
 
@@ -187,14 +193,16 @@ int WINSANE_Device::FetchOptions()
 		this->sock->ReadWord((PSANE_Word) &sane_option->cap);
 
 		this->sock->ReadWord((PSANE_Word) &sane_option->constraint_type);
+
 		switch (sane_option->constraint_type) {
 			case SANE_CONSTRAINT_NONE:
 				break;
 
 			case SANE_CONSTRAINT_RANGE:
-				this->sock->ReadWord(&null_pointer);
-				if (null_pointer)
+				hr = this->sock->ReadWord(&null_pointer);
+				if (FAILED(hr) || null_pointer)
 					break;
+
 				sane_option->constraint.range = new SANE_Range();
 				this->sock->ReadWord(&sane_option->constraint.range->min);
 				this->sock->ReadWord(&sane_option->constraint.range->max);
@@ -202,7 +210,10 @@ int WINSANE_Device::FetchOptions()
 				break;
 
 			case SANE_CONSTRAINT_WORD_LIST:
-				this->sock->ReadWord(&num_values);
+				hr = this->sock->ReadWord(&num_values);
+				if (FAILED(hr))
+					break;
+
 				sane_option->constraint.word_list = new SANE_Word[num_values];
 				for (value = 0; value < num_values; value++) {
 					this->sock->ReadWord(&sane_option->constraint.word_list[value]);
@@ -210,7 +221,10 @@ int WINSANE_Device::FetchOptions()
 				break;
 
 			case SANE_CONSTRAINT_STRING_LIST:
-				this->sock->ReadWord(&num_values);
+				hr = this->sock->ReadWord(&num_values);
+				if (FAILED(hr))
+					break;
+
 				sane_option->constraint.string_list = new SANE_String_Const[num_values];
 				for (value = 0; value < num_values; value++) {
 					this->sock->ReadString((PSANE_String) &sane_option->constraint.string_list[value]);
@@ -221,18 +235,50 @@ int WINSANE_Device::FetchOptions()
 		sane_options[this->num_options++] = sane_option;
 	}
 
-	this->options = new PWINSANE_Option[this->num_options];
+	if (this->num_options > 0) {
+		this->options = new PWINSANE_Option[this->num_options];
 
-	for (index = 0; index < this->num_options; index++) {
-		this->options[index] = new WINSANE_Option(this, this->sock, sane_options[index], this->sane_handle, index);
+		for (index = 0; index < this->num_options; index++) {
+			this->options[index] = new WINSANE_Option(this, this->sock, sane_options[index], this->sane_handle, index);
+		}
 	}
 
 	delete[] sane_options;
 
+	if (FAILED(hr)) {
+		switch (hr) {
+			case E_ABORT:
+				status = SANE_STATUS_CANCELLED;
+				break;
+			case E_INVALIDARG:
+				status = SANE_STATUS_INVAL;
+				break;
+			case E_NOTIMPL:
+				status = SANE_STATUS_UNSUPPORTED;
+				break;
+			case E_OUTOFMEMORY:
+				status = SANE_STATUS_NO_MEM;
+				break;
+			default:
+				status = SANE_STATUS_IO_ERROR;
+				break;
+		}
+
+		this->ClearOptions();
+	}
+
+	return status;
+}
+
+LONG WINSANE_Device::GetOptions()
+{
+	if (this->sane_handle == INVALID_SANE_HANDLE || !this->options)
+		return -1;
+
 	return this->num_options;
 }
 
-PWINSANE_Option WINSANE_Device::GetOption(_In_ int index)
+PWINSANE_Option WINSANE_Device::GetOption(_In_ LONG index)
 {
 	if (this->sane_handle == INVALID_SANE_HANDLE || !this->options)
 		return NULL;
@@ -246,7 +292,7 @@ PWINSANE_Option WINSANE_Device::GetOption(_In_ int index)
 PWINSANE_Option WINSANE_Device::GetOption(_In_ SANE_String_Const name)
 {
 	SANE_String_Const option_name;
-	int index;
+	LONG index;
 
 	if (this->sane_handle == INVALID_SANE_HANDLE || !this->options)
 		return NULL;
@@ -263,7 +309,7 @@ PWINSANE_Option WINSANE_Device::GetOption(_In_ SANE_String_Const name)
 
 VOID WINSANE_Device::ClearOptions()
 {
-	int index;
+	LONG index;
 
 	for (index = 0; index < this->num_options; index++) {
 		delete this->options[index];

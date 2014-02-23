@@ -48,8 +48,9 @@ public:
 	SANE_Status Open();
 	SANE_Status Close();
 
-	int FetchOptions();
-	PWINSANE_Option GetOption(_In_ int index);
+	SANE_Status FetchOptions();
+	LONG GetOptions();
+	PWINSANE_Option GetOption(_In_ LONG index);
 	PWINSANE_Option GetOption(_In_ SANE_String_Const name);
 	VOID ClearOptions();
 

@@ -67,7 +67,7 @@ VOID DebugSessionDevice(WINSANE_Session *session, WINSANE_Device *device)
 {
 	WINSANE_Option *option;
 	WINSANE_Params *params;
-	int options, i;
+	LONG index;
 
 	printf("------------------------------------------------------------\n");
 	printf("Name:\t%s\n", device->GetName());
@@ -76,12 +76,12 @@ VOID DebugSessionDevice(WINSANE_Session *session, WINSANE_Device *device)
 	printf("Type:\t%s\n", device->GetType());
 
 	if (device->Open() == SANE_STATUS_GOOD) {
-		options = device->FetchOptions();
-
-		for (i = 0; i < options; i++) {
-			option = device->GetOption(i);
-			if (option) {
-				DebugSessionDeviceOption(session, device, option);
+		if (device->FetchOptions() == SANE_STATUS_GOOD) {
+			for (index = 0; index < device->GetOptions(); index++) {
+				option = device->GetOption(index);
+				if (option) {
+					DebugSessionDeviceOption(session, device, option);
+				}
 			}
 		}
 
