@@ -26,6 +26,7 @@
 #include "wiasane.h"
 
 #include <sti.h>
+#include <wia.h>
 #include <math.h>
 #include <winioctl.h>
 #include <usbscan.h>
@@ -125,29 +126,15 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			Trace(TEXT("CMD_RESETSCANNER"));
 		case CMD_STI_DEVICERESET:
 			Trace(TEXT("CMD_STI_DEVICERESET"));
-			if (pContext && pContext->oSession && pContext->oDevice) {
-				if (pContext->oDevice->Cancel() != SANE_STATUS_GOOD) {
-					hr = E_FAIL;
-					break;
-				}
-			}
-
-			hr = S_OK;
-			break;
-
 		case CMD_STI_DIAGNOSTIC:
 			Trace(TEXT("CMD_STI_DIAGNOSTIC"));
 
-			if (pContext && pContext->oSession && pContext->oDevice) {
-				if (pContext->oDevice->GetParams(&oParams) == SANE_STATUS_GOOD) {
-					delete oParams;
-				} else {
-					hr = E_FAIL;
-					break;
-				}
+			if (pContext && pContext->oSession && pContext->oDevice && pContext->oSession->IsConnected()) {
+				hr = GetErrorCode(pContext->oDevice->Cancel());
+			} else {
+				hr = WIA_ERROR_OFFLINE;
 			}
 
-			hr = S_OK;
 			break;
 
 		case CMD_STI_GETSTATUS:
@@ -156,7 +143,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			pValue->lVal = MCRO_ERROR_OFFLINE;
 			pValue->pGuid = (GUID*) &GUID_NULL;
 
-			if (pContext && pContext->oSession && pContext->oDevice) {
+			if (pContext && pContext->oSession && pContext->oDevice && pContext->oSession->IsConnected()) {
 				if (pContext->oDevice->GetParams(&oParams) == SANE_STATUS_GOOD) {
 					delete oParams;
 					pValue->lVal = MCRO_STATUS_OK;
@@ -360,9 +347,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 	}
 
-	if (pContext && pContext->oSession && !pContext->oSession->IsConnected())
-		pValue->lVal = MCRO_ERROR_OFFLINE;
-
 	return hr;
 }
 
@@ -399,6 +383,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			//
 
 			if (pContext->oSession && pContext->oDevice && (!pContext->pTask || !pContext->pTask->oScan)) {
+				if (!pContext->oSession->IsConnected())
+					return WIA_ERROR_OFFLINE;
+
 				hr = SetScannerSettings(pScanInfo, pContext);
 				if (FAILED(hr))
 					return hr;
@@ -542,6 +529,9 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 	if (!pContext->oSession || !pContext->oDevice)
 		return E_FAIL;
 
+	if (!pContext->oSession->IsConnected())
+		return WIA_ERROR_OFFLINE;
+
 	oOptionTLx = pContext->oDevice->GetOption(WIASANE_OPTION_TL_X);
 	oOptionTLy = pContext->oDevice->GetOption(WIASANE_OPTION_TL_Y);
 	oOptionBRx = pContext->oDevice->GetOption(WIASANE_OPTION_BR_X);
@@ -599,6 +589,9 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
     Trace(TEXT("xext  = %d"), pScanInfo->Window.xExtent);
     Trace(TEXT("yext  = %d"), pScanInfo->Window.yExtent);
 #endif
+
+	if (!pContext->oSession->IsConnected())
+		return WIA_ERROR_OFFLINE;
 
 	return S_OK;
 }
@@ -689,55 +682,95 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 
 HRESULT InitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
+	SANE_Status status;
+	HRESULT hr;
+
 	UNREFERENCED_PARAMETER(pScanInfo);
 
 	pContext->pTask = NULL;
 	pContext->oSession = WINSANE_Session::Remote(pContext->pszHost, pContext->usPort);
 	if (pContext->oSession) {
-		if (pContext->oSession->Init(NULL, NULL) == SANE_STATUS_GOOD && pContext->oSession->FetchDevices() == SANE_STATUS_GOOD) {
-			pContext->oDevice = pContext->oSession->GetDevice(pContext->pszName);
-			if (pContext->oDevice && pContext->oDevice->Open() == SANE_STATUS_GOOD) {
-				if (pContext->oDevice->FetchOptions() == SANE_STATUS_GOOD) {
-					return S_OK;
+		status = pContext->oSession->Init(NULL, NULL);
+		if (status == SANE_STATUS_GOOD) {
+			status = pContext->oSession->FetchDevices();
+			if (status == SANE_STATUS_GOOD) {
+				pContext->oDevice = pContext->oSession->GetDevice(pContext->pszName);
+				if (pContext->oDevice) {
+					status = pContext->oDevice->Open();
+					if (status == SANE_STATUS_GOOD) {
+						status = pContext->oDevice->FetchOptions();
+						return GetErrorCode(status);
+					} else {
+						hr = GetErrorCode(status);
+					}
+				} else {
+					hr = WIA_ERROR_USER_INTERVENTION;
 				}
+			} else {
+				hr = GetErrorCode(status);
 			}
+
 			pContext->oSession->Exit();
+		} else {
+			hr = GetErrorCode(status);
 		}
+
 		delete pContext->oSession;
 		pContext->oSession = NULL;
+	} else {
+		hr = WIA_ERROR_OFFLINE;
 	}
+
 	pContext->oDevice = NULL;
-	return E_FAIL;
+	return hr;
 }
 
 HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
+	SANE_Status status;
+	HRESULT hr;
+
+	hr = S_OK;
+
 	if (pContext->oSession) {
 		if (pContext->oDevice) {
 			if (pContext->pTask) {
 				if (pContext->pTask->oScan) {
-					pContext->oDevice->Cancel();
+					status = pContext->oDevice->Cancel();
+					if (status != SANE_STATUS_GOOD)
+						hr = GetErrorCode(status);
+
 					delete pContext->pTask->oScan;
 					pContext->pTask->oScan = NULL;
 				}
+
 				ZeroMemory(pContext->pTask, sizeof(WIASANE_Task));
 				HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pTask);
 				pContext->pTask = NULL;
 			}
+
 			if (pContext->pValues) {
 				ZeroMemory(pContext->pValues, sizeof(WIASANE_Values));
 				HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues);
 				pContext->pValues = NULL;
 			}
-			pContext->oDevice->Close();
+
+			status = pContext->oDevice->Close();
+			if (status != SANE_STATUS_GOOD)
+				hr = GetErrorCode(status);
+
 			pContext->oDevice = NULL;
 		}
-		pContext->oSession->Exit();
+
+		status = pContext->oSession->Exit();
+		if (status != SANE_STATUS_GOOD)
+			hr = GetErrorCode(status);
+
 		delete pContext->oSession;
 		pContext->oSession = NULL;
 	}
 
-	return S_OK;
+	return hr;
 }
 
 HRESULT FreeScanner(_Inout_ PSCANINFO pScanInfo, _In_ PWIASANE_Context pContext)
@@ -1108,4 +1141,36 @@ HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _In_ LONG lScanMode)
 	}
 
 	return hr;
+}
+
+HRESULT GetErrorCode(_In_ SANE_Status status)
+{
+	switch (status) {
+		case SANE_STATUS_GOOD:
+			return S_OK;
+		case SANE_STATUS_UNSUPPORTED:
+			return WIA_ERROR_INVALID_COMMAND;
+		case SANE_STATUS_CANCELLED:
+			return E_ABORT;
+		case SANE_STATUS_DEVICE_BUSY:
+			return WIA_ERROR_BUSY;
+		case SANE_STATUS_INVAL:
+			return WIA_ERROR_INCORRECT_HARDWARE_SETTING;
+		case SANE_STATUS_EOF:
+			return S_FALSE;
+		case SANE_STATUS_JAMMED:
+			return WIA_ERROR_PAPER_JAM;
+		case SANE_STATUS_NO_DOCS:
+			return WIA_ERROR_PAPER_EMPTY;
+		case SANE_STATUS_COVER_OPEN:
+			return WIA_ERROR_COVER_OPEN;
+		case SANE_STATUS_IO_ERROR:
+			return WIA_ERROR_DEVICE_COMMUNICATION;
+		case SANE_STATUS_NO_MEM:
+			return E_OUTOFMEMORY;
+		case SANE_STATUS_ACCESS_DENIED:
+			return E_ACCESSDENIED;
+		default:
+			return WIA_ERROR_GENERAL_ERROR;
+	}
 }
