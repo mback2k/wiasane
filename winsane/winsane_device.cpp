@@ -96,6 +96,9 @@ SANE_Status WINSANE_Device::Open()
 
 	delete[] resource;
 
+	if (!this->sock->IsConnected())
+		return SANE_STATUS_IO_ERROR;
+
 	if (status != SANE_STATUS_GOOD)
 		return status;
 
@@ -117,6 +120,9 @@ SANE_Status WINSANE_Device::Close()
 		return SANE_STATUS_IO_ERROR;
 
 	this->sock->ReadWord();
+
+	if (!this->sock->IsConnected())
+		return SANE_STATUS_IO_ERROR;
 
 	this->sane_handle = INVALID_SANE_HANDLE;
 
@@ -279,6 +285,11 @@ SANE_Status WINSANE_Device::GetParams(_Outptr_result_maybenull_ PWINSANE_Params 
 	sane_params->lines = this->sock->ReadWord();
 	sane_params->depth = this->sock->ReadWord();
 
+	if (!this->sock->IsConnected()) {
+		delete sane_params;
+		return SANE_STATUS_IO_ERROR;
+	}
+
 	if (status != SANE_STATUS_GOOD) {
 		delete sane_params;
 		return status;
@@ -320,6 +331,9 @@ SANE_Status WINSANE_Device::Start(_Outptr_result_maybenull_ PWINSANE_Scan *scan)
 
 	delete[] resource;
 
+	if (!this->sock->IsConnected())
+		return SANE_STATUS_IO_ERROR;
+
 	if (status != SANE_STATUS_GOOD)
 		return status;
 
@@ -343,6 +357,9 @@ SANE_Status WINSANE_Device::Cancel()
 		return SANE_STATUS_IO_ERROR;
 
 	this->sock->ReadWord();
+
+	if (!this->sock->IsConnected())
+		return SANE_STATUS_IO_ERROR;
 
 	return SANE_STATUS_GOOD;
 }

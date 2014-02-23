@@ -182,6 +182,10 @@ SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth
 
 	status = this->sock->ReadStatus();
 	version_code = this->sock->ReadWord();
+
+	if (!this->sock->IsConnected())
+		return SANE_STATUS_IO_ERROR;
+
 	if (status != SANE_STATUS_GOOD)
 		return status;
 
