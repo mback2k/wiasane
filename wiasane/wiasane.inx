@@ -30,7 +30,8 @@ Needs=STI.SerialSection, STI.MICRODRIVERSection
 SubClass=StillImage
 DeviceType=1
 DeviceSubType=0x1
-Capabilities=0x30
+Capabilities=0x3A
+PortSelect=NO
 Events=WIASANE.Events
 DeviceData=WIASANE.DeviceData
 AddReg=WIASANE.AddReg
@@ -57,6 +58,7 @@ Resolutions="100, 150, 200, 300, 600"
 
 [WIASANE.AddReg]
 HKR,,HardwareConfig,1,1
+HKR,,CreateFileName,0,"AUTO"
 
 [WIASANE.CopyFiles]
 winsane.dll
