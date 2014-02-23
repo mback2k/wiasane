@@ -237,6 +237,9 @@ PWINSANE_Option WINSANE_Device::GetOption(_In_ int index)
 	if (this->sane_handle == INVALID_SANE_HANDLE || !this->options)
 		return NULL;
 
+	if (index < 0 || index >= this->num_options)
+		return NULL;
+
 	return this->options[index];
 }
 

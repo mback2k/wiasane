@@ -301,7 +301,10 @@ int WINSANE_Session::GetDevices()
 
 PWINSANE_Device WINSANE_Session::GetDevice(_In_ int index)
 {
-	if (!this->initialized)
+	if (!this->initialized || !this->devices)
+		return NULL;
+
+	if (index < 0 || index >= this->num_devices)
 		return NULL;
 
 	return this->devices[index];
@@ -312,7 +315,7 @@ PWINSANE_Device WINSANE_Session::GetDevice(_In_ SANE_String_Const name)
 	SANE_String_Const device_name;
 	int index;
 
-	if (!this->initialized)
+	if (!this->initialized || !this->devices)
 		return NULL;
 
 	for (index = 0; index < this->num_devices; index++) {
