@@ -1,6 +1,6 @@
-WIASANE
+WiaSane
 =======
-The WIASANE project provides a Windows Image Acquisition (WIA) Driver
+The WiaSane project provides a Windows Image Acquisition (WIA) Driver
 which enables image acquisition from scanner devices through the
 Scanner Access Now Easy (SANE) network protocol.
 
@@ -57,7 +57,7 @@ The installer is created and compiled using Inno Setup 5.5 or newer.
 
 License
 -------
-Copyright (c) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+Copyright (c) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
 
 This software is licensed as described in the file COPYING, which
 you should have received as part of this software distribution.
