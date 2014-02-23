@@ -328,7 +328,10 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		default:
 			Trace(TEXT("Unknown Command (%d)"), lCommand);
 			break;
-    }
+	}
+
+	if (pContext && pContext->oSession && !pContext->oSession->IsConnected())
+		pValue->lVal = MCRO_ERROR_OFFLINE;
 
     return hr;
 }
