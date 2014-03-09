@@ -41,7 +41,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 {
 	PWIASANE_Context pContext;
 	PWINSANE_Option oOption;
-	PWINSANE_Params oParams;
 	LONG lReceived;
 	HANDLE hHeap;
 	HRESULT hr;
@@ -140,15 +139,12 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_STI_GETSTATUS:
 			Trace(TEXT("CMD_STI_GETSTATUS"));
 
-			pValue->lVal = MCRO_ERROR_OFFLINE;
-			pValue->pGuid = (GUID*) &GUID_NULL;
-
 			if (pContext && pContext->oSession && pContext->oDevice && pContext->oSession->IsConnected()) {
-				if (pContext->oDevice->GetParams(&oParams) == SANE_STATUS_GOOD) {
-					delete oParams;
-					pValue->lVal = MCRO_STATUS_OK;
-				}
+				pValue->lVal = MCRO_STATUS_OK;
+			} else {
+				pValue->lVal = MCRO_ERROR_OFFLINE;
 			}
+			pValue->pGuid = (GUID*) &GUID_NULL;
 
 			hr = S_OK;
 			break;
@@ -736,9 +732,11 @@ HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 		if (pContext->oDevice) {
 			if (pContext->pTask) {
 				if (pContext->pTask->oScan) {
-					status = pContext->oDevice->Cancel();
-					if (status != SANE_STATUS_GOOD)
-						hr = GetErrorCode(status);
+					if (pContext->oSession->IsConnected()) {
+						status = pContext->oDevice->Cancel();
+						if (status != SANE_STATUS_GOOD)
+							hr = GetErrorCode(status);
+					}
 
 					delete pContext->pTask->oScan;
 					pContext->pTask->oScan = NULL;
@@ -755,16 +753,20 @@ HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 				pContext->pValues = NULL;
 			}
 
-			status = pContext->oDevice->Close();
-			if (status != SANE_STATUS_GOOD)
-				hr = GetErrorCode(status);
+			if (pContext->oSession->IsConnected()) {
+				status = pContext->oDevice->Close();
+				if (status != SANE_STATUS_GOOD)
+					hr = GetErrorCode(status);
+			}
 
 			pContext->oDevice = NULL;
 		}
 
-		status = pContext->oSession->Exit();
-		if (status != SANE_STATUS_GOOD)
-			hr = GetErrorCode(status);
+		if (pContext->oSession->IsConnected()) {
+			status = pContext->oSession->Exit();
+			if (status != SANE_STATUS_GOOD)
+				hr = GetErrorCode(status);
+		}
 
 		delete pContext->oSession;
 		pContext->oSession = NULL;
