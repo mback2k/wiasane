@@ -38,6 +38,9 @@ WINSANE_Device::~WINSANE_Device()
 	if (this->num_options > 0)
 		this->ClearOptions();
 
+	if (this->sane_handle != INVALID_SANE_HANDLE)
+		this->Close();
+
 	if (this->sane_device->name)
 		delete[] this->sane_device->name;
 	if (this->sane_device->vendor)
