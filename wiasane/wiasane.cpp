@@ -164,8 +164,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_SETXRESOLUTION:
 			Trace(TEXT("CMD_SETXRESOLUTION"));
-		case CMD_SETYRESOLUTION:
-			Trace(TEXT("CMD_SETYRESOLUTION"));
 
 			if (pContext && pContext->oDevice) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_RESOLUTION);
@@ -182,15 +180,20 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 				break;
 			}
 
-			switch (lCommand) {
-				case CMD_SETXRESOLUTION:
-					pValue->pScanInfo->Xresolution = pValue->lVal;
-					break;
+			pValue->pScanInfo->Xresolution = pValue->lVal;
 
-				case CMD_SETYRESOLUTION:
-					pValue->pScanInfo->Yresolution = pValue->lVal;
-					break;
+			hr = S_OK;
+			break;
+
+		case CMD_SETYRESOLUTION:
+			Trace(TEXT("CMD_SETYRESOLUTION"));
+
+			if (pValue->pScanInfo->Xresolution != pValue->lVal) {
+				hr = E_INVALIDARG;
+				break;
 			}
+
+			pValue->pScanInfo->Yresolution = pValue->lVal;
 
 			hr = S_OK;
 			break;
