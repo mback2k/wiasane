@@ -142,6 +142,11 @@ SANE_Status WINSANE_Device::Close()
 	return SANE_STATUS_GOOD;
 }
 
+BOOL WINSANE_Device::IsOpen()
+{
+	return this->sane_handle != INVALID_SANE_HANDLE;
+}
+
 
 SANE_Status WINSANE_Device::FetchOptions()
 {

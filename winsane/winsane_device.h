@@ -47,6 +47,7 @@ public:
 
 	SANE_Status Open();
 	SANE_Status Close();
+	BOOL IsOpen();
 
 	SANE_Status FetchOptions();
 	LONG GetOptions();
