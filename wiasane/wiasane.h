@@ -57,12 +57,12 @@ _Analysis_mode_(_Analysis_code_type_user_driver_)
 #define WIASANE_MODE_COLOR			"color"
 
 typedef struct _WIASANE_Values {
-	SANE_String_Const pszcModeThreshold;
-	SANE_String_Const pszcModeGrayscale;
-	SANE_String_Const pszcModeColor;
-	SANE_String_Const pszcSourceFlatbed;
-	SANE_String_Const pszcSourceADF;
-	SANE_String_Const pszcSourceDuplex;
+	PSTR pszModeThreshold;
+	PSTR pszModeGrayscale;
+	PSTR pszModeColor;
+	PSTR pszSourceFlatbed;
+	PSTR pszSourceADF;
+	PSTR pszSourceDuplex;
 } WIASANE_Values, *PWIASANE_Values;
 
 typedef struct _WIASANE_Task {

@@ -331,11 +331,11 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 				if (oOption && pContext->pValues) {
 					switch (pValue->pScanInfo->ADF) {
 						case 1:
-							hr = oOption->SetValueString(pContext->pValues->pszcSourceADF);
+							hr = oOption->SetValueString(pContext->pValues->pszSourceADF);
 							break;
 
 						case 2:
-							hr = oOption->SetValueString(pContext->pValues->pszcSourceDuplex);
+							hr = oOption->SetValueString(pContext->pValues->pszSourceDuplex);
 							break;
 					}
 					if (SUCCEEDED(hr)) {
@@ -350,7 +350,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 						if (!pContext->pTask || !pContext->pTask->bUsingADF) {
 							oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SOURCE);
 							if (oOption) {
-								oOption->SetValueString(pContext->pValues->pszcSourceFlatbed);
+								oOption->SetValueString(pContext->pValues->pszSourceFlatbed);
 							}
 						}
 					}
@@ -369,7 +369,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			if (SUCCEEDED(hr)) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SOURCE);
 				if (oOption && pContext->pValues) {
-					hr = oOption->SetValueString(pContext->pValues->pszcSourceFlatbed);
+					hr = oOption->SetValueString(pContext->pValues->pszSourceFlatbed);
 					if (SUCCEEDED(hr)) {
 						if (pContext->pTask) {
 							pContext->pTask->bUsingADF = FALSE;
@@ -900,6 +900,9 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	int index;
 
 	if (pContext && pContext->oSession && pContext->oDevice) {
+		if (pContext->pValues)
+			FreeScannerDefaults(pScanInfo, pContext);
+
 		pContext->pValues = (PWIASANE_Values) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, sizeof(WIASANE_Values));
 		if (!pContext->pValues)
 			return E_OUTOFMEMORY;
@@ -914,13 +917,13 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 				if (StrStrIA(string_list[index], WIASANE_SOURCE_ADF) ||
 					StrStrIA(string_list[index], WIASANE_SOURCE_ADF_EX)) {
 					pScanInfo->ADF = max(pScanInfo->ADF, 1);
-					pContext->pValues->pszcSourceADF = string_list[index];
+					pContext->pValues->pszSourceADF = StrDupA(string_list[index]);
 				} else if (StrStrIA(string_list[index], WIASANE_SOURCE_DUPLEX)) {
 					pScanInfo->ADF = max(pScanInfo->ADF, 2);
-					pContext->pValues->pszcSourceDuplex = string_list[index];
+					pContext->pValues->pszSourceDuplex = StrDupA(string_list[index]);
 				} else if (StrStrIA(string_list[index], WIASANE_SOURCE_FLATBED) ||
-					       !pContext->pValues->pszcSourceFlatbed) {
-					pContext->pValues->pszcSourceFlatbed = string_list[index];
+					       !pContext->pValues->pszSourceFlatbed) {
+					pContext->pValues->pszSourceFlatbed = StrDupA(string_list[index]);
 				}
 			}
 		}
@@ -935,14 +938,14 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 				if (StrCmpIA(string_list[index], WIASANE_MODE_LINEART) == 0 ||
 					StrCmpIA(string_list[index], WIASANE_MODE_THRESHOLD) == 0) {
 					pScanInfo->SupportedDataTypes |= SUPPORT_BW;
-					pContext->pValues->pszcModeThreshold = string_list[index];
+					pContext->pValues->pszModeThreshold = StrDupA(string_list[index]);
 				} else if (StrCmpIA(string_list[index], WIASANE_MODE_GRAY) == 0 ||
 					       StrCmpIA(string_list[index], WIASANE_MODE_GRAYSCALE) == 0) {
 					pScanInfo->SupportedDataTypes |= SUPPORT_GRAYSCALE;
-					pContext->pValues->pszcModeGrayscale = string_list[index];
+					pContext->pValues->pszModeGrayscale = StrDupA(string_list[index]);
 				} else if (StrCmpIA(string_list[index], WIASANE_MODE_COLOR) == 0) {
 					pScanInfo->SupportedDataTypes |= SUPPORT_COLOR;
-					pContext->pValues->pszcModeColor = string_list[index];
+					pContext->pValues->pszModeColor = StrDupA(string_list[index]);
 				}
 			}
 		}
@@ -1055,7 +1058,31 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 HRESULT FreeScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
 	if (pContext->pValues) {
-		ZeroMemory(pContext->pValues, sizeof(WIASANE_Values));
+		if (pContext->pValues->pszModeThreshold) {
+			LocalFree(pContext->pValues->pszModeThreshold);
+			pContext->pValues->pszModeThreshold = NULL;
+		}
+		if (pContext->pValues->pszModeGrayscale) {
+			LocalFree(pContext->pValues->pszModeGrayscale);
+			pContext->pValues->pszModeGrayscale = NULL;
+		}
+		if (pContext->pValues->pszModeColor) {
+			LocalFree(pContext->pValues->pszModeColor);
+			pContext->pValues->pszModeColor = NULL;
+		}
+		if (pContext->pValues->pszSourceFlatbed) {
+			LocalFree(pContext->pValues->pszSourceFlatbed);
+			pContext->pValues->pszSourceFlatbed = NULL;
+		}
+		if (pContext->pValues->pszSourceADF) {
+			LocalFree(pContext->pValues->pszSourceADF);
+			pContext->pValues->pszSourceADF = NULL;
+		}
+		if (pContext->pValues->pszSourceDuplex) {
+			LocalFree(pContext->pValues->pszSourceDuplex);
+			pContext->pValues->pszSourceDuplex = NULL;
+		}
+
 		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues);
 		pContext->pValues = NULL;
 	}
@@ -1073,13 +1100,13 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 		if (oOption && oOption->GetType() == SANE_TYPE_STRING) {
 			switch (pScanInfo->DataType) {
 				case WIA_DATA_THRESHOLD:
-					hr = oOption->SetValueString(pContext->pValues->pszcModeThreshold);
+					hr = oOption->SetValueString(pContext->pValues->pszModeThreshold);
 					break;
 				case WIA_DATA_GRAYSCALE:
-					hr = oOption->SetValueString(pContext->pValues->pszcModeGrayscale);
+					hr = oOption->SetValueString(pContext->pValues->pszModeGrayscale);
 					break;
 				case WIA_DATA_COLOR:
-					hr = oOption->SetValueString(pContext->pValues->pszcModeColor);
+					hr = oOption->SetValueString(pContext->pValues->pszModeColor);
 					break;
 				default:
 					hr = E_INVALIDARG;
