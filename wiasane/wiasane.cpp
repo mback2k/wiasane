@@ -1163,7 +1163,7 @@ HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	return hr;
 }
 
-HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _In_ PWIASANE_Context pContext)
+HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
 	PWINSANE_Option oOption;
 	HRESULT hr;
