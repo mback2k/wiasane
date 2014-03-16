@@ -255,6 +255,32 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			hr = S_OK;
 			break;
 
+		case CMD_SETSCANMODE:
+			Trace(TEXT("CMD_SETSCANMODE"));
+
+			if (pValue->lVal == SCANMODE_FINALSCAN ||
+				pValue->lVal == SCANMODE_PREVIEWSCAN) {
+				if (pContext) {
+					pContext->lScanMode = pValue->lVal;
+					hr = S_OK;
+				} else {
+					hr = E_FAIL;
+				}
+			} else {
+				hr = E_INVALIDARG;
+			}
+			break;
+
+		case CMD_GETCAPABILITIES:
+			Trace(TEXT("CMD_GETCAPABILITIES"));
+
+			pValue->lVal = 0;
+			pValue->pGuid = NULL;
+			pValue->ppButtonNames = NULL;
+
+			hr = S_OK;
+			break;
+
 		case CMD_GETADFSTATUS:
 			Trace(TEXT("CMD_GETADFSTATUS"));
 
@@ -354,27 +380,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			}
 			break;
 
-		case CMD_GETCAPABILITIES:
-			Trace(TEXT("CMD_GETCAPABILITIES"));
-
-			pValue->lVal = 0;
-			pValue->pGuid = NULL;
-			pValue->ppButtonNames = NULL;
-
-			hr = S_OK;
-			break;
-
-		case CMD_SETSCANMODE:
-			Trace(TEXT("CMD_SETSCANMODE"));
-
-			hr = OpenScannerDevice(pValue->pScanInfo, pContext);
-			if (SUCCEEDED(hr)) {
-				hr = SetScanMode(pValue->pScanInfo, pValue->lVal);
-
-				CloseScannerDevice(pValue->pScanInfo, pContext);
-			}
-			break;
-
 		default:
 			Trace(TEXT("Unknown Command (%d)"), lCommand);
 			break;
@@ -417,6 +422,10 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 
 			hr = OpenScannerDevice(pScanInfo, pContext);
 			if (SUCCEEDED(hr) && (!pContext->pTask || !pContext->pTask->oScan)) {
+				hr = SetScanMode(pContext);
+				if (FAILED(hr))
+					return hr;
+
 				hr = SetScannerSettings(pScanInfo, pContext);
 				if (FAILED(hr))
 					return hr;
@@ -1183,20 +1192,16 @@ HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	return hr;
 }
 
-HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _In_ LONG lScanMode)
+HRESULT SetScanMode(_In_ PWIASANE_Context pContext)
 {
-	PWIASANE_Context pContext;
-	PWINSANE_Option oOption;
 	PSANE_String_Const string_list;
+	PWINSANE_Option oOption;
 	HRESULT hr;
 
-	pContext = (PWIASANE_Context) pScanInfo->pMicroDriverContext;
 	if (!pContext)
-		return E_OUTOFMEMORY;
+		return E_INVALIDARG;
 
-	hr = E_NOTIMPL;
-
-	switch (lScanMode) {
+	switch (pContext->lScanMode) {
 		case SCANMODE_FINALSCAN:
 			Trace(TEXT("Final Scan"));
 
@@ -1242,9 +1247,9 @@ HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _In_ LONG lScanMode)
 			break;
 
 		default:
-			Trace(TEXT("Unknown Scan Mode (%d)"), lScanMode);
+			Trace(TEXT("Unknown Scan Mode (%d)"), pContext->lScanMode);
 
-			hr = E_FAIL;
+			hr = E_INVALIDARG;
 			break;
 	}
 

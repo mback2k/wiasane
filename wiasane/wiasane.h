@@ -83,6 +83,7 @@ typedef struct _WIASANE_Context {
 	PTSTR pszName;
 	USHORT usPort;
 	UINT uiDevRef;
+	LONG lScanMode;
 } WIASANE_Context, *PWIASANE_Context;
 
 HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
@@ -95,7 +96,7 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 HRESULT FreeScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
 HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
 HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
-HRESULT SetScanMode(_Inout_ PSCANINFO pScanInfo, _In_ LONG lScanMode);
+HRESULT SetScanMode(_In_ PWIASANE_Context pContext);
 HRESULT GetErrorCode(_In_ SANE_Status status);
 
 #endif
