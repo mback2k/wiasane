@@ -247,6 +247,22 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_SETDATATYPE:
 			Trace(TEXT("CMD_SETDATATYPE"));
 
+			if (pValue->lVal == WIA_DATA_THRESHOLD && !(
+			    pValue->pScanInfo->SupportedDataTypes & SUPPORT_BW)) {
+					hr = E_NOTIMPL;
+					break;
+			}
+			if (pValue->lVal == WIA_DATA_GRAYSCALE && !(
+			    pValue->pScanInfo->SupportedDataTypes & SUPPORT_GRAYSCALE)) {
+					hr = E_NOTIMPL;
+					break;
+			}
+			if (pValue->lVal == WIA_DATA_COLOR && !(
+			    pValue->pScanInfo->SupportedDataTypes & SUPPORT_COLOR)) {
+					hr = E_NOTIMPL;
+					break;
+			}
+
 			pValue->pScanInfo->DataType = pValue->lVal;
 			hr = S_OK;
 			break;
