@@ -84,12 +84,12 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 			if (pContext) {
 				if (pContext->oSession)
-					hr = UninitializeScanner(pValue->pScanInfo, pContext);
+					hr = FreeScannerSession(pValue->pScanInfo, pContext);
 				else
 					hr = S_OK;
 
 				if (SUCCEEDED(hr)) {
-					hr = InitializeScanner(pValue->pScanInfo, pContext);
+					hr = InitScannerSession(pValue->pScanInfo, pContext);
 
 					if (SUCCEEDED(hr)) {
 						hr = OpenScannerDevice(pValue->pScanInfo, pContext);
@@ -113,7 +113,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 			if (pContext) {
 				if (pContext->oSession)
-					hr = UninitializeScanner(pValue->pScanInfo, pContext);
+					hr = FreeScannerSession(pValue->pScanInfo, pContext);
 				else
 					hr = S_OK;
 
@@ -740,7 +740,7 @@ HRESULT FreeRegistryInformation(_Inout_ PSCANINFO pScanInfo, _In_ PWIASANE_Conte
 	return S_OK;
 }
 
-HRESULT InitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
+HRESULT InitScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
 	SANE_Status status;
 	HRESULT hr;
@@ -780,7 +780,7 @@ HRESULT InitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 	return hr;
 }
 
-HRESULT UninitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
+HRESULT FreeScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
 	SANE_Status status;
 	HRESULT hr;
@@ -821,13 +821,13 @@ HRESULT OpenScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 	hr = S_OK;
 
 	if (pContext->oSession && !pContext->oSession->IsConnected()) {
-		hr = UninitializeScanner(pScanInfo, pContext);
+		hr = FreeScannerSession(pScanInfo, pContext);
 		if (FAILED(hr))
 			return hr;
 	}
 
 	if (!pContext->oSession) {
-		hr = InitializeScanner(pScanInfo, pContext);
+		hr = InitScannerSession(pScanInfo, pContext);
 		if (FAILED(hr))
 			return hr;
 	}
