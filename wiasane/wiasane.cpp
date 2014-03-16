@@ -121,7 +121,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 					hr = FreeScannerDefaults(pValue->pScanInfo, pContext);
 
 				if (SUCCEEDED(hr))
-					hr = FreeScanner(pValue->pScanInfo, pContext);
+					hr = FreeRegistryInformation(pValue->pScanInfo, pContext);
 
 				if (SUCCEEDED(hr))
 					pContext = NULL;
@@ -723,6 +723,23 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 	return hr;
 }
 
+HRESULT FreeRegistryInformation(_Inout_ PSCANINFO pScanInfo, _In_ PWIASANE_Context pContext)
+{
+	if (!pScanInfo || !pContext)
+		return E_INVALIDARG;
+
+	if (pContext->pszHost)
+		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszHost);
+
+	if (pContext->pszName)
+		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszName);
+
+	ZeroMemory(pContext, sizeof(WIASANE_Context));
+	HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext);
+
+	return S_OK;
+}
+
 HRESULT InitializeScanner(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
 	SANE_Status status;
@@ -871,23 +888,6 @@ HRESULT CloseScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	}
 
 	return hr;
-}
-
-HRESULT FreeScanner(_Inout_ PSCANINFO pScanInfo, _In_ PWIASANE_Context pContext)
-{
-	if (!pScanInfo || !pContext)
-		return E_INVALIDARG;
-
-	if (pContext->pszHost)
-		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszHost);
-
-	if (pContext->pszName)
-		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszName);
-
-	ZeroMemory(pContext, sizeof(WIASANE_Context));
-	HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext);
-
-	return S_OK;
 }
 
 HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
