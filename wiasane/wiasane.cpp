@@ -167,7 +167,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_SETYRESOLUTION:
 			Trace(TEXT("CMD_SETYRESOLUTION"));
 
-			if (pContext && pContext->oSession && pContext->oDevice) {
+			if (pContext && pContext->oDevice) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_RESOLUTION);
 				if (!oOption) {
 					hr = E_NOTIMPL;
@@ -198,7 +198,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_SETCONTRAST:
 			Trace(TEXT("CMD_SETCONTRAST"));
 
-			if (pContext && pContext->oSession && pContext->oDevice) {
+			if (pContext && pContext->oDevice) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_CONTRAST);
 				if (!oOption) {
 					hr = E_NOTIMPL;
@@ -221,7 +221,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_SETINTENSITY:
 			Trace(TEXT("CMD_SETINTENSITY"));
 
-			if (pContext && pContext->oSession && pContext->oDevice) {
+			if (pContext && pContext->oDevice) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BRIGHTNESS);
 				if (!oOption) {
 					hr = E_NOTIMPL;
