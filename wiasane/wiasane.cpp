@@ -429,6 +429,10 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				if (FAILED(hr))
 					return hr;
 
+				hr = SetScanWindow(pContext);
+				if (FAILED(hr))
+					return hr;
+
 				hr = SetScannerSettings(pScanInfo, pContext);
 				if (FAILED(hr))
 					return hr;
@@ -560,7 +564,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y, LONG xExtent, LONG yExtent)
 {
 	PWIASANE_Context pContext;
-	PWINSANE_Option oOptionTLx, oOptionTLy, oOptionBRx, oOptionBRy;
+	PWINSANE_Option oOption;
 	HRESULT hr;
 	double tl_x, tl_y, br_x, br_y;
 
@@ -569,61 +573,55 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 
 	pContext = (PWIASANE_Context) pScanInfo->pMicroDriverContext;
 	if (!pContext)
-		return E_INVALIDARG;
+		return E_FAIL;
 
-	if (!pContext->oSession || !pContext->oDevice)
-		return E_INVALIDARG;
+	if (!pContext->oDevice)
+		return E_FAIL;
 
-	hr = OpenScannerDevice(pScanInfo, pContext);
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_TL_X);
+	if (!oOption)
+		return E_NOTIMPL;
+
+	tl_x = ((double) x) / ((double) pScanInfo->Xresolution);
+
+	hr = IsValidOptionValueInch(oOption, tl_x);
 	if (FAILED(hr))
 		return hr;
 
-	oOptionTLx = pContext->oDevice->GetOption(WIASANE_OPTION_TL_X);
-	oOptionTLy = pContext->oDevice->GetOption(WIASANE_OPTION_TL_Y);
-	oOptionBRx = pContext->oDevice->GetOption(WIASANE_OPTION_BR_X);
-	oOptionBRy = pContext->oDevice->GetOption(WIASANE_OPTION_BR_Y);
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_TL_Y);
+	if (!oOption)
+		return E_NOTIMPL;
 
-	if (!oOptionTLx || !oOptionTLy || !oOptionBRx || !oOptionBRy) {
-		hr = E_INVALIDARG;
-		goto done;
-	}
-
-	tl_x = ((double) x) / ((double) pScanInfo->Xresolution);
 	tl_y = ((double) y) / ((double) pScanInfo->Yresolution);
+
+	hr = IsValidOptionValueInch(oOption, tl_y);
+	if (FAILED(hr))
+		return hr;
+
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BR_X);
+	if (!oOption)
+		return E_NOTIMPL;
+
 	br_x = ((double) (x + xExtent)) / ((double) pScanInfo->Xresolution);
+
+	hr = IsValidOptionValueInch(oOption, br_x);
+	if (FAILED(hr))
+		return hr;
+
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BR_Y);
+	if (!oOption)
+		return E_NOTIMPL;
+
 	br_y = ((double) (y + yExtent)) / ((double) pScanInfo->Yresolution);
 
-	hr = IsValidOptionValueInch(oOptionTLx, tl_x);
+	hr = IsValidOptionValueInch(oOption, br_y);
 	if (FAILED(hr))
-		goto done;
+		return hr;
 
-	hr = IsValidOptionValueInch(oOptionTLy, tl_y);
-	if (FAILED(hr))
-		goto done;
-
-	hr = IsValidOptionValueInch(oOptionBRx, br_x);
-	if (FAILED(hr))
-		goto done;
-
-	hr = IsValidOptionValueInch(oOptionBRy, br_y);
-	if (FAILED(hr))
-		goto done;
-
-	hr = SetOptionValueInch(oOptionTLx, tl_x);
-	if (FAILED(hr))
-		goto done;
-
-	hr = SetOptionValueInch(oOptionTLy, tl_y);
-	if (FAILED(hr))
-		goto done;
-
-	hr = SetOptionValueInch(oOptionBRx, br_x);
-	if (FAILED(hr))
-		goto done;
-
-	hr = SetOptionValueInch(oOptionBRy, br_y);
-	if (FAILED(hr))
-		goto done;
+	pContext->dblTopLeftX = tl_x;
+	pContext->dblTopLeftY = tl_y;
+	pContext->dblBottomRightX = br_x;
+	pContext->dblBottomRightY = br_y;
 
     pScanInfo->Window.xPos = x;
     pScanInfo->Window.yPos = y;
@@ -637,12 +635,6 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
     Trace(TEXT("xext  = %d"), pScanInfo->Window.xExtent);
     Trace(TEXT("yext  = %d"), pScanInfo->Window.yExtent);
 #endif
-
-done:
-	CloseScannerDevice(pScanInfo, pContext);
-
-	if (!pContext->oSession->IsConnected())
-		hr = WIA_ERROR_OFFLINE;
 
 	return hr;
 }
@@ -1193,6 +1185,49 @@ HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	Trace(TEXT("wpixl = %d"), pScanInfo->WidthPixels);
 	Trace(TEXT("lines = %d"), pScanInfo->Lines);
 #endif
+
+	return hr;
+}
+
+HRESULT SetScanWindow(_In_ PWIASANE_Context pContext)
+{
+	PWINSANE_Option oOption;
+	HRESULT hr;
+
+	if (!pContext)
+		return E_INVALIDARG;
+
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_TL_X);
+	if (!oOption)
+		return E_NOTIMPL;
+
+	hr = SetOptionValueInch(oOption, pContext->dblTopLeftX);
+	if (FAILED(hr))
+		return hr;
+
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_TL_Y);
+	if (!oOption)
+		return E_NOTIMPL;
+
+	hr = SetOptionValueInch(oOption, pContext->dblTopLeftY);
+	if (FAILED(hr))
+		return hr;
+
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BR_X);
+	if (!oOption)
+		return E_NOTIMPL;
+
+	hr = SetOptionValueInch(oOption, pContext->dblBottomRightX);
+	if (FAILED(hr))
+		return hr;
+
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BR_Y);
+	if (!oOption)
+		return E_NOTIMPL;
+
+	hr = SetOptionValueInch(oOption, pContext->dblBottomRightY);
+	if (FAILED(hr))
+		return hr;
 
 	return hr;
 }
