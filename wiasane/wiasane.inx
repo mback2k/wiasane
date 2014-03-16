@@ -54,12 +54,12 @@ UI Class ID={4DB1AD10-3391-11D2-9A33-00C04FA36145}
 MicroDriver="wiasane.dll"
 Host=localhost
 Port=6566,1
+PollTimeout=20000,1
 Resolutions="100, 150, 200, 300, 600"
 
 [WIASANE.AddReg]
 HKR,,HardwareConfig,0x00000001,1
 HKR,,CreateFileName,0x00000000,"AUTO"
-HKR,,PollTimeout,0x00010001,20000
 
 [WIASANE.CopyFiles]
 winsane.dll
