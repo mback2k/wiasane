@@ -277,7 +277,7 @@ SANE_Status WINSANE_Device::FetchOptions()
 
 LONG WINSANE_Device::GetOptions()
 {
-	if (this->sane_handle == INVALID_SANE_HANDLE || !this->options)
+	if (!this->options)
 		return -1;
 
 	return this->num_options;
@@ -285,7 +285,7 @@ LONG WINSANE_Device::GetOptions()
 
 PWINSANE_Option WINSANE_Device::GetOption(_In_ LONG index)
 {
-	if (this->sane_handle == INVALID_SANE_HANDLE || !this->options)
+	if (!this->options)
 		return NULL;
 
 	if (index < 0 || index >= this->num_options)
@@ -299,7 +299,7 @@ PWINSANE_Option WINSANE_Device::GetOption(_In_ SANE_String_Const name)
 	SANE_String_Const option_name;
 	LONG index;
 
-	if (this->sane_handle == INVALID_SANE_HANDLE || !this->options)
+	if (!this->options)
 		return NULL;
 
 	for (index = 0; index < this->num_options; index++) {
