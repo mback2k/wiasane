@@ -1216,7 +1216,7 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _In_ PWIASANE_Context pC
 	return S_OK;
 }
 
-HRESULT SetScanWindow(_In_ PWIASANE_Context pContext)
+HRESULT SetScanWindow(_Inout_ PWIASANE_Context pContext)
 {
 	PWINSANE_Option oOption;
 	HRESULT hr;
@@ -1259,7 +1259,7 @@ HRESULT SetScanWindow(_In_ PWIASANE_Context pContext)
 	return hr;
 }
 
-HRESULT SetScanMode(_In_ PWIASANE_Context pContext)
+HRESULT SetScanMode(_Inout_ PWIASANE_Context pContext)
 {
 	PSANE_String_Const string_list;
 	PWINSANE_Option oOption;

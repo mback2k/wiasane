@@ -100,8 +100,8 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 HRESULT FreeScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
 HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
 HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
-HRESULT SetScanWindow(_In_ PWIASANE_Context pContext);
-HRESULT SetScanMode(_In_ PWIASANE_Context pContext);
+HRESULT SetScanWindow(_Inout_ PWIASANE_Context pContext);
+HRESULT SetScanMode(_Inout_ PWIASANE_Context pContext);
 HRESULT GetErrorCode(_In_ SANE_Status status);
 
 #endif
