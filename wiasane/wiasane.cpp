@@ -813,13 +813,15 @@ HRESULT OpenScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 
 	if (pContext->oSession && !pContext->oSession->IsConnected()) {
 		hr = UninitializeScanner(pScanInfo, pContext);
-		if (SUCCEEDED(hr)) {
-			hr = InitializeScanner(pScanInfo, pContext);
-		}
+		if (FAILED(hr))
+			return hr;
 	}
 
-	if (FAILED(hr))
-		return hr;
+	if (!pContext->oSession) {
+		hr = InitializeScanner(pScanInfo, pContext);
+		if (FAILED(hr))
+			return hr;
+	}
 
 	if (pContext->oDevice && !pContext->oDevice->IsOpen()) {
 		status = pContext->oDevice->Open();
