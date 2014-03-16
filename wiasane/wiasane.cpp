@@ -1090,59 +1090,6 @@ HRESULT FreeScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	return S_OK;
 }
 
-HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
-{
-	PWINSANE_Option oOption;
-	HRESULT hr;
-
-	if (pContext && pContext->oSession && pContext->oDevice && pContext->pValues) {
-		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_MODE);
-		if (oOption && oOption->GetType() == SANE_TYPE_STRING) {
-			switch (pScanInfo->DataType) {
-				case WIA_DATA_THRESHOLD:
-					hr = oOption->SetValueString(pContext->pValues->pszModeThreshold);
-					break;
-				case WIA_DATA_GRAYSCALE:
-					hr = oOption->SetValueString(pContext->pValues->pszModeGrayscale);
-					break;
-				case WIA_DATA_COLOR:
-					hr = oOption->SetValueString(pContext->pValues->pszModeColor);
-					break;
-				default:
-					hr = E_INVALIDARG;
-					break;
-			}
-			if (FAILED(hr))
-				return hr;
-		} else
-			return E_NOTIMPL;
-
-		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_RESOLUTION);
-		if (oOption) {
-			hr = oOption->SetValue(pScanInfo->Xresolution);
-			if (FAILED(hr))
-				return hr;
-		} else
-			return E_NOTIMPL;
-
-		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_CONTRAST);
-		if (oOption) {
-			hr = oOption->SetValue(pScanInfo->Contrast);
-			if (FAILED(hr) && hr != E_NOTIMPL)
-				return hr;
-		}
-
-		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BRIGHTNESS);
-		if (oOption) {
-			hr = oOption->SetValue(pScanInfo->Intensity);
-			if (FAILED(hr) && hr != E_NOTIMPL)
-				return hr;
-		}
-	}
-
-	return S_OK;
-}
-
 HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
 	PWINSANE_Params oParams;
@@ -1214,6 +1161,59 @@ HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 #endif
 
 	return hr;
+}
+
+HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _In_ PWIASANE_Context pContext)
+{
+	PWINSANE_Option oOption;
+	HRESULT hr;
+
+	if (pContext && pContext->oSession && pContext->oDevice && pContext->pValues) {
+		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_MODE);
+		if (oOption && oOption->GetType() == SANE_TYPE_STRING) {
+			switch (pScanInfo->DataType) {
+				case WIA_DATA_THRESHOLD:
+					hr = oOption->SetValueString(pContext->pValues->pszModeThreshold);
+					break;
+				case WIA_DATA_GRAYSCALE:
+					hr = oOption->SetValueString(pContext->pValues->pszModeGrayscale);
+					break;
+				case WIA_DATA_COLOR:
+					hr = oOption->SetValueString(pContext->pValues->pszModeColor);
+					break;
+				default:
+					hr = E_INVALIDARG;
+					break;
+			}
+			if (FAILED(hr))
+				return hr;
+		} else
+			return E_NOTIMPL;
+
+		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_RESOLUTION);
+		if (oOption) {
+			hr = oOption->SetValue(pScanInfo->Xresolution);
+			if (FAILED(hr))
+				return hr;
+		} else
+			return E_NOTIMPL;
+
+		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_CONTRAST);
+		if (oOption) {
+			hr = oOption->SetValue(pScanInfo->Contrast);
+			if (FAILED(hr) && hr != E_NOTIMPL)
+				return hr;
+		}
+
+		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BRIGHTNESS);
+		if (oOption) {
+			hr = oOption->SetValue(pScanInfo->Intensity);
+			if (FAILED(hr) && hr != E_NOTIMPL)
+				return hr;
+		}
+	}
+
+	return S_OK;
 }
 
 HRESULT SetScanWindow(_In_ PWIASANE_Context pContext)
