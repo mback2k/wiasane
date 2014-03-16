@@ -899,153 +899,154 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	double dbl;
 	int index;
 
-	if (pContext && pContext->oSession && pContext->oDevice) {
-		if (pContext->pValues)
-			FreeScannerDefaults(pScanInfo, pContext);
+	if (!pContext && !pContext->oDevice)
+		return E_INVALIDARG;
 
-		pContext->pValues = (PWIASANE_Values) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, sizeof(WIASANE_Values));
-		if (!pContext->pValues)
-			return E_OUTOFMEMORY;
+	if (pContext->pValues)
+		FreeScannerDefaults(pScanInfo, pContext);
 
-		pScanInfo->ADF                = 0;
-		pScanInfo->bNeedDataAlignment = TRUE;
+	pContext->pValues = (PWIASANE_Values) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, sizeof(WIASANE_Values));
+	if (!pContext->pValues)
+		return E_OUTOFMEMORY;
 
-		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SOURCE);
-		if (oOption && oOption->GetType() == SANE_TYPE_STRING && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
-			string_list = oOption->GetConstraintStringList();
-			for (index = 0; string_list[index] != NULL; index++) {
-				if (StrStrIA(string_list[index], WIASANE_SOURCE_ADF) ||
-					StrStrIA(string_list[index], WIASANE_SOURCE_ADF_EX)) {
-					pScanInfo->ADF = max(pScanInfo->ADF, 1);
-					pContext->pValues->pszSourceADF = StrDupA(string_list[index]);
-				} else if (StrStrIA(string_list[index], WIASANE_SOURCE_DUPLEX)) {
-					pScanInfo->ADF = max(pScanInfo->ADF, 2);
-					pContext->pValues->pszSourceDuplex = StrDupA(string_list[index]);
-				} else if (StrStrIA(string_list[index], WIASANE_SOURCE_FLATBED) ||
-					       !pContext->pValues->pszSourceFlatbed) {
-					pContext->pValues->pszSourceFlatbed = StrDupA(string_list[index]);
-				}
+	pScanInfo->ADF                = 0;
+	pScanInfo->bNeedDataAlignment = TRUE;
+
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SOURCE);
+	if (oOption && oOption->GetType() == SANE_TYPE_STRING && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
+		string_list = oOption->GetConstraintStringList();
+		for (index = 0; string_list[index] != NULL; index++) {
+			if (StrStrIA(string_list[index], WIASANE_SOURCE_ADF) ||
+				StrStrIA(string_list[index], WIASANE_SOURCE_ADF_EX)) {
+				pScanInfo->ADF = max(pScanInfo->ADF, 1);
+				pContext->pValues->pszSourceADF = StrDupA(string_list[index]);
+			} else if (StrStrIA(string_list[index], WIASANE_SOURCE_DUPLEX)) {
+				pScanInfo->ADF = max(pScanInfo->ADF, 2);
+				pContext->pValues->pszSourceDuplex = StrDupA(string_list[index]);
+			} else if (StrStrIA(string_list[index], WIASANE_SOURCE_FLATBED) ||
+					    !pContext->pValues->pszSourceFlatbed) {
+				pContext->pValues->pszSourceFlatbed = StrDupA(string_list[index]);
 			}
 		}
-
-		pScanInfo->SupportedCompressionType = 0;
-		pScanInfo->SupportedDataTypes       = 0;
-
-		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_MODE);
-		if (oOption && oOption->GetType() == SANE_TYPE_STRING && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
-			string_list = oOption->GetConstraintStringList();
-			for (index = 0; string_list[index] != NULL; index++) {
-				if (StrCmpIA(string_list[index], WIASANE_MODE_LINEART) == 0 ||
-					StrCmpIA(string_list[index], WIASANE_MODE_THRESHOLD) == 0) {
-					pScanInfo->SupportedDataTypes |= SUPPORT_BW;
-					pContext->pValues->pszModeThreshold = StrDupA(string_list[index]);
-				} else if (StrCmpIA(string_list[index], WIASANE_MODE_GRAY) == 0 ||
-					       StrCmpIA(string_list[index], WIASANE_MODE_GRAYSCALE) == 0) {
-					pScanInfo->SupportedDataTypes |= SUPPORT_GRAYSCALE;
-					pContext->pValues->pszModeGrayscale = StrDupA(string_list[index]);
-				} else if (StrCmpIA(string_list[index], WIASANE_MODE_COLOR) == 0) {
-					pScanInfo->SupportedDataTypes |= SUPPORT_COLOR;
-					pContext->pValues->pszModeColor = StrDupA(string_list[index]);
-				}
-			}
-		}
-
-		pScanInfo->BedWidth  = 8500;  // 1000's of an inch (WIA compatible unit)
-		pScanInfo->BedHeight = 11000; // 1000's of an inch (WIA compatible unit)
-
-		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BR_X);
-		if (oOption) {
-			hr = GetOptionMaxValueInch(oOption, &dbl);
-			if (SUCCEEDED(hr)) {
-				pScanInfo->BedWidth = (LONG) (dbl * 1000.0);
-			}
-		}
-		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BR_Y);
-		if (oOption) {
-			hr = GetOptionMaxValueInch(oOption, &dbl);
-			if (SUCCEEDED(hr)) {
-				pScanInfo->BedHeight = (LONG) (dbl * 1000.0);
-			}
-		}
-
-		pScanInfo->OpticalXResolution = 300;
-		pScanInfo->Xresolution = pScanInfo->OpticalXResolution;
-
-		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_RESOLUTION);
-		if (oOption) {
-			hr = GetOptionMaxValue(oOption, &dbl);
-			if (SUCCEEDED(hr)) {
-				pScanInfo->OpticalXResolution = (LONG) dbl;
-			}
-			hr = oOption->GetValue(&dbl);
-			if (SUCCEEDED(hr) == S_OK) {
-				pScanInfo->Xresolution = (LONG) dbl;
-			}
-		}
-
-		pScanInfo->OpticalYResolution = pScanInfo->OpticalXResolution;
-		pScanInfo->Yresolution = pScanInfo->Xresolution;
-
-		pScanInfo->Contrast            = 0;
-		pScanInfo->ContrastRange.lMin  = 0;
-		pScanInfo->ContrastRange.lMax  = 100;
-		pScanInfo->ContrastRange.lStep = 1;
-
-		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_CONTRAST);
-		if (oOption) {
-			if (oOption->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
-				range = oOption->GetConstraintRange();
-				pScanInfo->Contrast            = (range->min + range->max) / 2;
-				pScanInfo->ContrastRange.lMin  = range->min;
-				pScanInfo->ContrastRange.lMax  = range->max;
-				pScanInfo->ContrastRange.lStep = range->quant ? range->quant : 1;
-			}
-			hr = oOption->GetValue(&dbl);
-			if (SUCCEEDED(hr)) {
-				pScanInfo->Contrast = (LONG) dbl;
-			}
-		}
-		
-		pScanInfo->Intensity            = 0;
-		pScanInfo->IntensityRange.lMin  = 0;
-		pScanInfo->IntensityRange.lMax  = 100;
-		pScanInfo->IntensityRange.lStep = 1;
-
-		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BRIGHTNESS);
-		if (oOption) {
-			if (oOption->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
-				range = oOption->GetConstraintRange();
-				pScanInfo->IntensityRange.lMin  = (range->min + range->max) / 2;
-				pScanInfo->IntensityRange.lMax  = range->max;
-				pScanInfo->IntensityRange.lStep = range->quant ? range->quant : 1;
-			}
-			hr = oOption->GetValue(&dbl);
-			if (SUCCEEDED(hr)) {
-				pScanInfo->Intensity = (LONG) dbl;
-			}
-		}
-
-		pScanInfo->WidthPixels            = (LONG) (((double) (pScanInfo->BedWidth  * pScanInfo->Xresolution)) / 1000.0);
-		pScanInfo->Lines                  = (LONG) (((double) (pScanInfo->BedHeight * pScanInfo->Yresolution)) / 1000.0);
-
-		pScanInfo->Window.xPos            = 0;
-		pScanInfo->Window.yPos            = 0;
-		pScanInfo->Window.xExtent         = pScanInfo->WidthPixels;
-		pScanInfo->Window.yExtent         = pScanInfo->Lines;
-
-		// Scanner options
-		pScanInfo->Negative               = 0;
-		pScanInfo->Mirror                 = 0;
-		pScanInfo->AutoBack               = 0;
-		pScanInfo->DitherPattern          = 0;
-		pScanInfo->ColorDitherPattern     = 0;
-		pScanInfo->ToneMap                = 0;
-		pScanInfo->Compression            = 0;
-
-		hr = FetchScannerParams(pScanInfo, pContext);
-		if (FAILED(hr))
-			return hr;
 	}
+
+	pScanInfo->SupportedCompressionType = 0;
+	pScanInfo->SupportedDataTypes       = 0;
+
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_MODE);
+	if (oOption && oOption->GetType() == SANE_TYPE_STRING && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
+		string_list = oOption->GetConstraintStringList();
+		for (index = 0; string_list[index] != NULL; index++) {
+			if (StrCmpIA(string_list[index], WIASANE_MODE_LINEART) == 0 ||
+				StrCmpIA(string_list[index], WIASANE_MODE_THRESHOLD) == 0) {
+				pScanInfo->SupportedDataTypes |= SUPPORT_BW;
+				pContext->pValues->pszModeThreshold = StrDupA(string_list[index]);
+			} else if (StrCmpIA(string_list[index], WIASANE_MODE_GRAY) == 0 ||
+					    StrCmpIA(string_list[index], WIASANE_MODE_GRAYSCALE) == 0) {
+				pScanInfo->SupportedDataTypes |= SUPPORT_GRAYSCALE;
+				pContext->pValues->pszModeGrayscale = StrDupA(string_list[index]);
+			} else if (StrCmpIA(string_list[index], WIASANE_MODE_COLOR) == 0) {
+				pScanInfo->SupportedDataTypes |= SUPPORT_COLOR;
+				pContext->pValues->pszModeColor = StrDupA(string_list[index]);
+			}
+		}
+	}
+
+	pScanInfo->BedWidth  = 8500;  // 1000's of an inch (WIA compatible unit)
+	pScanInfo->BedHeight = 11000; // 1000's of an inch (WIA compatible unit)
+
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BR_X);
+	if (oOption) {
+		hr = GetOptionMaxValueInch(oOption, &dbl);
+		if (SUCCEEDED(hr)) {
+			pScanInfo->BedWidth = (LONG) (dbl * 1000.0);
+		}
+	}
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BR_Y);
+	if (oOption) {
+		hr = GetOptionMaxValueInch(oOption, &dbl);
+		if (SUCCEEDED(hr)) {
+			pScanInfo->BedHeight = (LONG) (dbl * 1000.0);
+		}
+	}
+
+	pScanInfo->OpticalXResolution = 300;
+	pScanInfo->Xresolution = pScanInfo->OpticalXResolution;
+
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_RESOLUTION);
+	if (oOption) {
+		hr = GetOptionMaxValue(oOption, &dbl);
+		if (SUCCEEDED(hr)) {
+			pScanInfo->OpticalXResolution = (LONG) dbl;
+		}
+		hr = oOption->GetValue(&dbl);
+		if (SUCCEEDED(hr) == S_OK) {
+			pScanInfo->Xresolution = (LONG) dbl;
+		}
+	}
+
+	pScanInfo->OpticalYResolution = pScanInfo->OpticalXResolution;
+	pScanInfo->Yresolution = pScanInfo->Xresolution;
+
+	pScanInfo->Contrast            = 0;
+	pScanInfo->ContrastRange.lMin  = 0;
+	pScanInfo->ContrastRange.lMax  = 100;
+	pScanInfo->ContrastRange.lStep = 1;
+
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_CONTRAST);
+	if (oOption) {
+		if (oOption->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
+			range = oOption->GetConstraintRange();
+			pScanInfo->Contrast            = (range->min + range->max) / 2;
+			pScanInfo->ContrastRange.lMin  = range->min;
+			pScanInfo->ContrastRange.lMax  = range->max;
+			pScanInfo->ContrastRange.lStep = range->quant ? range->quant : 1;
+		}
+		hr = oOption->GetValue(&dbl);
+		if (SUCCEEDED(hr)) {
+			pScanInfo->Contrast = (LONG) dbl;
+		}
+	}
+		
+	pScanInfo->Intensity            = 0;
+	pScanInfo->IntensityRange.lMin  = 0;
+	pScanInfo->IntensityRange.lMax  = 100;
+	pScanInfo->IntensityRange.lStep = 1;
+
+	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BRIGHTNESS);
+	if (oOption) {
+		if (oOption->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
+			range = oOption->GetConstraintRange();
+			pScanInfo->IntensityRange.lMin  = (range->min + range->max) / 2;
+			pScanInfo->IntensityRange.lMax  = range->max;
+			pScanInfo->IntensityRange.lStep = range->quant ? range->quant : 1;
+		}
+		hr = oOption->GetValue(&dbl);
+		if (SUCCEEDED(hr)) {
+			pScanInfo->Intensity = (LONG) dbl;
+		}
+	}
+
+	pScanInfo->WidthPixels            = (LONG) (((double) (pScanInfo->BedWidth  * pScanInfo->Xresolution)) / 1000.0);
+	pScanInfo->Lines                  = (LONG) (((double) (pScanInfo->BedHeight * pScanInfo->Yresolution)) / 1000.0);
+
+	pScanInfo->Window.xPos            = 0;
+	pScanInfo->Window.yPos            = 0;
+	pScanInfo->Window.xExtent         = pScanInfo->WidthPixels;
+	pScanInfo->Window.yExtent         = pScanInfo->Lines;
+
+	// Scanner options
+	pScanInfo->Negative               = 0;
+	pScanInfo->Mirror                 = 0;
+	pScanInfo->AutoBack               = 0;
+	pScanInfo->DitherPattern          = 0;
+	pScanInfo->ColorDitherPattern     = 0;
+	pScanInfo->ToneMap                = 0;
+	pScanInfo->Compression            = 0;
+
+	hr = FetchScannerParams(pScanInfo, pContext);
+	if (FAILED(hr))
+		return hr;
 
 #ifdef _DEBUG
 	Trace(TEXT("bw    = %d"), pScanInfo->BedWidth);
@@ -1057,35 +1058,36 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 
 HRESULT FreeScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	if (pContext->pValues) {
-		if (pContext->pValues->pszModeThreshold) {
-			LocalFree(pContext->pValues->pszModeThreshold);
-			pContext->pValues->pszModeThreshold = NULL;
-		}
-		if (pContext->pValues->pszModeGrayscale) {
-			LocalFree(pContext->pValues->pszModeGrayscale);
-			pContext->pValues->pszModeGrayscale = NULL;
-		}
-		if (pContext->pValues->pszModeColor) {
-			LocalFree(pContext->pValues->pszModeColor);
-			pContext->pValues->pszModeColor = NULL;
-		}
-		if (pContext->pValues->pszSourceFlatbed) {
-			LocalFree(pContext->pValues->pszSourceFlatbed);
-			pContext->pValues->pszSourceFlatbed = NULL;
-		}
-		if (pContext->pValues->pszSourceADF) {
-			LocalFree(pContext->pValues->pszSourceADF);
-			pContext->pValues->pszSourceADF = NULL;
-		}
-		if (pContext->pValues->pszSourceDuplex) {
-			LocalFree(pContext->pValues->pszSourceDuplex);
-			pContext->pValues->pszSourceDuplex = NULL;
-		}
+	if (!pContext || !pContext->pValues)
+		return S_OK;
 
-		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues);
-		pContext->pValues = NULL;
+	if (pContext->pValues->pszModeThreshold) {
+		LocalFree(pContext->pValues->pszModeThreshold);
+		pContext->pValues->pszModeThreshold = NULL;
 	}
+	if (pContext->pValues->pszModeGrayscale) {
+		LocalFree(pContext->pValues->pszModeGrayscale);
+		pContext->pValues->pszModeGrayscale = NULL;
+	}
+	if (pContext->pValues->pszModeColor) {
+		LocalFree(pContext->pValues->pszModeColor);
+		pContext->pValues->pszModeColor = NULL;
+	}
+	if (pContext->pValues->pszSourceFlatbed) {
+		LocalFree(pContext->pValues->pszSourceFlatbed);
+		pContext->pValues->pszSourceFlatbed = NULL;
+	}
+	if (pContext->pValues->pszSourceADF) {
+		LocalFree(pContext->pValues->pszSourceADF);
+		pContext->pValues->pszSourceADF = NULL;
+	}
+	if (pContext->pValues->pszSourceDuplex) {
+		LocalFree(pContext->pValues->pszSourceDuplex);
+		pContext->pValues->pszSourceDuplex = NULL;
+	}
+
+	HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues);
+	pContext->pValues = NULL;
 
 	return S_OK;
 }
