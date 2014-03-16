@@ -402,7 +402,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 	if (plReceived)
 		*plReceived = 0;
 
-    Trace(TEXT("------ Scan Requesting %d ------"), lLength);
+	Trace(TEXT("------ Scan Requesting %d ------"), lLength);
 
 	if (pScanInfo == NULL)
 		return E_INVALIDARG;
@@ -415,7 +415,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 	if (!pContext)
 		return E_OUTOFMEMORY;
 
-    switch (lPhase) {
+	switch (lPhase) {
 		case SCAN_FIRST:
 			Trace(TEXT("SCAN_FIRST"));
 
@@ -556,9 +556,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			}
 
 			break;
-    }
+	}
 
-    return S_OK;
+	return S_OK;
 }
 
 WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y, LONG xExtent, LONG yExtent)
@@ -568,8 +568,8 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 	HRESULT hr;
 	double tl_x, tl_y, br_x, br_y;
 
-    if (!pScanInfo)
-        return E_INVALIDARG;
+	if (!pScanInfo)
+		return E_INVALIDARG;
 
 	pContext = (PWIASANE_Context) pScanInfo->pMicroDriverContext;
 	if (!pContext)
@@ -623,17 +623,17 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 	pContext->dblBottomRightX = br_x;
 	pContext->dblBottomRightY = br_y;
 
-    pScanInfo->Window.xPos = x;
-    pScanInfo->Window.yPos = y;
-    pScanInfo->Window.xExtent = xExtent;
-    pScanInfo->Window.yExtent = yExtent;
+	pScanInfo->Window.xPos = x;
+	pScanInfo->Window.yPos = y;
+	pScanInfo->Window.xExtent = xExtent;
+	pScanInfo->Window.yExtent = yExtent;
 
 #ifdef _DEBUG
-    Trace(TEXT("Scanner window"));
-    Trace(TEXT("xpos  = %d"), pScanInfo->Window.xPos);
-    Trace(TEXT("ypos  = %d"), pScanInfo->Window.yPos);
-    Trace(TEXT("xext  = %d"), pScanInfo->Window.xExtent);
-    Trace(TEXT("yext  = %d"), pScanInfo->Window.yExtent);
+	Trace(TEXT("Scanner window"));
+	Trace(TEXT("xpos  = %d"), pScanInfo->Window.xPos);
+	Trace(TEXT("ypos  = %d"), pScanInfo->Window.yPos);
+	Trace(TEXT("xext  = %d"), pScanInfo->Window.xExtent);
+	Trace(TEXT("yext  = %d"), pScanInfo->Window.yExtent);
 #endif
 
 	return hr;
@@ -1048,8 +1048,8 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	}
 
 #ifdef _DEBUG
-    Trace(TEXT("bw    = %d"), pScanInfo->BedWidth);
-    Trace(TEXT("bh    = %d"), pScanInfo->BedHeight);
+	Trace(TEXT("bw    = %d"), pScanInfo->BedWidth);
+	Trace(TEXT("bh    = %d"), pScanInfo->BedHeight);
 #endif
 
 	return S_OK;
@@ -1140,7 +1140,7 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 		}
 	}
 
-    return S_OK;
+	return S_OK;
 }
 
 HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
@@ -1200,14 +1200,14 @@ HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	delete oParams;
 
 #ifdef _DEBUG
-    Trace(TEXT("Scanner parameters"));
-    Trace(TEXT("x res = %d"), pScanInfo->Xresolution);
-    Trace(TEXT("y res = %d"), pScanInfo->Yresolution);
-    Trace(TEXT("bpp   = %d"), pScanInfo->PixelBits);
-    Trace(TEXT("xpos  = %d"), pScanInfo->Window.xPos);
-    Trace(TEXT("ypos  = %d"), pScanInfo->Window.yPos);
-    Trace(TEXT("xext  = %d"), pScanInfo->Window.xExtent);
-    Trace(TEXT("yext  = %d"), pScanInfo->Window.yExtent);
+	Trace(TEXT("Scanner parameters"));
+	Trace(TEXT("x res = %d"), pScanInfo->Xresolution);
+	Trace(TEXT("y res = %d"), pScanInfo->Yresolution);
+	Trace(TEXT("bpp   = %d"), pScanInfo->PixelBits);
+	Trace(TEXT("xpos  = %d"), pScanInfo->Window.xPos);
+	Trace(TEXT("ypos  = %d"), pScanInfo->Window.yPos);
+	Trace(TEXT("xext  = %d"), pScanInfo->Window.xExtent);
+	Trace(TEXT("yext  = %d"), pScanInfo->Window.yExtent);
 	Trace(TEXT("wbyte = %d"), pScanInfo->WidthBytes);
 	Trace(TEXT("wpixl = %d"), pScanInfo->WidthPixels);
 	Trace(TEXT("lines = %d"), pScanInfo->Lines);
