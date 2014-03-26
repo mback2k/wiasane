@@ -70,6 +70,7 @@ FailedInstallDriver=Installation of driver failed!%n%nError = %1%n%nError Code =
 FailedInstallDevice=Installation of device failed!%n%nError = %1%n%nError Code = %2
 FailedUninstallDevice=Uninstallation of devices failed!%n%nError = %1%n%nError Code = %2
 FailedUninstallDriver=Uninstallation of driver failed!%n%nError = %1%n%nError Code = %2
+FinishInstallAction=Please execute the "Finish installing device software" action within the info area resp. system tray.
 German.StartInstallDevice=Scanner installieren
 German.StartUninstallDevice=Scanner deinstallieren
 German.StartUninstallDriver=Treiber deinstallieren
@@ -81,6 +82,7 @@ German.FailedInstallDriver=Installation des Treibers fehlgeschlagen!%n%nFehler =
 German.FailedInstallDevice=Installation des Geräts fehlgeschlagen!%n%nFehler = %1%n%nFehler Code = %2
 German.FailedUninstallDevice=Deinstallation der Geräte fehlgeschlagen!%n%nFehler = %1%n%nFehler Code = %2
 German.FailedUninstallDriver=Deinstallation des Treibers fehlgeschlagen!%n%nFehler = %1%n%nFehler Code = %2
+German.FinishInstallAction=Bitte die Aktion "Installation der Gerätesoftware abschließen" im Infobereich bzw. System Tray ausführen.
 [Code]
 const
   ERROR_NO_SUCH_DEVINST             = $E000020B;
@@ -116,7 +118,11 @@ begin
           or (ResultCode <> 0) then
         RaiseException(FmtMessage(CustomMessage('FailedInstallDevice'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]))
       else
+      begin
         Sleep(500);
+        if GetWindowsVersion >= $06020000 then
+          MsgBox(CustomMessage('FinishInstallAction'), mbInformation, MB_OK);
+      end;
     end;
   end;
 end;
