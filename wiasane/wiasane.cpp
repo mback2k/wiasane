@@ -451,7 +451,8 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				pContext->pTask->lByteGapX = (pScanInfo->Window.xExtent * pScanInfo->PixelBits / 8) - pScanInfo->WidthBytes;
 			else
 				pContext->pTask->lByteGapX = ((LONG) floor(pScanInfo->Window.xExtent + 7.0) / 8) - pScanInfo->WidthBytes;
-			pContext->pTask->lByteGapY = (pScanInfo->Window.yExtent - pScanInfo->Lines) * pScanInfo->WidthBytes;
+			pContext->pTask->lByteGapY = (pScanInfo->Window.yExtent - pScanInfo->Lines) * (pScanInfo->WidthBytes + pContext->pTask->lByteGapX);
+			Trace(TEXT("Gaps: %d, %d"), pContext->pTask->lByteGapX, pContext->pTask->lByteGapY);
 
 			pContext->pTask->uiTotal = pScanInfo->WidthBytes * pScanInfo->Lines;
 			pContext->pTask->uiReceived = 0;
