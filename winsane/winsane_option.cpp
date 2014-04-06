@@ -471,6 +471,9 @@ HRESULT WINSANE_Option::GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value
 	HRESULT hr;
 	PBYTE buf;
 
+	if (!SANE_OPTION_IS_ACTIVE(this->sane_option->cap))
+		return E_NOTIMPL;
+
 	if (!value_result)
 		return E_INVALIDARG;
 
@@ -508,6 +511,9 @@ HRESULT WINSANE_Option::SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value
 	LONG written;
 	HRESULT hr;
 	PBYTE buf;
+
+	if (!SANE_OPTION_IS_SETTABLE(this->sane_option->cap))
+		return E_NOTIMPL;
 
 	if (!value_result)
 		return E_INVALIDARG;
