@@ -416,16 +416,22 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				return WIA_ERROR_BUSY;
 
 			hr = SetScanMode(pContext);
-			if (FAILED(hr))
+			if (FAILED(hr)) {
+				Trace(TEXT("Failed to set scan mode: %08x"), hr);
 				return hr;
+			}
 
 			hr = SetScanWindow(pContext);
-			if (FAILED(hr))
+			if (FAILED(hr)) {
+				Trace(TEXT("Failed to set scan window: %08x"), hr);
 				return hr;
+			}
 
 			hr = SetScannerSettings(pScanInfo, pContext);
-			if (FAILED(hr))
+			if (FAILED(hr)) {
+				Trace(TEXT("Failed to set scanner settings: %08x"), hr);
 				return hr;
+			}
 
 			if (!pContext->pTask)
 				pContext->pTask = (PWIASANE_Task) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(WIASANE_Task));
@@ -1184,31 +1190,47 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 				hr = E_INVALIDARG;
 				break;
 		}
-		if (FAILED(hr))
+		if (FAILED(hr)) {
+			Trace(TEXT("Failed to set option 'mode' according to '%d': %08x"),
+				pScanInfo->DataType, hr);
 			return hr;
-	} else
+		}
+	} else {
+		Trace(TEXT("Required option 'mode' is not supported."));
 		return E_NOTIMPL;
+	}
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_RESOLUTION);
 	if (oOption) {
 		hr = oOption->SetValue(pScanInfo->Xresolution);
-		if (FAILED(hr))
+		if (FAILED(hr)) {
+			Trace(TEXT("Failed to set option 'resolution' to '%d': %08x"),
+				pScanInfo->Xresolution, hr);
 			return hr;
-	} else
+		}
+	} else {
+		Trace(TEXT("Required option 'resolution' is not supported."));
 		return E_NOTIMPL;
+	}
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_CONTRAST);
 	if (oOption) {
 		hr = oOption->SetValue(pScanInfo->Contrast);
-		if (FAILED(hr) && hr != E_NOTIMPL)
+		if (FAILED(hr) && hr != E_NOTIMPL) {
+			Trace(TEXT("Failed to set option 'contrast' to '%d': %08x"),
+				pScanInfo->Contrast, hr);
 			return hr;
+		}
 	}
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BRIGHTNESS);
 	if (oOption) {
 		hr = oOption->SetValue(pScanInfo->Intensity);
-		if (FAILED(hr) && hr != E_NOTIMPL)
+		if (FAILED(hr) && hr != E_NOTIMPL) {
+			Trace(TEXT("Failed to set option 'brightness' to '%d': %08x"),
+				pScanInfo->Intensity, hr);
 			return hr;
+		}
 	}
 
 	return S_OK;
@@ -1223,36 +1245,56 @@ HRESULT SetScanWindow(_Inout_ PWIASANE_Context pContext)
 		return E_INVALIDARG;
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_TL_X);
-	if (!oOption)
+	if (!oOption) {
+		Trace(TEXT("Required option 'tl-x' is not supported."));
 		return E_NOTIMPL;
+	}
 
 	hr = SetOptionValueInch(oOption, pContext->dblTopLeftX);
-	if (FAILED(hr))
+	if (FAILED(hr)) {
+		Trace(TEXT("Failed to set option 'tl-x' to '%f': %08x"),
+			pContext->dblTopLeftX, hr);
 		return hr;
+	}
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_TL_Y);
-	if (!oOption)
+	if (!oOption) {
+		Trace(TEXT("Required option 'tl-y' is not supported."));
 		return E_NOTIMPL;
+	}
 
 	hr = SetOptionValueInch(oOption, pContext->dblTopLeftY);
-	if (FAILED(hr))
+	if (FAILED(hr)) {
+		Trace(TEXT("Failed to set option 'tl-y' to '%f': %08x"),
+			pContext->dblTopLeftY, hr);
 		return hr;
+	}
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BR_X);
-	if (!oOption)
+	if (!oOption) {
+		Trace(TEXT("Required option 'br-x' is not supported."));
 		return E_NOTIMPL;
+	}
 
 	hr = SetOptionValueInch(oOption, pContext->dblBottomRightX);
-	if (FAILED(hr))
+	if (FAILED(hr)) {
+		Trace(TEXT("Failed to set option 'br-x' to '%f': %08x"),
+			pContext->dblBottomRightX, hr);
 		return hr;
+	}
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BR_Y);
-	if (!oOption)
+	if (!oOption) {
+		Trace(TEXT("Required option 'br-y' is not supported."));
 		return E_NOTIMPL;
+	}
 
 	hr = SetOptionValueInch(oOption, pContext->dblBottomRightY);
-	if (FAILED(hr))
+	if (FAILED(hr)) {
+		Trace(TEXT("Failed to set option 'br-y' to '%f': %08x"),
+			pContext->dblBottomRightY, hr);
 		return hr;
+	}
 
 	return hr;
 }
