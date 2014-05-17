@@ -23,12 +23,10 @@
 
 #include <stdlib.h>
 #include <malloc.h>
-#include <algorithm>
 
 WINSANE_Socket::WINSANE_Socket(_In_ SOCKET sock)
 {
 	this->sock = sock;
-	this->conv = FALSE;
 	this->buf = NULL;
 	this->buflen = 0;
 	this->bufoff = 0;
@@ -49,17 +47,6 @@ SOCKET WINSANE_Socket::GetSocket()
 BOOL WINSANE_Socket::IsConnected()
 {
 	return this->sock != INVALID_SOCKET;
-}
-
-
-VOID WINSANE_Socket::SetConverting(_In_ BOOL converting)
-{
-	this->conv = converting;
-}
-
-BOOL WINSANE_Socket::IsConverting()
-{
-	return this->conv;
 }
 
 
@@ -188,7 +175,8 @@ LONG WINSANE_Socket::ReadSocket(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG 
 	return result;
 }
 
-LONG WINSANE_Socket::WritePlain(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen)
+
+LONG WINSANE_Socket::Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen)
 {
 	LONG space, size;
 
@@ -209,58 +197,9 @@ LONG WINSANE_Socket::WritePlain(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ L
 	return buflen;
 }
 
-LONG WINSANE_Socket::ReadPlain(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen)
-{
-	return this->ReadSocket(buf, buflen);
-}
-
-
-LONG WINSANE_Socket::Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen)
-{
-	PBYTE buftmp;
-	LONG result;
-
-	if (!this->conv)
-		return this->WritePlain(buf, buflen);
-
-	buftmp = (PBYTE) malloc(buflen);
-	if (!buftmp)
-		return 0;
-
-	memcpy(buftmp, buf, buflen);
-	std::reverse(buftmp, buftmp + buflen);
-
-	result = this->WritePlain(buftmp, buflen);
-
-	memset(buftmp, 0, buflen);
-	free(buftmp);
-
-	return result;
-}
-
 LONG WINSANE_Socket::Read(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen)
 {
-	PBYTE buftmp;
-	LONG result;
-
-	if (!this->conv)
-		return this->ReadPlain(buf, buflen);
-
-	buftmp = (PBYTE) malloc(buflen);
-	if (!buftmp)
-		return 0;
-
-	result = this->ReadPlain(buftmp, buflen);
-
-	if (result > 0 && result <= buflen) {
-		std::reverse(buftmp, buftmp + result);
-		memcpy(buf, buftmp, result);
-	}
-
-	memset(buftmp, 0, buflen);
-	free(buftmp);
-
-	return result;
+	return this->ReadSocket(buf, buflen);
 }
 
 
@@ -271,6 +210,8 @@ LONG WINSANE_Socket::WriteByte(_In_ SANE_Byte b)
 
 LONG WINSANE_Socket::WriteWord(_In_ SANE_Word w)
 {
+	w = htonl(w);
+
 	return this->Write((PBYTE) &w, sizeof(SANE_Word));
 }
 
@@ -286,7 +227,7 @@ LONG WINSANE_Socket::WriteString(_In_ SANE_String_Const s)
 	
 	length = (SANE_Word) strlen(s) + 1;
 	written = this->WriteWord(length);
-	written += this->WritePlain((PBYTE) s, length);
+	written += this->Write((PBYTE) s, length);
 
 	return written;
 }
@@ -331,6 +272,8 @@ HRESULT WINSANE_Socket::ReadWord(_Out_ PSANE_Word w)
 	if (readlen != sizeof(SANE_Word))
 		return E_FAIL;
 
+	*w = ntohl(*w);
+
 	return S_OK;
 }
 
@@ -364,7 +307,7 @@ HRESULT WINSANE_Socket::ReadString(_Out_ PSANE_String s)
 
 	if (length > 0) {
 		*s = new SANE_Char[length+1];
-		if (this->ReadPlain((PBYTE) *s, length) == length) {
+		if (this->Read((PBYTE) *s, length) == length) {
 			(*s)[length] = '\0';
 		} else {
 			delete[] *s;

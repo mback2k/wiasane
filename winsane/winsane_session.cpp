@@ -156,14 +156,8 @@ SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth
 	SANE_Status status;
 	CHAR user_name[SANE_MAX_USERNAME_LEN];
 	DWORD user_name_len;
-	unsigned short ns;
-	unsigned char *p;
 	LONG written;
 	HRESULT hr;
-
-	ns = 0x1234;
-	p = (unsigned char*) &ns;
-	this->sock->SetConverting(*p != 0x12);
 
 	this->auth_callback = authorize;
 

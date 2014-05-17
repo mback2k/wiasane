@@ -270,7 +270,7 @@ HRESULT WINSANE_Option::GetValueBool(_Out_ PSANE_Bool value_bool)
 		return hr;
 
 	if (value) {
-		*value_bool = *((PSANE_Bool) value);
+		*value_bool = ntohl(*((PSANE_Bool) value));
 		delete[] value;
 		return S_OK;
 	}
@@ -294,7 +294,7 @@ HRESULT WINSANE_Option::GetValueInt(_Out_ PSANE_Int value_int)
 		return hr;
 
 	if (value) {
-		*value_int = *((PSANE_Int) value);
+		*value_int = ntohl(*((PSANE_Int) value));
 		delete[] value;
 		return S_OK;
 	}
@@ -318,7 +318,7 @@ HRESULT WINSANE_Option::GetValueFixed(_Out_ PSANE_Fixed value_fixed)
 		return hr;
 
 	if (value) {
-		*value_fixed = *((PSANE_Fixed) value);
+		*value_fixed = ntohl(*((PSANE_Fixed) value));
 		delete[] value;
 		return S_OK;
 	}
@@ -383,6 +383,8 @@ HRESULT WINSANE_Option::SetValueBool(_In_ SANE_Bool value_bool)
 	if (this->sane_option->type != SANE_TYPE_BOOL)
 		return E_INVALIDARG;
 
+	value_bool = htonl(value_bool);
+
 	hr = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Bool), (PVOID) &value_bool, &value);
 	if (FAILED(hr))
 		return hr;
@@ -404,6 +406,8 @@ HRESULT WINSANE_Option::SetValueInt(_In_ SANE_Int value_int)
 	if (this->sane_option->type != SANE_TYPE_INT)
 		return E_INVALIDARG;
 
+	value_int = htonl(value_int);
+
 	hr = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Int), (PVOID) &value_int, &value);
 	if (FAILED(hr))
 		return hr;
@@ -424,6 +428,8 @@ HRESULT WINSANE_Option::SetValueFixed(_In_ SANE_Fixed value_fixed)
 
 	if (this->sane_option->type != SANE_TYPE_FIXED)
 		return E_INVALIDARG;
+
+	value_fixed = htonl(value_fixed);
 
 	hr = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Fixed), (PVOID) &value_fixed, &value);
 	if (FAILED(hr))
@@ -487,10 +493,7 @@ HRESULT WINSANE_Option::GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value
 	written += this->sock->WriteWord(value_type);
 	written += this->sock->WriteWord(value_size);
 	written += this->sock->WriteWord(element_count);
-	if (value_type == SANE_TYPE_STRING)
-		written += this->sock->WritePlain(buf, value_size);
-	else
-		written += this->sock->Write(buf, value_size);
+	written += this->sock->Write(buf, value_size);
 	if (this->sock->Flush() != written) {
 		delete[] buf;
 		return E_ABORT;
@@ -528,10 +531,7 @@ HRESULT WINSANE_Option::SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value
 	written += this->sock->WriteWord(value_type);
 	written += this->sock->WriteWord(value_size);
 	written += this->sock->WriteWord(element_count);
-	if (value_type == SANE_TYPE_STRING)
-		written += this->sock->WritePlain(buf, value_size);
-	else
-		written += this->sock->Write(buf, value_size);
+	written += this->sock->Write(buf, value_size);
 	if (this->sock->Flush() != written) {
 		delete[] buf;
 		return E_ABORT;
@@ -580,10 +580,7 @@ HRESULT WINSANE_Option::ReadValueResult(_Inout_ PSANE_Word value_type, _Inout_ P
 		return hr;
 
 	if (pointer) {
-		if (*value_type == SANE_TYPE_STRING)
-			readlen = this->sock->ReadPlain(value_result, *value_size);
-		else
-			readlen = this->sock->Read(value_result, *value_size);
+		readlen = this->sock->Read(value_result, *value_size);
 	} else
 		readlen = 0;
 

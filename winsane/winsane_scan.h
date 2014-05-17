@@ -72,7 +72,6 @@ private:
 	DWORD buflen;
 	DWORD bufoff;
 	DWORD bufpos;
-	BOOL conv;
 };
 
 #endif

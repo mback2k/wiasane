@@ -27,9 +27,6 @@
 
 WINSANE_Scan::WINSANE_Scan(_In_ PWINSANE_Device device, _In_ PWINSANE_Socket sock, _In_ SANE_Word port, _In_ SANE_Word byte_order)
 {
-	unsigned char *p, *b;
-	unsigned short ns;
-
 	this->state = NEW;
 	this->device = device;
 	this->sock = sock;
@@ -40,11 +37,6 @@ WINSANE_Scan::WINSANE_Scan(_In_ PWINSANE_Device device, _In_ PWINSANE_Socket soc
 	this->buflen = 0;
 	this->bufoff = 0;
 	this->bufpos = 0;
-
-	ns = 0x1234;
-	p = (unsigned char*) &ns;
-	b = (unsigned char*) &this->byte_order;
-	this->conv = *p != *b;
 }
 
 WINSANE_Scan::~WINSANE_Scan()
@@ -124,7 +116,6 @@ WINSANE_Scan_Result WINSANE_Scan::Connect()
 	}
 
 	this->scan = new WINSANE_Socket(scan_sock);
-	this->scan->SetConverting(sock->IsConverting());
 
 	this->state = CONNECTED;
 	return CONTINUE;
@@ -138,6 +129,8 @@ WINSANE_Scan_Result WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD l
 	if (!this->buf || !this->buflen) {
 		if (this->scan->Read((PBYTE) &record_size, sizeof(record_size)) != sizeof(record_size))
 			return TRANSFER_ERROR;
+
+		record_size = ntohl(record_size);
 
 		if (record_size == 0) {
 			this->state = CONNECTED;
@@ -157,7 +150,7 @@ WINSANE_Scan_Result WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD l
 		this->bufpos = 0;
 
 		while (this->bufoff < this->buflen) {
-			size = this->scan->ReadPlain(this->buf + this->bufoff, this->buflen - this->bufoff);
+			size = this->scan->Read(this->buf + this->bufoff, this->buflen - this->bufoff);
 
 			if (size == 0) {
 				this->state = DISCONNECTED;
@@ -171,7 +164,7 @@ WINSANE_Scan_Result WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD l
 			this->bufoff += size;
 		}
 
-		if (this->conv)
+		if (this->byte_order != 0x1234)
 			std::reverse(this->buf, this->buf + this->bufoff);
 	}
 

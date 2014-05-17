@@ -40,14 +40,8 @@ public:
 	SOCKET GetSocket();
 	BOOL IsConnected();
 
-	VOID SetConverting(_In_ BOOL converting);
-	BOOL IsConverting();
-
 	LONG Flush();
 	VOID Clear();
-
-	LONG WritePlain(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen);
-	LONG ReadPlain(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen);
 
 	LONG Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen);
 	LONG Read(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen);
@@ -80,7 +74,6 @@ private:
 	PBYTE buf;
 	ULONG buflen;
 	ULONG bufoff;
-	BOOL conv;
 };
 
 typedef WINSANE_Socket* PWINSANE_Socket;
