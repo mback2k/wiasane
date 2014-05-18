@@ -17,6 +17,46 @@
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+#pragma code_page(1252)
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 0,0,0,5
+ PRODUCTVERSION 0,0,0,5
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x9L
+#else
+ FILEFLAGS 0x8L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "000004b0"
+        BEGIN
+            VALUE "CompanyName", "Marc Hörsken"
+            VALUE "FileDescription", "Scanner Access Now Easy - Driver/Device Installer"
+            VALUE "FileVersion", "0.0.0.5"
+            VALUE "InternalName", "devsane.exe"
+            VALUE "LegalCopyright", "Copyright © 2013-2014 Marc Hörsken. All rights reserved."
+            VALUE "OriginalFilename", "devsane.exe"
+            VALUE "ProductName", "Scanner Access Now Easy - WIA Driver"
+            VALUE "ProductVersion", "0.0.0.5"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0, 1200
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -37,6 +77,7 @@ END
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
 LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+#pragma code_page(1252)
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -62,45 +103,6 @@ BEGIN
 END
 
 #endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Version
-//
-
-VS_VERSION_INFO VERSIONINFO
- FILEVERSION 0,0,0,4
- PRODUCTVERSION 0,0,0,4
- FILEFLAGSMASK 0x3fL
-#ifdef _DEBUG
- FILEFLAGS 0x9L
-#else
- FILEFLAGS 0x8L
-#endif
- FILEOS 0x40004L
- FILETYPE 0x1L
- FILESUBTYPE 0x0L
-BEGIN
-    BLOCK "StringFileInfo"
-    BEGIN
-        BLOCK "000004b0"
-        BEGIN
-            VALUE "CompanyName", "Marc Hörsken"
-            VALUE "FileDescription", "Scanner Access Now Easy - Driver/Device Installer"
-            VALUE "FileVersion", "0.0.0.4"
-            VALUE "InternalName", "devsane.exe"
-            VALUE "LegalCopyright", "Copyright © 2013-2014 Marc Hörsken. All rights reserved."
-            VALUE "OriginalFilename", "devsane.exe"
-            VALUE "ProductName", "Scanner Access Now Easy - WIA Driver"
-            VALUE "ProductVersion", "0.0.0.4"
-        END
-    END
-    BLOCK "VarFileInfo"
-    BEGIN
-        VALUE "Translation", 0x0, 1200
-    END
-END
 
 #endif    // Deutsch (Deutschland) resources
 /////////////////////////////////////////////////////////////////////////////
