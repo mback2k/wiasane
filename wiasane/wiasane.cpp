@@ -379,8 +379,8 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 {
 	PWIASANE_Context pContext;
 	SANE_Status status;
-	LONG idx, aquired;
-	DWORD aquire;
+	LONG idx, aquire, aquired;
+	DWORD receive;
 	HANDLE hHeap;
 	HRESULT hr;
 
@@ -453,15 +453,22 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			if (FAILED(hr))
 				return hr;
 
-			if (pScanInfo->PixelBits > 1)
-				pContext->pTask->lByteGapX = (pScanInfo->Window.xExtent * pScanInfo->PixelBits / 8) - pScanInfo->WidthBytes;
+			if (pScanInfo->PixelBits == 1)
+				pContext->pTask->lByteGapX = ((LONG) ceil(pScanInfo->Window.xExtent / 8.0)) - pScanInfo->WidthBytes;
+			else if ((pScanInfo->PixelBits % 8) == 0)
+				pContext->pTask->lByteGapX = (pScanInfo->Window.xExtent * (pScanInfo->PixelBits / 8)) - pScanInfo->WidthBytes;
 			else
-				pContext->pTask->lByteGapX = ((LONG) floor(pScanInfo->Window.xExtent + 7.0) / 8) - pScanInfo->WidthBytes;
-			pContext->pTask->lByteGapY = (pScanInfo->Window.yExtent - pScanInfo->Lines) * (pScanInfo->WidthBytes + pContext->pTask->lByteGapX);
-			Trace(TEXT("Gaps: %d, %d"), pContext->pTask->lByteGapX, pContext->pTask->lByteGapY);
+				pContext->pTask->lByteGapX = 0;
 
-			pContext->pTask->uiTotal = pScanInfo->WidthBytes * pScanInfo->Lines;
+			pContext->pTask->lByteGapY = (pScanInfo->Window.yExtent - pScanInfo->Lines) *
+			                             (pScanInfo->WidthBytes + pContext->pTask->lByteGapX);
+
+			Trace(TEXT("Gaps: %d,%d"), pContext->pTask->lByteGapX, pContext->pTask->lByteGapY);
+
+			pContext->pTask->uiTotal = ((pScanInfo->WidthBytes + pContext->pTask->lByteGapX) *
+			                            pScanInfo->Lines) + pContext->pTask->lByteGapY;
 			pContext->pTask->uiReceived = 0;
+
 			Trace(TEXT("Data: %d/%d"), pContext->pTask->uiReceived, pContext->pTask->uiTotal);
 
 		case SCAN_NEXT: // SCAN_FIRST will fall through to SCAN_NEXT (because it is expecting data)
@@ -480,36 +487,63 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 
 			memset(pBuffer, 0, lLength);
 
-			aquire = pContext->pTask->lByteGapX ? min(lLength, pScanInfo->WidthBytes) : lLength;
+			if (pContext->pTask->lByteGapX > 0) // not enough data
+				receive = min(lLength, pScanInfo->WidthBytes);
+			else if (pContext->pTask->lByteGapX < 0) // too much data
+				receive = min(lLength, pScanInfo->WidthBytes);
+			else
+				receive = lLength;
+
 			aquired = 0;
 
-			while (pContext->pTask->oScan->AquireImage((pBuffer + *plReceived + aquired), &aquire) == CONTINUE) {
-				if (aquire > 0) {
-					if (pContext->pTask->lByteGapX) {
-						aquired += aquire;
-						if (aquired == pScanInfo->WidthBytes) {
+			while (pContext->pTask->oScan->AquireImage((pBuffer + *plReceived + aquired), &receive) == CONTINUE) {
+				if (receive > 0) {
+					if (pContext->pTask->lByteGapX > 0) { // not enough data
+						aquired += receive;
+						if (aquired == pScanInfo->WidthBytes) { // check for boundary
 							*plReceived += aquired;
-							if (lLength - *plReceived >= pContext->pTask->lByteGapX)
+							aquire = lLength - *plReceived;
+							if (aquire >= pContext->pTask->lByteGapX) // skip missing data
 								*plReceived += pContext->pTask->lByteGapX;
+							else // unable to skip data, break out
+								break; // not enough space
 							aquired = 0;
 						}
-						if (lLength - *plReceived < pScanInfo->WidthBytes - aquired)
-							break;
 						aquire = pScanInfo->WidthBytes - aquired;
+						if (aquire > lLength - *plReceived)
+							break;
+						receive = aquire;
+					} else if (pContext->pTask->lByteGapX < 0) { // too much data
+						aquired += receive;
+						if (aquired == pScanInfo->WidthBytes) { // check for boundary
+							*plReceived += aquired;
+							aquire = 0 - pContext->pTask->lByteGapX;
+							if (aquire >= *plReceived)  // rewind obsolete data
+								*plReceived -= pContext->pTask->lByteGapX;
+							else // unable to rewind data, break out
+								break; // not enough space
+							aquired = 0;
+						}
+						aquire = pScanInfo->WidthBytes - aquired;
+						if (aquire > lLength - *plReceived)
+							break;
+						receive = aquire;
 					} else {
-						*plReceived += aquire;
-						aquire = lLength - *plReceived;
+						*plReceived += receive;
+						receive = lLength - *plReceived;
 					}
 				}
-				if (aquire <= 0)
+				if (receive <= 0)
 					break;
 			}
 
-			if (pContext->pTask->lByteGapY > 0 && *plReceived < lLength) {
-				aquired = min(lLength - *plReceived, pContext->pTask->lByteGapY);
-				if (aquired > 0) {
-					memset(pBuffer + *plReceived, -1, aquired);
-					*plReceived += aquired;
+			aquire = lLength - *plReceived;
+
+			if (aquire > 0 && pContext->pTask->lByteGapY > 0) {
+				aquire = min(aquire, pContext->pTask->lByteGapY);
+				if (aquire > 0) {
+					memset(pBuffer + *plReceived, -1, aquire);
+					*plReceived += aquire;
 				}
 			}
 
@@ -519,9 +553,12 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				}
 			}
 
-			pContext->pTask->uiTotal = pScanInfo->WidthBytes * pScanInfo->Lines;
+			pContext->pTask->uiTotal = ((pScanInfo->WidthBytes + pContext->pTask->lByteGapX) *
+			                            pScanInfo->Lines) + pContext->pTask->lByteGapY;
 			pContext->pTask->uiReceived += *plReceived;
-			Trace(TEXT("Data: %d/%d -> %d/%d"), pContext->pTask->uiReceived, pContext->pTask->uiTotal, pContext->pTask->uiTotal - pContext->pTask->uiReceived, lLength);
+
+			Trace(TEXT("Data: %d/%d -> %d/%d"), pContext->pTask->uiReceived, pContext->pTask->uiTotal,
+			                       *plReceived, pContext->pTask->uiTotal - pContext->pTask->uiReceived);
 
 			break;
 
