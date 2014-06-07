@@ -41,8 +41,17 @@ WINSANE_Scan::WINSANE_Scan(_In_ PWINSANE_Device device, _In_ PWINSANE_Socket soc
 
 WINSANE_Scan::~WINSANE_Scan()
 {
+	if (this->buf) {
+		free(this->buf);
+	}
+	this->buf = NULL;
+	this->buflen = 0;
+	this->bufoff = 0;
+	this->bufpos = 0;
 	this->Disconnect();
 	this->device = NULL;
+	this->sock = NULL;
+	this->scan = NULL;
 }
 
 
