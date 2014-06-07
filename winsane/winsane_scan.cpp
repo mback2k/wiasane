@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "winsane_scan.h"
+#include "winsane_params.h"
 #include "winsane_internal.h"
 
 #include <stdlib.h>
@@ -29,6 +30,7 @@ WINSANE_Scan::WINSANE_Scan(_In_ PWINSANE_Device device, _In_ PWINSANE_Socket soc
 {
 	this->state = NEW;
 	this->device = device;
+	this->params = NULL;
 	this->sock = sock;
 	this->scan = NULL;
 	this->port = port;
@@ -50,6 +52,7 @@ WINSANE_Scan::~WINSANE_Scan()
 	this->bufpos = 0;
 	this->Disconnect();
 	this->device = NULL;
+	this->params = NULL;
 	this->sock = NULL;
 	this->scan = NULL;
 }
@@ -127,13 +130,14 @@ WINSANE_Scan_Result WINSANE_Scan::Connect()
 	this->scan = new WINSANE_Socket(scan_sock);
 
 	this->state = CONNECTED;
+	this->device->GetParams(&this->params);
 	return CONTINUE;
 }
 
 WINSANE_Scan_Result WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length)
 {
 	UINT32 record_size;
-	DWORD size;
+	DWORD size, index;
 
 	if (!this->buf || !this->buflen) {
 		if (this->scan->Read((PBYTE) &record_size, sizeof(record_size)) != sizeof(record_size))
@@ -173,11 +177,21 @@ WINSANE_Scan_Result WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD l
 			this->bufoff += size;
 		}
 
-		if (this->byte_order != 0x1234)
-			std::reverse(this->buf, this->buf + this->bufoff);
+		if (this->bufoff == this->buflen && this->byte_order != 0x1234) {
+			size = this->params->GetDepth();
+			if (size >= 16 && (size % 8) == 0) {
+				size /= 8;
+				if ((this->bufoff % size) != 0) {
+					return TRANSFER_ERROR;
+				}
+				for (index = 0; index < this->bufoff; index += size) {
+					std::reverse(this->buf + index, this->buf + index + size);
+				}
+			}
+		}
 	}
 
-	if (this->buf && this->buflen > 0 && this->bufoff == this->buflen && this->bufpos < this->bufoff) {
+	if (this->buf && this->buflen && this->bufoff == this->buflen && this->bufpos < this->bufoff) {
 		size = min(this->bufoff - this->bufpos, *length);
 
 		if (size > 0) {
@@ -204,6 +218,11 @@ WINSANE_Scan_Result WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD l
 
 WINSANE_Scan_Result WINSANE_Scan::Disconnect()
 {
+	if (this->params != NULL) {
+		delete this->params;
+		this->params = NULL;
+	}
+
 	if (this->scan != NULL) {
 		delete this->scan;
 		this->scan = NULL;
