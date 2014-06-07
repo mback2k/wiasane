@@ -58,33 +58,33 @@ WINSANE_Scan::~WINSANE_Scan()
 }
 
 
-WINSANE_Scan_Result WINSANE_Scan::AquireImage(_Inout_ PBYTE buffer, _Inout_ PDWORD length)
+SANE_Status WINSANE_Scan::AquireImage(_Inout_ PBYTE buffer, _Inout_ PDWORD length)
 {
-	WINSANE_Scan_Result result;
-
-	result = SUCCESSFUL;
+	SANE_Status status;
 
 	switch (this->state) {
 		case NEW:
-			result = this->Connect();
+			status = this->Connect();
 			*length = 0;
 			break;
 		case CONNECTED:
 		case SCANNING:
-			result = this->Receive(buffer, length);
+			status = this->Receive(buffer, length);
 			break;
 		case COMPLETED:
-			result = this->Disconnect();
+			status = this->Disconnect();
 		case DISCONNECTED:
+		default:
+			status = SANE_STATUS_EOF;
 			*length = 0;
 			break;
 	}
 
-	return result;
+	return status;
 }
 
 
-WINSANE_Scan_Result WINSANE_Scan::Connect()
+SANE_Status WINSANE_Scan::Connect()
 {
 	SOCKET real_sock, scan_sock;
 	SOCKADDR addr, *scanaddr;
@@ -97,14 +97,14 @@ WINSANE_Scan_Result WINSANE_Scan::Connect()
 	addrlen = sizeof(addr);
 	result = getpeername(real_sock, &addr, &addrlen);
 	if (result)
-		return CONNECTION_ERROR;
+		return SANE_STATUS_IO_ERROR;
 
 	if (addr.sa_family == AF_INET) {
 		addrlen = sizeof(addr_in);
 		scanaddr = (PSOCKADDR) &addr_in;
 		result = getpeername(real_sock, scanaddr, &addrlen);
 		if (result)
-			return CONNECTION_ERROR;
+			return SANE_STATUS_IO_ERROR;
 
 		addr_in.sin_port = htons((USHORT) this->port);
 	} else if (addr.sa_family == AF_INET6) {
@@ -112,51 +112,49 @@ WINSANE_Scan_Result WINSANE_Scan::Connect()
 		scanaddr = (PSOCKADDR) &addr_in6;
 		result = getpeername(real_sock, scanaddr, &addrlen);
 		if (result)
-			return CONNECTION_ERROR;
+			return SANE_STATUS_IO_ERROR;
 
 		addr_in6.sin6_port = htons((USHORT) this->port);
 	} else
-		return CONNECTION_ERROR;
+		return SANE_STATUS_IO_ERROR;
 
 	scan_sock = socket(scanaddr->sa_family, SOCK_STREAM, IPPROTO_TCP);
 	if (scan_sock == INVALID_SOCKET)
-		return CONNECTION_ERROR;
+		return SANE_STATUS_IO_ERROR;
 
 	if (connect(scan_sock, scanaddr, addrlen) != 0) {
 		closesocket(scan_sock);
-		return CONNECTION_ERROR;
+		return SANE_STATUS_IO_ERROR;
 	}
 
 	this->scan = new WINSANE_Socket(scan_sock);
-
 	this->state = CONNECTED;
-	this->device->GetParams(&this->params);
-	return CONTINUE;
+	return this->device->GetParams(&this->params);
 }
 
-WINSANE_Scan_Result WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length)
+SANE_Status WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length)
 {
 	UINT32 record_size;
 	DWORD size, index;
 
 	if (!this->buf || !this->buflen) {
 		if (this->scan->Read((PBYTE) &record_size, sizeof(record_size)) != sizeof(record_size))
-			return TRANSFER_ERROR;
+			return SANE_STATUS_IO_ERROR;
 
 		record_size = ntohl(record_size);
 
 		if (record_size == 0) {
 			this->state = CONNECTED;
-			return CONTINUE;
+			return SANE_STATUS_GOOD;
 		}
 		if (record_size == -1) {
 			this->state = COMPLETED;
-			return SUCCESSFUL;
+			return SANE_STATUS_EOF;
 		}
 
 		this->buf = (PBYTE) malloc(record_size);
 		if (!this->buf)
-			return MEMORY_ERROR;
+			return SANE_STATUS_NO_MEM;
 
 		this->buflen = record_size;
 		this->bufoff = 0;
@@ -167,11 +165,11 @@ WINSANE_Scan_Result WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD l
 
 			if (size == 0) {
 				this->state = DISCONNECTED;
-				return CONNECTION_ERROR;
+				return SANE_STATUS_IO_ERROR;
 			}
 			if (size == SOCKET_ERROR) {
 				this->state = DISCONNECTED;
-				return CONNECTION_ERROR;
+				return SANE_STATUS_IO_ERROR;
 			}
 
 			this->bufoff += size;
@@ -182,7 +180,7 @@ WINSANE_Scan_Result WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD l
 			if (size >= 16 && (size % 8) == 0) {
 				size /= 8;
 				if ((this->bufoff % size) != 0) {
-					return TRANSFER_ERROR;
+					return SANE_STATUS_IO_ERROR;
 				}
 				for (index = 0; index < this->bufoff; index += size) {
 					std::reverse(this->buf + index, this->buf + index + size);
@@ -213,10 +211,10 @@ WINSANE_Scan_Result WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD l
 		*length = 0;
 
 	this->state = SCANNING;
-	return CONTINUE;
+	return SANE_STATUS_GOOD;
 }
 
-WINSANE_Scan_Result WINSANE_Scan::Disconnect()
+SANE_Status WINSANE_Scan::Disconnect()
 {
 	if (this->params != NULL) {
 		delete this->params;
@@ -229,5 +227,5 @@ WINSANE_Scan_Result WINSANE_Scan::Disconnect()
 	}
 
 	this->state = DISCONNECTED;
-	return SUCCESSFUL;
+	return SANE_STATUS_EOF;
 }

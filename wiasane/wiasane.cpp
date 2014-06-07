@@ -446,8 +446,9 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			if (!pContext->pTask->oScan)
 				return E_OUTOFMEMORY;
 
-			if (pContext->pTask->oScan->Connect() != CONTINUE)
-				return E_FAIL;
+			status = pContext->pTask->oScan->Connect();
+			if (status != SANE_STATUS_GOOD)
+				return GetErrorCode(status);
 
 			hr = FetchScannerParams(pScanInfo, pContext);
 			if (FAILED(hr))
@@ -496,7 +497,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 
 			aquired = 0;
 
-			while (pContext->pTask->oScan->AquireImage((pBuffer + *plReceived + aquired), &receive) == CONTINUE) {
+			while ((status = pContext->pTask->oScan->AquireImage((pBuffer + *plReceived + aquired), &receive)) == SANE_STATUS_GOOD) {
 				if (receive > 0) {
 					if (pContext->pTask->lByteGapX > 0) { // not enough data
 						aquired += receive;

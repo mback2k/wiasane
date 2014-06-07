@@ -37,14 +37,6 @@ enum WINSANE_Scan_State {
 	DISCONNECTED
 };
 
-enum WINSANE_Scan_Result {
-	CONTINUE,
-	SUCCESSFUL,
-	CONNECTION_ERROR,
-	TRANSFER_ERROR,
-	MEMORY_ERROR,
-};
-
 class WINSANE_API WINSANE_Scan {
 public:
 	/* Constructer & Deconstructer */
@@ -53,13 +45,13 @@ public:
 
 
 	/* Public API */
-	WINSANE_Scan_Result Connect();
-	WINSANE_Scan_Result AquireImage(_Inout_ PBYTE buffer, _Inout_ PDWORD length);
+	SANE_Status Connect();
+	SANE_Status AquireImage(_Inout_ PBYTE buffer, _Inout_ PDWORD length);
 
 
 protected:
-	WINSANE_Scan_Result Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length);
-	WINSANE_Scan_Result Disconnect();
+	SANE_Status Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length);
+	SANE_Status Disconnect();
 
 
 private:

@@ -275,7 +275,7 @@ VOID DebugSessionDeviceScan(WINSANE_Session *session, WINSANE_Device *device)
 				if (buffer) {
 					length = 1024;
 					ZeroMemory(buffer, length);
-					while (scan->AquireImage(buffer, &length) == CONTINUE) {
+					while (scan->AquireImage(buffer, &length) == SANE_STATUS_GOOD) {
 						printf("Received %d bytes of scanned image ...\n", length);
 						WriteFile(output, buffer, length, &written, NULL);
 						length = 1024;
