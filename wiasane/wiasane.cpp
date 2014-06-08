@@ -500,40 +500,66 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 
 			aquired = 0;
 
+			Trace(TEXT("Receiving %d bytes from data channel"), receive);
 			while ((status = pContext->pTask->oScan->AquireImage((pBuffer + *plReceived + aquired), &receive)) == SANE_STATUS_GOOD) {
+				Trace(TEXT("Received %d bytes from data channel"), receive);
 				if (receive > 0) {
 					if (pContext->pTask->lByteGapX > 0) { // not enough data
+						Trace(TEXT("Previously aquired %d bytes from data channel"), aquired);
 						aquired += receive;
+						Trace(TEXT("Currently aquired %d bytes from data channel"), aquired);
 						if (aquired == pScanInfo->WidthBytes) { // check for boundary
+							Trace(TEXT("-- Hit width boundary, returning additional data --"));
+							Trace(TEXT("Previously received %d bytes from data channel"), *plReceived);
 							*plReceived += aquired;
+							Trace(TEXT("Currently received %d bytes from data channel"), *plReceived);
 							aquire = lLength - *plReceived;
-							if (aquire >= pContext->pTask->lByteGapX) // skip missing data
+							Trace(TEXT("Remaining %d empty x-bytes"), aquire);
+							if (aquire >= pContext->pTask->lByteGapX) { // skip missing data
+								Trace(TEXT("Adding %d additional x-bytes"), pContext->pTask->lByteGapX);
 								*plReceived += pContext->pTask->lByteGapX;
-							else // unable to skip data, break out
+							} else { // unable to skip data, break out
+								Trace(TEXT("Not enough space to add %d additional x-bytes, break out"), pContext->pTask->lByteGapX);
 								break; // not enough space
+							}
+							Trace(TEXT("Currently received %d bytes from data channel"), *plReceived);
 							aquired = 0;
 						}
 						aquire = pScanInfo->WidthBytes - aquired;
-						if (aquire > lLength - *plReceived)
+						if (aquire > lLength - *plReceived) {
+							Trace(TEXT("Next width boundary is outside of remaining space, break out"));
 							break;
+						}
 						receive = aquire;
 					} else if (pContext->pTask->lByteGapX < 0) { // too much data
+						Trace(TEXT("Previously aquired %d bytes from data channel"), aquired);
 						aquired += receive;
+						Trace(TEXT("Currently aquired %d bytes from data channel"), aquired);
 						if (aquired == pScanInfo->WidthBytes) { // check for boundary
+							Trace(TEXT("-- Hit width boundary, skipping obsolete data --"));
+							Trace(TEXT("Previously received %d bytes from data channel"), *plReceived);
 							*plReceived += aquired;
+							Trace(TEXT("Currently received %d bytes from data channel"), *plReceived);
 							aquire = 0 - pContext->pTask->lByteGapX;
-							if (aquire >= *plReceived)  // rewind obsolete data
+							if (aquire >= *plReceived) { // rewind obsolete data
+								Trace(TEXT("Rewinding %d obsolete x-bytes"), aquire);
 								*plReceived -= pContext->pTask->lByteGapX;
-							else // unable to rewind data, break out
+							} else { // unable to rewind data, break out
+								Trace(TEXT("Not enough space to rewind %d obsolete x-bytes, break out"), aquire);
 								break; // not enough space
+							}
 							aquired = 0;
 						}
 						aquire = pScanInfo->WidthBytes - aquired;
-						if (aquire > lLength - *plReceived)
+						if (aquire > lLength - *plReceived) {
+							Trace(TEXT("Next width boundary is outside of remaining space, break out"));
 							break;
+						}
 						receive = aquire;
 					} else {
+						Trace(TEXT("Previously received %d bytes from data channel"), *plReceived);
 						*plReceived += receive;
+						Trace(TEXT("Currently received %d bytes from data channel"), *plReceived);
 						receive = lLength - *plReceived;
 					}
 				}
@@ -547,8 +573,10 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 							*plReceived += aquire;
 						}
 					}
+					Trace(TEXT("No more data avaiable or required, break out"), receive);
 					break;
 				}
+				Trace(TEXT("Receiving %d bytes from data channel"), receive);
 			}
 
 			if (pScanInfo->DataType == WIA_DATA_THRESHOLD) {
@@ -673,6 +701,10 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 	Trace(TEXT("ypos  = %d"), pScanInfo->Window.yPos);
 	Trace(TEXT("xext  = %d"), pScanInfo->Window.xExtent);
 	Trace(TEXT("yext  = %d"), pScanInfo->Window.yExtent);
+	Trace(TEXT("tl_x  = %f"), pContext->dblTopLeftX);
+	Trace(TEXT("tl_y  = %f"), pContext->dblTopLeftY);
+	Trace(TEXT("br_x  = %f"), pContext->dblBottomRightX);
+	Trace(TEXT("br_y  = %f"), pContext->dblBottomRightY);
 #endif
 
 	return hr;
