@@ -537,17 +537,17 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 						receive = lLength - *plReceived;
 					}
 				}
-				if (receive <= 0)
+				if (receive <= 0) {
+					if (pContext->pTask->lByteGapY > 0) {
+						aquire = lLength - *plReceived;
+						if (aquire > 0) {
+							aquire = min(aquire, pContext->pTask->lByteGapY);
+							Trace(TEXT("Adding %d additional y-bytes"), aquire);
+							memset(pBuffer + *plReceived, -1, aquire);
+							*plReceived += aquire;
+						}
+					}
 					break;
-			}
-
-			aquire = lLength - *plReceived;
-
-			if (aquire > 0 && pContext->pTask->lByteGapY > 0) {
-				aquire = min(aquire, pContext->pTask->lByteGapY);
-				if (aquire > 0) {
-					memset(pBuffer + *plReceived, -1, aquire);
-					*plReceived += aquire;
 				}
 			}
 
