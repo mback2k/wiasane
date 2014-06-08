@@ -450,6 +450,8 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			if (status != SANE_STATUS_GOOD)
 				return GetErrorCode(status);
 
+			Trace(TEXT("Byte-order: %04x"), pContext->pTask->oScan->GetByteOrder());
+
 			hr = FetchScannerParams(pScanInfo, pContext);
 			if (FAILED(hr))
 				return hr;
@@ -464,7 +466,8 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			pContext->pTask->lByteGapY = (pScanInfo->Window.yExtent - pScanInfo->Lines) *
 			                             (pScanInfo->WidthBytes + pContext->pTask->lByteGapX);
 
-			Trace(TEXT("Gaps: %d,%d"), pContext->pTask->lByteGapX, pContext->pTask->lByteGapY);
+			Trace(TEXT("X byte-gap: %d"), pContext->pTask->lByteGapX);
+			Trace(TEXT("Y byte-gap: %d"), pContext->pTask->lByteGapY);
 
 			pContext->pTask->uiTotal = ((pScanInfo->WidthBytes + pContext->pTask->lByteGapX) *
 			                            pScanInfo->Lines) + pContext->pTask->lByteGapY;
