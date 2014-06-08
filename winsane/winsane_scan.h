@@ -47,11 +47,11 @@ public:
 	/* Public API */
 	SANE_Status Connect();
 	SANE_Status AquireImage(_Inout_ PBYTE buffer, _Inout_ PDWORD length);
+	SANE_Status Disconnect();
 
 
 protected:
 	SANE_Status Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length);
-	SANE_Status Disconnect();
 
 
 private:
