@@ -49,6 +49,8 @@ public:
 	SANE_Status AquireImage(_Inout_ PBYTE buffer, _Inout_ PDWORD length);
 	SANE_Status Disconnect();
 
+	SANE_Word GetByteOrder();
+
 
 protected:
 	SANE_Status Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length);

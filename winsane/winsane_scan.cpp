@@ -229,3 +229,9 @@ SANE_Status WINSANE_Scan::Disconnect()
 	this->state = DISCONNECTED;
 	return SANE_STATUS_EOF;
 }
+
+
+SANE_Word WINSANE_Scan::GetByteOrder()
+{
+	return this->byte_order;
+}
