@@ -29,8 +29,10 @@
 #include "dllmain.h"
 #include "resource.h"
 #include "strutil.h"
+#include "strutil_dbg.h"
 #include "strutil_res.h"
 #include "coisane_util.h"
+
 
 DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
 {

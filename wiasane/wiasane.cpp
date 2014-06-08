@@ -34,7 +34,7 @@
 #include <shlwapi.h>
 
 #include "wiasane_opt.h"
-#include "wiasane_util.h"
+#include "strutil_dbg.h"
 
 
 WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)

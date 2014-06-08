@@ -20,10 +20,6 @@
 
 #include "coisane_util.h"
 
-#ifdef _DEBUG
-#include <stdio.h>
-#endif
-
 #include <tchar.h>
 #include <strsafe.h>
 #include <malloc.h>
@@ -31,35 +27,7 @@
 #include "dllmain.h"
 #include "resource.h"
 #include "strutil.h"
-
-
-VOID Trace(_In_ LPCTSTR pszFormat, ...)
-{
-#ifdef _DEBUG
-	PTSTR lpMsg, lpOut;
-	va_list argList;
-	HANDLE hHeap;
-	size_t cbLen;
-	HRESULT hr;
-
-	hHeap = GetProcessHeap();
-	if (hHeap) {
-		va_start(argList, pszFormat);
-		hr = StringCchAVPrintf(hHeap, &lpMsg, &cbLen, pszFormat, argList);
-		va_end(argList);
-		if (SUCCEEDED(hr)) {
-			hr = StringCchAPrintf(hHeap, &lpOut, &cbLen, TEXT("coisane: %s\r\n"), lpMsg);
-			if (SUCCEEDED(hr)) {
-				OutputDebugString(lpOut);
-				HeapFree(hHeap, 0, lpOut);
-			}
-			HeapFree(hHeap, 0, lpMsg);
-		}
-	}
-#else
-	UNREFERENCED_PARAMETER(pszFormat);
-#endif
-}
+#include "strutil_dbg.h"
 
 
 HINF OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _Out_opt_ PUINT ErrorLine)

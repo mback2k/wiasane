@@ -34,7 +34,6 @@ __user_code
 #include "coisane.h"
 #include "winsane.h"
 
-VOID Trace(_In_ LPCTSTR pszFormat, ...);
 HINF OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _Out_opt_ PUINT ErrorLine);
 
 DWORD UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags);

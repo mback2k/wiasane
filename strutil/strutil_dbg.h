@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -18,16 +18,24 @@
  *
  ***************************************************************************/
 
-#ifndef WIASANE_UTIL_H
-#define WIASANE_UTIL_H
+#ifndef STRUTIL_DBG_H
+#define STRUTIL_DBG_H
 
 #if _MSC_VER > 1000
 #pragma once
 #endif
 
+#include <DriverSpecs.h>
+__user_code
+
 #include <windows.h>
 #include <wtypes.h>
 
-VOID Trace(_In_ LPCTSTR format, ...);
+#ifdef _DEBUG
+VOID Trace_(_In_ LPCTSTR lpszPrefix, _In_ LPCTSTR lpszFormat, ...);
+#define Trace(format, ...) Trace_(TEXT(_DEBUG_PREFIX), format, ##__VA_ARGS__)
+#else
+#define Trace(format, ...) ((void)0)
+#endif
 
 #endif
