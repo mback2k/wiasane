@@ -541,7 +541,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 							*plReceived += aquired;
 							Trace(TEXT("Currently received %d bytes from data channel"), *plReceived);
 							aquire = 0 - pContext->pTask->lByteGapX;
-							if (aquire >= *plReceived) { // rewind obsolete data
+							if (aquire <= *plReceived) { // rewind obsolete data
 								Trace(TEXT("Rewinding %d obsolete x-bytes"), aquire);
 								*plReceived -= pContext->pTask->lByteGapX;
 							} else { // unable to rewind data, break out
