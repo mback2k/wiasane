@@ -543,7 +543,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 							aquire = 0 - pContext->pTask->lByteGapX;
 							if (aquire <= *plReceived) { // rewind obsolete data
 								Trace(TEXT("Rewinding %d obsolete x-bytes"), aquire);
-								*plReceived -= pContext->pTask->lByteGapX;
+								*plReceived -= aquire;
 							} else { // unable to rewind data, break out
 								Trace(TEXT("Not enough space to rewind %d obsolete x-bytes, break out"), aquire);
 								break; // not enough space
