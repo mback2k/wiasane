@@ -65,7 +65,8 @@ SANE_Status WINSANE_Scan::AquireImage(_Inout_ PBYTE buffer, _Inout_ PDWORD lengt
 	switch (this->state) {
 		case NEW:
 			status = this->Connect();
-			*length = 0;
+			if (length)
+				*length = 0;
 			break;
 		case CONNECTED:
 		case SCANNING:
@@ -73,10 +74,14 @@ SANE_Status WINSANE_Scan::AquireImage(_Inout_ PBYTE buffer, _Inout_ PDWORD lengt
 			break;
 		case COMPLETED:
 			status = this->Disconnect();
+			if (length)
+				*length = 0;
+			break;
 		case DISCONNECTED:
 		default:
 			status = SANE_STATUS_EOF;
-			*length = 0;
+			if (length)
+				*length = 0;
 			break;
 	}
 
@@ -204,11 +209,10 @@ SANE_Status WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length)
 				this->bufoff = 0;
 				this->bufpos = 0;
 			}
-		}
 
-		*length = size;
-	} else
-		*length = 0;
+			*length = size;
+		}
+	}
 
 	this->state = SCANNING;
 	return SANE_STATUS_GOOD;
