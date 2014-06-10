@@ -212,10 +212,11 @@ SANE_Status WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length)
 				this->bufoff = 0;
 				this->bufpos = 0;
 			}
-
-			*length = size;
 		}
-	}
+
+		*length = size;
+	} else
+		*length = 0;
 
 	this->state = SCANNING;
 	return SANE_STATUS_GOOD;
