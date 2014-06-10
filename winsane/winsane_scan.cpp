@@ -142,6 +142,9 @@ SANE_Status WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length)
 	UINT32 record_size;
 	DWORD size, index;
 
+	if (this->state == COMPLETED)
+		return SANE_STATUS_EOF;
+
 	if (!this->buf || !this->buflen) {
 		if (this->scan->Read((PBYTE) &record_size, sizeof(record_size)) != sizeof(record_size))
 			return SANE_STATUS_IO_ERROR;
