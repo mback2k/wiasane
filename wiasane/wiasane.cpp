@@ -564,19 +564,20 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					}
 				}
 				if (receive <= 0) {
-					if (pContext->pTask->lByteGapY > 0) {
-						aquire = lLength - *plReceived;
-						if (aquire > 0) {
-							aquire = min(aquire, pContext->pTask->lByteGapY);
-							Trace(TEXT("Adding %d additional y-bytes"), aquire);
-							memset(pBuffer + *plReceived, -1, aquire);
-							*plReceived += aquire;
-						}
-					}
 					Trace(TEXT("No more data avaiable or required, break out"), receive);
 					break;
 				}
 				Trace(TEXT("Receiving %d bytes from data channel"), receive);
+			}
+
+			if (status == SANE_STATUS_EOF && pContext->pTask->lByteGapY > 0) {
+				aquire = lLength - *plReceived;
+				if (aquire > 0) {
+					aquire = min(aquire, pContext->pTask->lByteGapY);
+					Trace(TEXT("Adding %d additional y-bytes"), aquire);
+					memset(pBuffer + *plReceived, -1, aquire);
+					*plReceived += aquire;
+				}
 			}
 
 			if (pScanInfo->DataType == WIA_DATA_THRESHOLD) {
