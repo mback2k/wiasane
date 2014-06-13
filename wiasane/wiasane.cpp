@@ -47,9 +47,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 	HANDLE hHeap;
 	HRESULT hr;
 
-#ifdef _DEBUG
-	Trace(TEXT("Command Value (%d)"), lCommand);
-#endif
+	Trace(TEXT("------ MicroEntry(lCommand=%d) ------"), lCommand);
 
 	if (!pValue || !pValue->pScanInfo)
 		return E_INVALIDARG;
@@ -389,7 +387,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 	if (plReceived)
 		*plReceived = 0;
 
-	Trace(TEXT("------ Scan Requesting %d ------"), lLength);
+	Trace(TEXT("------ Scan(lPhase=%d, lLength=%d) ------"), lPhase, lLength);
 
 	if (pScanInfo == NULL)
 		return E_INVALIDARG;
@@ -637,6 +635,8 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 	PWINSANE_Option oOption;
 	HRESULT hr;
 	double tl_x, tl_y, br_x, br_y;
+
+	Trace(TEXT("------ SetPixelWindow(x=%d, y=%d, xExtent=%d, yExtent=%d) ------"), x, y, xExtent, yExtent);
 
 	if (!pScanInfo)
 		return E_INVALIDARG;
