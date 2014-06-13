@@ -204,6 +204,9 @@ SANE_Status WINSANE_Session::Exit()
 	if (this->sock->Flush() != written)
 		return SANE_STATUS_IO_ERROR;
 
+	if (!this->sock->Disconnect())
+		return SANE_STATUS_IO_ERROR;
+
 	this->initialized = FALSE;
 	return SANE_STATUS_GOOD;
 }
