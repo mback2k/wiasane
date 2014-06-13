@@ -88,7 +88,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			if (SUCCEEDED(hr)) {
 				hr = InitScannerDefaults(pValue->pScanInfo, pContext);
 
-				CloseScannerDevice(pValue->pScanInfo, pContext);
+				ExitScannerSession(pValue->pScanInfo, pContext);
 			}
 
 			pValue->pScanInfo->DeviceIOHandles[2] = NULL;
@@ -119,7 +119,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 			hr = OpenScannerDevice(pValue->pScanInfo, pContext);
 			if (SUCCEEDED(hr)) {
-				hr = CloseScannerDevice(pValue->pScanInfo, pContext);
+				hr = ExitScannerSession(pValue->pScanInfo, pContext);
 			}
 			break;
 
@@ -130,7 +130,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			if (SUCCEEDED(hr)) {
 				pValue->lVal = MCRO_STATUS_OK;
 
-				CloseScannerDevice(pValue->pScanInfo, pContext);
+				ExitScannerSession(pValue->pScanInfo, pContext);
 			} else {
 				pValue->lVal = MCRO_ERROR_OFFLINE;
 			}
@@ -277,7 +277,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			if (SUCCEEDED(hr)) {
 				pValue->lVal = MCRO_STATUS_OK;
 
-				CloseScannerDevice(pValue->pScanInfo, pContext);
+				ExitScannerSession(pValue->pScanInfo, pContext);
 			} else {
 				pValue->lVal = MCRO_ERROR_OFFLINE;
 			}
@@ -296,11 +296,11 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 				if (pContext->pTask && pContext->pTask->bUsingADF) {
 					pValue->lVal = MCRO_STATUS_OK;
+					CloseScannerDevice(pValue->pScanInfo, pContext);
 				} else {
 					pValue->lVal = MCRO_ERROR_PAPER_EMPTY;
+					ExitScannerSession(pValue->pScanInfo, pContext);
 				}
-
-				CloseScannerDevice(pValue->pScanInfo, pContext);
 			} else {
 				pValue->lVal = MCRO_ERROR_OFFLINE;
 			}
@@ -365,7 +365,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 				} else
 					hr = E_NOTIMPL;
 
-				CloseScannerDevice(pValue->pScanInfo, pContext);
+				ExitScannerSession(pValue->pScanInfo, pContext);
 			}
 			break;
 
@@ -386,12 +386,12 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 	HANDLE hHeap;
 	HRESULT hr;
 
+	Trace(TEXT("------ Scan(lPhase=%d, lLength=%d) ------"), lPhase, lLength);
+
 	if (plReceived)
 		*plReceived = 0;
 
-	Trace(TEXT("------ Scan(lPhase=%d, lLength=%d) ------"), lPhase, lLength);
-
-	if (pScanInfo == NULL)
+	if (!pScanInfo)
 		return E_INVALIDARG;
 
 	hHeap = pScanInfo->DeviceIOHandles[1];
@@ -400,7 +400,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 
 	pContext = (PWIASANE_Context) pScanInfo->pMicroDriverContext;
 	if (!pContext)
-		return E_OUTOFMEMORY;
+		return E_FAIL;
 
 	switch (lPhase) {
 		case SCAN_FIRST:
@@ -620,9 +620,11 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					pContext->pTask = NULL;
 				}
 
-				pContext->oDevice->Cancel();
+				if (pContext->oDevice->IsOpen()) {
+					pContext->oDevice->Cancel();
+				}
 
-				CloseScannerDevice(pScanInfo, pContext);
+				ExitScannerSession(pScanInfo, pContext);
 			}
 
 			break;
@@ -644,10 +646,7 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 		return E_INVALIDARG;
 
 	pContext = (PWIASANE_Context) pScanInfo->pMicroDriverContext;
-	if (!pContext)
-		return E_FAIL;
-
-	if (!pContext->oDevice)
+	if (!pContext || !pContext->oSession || !pContext->oDevice)
 		return E_FAIL;
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_TL_X);
@@ -716,6 +715,48 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 }
 
 
+HRESULT CreateScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
+{
+	if (!pScanInfo || !pContext)
+		return E_INVALIDARG;
+
+	if (pContext->oSession)
+		return S_OK;
+
+	pContext->uiDevRef = 0;
+
+	pContext->pTask = NULL;
+	pContext->oDevice = NULL;
+
+	pContext->oSession = WINSANE_Session::Remote(pContext->pszHost, pContext->usPort);
+	if (!pContext->oSession)
+		return WIA_ERROR_OFFLINE;
+
+	return S_OK;
+}
+
+HRESULT FreeScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
+{
+	if (!pScanInfo || !pContext)
+		return E_INVALIDARG;
+
+	if (!pContext->oSession)
+		return S_OK;
+
+	ExitScannerSession(pScanInfo, pContext);
+
+	delete pContext->oSession;
+	pContext->oSession = NULL;
+
+	pContext->oDevice = NULL;
+	pContext->pTask = NULL;
+
+	pContext->uiDevRef = 0;
+
+	return S_OK;
+}
+
+
 HRESULT InitScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
 	SANE_Status status;
@@ -724,70 +765,57 @@ HRESULT InitScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	if (!pScanInfo || !pContext)
 		return E_INVALIDARG;
 
-	pContext->uiDevRef = 0;
-	pContext->pTask = NULL;
-	pContext->oDevice = NULL;
-	pContext->oSession = WINSANE_Session::Remote(pContext->pszHost, pContext->usPort);
-	if (pContext->oSession) {
-		status = pContext->oSession->Init(NULL, NULL);
-		if (status == SANE_STATUS_GOOD) {
-			status = pContext->oSession->FetchDevices();
-			if (status == SANE_STATUS_GOOD) {
-				pContext->oDevice = pContext->oSession->GetDevice(pContext->pszName);
-				if (pContext->oDevice) {
-					return S_OK;
-				} else {
-					hr = WIA_ERROR_USER_INTERVENTION;
-				}
-			} else {
-				hr = GetErrorCode(status);
-			}
+	if (pContext->oSession && pContext->oSession->IsInitialized() && pContext->oDevice)
+		return S_OK;
 
-			pContext->oSession->Exit();
-		} else {
-			hr = GetErrorCode(status);
-		}
-
-		delete pContext->oSession;
-		pContext->oSession = NULL;
-	} else {
-		hr = WIA_ERROR_OFFLINE;
+	if (!pContext->oSession) {
+		hr = CreateScannerSession(pScanInfo, pContext);
+		if (FAILED(hr))
+			return hr;
 	}
 
-	return hr;
+	if (!pContext->oSession->IsInitialized()) {
+		status = pContext->oSession->Init(NULL, NULL);
+		if (status != SANE_STATUS_GOOD) {
+			return GetErrorCode(status);
+		}
+	}
+
+	status = pContext->oSession->FetchDevices();
+	if (status != SANE_STATUS_GOOD) {
+		pContext->oSession->Exit();
+		return GetErrorCode(status);
+	}
+
+	pContext->oDevice = pContext->oSession->GetDevice(pContext->pszName);
+	if (!pContext->oDevice) {
+		pContext->oSession->Exit();
+		return WIA_ERROR_USER_INTERVENTION;
+	}
+
+	return S_OK;
 }
 
-HRESULT FreeScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
+HRESULT ExitScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
 	SANE_Status status;
-	HRESULT hr;
 
-	if (!pScanInfo || !pContext)
+	if (!pScanInfo || !pContext || !pContext->oSession)
 		return E_INVALIDARG;
 
-	hr = S_OK;
-
-	if (pContext->oSession) {
-		if (pContext->oDevice) {
-			CloseScannerDevice(pScanInfo, pContext);
-			pContext->oDevice = NULL;
-		}
-
-		if (pContext->oSession->IsInitialized()) {
-			status = pContext->oSession->Exit();
-			if (status != SANE_STATUS_GOOD)
-				hr = GetErrorCode(status);
-		}
-
-		delete pContext->oSession;
-		pContext->oSession = NULL;
+	if (pContext->oDevice) {
+		CloseScannerDevice(pScanInfo, pContext);
 	}
 
-	if (SUCCEEDED(hr))
-		pContext->uiDevRef = 0;
+	if (pContext->oSession->IsInitialized()) {
+		status = pContext->oSession->Exit();
+		if (status != SANE_STATUS_GOOD)
+			return GetErrorCode(status);
+	}
 
-	return hr;
+	return S_OK;
 }
+
 
 HRESULT OpenScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
@@ -797,58 +825,43 @@ HRESULT OpenScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 	if (!pScanInfo || !pContext)
 		return E_INVALIDARG;
 
-	hr = S_OK;
-
-	if (pContext->oSession && !pContext->oSession->IsInitialized()) {
-		hr = FreeScannerSession(pScanInfo, pContext);
-		if (FAILED(hr))
-			return hr;
-	}
-
-	if (!pContext->oSession) {
+	if (!pContext->oSession || !pContext->oSession->IsInitialized() || !pContext->oDevice) {
 		hr = InitScannerSession(pScanInfo, pContext);
 		if (FAILED(hr))
 			return hr;
 	}
 
-	if (pContext->oDevice && !pContext->oDevice->IsOpen()) {
+	if (!pContext->oDevice->IsOpen()) {
 		status = pContext->oDevice->Open();
-		if (status == SANE_STATUS_GOOD) {
-			status = pContext->oDevice->FetchOptions();
-		}
-		hr = GetErrorCode(status);
+		if (status != SANE_STATUS_GOOD)
+			return GetErrorCode(status);
+
+		status = pContext->oDevice->FetchOptions();
+		if (status != SANE_STATUS_GOOD)
+			return GetErrorCode(status);
 	}
 
-	if (SUCCEEDED(hr))
-		pContext->uiDevRef++;
-
-	return hr;
+	pContext->uiDevRef++;
+	return S_OK;
 }
 
 HRESULT CloseScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
 	SANE_Status status;
-	HRESULT hr;
 
-	if (!pScanInfo || !pContext)
+	if (!pScanInfo || !pContext || !pContext->oSession || !pContext->oDevice)
 		return E_INVALIDARG;
 
-	if (pContext->uiDevRef == 0)
-		return S_OK;
-
-	pContext->uiDevRef--;
+	if (pContext->uiDevRef > 0)
+		pContext->uiDevRef--;
 
 	if (pContext->uiDevRef > 0)
 		return S_OK;
 
-	hr = S_OK;
-
 	if (pContext->pTask) {
 		if (pContext->pTask->oScan) {
-			if (pContext->oSession->IsInitialized()) {
-				status = pContext->oDevice->Cancel();
-				if (status != SANE_STATUS_GOOD)
-					hr = GetErrorCode(status);
+			if (pContext->oDevice->IsOpen()) {
+				pContext->oDevice->Cancel();
 			}
 
 			delete pContext->pTask->oScan;
@@ -860,11 +873,11 @@ HRESULT CloseScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 		pContext->pTask = NULL;
 	}
 
-	if (pContext->oDevice && pContext->oDevice->IsOpen()) {
+	if (pContext->oDevice->IsOpen()) {
 		status = pContext->oDevice->Close();
 		if (status != SANE_STATUS_GOOD)
-			hr = GetErrorCode(status);
+			return GetErrorCode(status);
 	}
 
-	return hr;
+	return S_OK;
 }
