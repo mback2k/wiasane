@@ -99,8 +99,5 @@ HRESULT CloseScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
 HRESULT FreeScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
 HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
-HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
-HRESULT SetScanWindow(_Inout_ PWIASANE_Context pContext);
-HRESULT SetScanMode(_Inout_ PWIASANE_Context pContext);
 
 #endif
