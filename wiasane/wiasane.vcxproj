@@ -119,6 +119,7 @@
     <ClInclude Include="resource.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="wiasane.h" />
+    <ClInclude Include="wiasane_def.h" />
     <ClInclude Include="wiasane_opt.h" />
     <ClInclude Include="wiasane_scan.h" />
     <ClInclude Include="wiasane_util.h" />
@@ -126,6 +127,7 @@
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="wiasane.cpp" />
+    <ClCompile Include="wiasane_def.cpp" />
     <ClCompile Include="wiasane_opt.cpp" />
     <ClCompile Include="wiasane_scan.cpp" />
     <ClCompile Include="wiasane_util.cpp" />
