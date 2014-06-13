@@ -34,6 +34,7 @@
 #include <shlwapi.h>
 
 #include "wiasane_opt.h"
+#include "wiasane_util.h"
 #include "strutil_dbg.h"
 
 
@@ -1431,36 +1432,4 @@ HRESULT SetScanMode(_Inout_ PWIASANE_Context pContext)
 	}
 
 	return hr;
-}
-
-HRESULT GetErrorCode(_In_ SANE_Status status)
-{
-	switch (status) {
-		case SANE_STATUS_GOOD:
-			return S_OK;
-		case SANE_STATUS_UNSUPPORTED:
-			return WIA_ERROR_INVALID_COMMAND;
-		case SANE_STATUS_CANCELLED:
-			return E_ABORT;
-		case SANE_STATUS_DEVICE_BUSY:
-			return WIA_ERROR_BUSY;
-		case SANE_STATUS_INVAL:
-			return WIA_ERROR_INCORRECT_HARDWARE_SETTING;
-		case SANE_STATUS_EOF:
-			return S_FALSE;
-		case SANE_STATUS_JAMMED:
-			return WIA_ERROR_PAPER_JAM;
-		case SANE_STATUS_NO_DOCS:
-			return WIA_ERROR_PAPER_EMPTY;
-		case SANE_STATUS_COVER_OPEN:
-			return WIA_ERROR_COVER_OPEN;
-		case SANE_STATUS_IO_ERROR:
-			return WIA_ERROR_DEVICE_COMMUNICATION;
-		case SANE_STATUS_NO_MEM:
-			return E_OUTOFMEMORY;
-		case SANE_STATUS_ACCESS_DENIED:
-			return E_ACCESSDENIED;
-		default:
-			return WIA_ERROR_GENERAL_ERROR;
-	}
 }

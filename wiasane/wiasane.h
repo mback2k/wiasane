@@ -102,6 +102,5 @@ HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
 HRESULT SetScanWindow(_Inout_ PWIASANE_Context pContext);
 HRESULT SetScanMode(_Inout_ PWIASANE_Context pContext);
-HRESULT GetErrorCode(_In_ SANE_Status status);
 
 #endif

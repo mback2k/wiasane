@@ -120,11 +120,13 @@
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="wiasane.h" />
     <ClInclude Include="wiasane_opt.h" />
+    <ClInclude Include="wiasane_util.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="wiasane.cpp" />
     <ClCompile Include="wiasane_opt.cpp" />
+    <ClCompile Include="wiasane_util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="wiasane.rc" />
