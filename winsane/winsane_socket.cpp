@@ -64,6 +64,45 @@ BOOL WINSANE_Socket::Disconnect()
 	return TRUE;
 }
 
+BOOL WINSANE_Socket::Reconnect()
+{
+	SOCKET new_sock;
+	SOCKADDR addr, *new_addr;
+	int addrlen, result;
+
+	addrlen = sizeof(addr);
+	result = getpeername(this->sock, &addr, &addrlen);
+	if (result) {
+		return FALSE;
+	}
+
+	new_addr = (SOCKADDR*) new BYTE[addrlen];
+	result = getpeername(this->sock, new_addr, &addrlen);
+	if (result) {
+		delete[] new_addr;
+		return FALSE;
+	}
+
+	new_sock = socket(new_addr->sa_family, SOCK_STREAM, IPPROTO_TCP);
+	if (new_sock == INVALID_SOCKET) {
+		delete[] new_addr;
+		return FALSE;
+	}
+
+	if (connect(new_sock, new_addr, addrlen) != 0) {
+		closesocket(new_sock);
+		delete[] new_addr;
+		return FALSE;
+	}
+
+	this->Disconnect();
+	this->Close();
+
+	this->sock = new_sock;
+	this->shut = FALSE;
+	return TRUE;
+}
+
 
 LONG WINSANE_Socket::Flush()
 {

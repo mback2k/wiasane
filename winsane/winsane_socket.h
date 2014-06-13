@@ -40,6 +40,7 @@ public:
 	SOCKET GetSocket();
 	BOOL IsConnected();
 	BOOL Disconnect();
+	BOOL Reconnect();
 
 	LONG Flush();
 	VOID Clear();
