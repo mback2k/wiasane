@@ -976,8 +976,10 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	double dbl;
 	int index;
 
-	if (!pContext && !pContext->oDevice)
-		return E_INVALIDARG;
+	if (!pScanInfo || !pContext ||
+		!pContext->oSession || !pContext->oSession->IsInitialized() ||
+		!pContext->oDevice || !pContext->oDevice->IsOpen())
+			return E_INVALIDARG;
 
 	if (pContext->pValues)
 		FreeScannerDefaults(pScanInfo, pContext);
@@ -1135,7 +1137,10 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 
 HRESULT FreeScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	if (!pContext || !pContext->pValues)
+	if (!pScanInfo || !pContext)
+		return E_INVALIDARG;
+
+	if (!pContext->pValues)
 		return S_OK;
 
 	if (pContext->pValues->pszModeThreshold) {
@@ -1175,6 +1180,11 @@ HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	SANE_Frame frame;
 	SANE_Int depth;
 	HRESULT hr;
+
+	if (!pScanInfo || !pContext ||
+		!pContext->oSession || !pContext->oSession->IsInitialized() ||
+		!pContext->oDevice || !pContext->oDevice->IsOpen())
+			return E_INVALIDARG;
 
 	if (pContext->oDevice->GetParams(&oParams) != SANE_STATUS_GOOD)
 		return E_FAIL;
