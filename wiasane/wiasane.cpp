@@ -871,7 +871,7 @@ HRESULT FreeScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 			pContext->oDevice = NULL;
 		}
 
-		if (pContext->oSession->IsConnected()) {
+		if (pContext->oSession->IsInitialized()) {
 			status = pContext->oSession->Exit();
 			if (status != SANE_STATUS_GOOD)
 				hr = GetErrorCode(status);
@@ -897,7 +897,7 @@ HRESULT OpenScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 
 	hr = S_OK;
 
-	if (pContext->oSession && !pContext->oSession->IsConnected()) {
+	if (pContext->oSession && !pContext->oSession->IsInitialized()) {
 		hr = FreeScannerSession(pScanInfo, pContext);
 		if (FAILED(hr))
 			return hr;
@@ -943,7 +943,7 @@ HRESULT CloseScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 
 	if (pContext->pTask) {
 		if (pContext->pTask->oScan) {
-			if (pContext->oSession->IsConnected()) {
+			if (pContext->oSession->IsInitialized()) {
 				status = pContext->oDevice->Cancel();
 				if (status != SANE_STATUS_GOOD)
 					hr = GetErrorCode(status);

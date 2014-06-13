@@ -48,12 +48,9 @@ public:
 	static PWINSANE_Session Remote(_In_ PTSTR hostname, _In_ USHORT port);
 
 
-	/* Internal API */
-	BOOL IsConnected();
-
-
 	/* Public API */
 	SANE_Status Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth_Callback authorize);
+	BOOL IsInitialized();
 	SANE_Status Exit();
 
 	SANE_Status FetchDevices();

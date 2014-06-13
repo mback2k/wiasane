@@ -144,12 +144,6 @@ PWINSANE_Session WINSANE_Session::Remote(_In_ PTSTR hostname, _In_ USHORT port)
 }
 
 
-BOOL WINSANE_Session::IsConnected()
-{
-	return this->sock->IsConnected();
-}
-
-
 SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth_Callback authorize)
 {
 	SANE_Word version_code;
@@ -197,6 +191,11 @@ SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth
 
 	this->initialized = TRUE;
 	return SANE_STATUS_GOOD;
+}
+
+BOOL WINSANE_Session::IsInitialized()
+{
+	return this->initialized && this->sock->IsConnected();
 }
 
 SANE_Status WINSANE_Session::Exit()
