@@ -91,31 +91,31 @@ SANE_Status WINSANE_Scan::AquireImage(_Inout_ PBYTE buffer, _Inout_ PDWORD lengt
 
 SANE_Status WINSANE_Scan::Connect()
 {
-	SOCKET real_sock, scan_sock;
-	SOCKADDR addr, *scanaddr;
+	SOCKET sock, scan_sock;
+	SOCKADDR addr, *scan_addr;
 	SOCKADDR_IN addr_in;
 	SOCKADDR_IN6 addr_in6;
 	int addrlen, result;
 
-	real_sock = this->sock->GetSocket();
+	sock = this->sock->GetSocket();
 
 	addrlen = sizeof(addr);
-	result = getpeername(real_sock, &addr, &addrlen);
+	result = getpeername(sock, &addr, &addrlen);
 	if (result)
 		return SANE_STATUS_IO_ERROR;
 
 	if (addr.sa_family == AF_INET) {
 		addrlen = sizeof(addr_in);
-		scanaddr = (PSOCKADDR) &addr_in;
-		result = getpeername(real_sock, scanaddr, &addrlen);
+		scan_addr = (PSOCKADDR) &addr_in;
+		result = getpeername(sock, scan_addr, &addrlen);
 		if (result)
 			return SANE_STATUS_IO_ERROR;
 
 		addr_in.sin_port = htons((USHORT) this->port);
 	} else if (addr.sa_family == AF_INET6) {
 		addrlen = sizeof(addr_in6);
-		scanaddr = (PSOCKADDR) &addr_in6;
-		result = getpeername(real_sock, scanaddr, &addrlen);
+		scan_addr = (PSOCKADDR) &addr_in6;
+		result = getpeername(sock, scan_addr, &addrlen);
 		if (result)
 			return SANE_STATUS_IO_ERROR;
 
@@ -123,11 +123,11 @@ SANE_Status WINSANE_Scan::Connect()
 	} else
 		return SANE_STATUS_IO_ERROR;
 
-	scan_sock = socket(scanaddr->sa_family, SOCK_STREAM, IPPROTO_TCP);
+	scan_sock = socket(scan_addr->sa_family, SOCK_STREAM, IPPROTO_TCP);
 	if (scan_sock == INVALID_SOCKET)
 		return SANE_STATUS_IO_ERROR;
 
-	if (connect(scan_sock, scanaddr, addrlen) != 0) {
+	if (connect(scan_sock, scan_addr, addrlen) != 0) {
 		closesocket(scan_sock);
 		return SANE_STATUS_IO_ERROR;
 	}
