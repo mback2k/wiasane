@@ -159,6 +159,12 @@ SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth
 	LONG written;
 	HRESULT hr;
 
+	if (!this->sock->IsConnected()) {
+		if (!this->sock->Reconnect()) {
+			return SANE_STATUS_IO_ERROR;
+		}
+	}
+
 	this->auth_callback = authorize;
 
 	version_code = SANE_VERSION_CODE(SANE_CURRENT_MAJOR, SANE_CURRENT_MINOR, 0);
