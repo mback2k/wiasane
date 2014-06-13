@@ -31,8 +31,10 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	PWINSANE_Option oOption;
 	HRESULT hr;
 
-	if (!pContext || !pContext->oDevice || !pContext->pValues)
-		return E_INVALIDARG;
+	if (!pScanInfo || !pContext || !pContext->pValues ||
+		!pContext->oSession || !pContext->oSession->IsInitialized() ||
+		!pContext->oDevice || !pContext->oDevice->IsOpen())
+			return E_INVALIDARG;
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_MODE);
 	if (oOption && oOption->GetType() == SANE_TYPE_STRING) {
@@ -101,8 +103,10 @@ HRESULT SetScanWindow(_Inout_ PWIASANE_Context pContext)
 	PWINSANE_Option oOption;
 	HRESULT hr;
 
-	if (!pContext || !pContext->oDevice)
-		return E_INVALIDARG;
+	if (!pContext ||
+		!pContext->oSession || !pContext->oSession->IsInitialized() ||
+		!pContext->oDevice || !pContext->oDevice->IsOpen())
+			return E_INVALIDARG;
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_TL_X);
 	if (!oOption) {
@@ -165,8 +169,10 @@ HRESULT SetScanMode(_Inout_ PWIASANE_Context pContext)
 	PWINSANE_Option oOption;
 	HRESULT hr;
 
-	if (!pContext || !pContext->oDevice)
-		return E_INVALIDARG;
+	if (!pContext ||
+		!pContext->oSession || !pContext->oSession->IsInitialized() ||
+		!pContext->oDevice || !pContext->oDevice->IsOpen())
+			return E_INVALIDARG;
 
 	switch (pContext->lScanMode) {
 		case SCANMODE_FINALSCAN:
