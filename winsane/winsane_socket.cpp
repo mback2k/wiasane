@@ -27,6 +27,7 @@
 WINSANE_Socket::WINSANE_Socket(_In_ SOCKET sock)
 {
 	this->sock = sock;
+	this->shut = FALSE;
 	this->buf = NULL;
 	this->buflen = 0;
 	this->bufoff = 0;
@@ -35,6 +36,7 @@ WINSANE_Socket::WINSANE_Socket(_In_ SOCKET sock)
 WINSANE_Socket::~WINSANE_Socket()
 {
 	this->Clear();
+	this->Disconnect();
 	this->Close();
 }
 
@@ -46,7 +48,20 @@ SOCKET WINSANE_Socket::GetSocket()
 
 BOOL WINSANE_Socket::IsConnected()
 {
-	return this->sock != INVALID_SOCKET;
+	return this->sock != INVALID_SOCKET && this->shut != TRUE;
+}
+
+BOOL WINSANE_Socket::Disconnect()
+{
+	if (this->shut != TRUE) {
+		if (this->sock != INVALID_SOCKET) {
+			if (shutdown(this->sock, SD_BOTH) != 0) {
+				return FALSE;
+			}
+		}
+		this->shut = TRUE;
+	}
+	return TRUE;
 }
 
 

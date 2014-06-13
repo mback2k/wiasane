@@ -39,6 +39,7 @@ public:
 	/* Internal API */
 	SOCKET GetSocket();
 	BOOL IsConnected();
+	BOOL Disconnect();
 
 	LONG Flush();
 	VOID Clear();
@@ -71,6 +72,7 @@ private:
 	VOID Close();
 
 	SOCKET sock;
+	BOOL shut;
 	PBYTE buf;
 	ULONG buflen;
 	ULONG bufoff;
