@@ -102,6 +102,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			FreeRegistryInformation(pValue->pScanInfo, pContext);
 
 			pValue->pScanInfo->pMicroDriverContext = NULL;
+			pValue->pScanInfo->DeviceIOHandles[2] = NULL;
+			pValue->pScanInfo->DeviceIOHandles[1] = NULL;
 			break;
 
 		case CMD_RESETSCANNER: // online
