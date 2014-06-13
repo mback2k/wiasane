@@ -772,6 +772,8 @@ HRESULT InitScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 		hr = CreateScannerSession(pScanInfo, pContext);
 		if (FAILED(hr))
 			return hr;
+		if (!pContext->oSession)
+			return E_FAIL;
 	}
 
 	if (!pContext->oSession->IsInitialized()) {
@@ -829,6 +831,8 @@ HRESULT OpenScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 		hr = InitScannerSession(pScanInfo, pContext);
 		if (FAILED(hr))
 			return hr;
+		if (!pContext->oSession || !pContext->oDevice)
+			return E_FAIL;
 	}
 
 	if (!pContext->oDevice->IsOpen()) {
