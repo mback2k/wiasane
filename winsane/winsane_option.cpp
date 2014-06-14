@@ -560,48 +560,52 @@ HRESULT WINSANE_Option::ReadValueResult(_Inout_ PSANE_Word value_type, _Inout_ P
 	if (!value_type || !value_size || !value_result)
 		return E_INVALIDARG;
 
-	hr = this->sock->ReadStatus(&status);
-	if (FAILED(hr))
-		return hr;
-
-	hr = this->sock->ReadWord(&info);
-	if (FAILED(hr))
-		return hr;
-
-	hr = this->sock->ReadWord(value_type);
-	if (FAILED(hr))
-		return hr;
-
-	hr = this->sock->ReadWord(value_size);
-	if (FAILED(hr))
-		return hr;
-
-	hr = this->sock->ReadWord(&pointer);
-	if (FAILED(hr))
-		return hr;
-
-	if (pointer) {
-		readlen = this->sock->Read(value_result, *value_size);
-	} else
-		readlen = 0;
-
-	hr = this->sock->ReadWord(&pointer);
-	if (FAILED(hr))
-		return hr;
-
-	if (pointer) {
-		hr = this->sock->ReadString(&resource);
+	do {
+		hr = this->sock->ReadStatus(&status);
 		if (FAILED(hr))
 			return hr;
 
-		if (resource) {
-			if (strlen(resource) > 0)
-				status = this->session->Authorize(resource);
-			delete[] resource;
-			if (status != SANE_STATUS_GOOD)
-				return status;
+		hr = this->sock->ReadWord(&info);
+		if (FAILED(hr))
+			return hr;
+
+		hr = this->sock->ReadWord(value_type);
+		if (FAILED(hr))
+			return hr;
+
+		hr = this->sock->ReadWord(value_size);
+		if (FAILED(hr))
+			return hr;
+
+		hr = this->sock->ReadWord(&pointer);
+		if (FAILED(hr))
+			return hr;
+
+		if (pointer) {
+			readlen = this->sock->Read(value_result, *value_size);
+		} else
+			readlen = 0;
+
+		hr = this->sock->ReadWord(&pointer);
+		if (FAILED(hr))
+			return hr;
+
+		if (pointer) {
+			hr = this->sock->ReadString(&resource);
+			if (FAILED(hr))
+				return hr;
+
+			if (resource) {
+				if (strlen(resource) > 0)
+					status = this->session->Authorize(resource);
+				delete[] resource;
+				if (status != SANE_STATUS_GOOD)
+					return status;
+			}
+		} else {
+			resource = NULL;
 		}
-	}
+	} while (resource);
 
 	if (!this->sock->IsConnected())
 		return E_ABORT;

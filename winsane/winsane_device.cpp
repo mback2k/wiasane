@@ -94,25 +94,27 @@ SANE_Status WINSANE_Device::Open()
 	if (this->sock->Flush() != written)
 		return SANE_STATUS_IO_ERROR;
 
-	hr = this->sock->ReadStatus(&status);
-	if (FAILED(hr))
-		return SANE_STATUS_IO_ERROR;
+	do {
+		hr = this->sock->ReadStatus(&status);
+		if (FAILED(hr))
+			return SANE_STATUS_IO_ERROR;
 
-	hr = this->sock->ReadHandle(&handle);
-	if (FAILED(hr))
-		return SANE_STATUS_IO_ERROR;
+		hr = this->sock->ReadHandle(&handle);
+		if (FAILED(hr))
+			return SANE_STATUS_IO_ERROR;
 
-	hr = this->sock->ReadString(&resource);
-	if (FAILED(hr))
-		return SANE_STATUS_IO_ERROR;
+		hr = this->sock->ReadString(&resource);
+		if (FAILED(hr))
+			return SANE_STATUS_IO_ERROR;
 
-	if (resource) {
-		if (strlen(resource) > 0)
-			status = this->session->Authorize(resource);
-		delete[] resource;
-		if (status != SANE_STATUS_GOOD)
-			return status;
-	}
+		if (resource) {
+			if (strlen(resource) > 0)
+				status = this->session->Authorize(resource);
+			delete[] resource;
+			if (status != SANE_STATUS_GOOD)
+				return status;
+		}
+	} while (resource);
 
 	if (!this->sock->IsConnected())
 		return SANE_STATUS_IO_ERROR;
@@ -430,29 +432,31 @@ SANE_Status WINSANE_Device::Start(_Outptr_result_maybenull_ PWINSANE_Scan *scan)
 	if (this->sock->Flush() != written)
 		return SANE_STATUS_IO_ERROR;
 
-	hr = this->sock->ReadStatus(&status);
-	if (FAILED(hr))
-		return SANE_STATUS_IO_ERROR;
+	do {
+		hr = this->sock->ReadStatus(&status);
+		if (FAILED(hr))
+			return SANE_STATUS_IO_ERROR;
 
-	hr = this->sock->ReadWord(&port);
-	if (FAILED(hr))
-		return SANE_STATUS_IO_ERROR;
+		hr = this->sock->ReadWord(&port);
+		if (FAILED(hr))
+			return SANE_STATUS_IO_ERROR;
 
-	hr = this->sock->ReadWord(&byte_order);
-	if (FAILED(hr))
-		return SANE_STATUS_IO_ERROR;
+		hr = this->sock->ReadWord(&byte_order);
+		if (FAILED(hr))
+			return SANE_STATUS_IO_ERROR;
 
-	hr = this->sock->ReadString(&resource);
-	if (FAILED(hr))
-		return SANE_STATUS_IO_ERROR;
+		hr = this->sock->ReadString(&resource);
+		if (FAILED(hr))
+			return SANE_STATUS_IO_ERROR;
 
-	if (resource) {
-		if (strlen(resource) > 0)
-			status = this->session->Authorize(resource);
-		delete[] resource;
-		if (status != SANE_STATUS_GOOD)
-			return status;
-	}
+		if (resource) {
+			if (strlen(resource) > 0)
+				status = this->session->Authorize(resource);
+			delete[] resource;
+			if (status != SANE_STATUS_GOOD)
+				return status;
+		}
+	} while (resource);
 
 	if (!this->sock->IsConnected())
 		return SANE_STATUS_IO_ERROR;
