@@ -50,6 +50,7 @@ public:
 
 	/* Public API */
 	SANE_Status Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth_Callback authorize);
+	SANE_Status Authorize(_In_ SANE_String resource);
 	BOOL IsInitialized();
 	SANE_Status Exit();
 

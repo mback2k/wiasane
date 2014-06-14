@@ -193,6 +193,44 @@ SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth
 	return SANE_STATUS_GOOD;
 }
 
+SANE_Status WINSANE_Session::Authorize(_In_ SANE_String resource)
+{
+	SANE_Char username[SANE_MAX_USERNAME_LEN+1];
+	SANE_Char password[SANE_MAX_PASSWORD_LEN+1];
+	SANE_Word dummy;
+	LONG written;
+	HRESULT hr;
+
+	if (!this->auth_callback)
+		return SANE_STATUS_ACCESS_DENIED;
+
+	ZeroMemory(username, sizeof(username));
+	ZeroMemory(password, sizeof(password));
+	this->auth_callback(resource, username, password);
+	username[SANE_MAX_USERNAME_LEN] = 0;
+	password[SANE_MAX_PASSWORD_LEN] = 0;
+
+	if (!strnlen_s(username, SANE_MAX_USERNAME_LEN) ||
+		!strnlen_s(password, SANE_MAX_PASSWORD_LEN))
+		return SANE_STATUS_ACCESS_DENIED;
+
+	written = this->sock->WriteWord(WINSANE_NET_AUTHORIZE);
+	written += this->sock->WriteString(resource);
+	written += this->sock->WriteString(username);
+	written += this->sock->WriteString(password);
+	if (this->sock->Flush() != written)
+		return SANE_STATUS_IO_ERROR;
+
+	hr = this->sock->ReadWord(&dummy);
+	if (FAILED(hr))
+		return SANE_STATUS_IO_ERROR;
+
+	if (!this->sock->IsConnected())
+		return SANE_STATUS_IO_ERROR;
+
+	return SANE_STATUS_GOOD;
+}
+
 BOOL WINSANE_Session::IsInitialized()
 {
 	return this->initialized && this->sock->IsConnected();
