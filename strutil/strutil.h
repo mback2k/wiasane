@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -34,6 +34,9 @@ __user_code
 
 LPTSTR StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString);
 
+LPSTR StringWToA(_In_ HANDLE hHeap, _In_ LPWSTR pszString);
+LPWSTR StringAToW(_In_ HANDLE hHeap, _In_ LPSTR pszString);
+
 HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...);
 HRESULT StringCbAPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...);
 
@@ -47,11 +50,17 @@ HRESULT StringCchAVPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *p
 HRESULT StringCchAVPrintfW( _In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList);
 
 #ifdef UNICODE
+#define StringToA StringWToA
+#define StringToW StringAClone
+#define StringTo StringToW
 #define StringCbAPrintf StringCbAPrintfW
 #define StringCchAPrintf StringCchAPrintfW
 #define StringCbAVPrintf StringCbAVPrintfW
 #define StringCchAVPrintf StringCchAVPrintfW
 #else
+#define StringToA StringAClone
+#define StringToW StringAToW
+#define StringTo StringToA
 #define StringCbAPrintf StringCbAPrintfA
 #define StringCchAPrintf StringCchAPrintfA
 #define StringCbAVPrintf StringCbAVPrintfA

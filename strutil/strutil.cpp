@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -43,6 +43,57 @@ LPTSTR StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString)
 
 	hr = StringCbCopy(pszCopy, cbCopy + sizeof(TCHAR), pszString);
 	if (FAILED(hr)) {
+		HeapFree(hHeap, 0, pszCopy);
+		return NULL;
+	}
+
+	return pszCopy;
+}
+
+
+LPSTR StringWToA(_In_ HANDLE hHeap, _In_ LPWSTR pszString)
+{
+	LPSTR pszCopy;
+	int iLength;
+
+	if (!pszString)
+		return NULL;
+
+	iLength = WideCharToMultiByte(CP_ACP, 0, pszString, -1, NULL, 0, NULL, NULL);
+	if (!iLength)
+		return NULL;
+
+	pszCopy = (LPSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, iLength);
+	if (!pszCopy)
+		return NULL;
+
+	iLength = WideCharToMultiByte(CP_ACP, 0, pszString, -1, pszCopy, iLength, NULL, NULL);
+	if (!iLength) {
+		HeapFree(hHeap, 0, pszCopy);
+		return NULL;
+	}
+
+	return pszCopy;
+}
+
+LPWSTR StringAToW(_In_ HANDLE hHeap, _In_ LPSTR pszString)
+{
+	LPWSTR pszCopy;
+	int iLength;
+
+	if (!pszString)
+		return NULL;
+
+	iLength = MultiByteToWideChar(CP_ACP, 0, pszString, -1, NULL, 0);
+	if (!iLength)
+		return NULL;
+
+	pszCopy = (LPWSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, iLength);
+	if (!pszCopy)
+		return NULL;
+
+	iLength = MultiByteToWideChar(CP_ACP, 0, pszString, -1, pszCopy, iLength);
+	if (!iLength) {
 		HeapFree(hHeap, 0, pszCopy);
 		return NULL;
 	}
