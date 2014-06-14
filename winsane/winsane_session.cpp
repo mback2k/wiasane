@@ -21,10 +21,14 @@
 #include "winsane_session.h"
 #include "winsane_internal.h"
 
+#include <wincrypt.h>
 #include <stdlib.h>
 #include <tchar.h>
 
 #include "strutil.h"
+
+#define WINSANE_AUTH_MD5 "$MD5$"
+#define WINSANE_AUTH_MD5_FORMAT "$MD5$%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"
 
 WINSANE_Session::WINSANE_Session(_In_ SOCKET sock)
 {
@@ -199,11 +203,20 @@ SANE_Status WINSANE_Session::Authorize(_In_ SANE_String resource)
 {
 	SANE_Char username[SANE_MAX_USERNAME_LEN+1];
 	SANE_Char password[SANE_MAX_PASSWORD_LEN+1];
+	SANE_Char *md5pos, *md5salt;
 	SANE_Word dummy;
+	DWORD md5len, reslen, usrlen, pwdlen;
+	BYTE md5hash[16];
 	LONG written;
+	HCRYPTPROV hCryptProv;
+	HCRYPTHASH hHash;
 	HRESULT hr;
 
-	if (!this->auth_callback)
+	if (!this->auth_callback || !resource)
+		return SANE_STATUS_ACCESS_DENIED;
+
+	reslen = (DWORD) strlen(resource);
+	if (!reslen)
 		return SANE_STATUS_ACCESS_DENIED;
 
 	ZeroMemory(username, sizeof(username));
@@ -212,9 +225,40 @@ SANE_Status WINSANE_Session::Authorize(_In_ SANE_String resource)
 	username[SANE_MAX_USERNAME_LEN] = 0;
 	password[SANE_MAX_PASSWORD_LEN] = 0;
 
-	if (!strnlen_s(username, SANE_MAX_USERNAME_LEN) ||
-		!strnlen_s(password, SANE_MAX_PASSWORD_LEN))
+	usrlen = (DWORD) strnlen_s(username, SANE_MAX_USERNAME_LEN);
+	if (!usrlen)
 		return SANE_STATUS_ACCESS_DENIED;
+
+	pwdlen = (DWORD) strnlen_s(password, SANE_MAX_PASSWORD_LEN);
+	if (!pwdlen)
+		return SANE_STATUS_ACCESS_DENIED;
+
+	md5pos = strstr(resource, WINSANE_AUTH_MD5);
+	if (md5pos) {
+		md5len = (DWORD) strnlen_s(WINSANE_AUTH_MD5, sizeof(WINSANE_AUTH_MD5));
+		md5salt = md5pos + md5len;
+		if (md5salt > md5pos && md5salt < (resource + reslen)) {
+			if (CryptAcquireContext(&hCryptProv, NULL, NULL,
+									PROV_RSA_FULL, CRYPT_VERIFYCONTEXT)) {
+				if (CryptCreateHash(hCryptProv, CALG_MD5, 0, 0, &hHash)) {
+					md5len = (DWORD) strnlen_s(md5salt, reslen - (md5salt - resource));
+					CryptHashData(hHash, (const BYTE*) md5salt, md5len, 0);
+					CryptHashData(hHash, (const BYTE*) password, pwdlen, 0);
+					md5len = sizeof(md5hash);
+					ZeroMemory(md5hash, md5len);
+					if (CryptGetHashParam(hHash, HP_HASHVAL, md5hash, &md5len, 0)) {
+						sprintf_s(password, SANE_MAX_PASSWORD_LEN, WINSANE_AUTH_MD5_FORMAT,
+								md5hash[0], md5hash[1], md5hash[2], md5hash[3],
+								md5hash[4], md5hash[5], md5hash[6], md5hash[7],
+								md5hash[8], md5hash[9], md5hash[10], md5hash[11],
+								md5hash[12], md5hash[13], md5hash[14], md5hash[15]);
+					}
+					CryptDestroyHash(hHash);
+				}
+				CryptReleaseContext(hCryptProv, 0);
+			}
+		}
+	}
 
 	written = this->sock->WriteWord(WINSANE_NET_AUTHORIZE);
 	written += this->sock->WriteString(resource);
