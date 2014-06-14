@@ -49,7 +49,7 @@ VOID DebugSession(WINSANE_Session *session)
 	WINSANE_Device *device;
 	LONG index;
 
-	if (session->Init(NULL, NULL) == SANE_STATUS_GOOD) {
+	if (session->Init(NULL, &SessionAuthCallback) == SANE_STATUS_GOOD) {
 		if (session->FetchDevices() == SANE_STATUS_GOOD) {
 			for (index = 0; index < session->GetDevices(); index++) {
 				device = session->GetDevice(index);
@@ -291,4 +291,19 @@ VOID DebugSessionDeviceScan(WINSANE_Session *session, WINSANE_Device *device)
 			device->Cancel();
 		}
 	}
+}
+
+
+WINSANE_API_CALLBACK SessionAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password)
+{
+	if (!resource || !strlen(resource) || !username || !password)
+		return;
+
+	printf("Authentication for %s:\n", resource);
+
+	printf("Username: ");
+	scanf_s("%s", username, SANE_MAX_USERNAME_LEN);
+
+	printf("Password: ");
+	scanf_s("%s", password, SANE_MAX_PASSWORD_LEN);
 }

@@ -42,4 +42,6 @@ VOID DebugSessionDeviceOption(WINSANE_Session *session, WINSANE_Device *device, 
 VOID DebugSessionDeviceParams(WINSANE_Session *session, WINSANE_Device *device, WINSANE_Params *params);
 VOID DebugSessionDeviceScan(WINSANE_Session *session, WINSANE_Device *device);
 
+WINSANE_API_CALLBACK SessionAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password);
+
 #endif
