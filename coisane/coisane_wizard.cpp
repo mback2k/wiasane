@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -24,8 +24,6 @@
 #include <strsafe.h>
 #include <malloc.h>
 
-#include "winsane.h"
-
 #include "dllmain.h"
 #include "resource.h"
 #include "strutil.h"
@@ -33,6 +31,8 @@
 #include "strutil_res.h"
 #include "coisane_util.h"
 
+
+PCOISANE_Data g_pWizardPageData = NULL; // global instance of the COISANE data with device information
 
 DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
 {
@@ -472,7 +472,8 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 
 		oSession = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
 		if (oSession) {
-			if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
+			g_pWizardPageData = privateData;
+			if (oSession->Init(NULL, &WizardPageAuthCallback) == SANE_STATUS_GOOD) {
 				if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
 					oDevice = oSession->GetDevice(privateData->lpName);
 					if (oDevice) {
@@ -495,6 +496,7 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 			} else {
 				res = FALSE;
 			}
+			g_pWizardPageData = NULL;
 			delete oSession;
 		} else {
 			res = FALSE;
@@ -502,4 +504,34 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 	}
 
 	return res;
+}
+
+
+WINSANE_API_CALLBACK WizardPageAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password)
+{
+	LPSTR lpUsername, lpPassword;
+	HANDLE hHeap;
+
+	if (!g_pWizardPageData || !resource || !strlen(resource) || !username || !password)
+		return;
+
+	Trace(TEXT("------ WizardPageAuthCallback(resource='%hs') ------"), resource);
+
+	hHeap = GetProcessHeap();
+	if (!hHeap)
+		return;
+
+	lpUsername = StringToA(hHeap, g_pWizardPageData->lpUsername);
+	if (lpUsername) {
+		lpPassword = StringToA(hHeap, g_pWizardPageData->lpPassword);
+		if (lpPassword) {
+			strcpy_s(username, SANE_MAX_USERNAME_LEN, lpUsername);
+			strcpy_s(password, SANE_MAX_PASSWORD_LEN, lpPassword);
+			HeapFree(hHeap, 0, lpPassword);
+		}
+		HeapFree(hHeap, 0, lpUsername);
+	}
+
+	Trace(TEXT("Username: %hs (%d)"), username, strlen(username));
+	Trace(TEXT("Password: ******** (%d)"), strlen(password));
 }
