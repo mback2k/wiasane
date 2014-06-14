@@ -401,10 +401,11 @@ BOOL InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
 			hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER);
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
+				SendMessageA(hwnd, CB_RESETCONTENT, (WPARAM) 0, (LPARAM) 0);
 				for (index = 0; index < oSession->GetDevices(); index++) {
 					oDevice = oSession->GetDevice(index);
 					if (oDevice) {
-						SendMessageA(hwnd, CB_ADDSTRING, 0, (LPARAM) oDevice->GetName());
+						SendMessageA(hwnd, CB_ADDSTRING, (WPARAM) 0, (LPARAM) oDevice->GetName());
 					}
 				}
 			}
