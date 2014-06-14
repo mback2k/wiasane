@@ -29,6 +29,8 @@
 
 #define WINSANE_DEFAULT_PORT			6566
 
+#define WINSANE_API_CALLBACK extern "C" void
+
 #ifdef WINSANE_EXPORTS
 #define WINSANE_API __declspec(dllexport)
 #else
