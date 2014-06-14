@@ -56,9 +56,9 @@ public:
 
 	SANE_Status FetchDevices();
 	LONG GetDevices();
-	WINSANE_Device* GetDevice(_In_ LONG index);
-	WINSANE_Device* GetDevice(_In_ SANE_String_Const name);
-	WINSANE_Device* GetDevice(_In_ PTSTR ptName);
+	PWINSANE_Device GetDevice(_In_ LONG index);
+	PWINSANE_Device GetDevice(_In_ SANE_String_Const name);
+	PWINSANE_Device GetDevice(_In_ PTSTR pszName);
 	VOID ClearDevices();
 
 

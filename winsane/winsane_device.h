@@ -53,6 +53,7 @@ public:
 	LONG GetOptions();
 	PWINSANE_Option GetOption(_In_ LONG index);
 	PWINSANE_Option GetOption(_In_ SANE_String_Const name);
+	PWINSANE_Option GetOption(_In_ PTSTR pszName);
 	VOID ClearOptions();
 
 	SANE_Status GetParams(_Outptr_result_maybenull_ PWINSANE_Params *params);

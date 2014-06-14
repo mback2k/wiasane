@@ -21,6 +21,8 @@
 #include "winsane_device.h"
 #include "winsane_internal.h"
 
+#include "strutil.h"
+
 #define INVALID_SANE_HANDLE ((SANE_Handle)-1)
 
 WINSANE_Device::WINSANE_Device(_In_ PWINSANE_Session session, _In_ PWINSANE_Socket sock, _In_ PSANE_Device sane_device)
@@ -321,6 +323,26 @@ PWINSANE_Option WINSANE_Device::GetOption(_In_ SANE_String_Const name)
 	}
 
 	return NULL;
+}
+
+PWINSANE_Option WINSANE_Device::GetOption(_In_ PTSTR pszName)
+{
+	PWINSANE_Option option;
+	SANE_String_Const name;
+	HANDLE hHeap;
+
+	option = NULL;
+
+	hHeap = GetProcessHeap();
+	if (hHeap) {
+		name = (SANE_String_Const) StringToA(hHeap, pszName);
+		if (name) {
+			option = this->GetOption(name);
+			HeapFree(hHeap, 0, (LPVOID) name);
+		}
+	}
+
+	return option;
 }
 
 VOID WINSANE_Device::ClearOptions()

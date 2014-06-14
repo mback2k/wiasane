@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <tchar.h>
 
+#include "strutil.h"
+
 WINSANE_Session::WINSANE_Session(_In_ SOCKET sock)
 {
 	this->sock = new WINSANE_Socket(sock);
@@ -379,35 +381,24 @@ PWINSANE_Device WINSANE_Session::GetDevice(_In_ SANE_String_Const name)
 	return NULL;
 }
 
-PWINSANE_Device WINSANE_Session::GetDevice(_In_ PTSTR ptName)
+PWINSANE_Device WINSANE_Session::GetDevice(_In_ PTSTR pszName)
 {
-#ifdef UNICODE
 	PWINSANE_Device device;
 	SANE_String_Const name;
 	HANDLE hHeap;
-	int length;
 
 	device = NULL;
 
 	hHeap = GetProcessHeap();
 	if (hHeap) {
-		length = WideCharToMultiByte(CP_ACP, 0, ptName, -1, NULL, 0, NULL, NULL);
-		if (length) {
-			name = (SANE_String_Const) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, length);
-			if (name) {
-				length = WideCharToMultiByte(CP_ACP, 0, ptName, -1, (LPSTR) name, length, NULL, NULL);
-				if (length) {
-					device = WINSANE_Session::GetDevice(name);
-				}
-				HeapFree(hHeap, 0, (LPVOID) name);
-			}
+		name = (SANE_String_Const) StringToA(hHeap, pszName);
+		if (name) {
+			device = this->GetDevice(name);
+			HeapFree(hHeap, 0, (LPVOID) name);
 		}
 	}
 
 	return device;
-#else
-	return WINSANE_Session::GetDevice((SANE_String_Const) name);
-#endif
 }
 
 VOID WINSANE_Session::ClearDevices()

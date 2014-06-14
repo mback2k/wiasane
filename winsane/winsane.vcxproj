@@ -68,6 +68,7 @@
       <Culture>0x0009</Culture>
     </ResourceCompile>
     <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)strutil</AdditionalIncludeDirectories>
       <ExceptionHandling>
       </ExceptionHandling>
       <SDLCheck>True</SDLCheck>
@@ -75,7 +76,8 @@
       <PreprocessorDefinitions>WINSANE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>%(AdditionalDependencies);ws2_32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)strutil\$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);ws2_32.lib;strutil.lib</AdditionalDependencies>
       <GenerateDebugInformation>True</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
