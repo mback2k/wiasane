@@ -106,7 +106,13 @@ SANE_Status WINSANE_Device::Open()
 	if (FAILED(hr))
 		return SANE_STATUS_IO_ERROR;
 
-	delete[] resource;
+	if (resource) {
+		if (strlen(resource) > 0)
+			status = this->session->Authorize(resource);
+		delete[] resource;
+		if (status != SANE_STATUS_GOOD)
+			return status;
+	}
 
 	if (!this->sock->IsConnected())
 		return SANE_STATUS_IO_ERROR;
@@ -440,7 +446,13 @@ SANE_Status WINSANE_Device::Start(_Outptr_result_maybenull_ PWINSANE_Scan *scan)
 	if (FAILED(hr))
 		return SANE_STATUS_IO_ERROR;
 
-	delete[] resource;
+	if (resource) {
+		if (strlen(resource) > 0)
+			status = this->session->Authorize(resource);
+		delete[] resource;
+		if (status != SANE_STATUS_GOOD)
+			return status;
+	}
 
 	if (!this->sock->IsConnected())
 		return SANE_STATUS_IO_ERROR;

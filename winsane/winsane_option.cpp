@@ -593,6 +593,14 @@ HRESULT WINSANE_Option::ReadValueResult(_Inout_ PSANE_Word value_type, _Inout_ P
 		hr = this->sock->ReadString(&resource);
 		if (FAILED(hr))
 			return hr;
+
+		if (resource) {
+			if (strlen(resource) > 0)
+				status = this->session->Authorize(resource);
+			delete[] resource;
+			if (status != SANE_STATUS_GOOD)
+				return status;
+		}
 	}
 
 	if (!this->sock->IsConnected())
