@@ -48,6 +48,10 @@
 
 #include <windows.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define SANE_CURRENT_MAJOR	1
 #define SANE_CURRENT_MINOR	0
 
@@ -192,5 +196,9 @@ struct SANE_Auth_Data;
 #define SANE_MAX_PASSWORD_LEN	128
 
 typedef void (*SANE_Auth_Callback) (SANE_String_Const resource, SANE_Char *username, SANE_Char *password);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
