@@ -3,6 +3,6 @@
   <PropertyGroup>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerEnvironment>PATH=$(SolutionDir)winsane\$(OutDir);%PATH%</LocalDebuggerEnvironment>
-    <LocalDebuggerCommandArguments>10.0.0.1</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>$(SANED)</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>
