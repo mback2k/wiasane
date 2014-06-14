@@ -90,9 +90,11 @@ const
 procedure CurStepChanged(CurStep: TSetupStep);
 var
   ResultCode: integer;
+  StatusLabel: string;
 begin
   if CurStep = ssInstall then
   begin
+    StatusLabel := WizardForm.StatusLabel.Caption;
     if FileExists(ExpandConstant('{app}\devsane.exe')) and FileExists(ExpandConstant('{app}\wiasane.inf')) then
     begin
       WizardForm.StatusLabel.Caption := CustomMessage('UninstallDriver');
@@ -102,9 +104,11 @@ begin
       else
         Sleep(1000);
     end;
+    WizardForm.StatusLabel.Caption := StatusLabel;
   end
   else if CurStep = ssPostInstall then
   begin
+    StatusLabel := WizardForm.StatusLabel.Caption;
     WizardForm.StatusLabel.Caption := CustomMessage('InstallDriver');
     if not Exec(ExpandConstant('{app}\devsane.exe'), ExpandConstant('driver install wiasane.inf {hwnd}'), ExpandConstant('{app}'), SW_SHOW, ewWaitUntilTerminated, ResultCode)
         or ((ResultCode <> 0) and (ResultCode <> ERROR_NO_SUCH_DEVINST)) then
@@ -124,14 +128,17 @@ begin
           MsgBox(CustomMessage('FinishInstallAction'), mbInformation, MB_OK);
       end;
     end;
+    WizardForm.StatusLabel.Caption := StatusLabel;
   end;
 end;
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 var
   ResultCode: integer;
+  StatusLabel: string;
 begin
   if CurUninstallStep = usUninstall then
   begin
+    StatusLabel := UninstallProgressForm.StatusLabel.Caption;
     UninstallProgressForm.StatusLabel.Caption := CustomMessage('UninstallDevice');
     if not Exec(ExpandConstant('{app}\devsane.exe'), ExpandConstant('device uninstall wiasane.inf'), ExpandConstant('{app}'), SW_HIDE, ewWaitUntilTerminated, ResultCode)
         or ((ResultCode <> 0) and (ResultCode <> ERROR_DRIVER_PACKAGE_NOT_IN_STORE)) then
@@ -144,6 +151,7 @@ begin
       RaiseException(FmtMessage(CustomMessage('FailedUninstallDriver'), [SysErrorMessage(ResultCode), Format('%.8x', [ResultCode])]))
     else
       Sleep(500);
+    UninstallProgressForm.StatusLabel.Caption := StatusLabel;
   end;
 end;
 [_ISTool]
