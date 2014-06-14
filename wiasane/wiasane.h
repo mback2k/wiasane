@@ -81,6 +81,8 @@ typedef struct _WIASANE_Context {
 	PWIASANE_Task pTask;
 	PTSTR pszHost;
 	PTSTR pszName;
+	PTSTR pszUsername;
+	PTSTR pszPassword;
 	USHORT usPort;
 	UINT uiDevRef;
 	LONG lScanMode;

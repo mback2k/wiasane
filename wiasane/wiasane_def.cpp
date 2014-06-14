@@ -32,7 +32,7 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 {
 	HKEY hKey, hOpenKey;
 	DWORD dwWritten, dwType, dwPort;
-	PTSTR pszHost, pszName;
+	PTSTR pszHost, pszName, pszUsername, pszPassword;
 	LSTATUS st;
 	HRESULT hr;
 
@@ -105,6 +105,46 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 				hr = E_OUTOFMEMORY;
 		} else
 			hr = E_FAIL;
+
+		dwWritten = 0;
+		dwType = REG_SZ;
+		pszUsername = NULL;
+
+		st = RegQueryValueEx(hOpenKey, TEXT("Username"), NULL, &dwType, (LPBYTE)pszUsername, &dwWritten);
+		if (st == ERROR_SUCCESS && dwWritten > 0) {
+			pszUsername = (PTSTR) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, dwWritten);
+			if (pszUsername) {
+				st = RegQueryValueEx(hOpenKey, TEXT("Username"), NULL, &dwType, (LPBYTE)pszUsername, &dwWritten);
+				if (st == ERROR_SUCCESS) {
+					pContext->pszUsername = pszUsername;
+				} else {
+					HeapFree(pScanInfo->DeviceIOHandles[1], 0, pszUsername);
+					hr = E_FAIL;
+				}
+			} else
+				hr = E_OUTOFMEMORY;
+		} else
+			hr = E_FAIL;
+
+		dwWritten = 0;
+		dwType = REG_SZ;
+		pszPassword = NULL;
+
+		st = RegQueryValueEx(hOpenKey, TEXT("Password"), NULL, &dwType, (LPBYTE)pszPassword, &dwWritten);
+		if (st == ERROR_SUCCESS && dwWritten > 0) {
+			pszPassword = (PTSTR) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, dwWritten);
+			if (pszPassword) {
+				st = RegQueryValueEx(hOpenKey, TEXT("Password"), NULL, &dwType, (LPBYTE)pszPassword, &dwWritten);
+				if (st == ERROR_SUCCESS) {
+					pContext->pszPassword = pszPassword;
+				} else {
+					HeapFree(pScanInfo->DeviceIOHandles[1], 0, pszPassword);
+					hr = E_FAIL;
+				}
+			} else
+				hr = E_OUTOFMEMORY;
+		} else
+			hr = E_FAIL;
 	} else
 		hr = E_ACCESSDENIED;
 
@@ -121,6 +161,12 @@ HRESULT FreeRegistryInformation(_Inout_ PSCANINFO pScanInfo, _In_ PWIASANE_Conte
 
 	if (pContext->pszName)
 		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszName);
+
+	if (pContext->pszUsername)
+		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszUsername);
+
+	if (pContext->pszPassword)
+		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszPassword);
 
 	ZeroMemory(pContext, sizeof(WIASANE_Context));
 	HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext);
