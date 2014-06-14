@@ -21,8 +21,9 @@
 #include "winsane_option.h"
 #include "winsane_internal.h"
 
-WINSANE_Option::WINSANE_Option(_In_ PWINSANE_Device device, _In_ PWINSANE_Socket sock, _In_ PSANE_Option_Descriptor sane_option, _In_ SANE_Handle sane_handle, _In_ int index)
+WINSANE_Option::WINSANE_Option(_In_ PWINSANE_Session session, _In_ PWINSANE_Device device, _In_ PWINSANE_Socket sock, _In_ PSANE_Option_Descriptor sane_option, _In_ SANE_Handle sane_handle, _In_ int index)
 {
+	this->session = session;
 	this->device = device;
 	this->sock = sock;
 	this->sane_option = sane_option;

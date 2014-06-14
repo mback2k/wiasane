@@ -28,10 +28,11 @@
 #include "winsane.h"
 #include "winsane_socket.h"
 #include "winsane_device.h"
+#include "winsane_session.h"
 
 class WINSANE_API WINSANE_Option {
 public:
-	WINSANE_Option(_In_ PWINSANE_Device device, _In_ PWINSANE_Socket sock, _In_ PSANE_Option_Descriptor sane_option, _In_ SANE_Handle sane_handle, _In_ int index);
+	WINSANE_Option(_In_ PWINSANE_Session session, _In_ PWINSANE_Device device, _In_ PWINSANE_Socket sock, _In_ PSANE_Option_Descriptor sane_option, _In_ SANE_Handle sane_handle, _In_ int index);
 	~WINSANE_Option();
 
 
@@ -74,6 +75,7 @@ protected:
 private:
 	HRESULT ReadValueResult(_Inout_ PSANE_Word value_type, _Inout_ PSANE_Word value_size, _Inout_ PBYTE value_result);
 
+	PWINSANE_Session session;
 	PWINSANE_Device device;
 	PWINSANE_Socket sock;
 	PSANE_Option_Descriptor sane_option;

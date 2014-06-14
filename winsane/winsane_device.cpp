@@ -247,7 +247,7 @@ SANE_Status WINSANE_Device::FetchOptions()
 		this->options = new PWINSANE_Option[this->num_options];
 
 		for (index = 0; index < this->num_options; index++) {
-			this->options[index] = new WINSANE_Option(this, this->sock, sane_options[index], this->sane_handle, index);
+			this->options[index] = new WINSANE_Option(this->session, this, this->sock, sane_options[index], this->sane_handle, index);
 		}
 	}
 
