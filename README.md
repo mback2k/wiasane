@@ -31,17 +31,14 @@ Features
 - Support for contrast and brightness settings
 - Support for single-sided scanning from a flatbed
 - Support for automatic document feeder and duplex mode
+- Support for username- und password-based authentication
 - Integrated property page for device modification
 - Integrated wizard during driver/device installation
 
-To be implemented
------------------
-- Support for username- und password-based authentication (in progress)
-
 To be improved
 --------------
-- Make WIA driver use asynchronous network connections
-- Make wizard and property pages use threaded device I/O handling
+- Make WIA driver use asynchronous network connections (in progress)
+- Make wizard and property pages use threaded device I/O handling (in progress)
 - Handling of rounding issues while converting between units of length
 - Handling of errors while using automatic document feeder or duplex mode
 
