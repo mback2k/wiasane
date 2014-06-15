@@ -28,6 +28,7 @@
 #include <malloc.h>
 
 #include "strutil.h"
+#include "strutil_mem.h"
 
 VOID Trace_(_In_ LPCTSTR lpszPrefix, _In_ LPCTSTR lpszFormat, ...)
 {
@@ -46,9 +47,9 @@ VOID Trace_(_In_ LPCTSTR lpszPrefix, _In_ LPCTSTR lpszFormat, ...)
 			hr = StringCchAPrintf(hHeap, &lpOut, &cbLen, TEXT("%s: %s\r\n"), lpszPrefix, lpszMsg);
 			if (SUCCEEDED(hr)) {
 				OutputDebugString(lpOut);
-				HeapFree(hHeap, 0, lpOut);
+				HeapSafeFree(hHeap, 0, lpOut);
 			}
-			HeapFree(hHeap, 0, lpszMsg);
+			HeapSafeFree(hHeap, 0, lpszMsg);
 		}
 	}
 }

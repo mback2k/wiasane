@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "strutil_mem.h"
 
 LPTSTR WINAPI StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString)
 {
@@ -43,7 +44,7 @@ LPTSTR WINAPI StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString)
 
 	hr = StringCbCopy(pszCopy, cbCopy + sizeof(TCHAR), pszString);
 	if (FAILED(hr)) {
-		HeapFree(hHeap, 0, pszCopy);
+		HeapSafeFree(hHeap, 0, pszCopy);
 		return NULL;
 	}
 
@@ -69,7 +70,7 @@ LPSTR WINAPI StringWToA(_In_ HANDLE hHeap, _In_ LPWSTR pszString)
 
 	iLength = WideCharToMultiByte(CP_ACP, 0, pszString, -1, pszCopy, iLength, NULL, NULL);
 	if (!iLength) {
-		HeapFree(hHeap, 0, pszCopy);
+		HeapSafeFree(hHeap, 0, pszCopy);
 		return NULL;
 	}
 
@@ -94,7 +95,7 @@ LPWSTR WINAPI StringAToW(_In_ HANDLE hHeap, _In_ LPSTR pszString)
 
 	iLength = MultiByteToWideChar(CP_ACP, 0, pszString, -1, pszCopy, iLength);
 	if (!iLength) {
-		HeapFree(hHeap, 0, pszCopy);
+		HeapSafeFree(hHeap, 0, pszCopy);
 		return NULL;
 	}
 
@@ -201,7 +202,7 @@ HRESULT StringCchAVPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *p
 			*ppszDest = pszDest;
 			return S_OK;
 		} else {
-			HeapFree(hHeap, 0, pszDest);
+			HeapSafeFree(hHeap, 0, pszDest);
 		}
 	}
 
@@ -232,7 +233,7 @@ HRESULT StringCchAVPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *
 			*ppszDest = pszDest;
 			return S_OK;
 		} else {
-			HeapFree(hHeap, 0, pszDest);
+			HeapSafeFree(hHeap, 0, pszDest);
 		}
 	}
 

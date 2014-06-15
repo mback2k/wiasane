@@ -20,6 +20,7 @@
 
 #include "strutil_reg.h"
 
+#include "strutil_mem.h"
 
 LONG WINAPI ReadRegistryLong(_In_ HANDLE hHeap, _In_ HKEY hKey, _In_opt_ LPCTSTR lpcszValueName, _Out_ DWORD *pdwValue)
 {
@@ -81,17 +82,17 @@ LONG WINAPI ReadRegistryString(_In_ HANDLE hHeap, _In_ HKEY hKey, _In_opt_ LPCTS
 
 	lStatus = RegQueryValueEx(hKey, lpcszValueName, NULL, &dwType, (LPBYTE) lpszValue, &dwLength);
 	if (lStatus != ERROR_SUCCESS) {
-		HeapFree(hHeap, 0, lpszValue);
+		HeapSafeFree(hHeap, 0, lpszValue);
 		return lStatus;
 	}
 
 	if (dwType != REG_SZ) {
-		HeapFree(hHeap, 0, lpszValue);
+		HeapSafeFree(hHeap, 0, lpszValue);
 		return ERROR_INVALID_DATATYPE;
 	}
 
 	if (!dwLength) {
-		HeapFree(hHeap, 0, lpszValue);
+		HeapSafeFree(hHeap, 0, lpszValue);
 		return ERROR_EMPTY;
 	}
 

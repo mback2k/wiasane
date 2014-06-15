@@ -20,7 +20,6 @@
 
 #include "strutil_mem.h"
 
-
 BOOL WINAPI HeapSafeFree(_In_ HANDLE hHeap, _In_ DWORD dwFlags, _In_ LPVOID lpMem)
 {
 	size_t cbMem;

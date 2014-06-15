@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -20,6 +20,7 @@
 
 #include "strutil_res.h"
 
+#include "strutil_mem.h"
 
 int WINAPI LoadAString(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ UINT uID, _Out_ LPTSTR *ppszBuffer)
 {
@@ -46,9 +47,9 @@ int WINAPI MessageBoxR(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ HWN
 	if (LoadAString(hHeap, hInstance, uText, (LPTSTR*) &lpText) > 0) {
 		if (LoadAString(hHeap, hInstance, uCaption, (LPTSTR*) &lpCaption) > 0) {
 			msgBoxID = MessageBox(hWnd, lpText, lpCaption, uType);
-			HeapFree(hHeap, 0, (LPVOID) lpCaption);
+			HeapSafeFree(hHeap, 0, (LPVOID) lpCaption);
 		}
-		HeapFree(hHeap, 0, (LPVOID) lpText);
+		HeapSafeFree(hHeap, 0, (LPVOID) lpText);
 	}
 
 	return msgBoxID;
