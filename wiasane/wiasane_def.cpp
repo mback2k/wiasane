@@ -26,158 +26,98 @@
 
 #include "wiasane_opt.h"
 #include "wiasane_scan.h"
+#include "strutil_reg.h"
 #include "strutil_dbg.h"
 
 HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
 	HKEY hKey, hOpenKey;
-	DWORD dwWritten, dwType, dwPort;
-	PTSTR pszHost, pszName, pszUsername, pszPassword;
+	LPTSTR lpszValue;
+	DWORD dwValue;
+	HANDLE hHeap;
 	LSTATUS st;
-	HRESULT hr;
 
-	hr = S_OK;
+	if (!pScanInfo || !pContext)
+		return E_INVALIDARG;
+
+	hHeap = pScanInfo->DeviceIOHandles[1];
 	hKey = (HKEY) pScanInfo->DeviceIOHandles[2];
 	hOpenKey = NULL;
-
-	pContext->usPort = WINSANE_DEFAULT_PORT;
-	if (pContext->pszHost) {
-		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszHost);
-		pContext->pszHost = NULL;
-	}
-	if (pContext->pszName) {
-		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszName);
-		pContext->pszName = NULL;
-	}
-	if (pContext->pszUsername) {
-		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszUsername);
-		pContext->pszUsername = NULL;
-	}
-	if (pContext->pszPassword) {
-		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszPassword);
-		pContext->pszPassword = NULL;
-	}
 
 	//
 	// Open DeviceData section to read driver specific information
 	//
 
 	st = RegOpenKeyEx(hKey, TEXT("DeviceData"), 0, KEY_QUERY_VALUE|KEY_READ, &hOpenKey);
-	if (st == ERROR_SUCCESS) {
-		dwWritten = sizeof(DWORD);
-		dwType = REG_DWORD;
-		dwPort = WINSANE_DEFAULT_PORT;
+	if (st != ERROR_SUCCESS)
+		return HRESULT_FROM_WIN32(st);
 
-		st = RegQueryValueEx(hOpenKey, TEXT("Port"), NULL, &dwType, (LPBYTE)&dwPort, &dwWritten);
-		if (st == ERROR_SUCCESS) {
-			pContext->usPort = (USHORT) dwPort;
-		} else
-			hr = E_FAIL;
+	pContext->usPort = WINSANE_DEFAULT_PORT;
 
-		dwWritten = 0;
-		dwType = REG_SZ;
-		pszHost = NULL;
+	st = ReadRegistryLong(hHeap, hOpenKey, TEXT("Port"), &dwValue);
+	if (st != ERROR_SUCCESS)
+		return HRESULT_FROM_WIN32(st);
 
-		st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)pszHost, &dwWritten);
-		if (st == ERROR_SUCCESS && dwWritten > 0) {
-			pszHost = (PTSTR) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, dwWritten);
-			if (pszHost) {
-				st = RegQueryValueEx(hOpenKey, TEXT("Host"), NULL, &dwType, (LPBYTE)pszHost, &dwWritten);
-				if (st == ERROR_SUCCESS) {
-					pContext->pszHost = pszHost;
-				} else {
-					HeapFree(pScanInfo->DeviceIOHandles[1], 0, pszHost);
-					hr = E_FAIL;
-				}
-			} else
-				hr = E_OUTOFMEMORY;
-		} else
-			hr = E_FAIL;
+	pContext->usPort = (USHORT) dwValue;
 
-		dwWritten = 0;
-		dwType = REG_SZ;
-		pszName = NULL;
+	st = ReadRegistryString(hHeap, hOpenKey, TEXT("Host"), &lpszValue, &dwValue);
+	if (st != ERROR_SUCCESS)
+		return HRESULT_FROM_WIN32(st);
 
-		st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)pszName, &dwWritten);
-		if (st == ERROR_SUCCESS && dwWritten > 0) {
-			pszName = (PTSTR) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, dwWritten);
-			if (pszName) {
-				st = RegQueryValueEx(hOpenKey, TEXT("Name"), NULL, &dwType, (LPBYTE)pszName, &dwWritten);
-				if (st == ERROR_SUCCESS) {
-					pContext->pszName = pszName;
-				} else {
-					HeapFree(pScanInfo->DeviceIOHandles[1], 0, pszName);
-					hr = E_FAIL;
-				}
-			} else
-				hr = E_OUTOFMEMORY;
-		} else
-			hr = E_FAIL;
+	if (pContext->pszHost)
+		HeapFree(hHeap, 0, pContext->pszHost);
+	pContext->pszHost = lpszValue;
 
-		dwWritten = 0;
-		dwType = REG_SZ;
-		pszUsername = NULL;
+	st = ReadRegistryString(hHeap, hOpenKey, TEXT("Name"), &lpszValue, &dwValue);
+	if (st != ERROR_SUCCESS)
+		return HRESULT_FROM_WIN32(st);
 
-		st = RegQueryValueEx(hOpenKey, TEXT("Username"), NULL, &dwType, (LPBYTE)pszUsername, &dwWritten);
-		if (st == ERROR_SUCCESS && dwWritten > 0) {
-			pszUsername = (PTSTR) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, dwWritten);
-			if (pszUsername) {
-				st = RegQueryValueEx(hOpenKey, TEXT("Username"), NULL, &dwType, (LPBYTE)pszUsername, &dwWritten);
-				if (st == ERROR_SUCCESS) {
-					pContext->pszUsername = pszUsername;
-				} else {
-					HeapFree(pScanInfo->DeviceIOHandles[1], 0, pszUsername);
-					hr = E_FAIL;
-				}
-			} else
-				hr = E_OUTOFMEMORY;
-		} else
-			hr = E_FAIL;
+	if (pContext->pszName)
+		HeapFree(hHeap, 0, pContext->pszName);
+	pContext->pszName = lpszValue;
 
-		dwWritten = 0;
-		dwType = REG_SZ;
-		pszPassword = NULL;
+	st = ReadRegistryString(hHeap, hOpenKey, TEXT("Username"), &lpszValue, &dwValue);
+	if (st != ERROR_SUCCESS && st != ERROR_FILE_NOT_FOUND)
+		return HRESULT_FROM_WIN32(st);
 
-		st = RegQueryValueEx(hOpenKey, TEXT("Password"), NULL, &dwType, (LPBYTE)pszPassword, &dwWritten);
-		if (st == ERROR_SUCCESS && dwWritten > 0) {
-			pszPassword = (PTSTR) HeapAlloc(pScanInfo->DeviceIOHandles[1], HEAP_ZERO_MEMORY, dwWritten);
-			if (pszPassword) {
-				st = RegQueryValueEx(hOpenKey, TEXT("Password"), NULL, &dwType, (LPBYTE)pszPassword, &dwWritten);
-				if (st == ERROR_SUCCESS) {
-					pContext->pszPassword = pszPassword;
-				} else {
-					HeapFree(pScanInfo->DeviceIOHandles[1], 0, pszPassword);
-					hr = E_FAIL;
-				}
-			} else
-				hr = E_OUTOFMEMORY;
-		} else
-			hr = E_FAIL;
-	} else
-		hr = E_ACCESSDENIED;
+	if (pContext->pszUsername)
+		HeapFree(hHeap, 0, pContext->pszUsername);
+	pContext->pszUsername = lpszValue;
 
-	return hr;
+	st = ReadRegistryString(hHeap, hOpenKey, TEXT("Password"), &lpszValue, &dwValue);
+	if (st != ERROR_SUCCESS && st != ERROR_FILE_NOT_FOUND)
+		return HRESULT_FROM_WIN32(st);
+
+	if (pContext->pszPassword)
+		HeapFree(hHeap, 0, pContext->pszPassword);
+	pContext->pszPassword = lpszValue;
+
+	return S_OK;
 }
 
 HRESULT FreeRegistryInformation(_Inout_ PSCANINFO pScanInfo, _In_ PWIASANE_Context pContext)
 {
+	HANDLE hHeap;
+
 	if (!pScanInfo || !pContext)
 		return E_INVALIDARG;
 
+	hHeap = pScanInfo->DeviceIOHandles[1];
+
 	if (pContext->pszHost)
-		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszHost);
+		HeapFree(hHeap, 0, pContext->pszHost);
 
 	if (pContext->pszName)
-		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszName);
+		HeapFree(hHeap, 0, pContext->pszName);
 
 	if (pContext->pszUsername)
-		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszUsername);
+		HeapFree(hHeap, 0, pContext->pszUsername);
 
 	if (pContext->pszPassword)
-		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszPassword);
+		HeapFree(hHeap, 0, pContext->pszPassword);
 
 	ZeroMemory(pContext, sizeof(WIASANE_Context));
-	HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext);
+	HeapFree(hHeap, 0, pContext);
 
 	return S_OK;
 }

@@ -21,12 +21,24 @@
     <ClCompile Include="strutil_res.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="strutil_dbg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="strutil_reg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="strutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="strutil_res.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="strutil_dbg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="strutil_reg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
