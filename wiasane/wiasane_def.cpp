@@ -26,8 +26,10 @@
 
 #include "wiasane_opt.h"
 #include "wiasane_scan.h"
-#include "strutil_reg.h"
 #include "strutil_dbg.h"
+#include "strutil_mem.h"
+#include "strutil_reg.h"
+#include "strutil.h"
 
 HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
@@ -69,7 +71,7 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 	}
 
 	if (pContext->pszHost)
-		HeapFree(hHeap, 0, pContext->pszHost);
+		HeapSafeFree(hHeap, 0, pContext->pszHost);
 	pContext->pszHost = lpszValue;
 
 	st = ReadRegistryString(hHeap, hOpenKey, TEXT("Name"), &lpszValue, &dwValue);
@@ -79,7 +81,7 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 	}
 
 	if (pContext->pszName)
-		HeapFree(hHeap, 0, pContext->pszName);
+		HeapSafeFree(hHeap, 0, pContext->pszName);
 	pContext->pszName = lpszValue;
 
 	st = ReadRegistryString(hHeap, hOpenKey, TEXT("Username"), &lpszValue, &dwValue);
@@ -89,7 +91,7 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 	}
 
 	if (pContext->pszUsername)
-		HeapFree(hHeap, 0, pContext->pszUsername);
+		HeapSafeFree(hHeap, 0, pContext->pszUsername);
 	pContext->pszUsername = lpszValue;
 
 	st = ReadRegistryString(hHeap, hOpenKey, TEXT("Password"), &lpszValue, &dwValue);
@@ -99,7 +101,7 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 	}
 
 	if (pContext->pszPassword)
-		HeapFree(hHeap, 0, pContext->pszPassword);
+		HeapSafeFree(hHeap, 0, pContext->pszPassword);
 	pContext->pszPassword = lpszValue;
 
 	RegCloseKey(hOpenKey);
@@ -116,19 +118,18 @@ HRESULT FreeRegistryInformation(_Inout_ PSCANINFO pScanInfo, _In_ PWIASANE_Conte
 	hHeap = pScanInfo->DeviceIOHandles[1];
 
 	if (pContext->pszHost)
-		HeapFree(hHeap, 0, pContext->pszHost);
+		HeapSafeFree(hHeap, 0, pContext->pszHost);
 
 	if (pContext->pszName)
-		HeapFree(hHeap, 0, pContext->pszName);
+		HeapSafeFree(hHeap, 0, pContext->pszName);
 
 	if (pContext->pszUsername)
-		HeapFree(hHeap, 0, pContext->pszUsername);
+		HeapSafeFree(hHeap, 0, pContext->pszUsername);
 
 	if (pContext->pszPassword)
-		HeapFree(hHeap, 0, pContext->pszPassword);
+		HeapSafeFree(hHeap, 0, pContext->pszPassword);
 
-	ZeroMemory(pContext, sizeof(WIASANE_Context));
-	HeapFree(hHeap, 0, pContext);
+	HeapSafeFree(hHeap, 0, pContext);
 
 	return S_OK;
 }
@@ -311,31 +312,31 @@ HRESULT FreeScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 		return S_OK;
 
 	if (pContext->pValues->pszModeThreshold) {
-		LocalFree(pContext->pValues->pszModeThreshold);
+		LocalSafeFree(pContext->pValues->pszModeThreshold);
 		pContext->pValues->pszModeThreshold = NULL;
 	}
 	if (pContext->pValues->pszModeGrayscale) {
-		LocalFree(pContext->pValues->pszModeGrayscale);
+		LocalSafeFree(pContext->pValues->pszModeGrayscale);
 		pContext->pValues->pszModeGrayscale = NULL;
 	}
 	if (pContext->pValues->pszModeColor) {
-		LocalFree(pContext->pValues->pszModeColor);
+		LocalSafeFree(pContext->pValues->pszModeColor);
 		pContext->pValues->pszModeColor = NULL;
 	}
 	if (pContext->pValues->pszSourceFlatbed) {
-		LocalFree(pContext->pValues->pszSourceFlatbed);
+		LocalSafeFree(pContext->pValues->pszSourceFlatbed);
 		pContext->pValues->pszSourceFlatbed = NULL;
 	}
 	if (pContext->pValues->pszSourceADF) {
-		LocalFree(pContext->pValues->pszSourceADF);
+		LocalSafeFree(pContext->pValues->pszSourceADF);
 		pContext->pValues->pszSourceADF = NULL;
 	}
 	if (pContext->pValues->pszSourceDuplex) {
-		LocalFree(pContext->pValues->pszSourceDuplex);
+		LocalSafeFree(pContext->pValues->pszSourceDuplex);
 		pContext->pValues->pszSourceDuplex = NULL;
 	}
 
-	HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues);
+	HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues);
 	pContext->pValues = NULL;
 
 	return S_OK;

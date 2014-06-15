@@ -37,6 +37,7 @@
 #include "wiasane_scan.h"
 #include "wiasane_util.h"
 #include "strutil_dbg.h"
+#include "strutil_mem.h"
 #include "strutil.h"
 
 
@@ -620,8 +621,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 						pContext->pTask->oScan = NULL;
 					}
 
-					ZeroMemory(pContext->pTask, sizeof(WIASANE_Task));
-					HeapFree(hHeap, 0, pContext->pTask);
+					HeapSafeFree(hHeap, 0, pContext->pTask);
 					pContext->pTask = NULL;
 				}
 
@@ -740,9 +740,9 @@ WINSANE_API_CALLBACK SessionAuthCallback(_In_ SANE_String_Const resource, _Inout
 		if (lpPassword) {
 			strcpy_s(username, SANE_MAX_USERNAME_LEN, lpUsername);
 			strcpy_s(password, SANE_MAX_PASSWORD_LEN, lpPassword);
-			HeapFree(hHeap, 0, lpPassword);
+			HeapSafeFree(hHeap, 0, lpPassword);
 		}
-		HeapFree(hHeap, 0, lpUsername);
+		HeapSafeFree(hHeap, 0, lpUsername);
 	}
 
 	Trace(TEXT("Username: %hs (%d)"), username, strlen(username));
@@ -908,7 +908,7 @@ HRESULT CloseScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 		}
 
 		ZeroMemory(pContext->pTask, sizeof(WIASANE_Task));
-		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pTask);
+		HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pTask);
 		pContext->pTask = NULL;
 	}
 
