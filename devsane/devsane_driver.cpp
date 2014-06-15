@@ -24,6 +24,7 @@
 #include <difxapi.h>
 
 #include "strutil.h"
+#include "strutil_mem.h"
 #include "strutil_dbg.h"
 #include "devsane_util.h"
 
@@ -49,7 +50,7 @@ DWORD DriverInstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_ int nCmdShow)
 		if (res != ERROR_SUCCESS && res != ERROR_NO_SUCH_DEVINST)
 			Trace(TEXT("DriverPackageInstall failed: %08X"), res);
 
-		HeapFree(hHeap, 0, lpData);
+		HeapSafeFree(hHeap, 0, lpData);
 	}
 
 	return res;
@@ -86,12 +87,12 @@ DWORD DriverUninstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_ int nCmdSho
 					if (res != ERROR_SUCCESS)
 						Trace(TEXT("DriverPackageUninstall failed: %08X"), res);
 
-					HeapFree(hHeap, 0, lpData);
+					HeapSafeFree(hHeap, 0, lpData);
 				}
 			} else
 				Trace(TEXT("DriverPackageGetPath 2 failed: %08X"), res);
 
-			HeapFree(hHeap, 0, lpDsInfPath);
+			HeapSafeFree(hHeap, 0, lpDsInfPath);
 		} else
 			Trace(TEXT("HeapAlloc failed"));
 	} else

@@ -25,6 +25,7 @@
 #include <newdev.h>
 
 #include "strutil.h"
+#include "strutil_mem.h"
 #include "strutil_dbg.h"
 #include "devsane_util.h"
 
@@ -107,13 +108,13 @@ DWORD CALLBACK DeviceInstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_opt_ 
 													} else
 														Trace(TEXT("SetupDiSetDeviceRegistryProperty failed: %08X"), res = GetLastError());
 
-													HeapFree(hHeap, 0, lpHardwareIds);
+													HeapSafeFree(hHeap, 0, lpHardwareIds);
 												} else
 													Trace(TEXT("StringCchAPrintf failed: %08X"), hr);
 											} else
 												Trace(TEXT("SetupDiGetDeviceInstanceId 2 failed: %08X"), res = GetLastError());
 
-											HeapFree(hHeap, 0, lpHardwareId);
+											HeapSafeFree(hHeap, 0, lpHardwareId);
 										} else
 											Trace(TEXT("HeapAlloc failed"));
 									} else
@@ -129,7 +130,7 @@ DWORD CALLBACK DeviceInstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_opt_ 
 						} else
 							Trace(TEXT("SetupDiGetINFClass 2 failed: %08X"), res = GetLastError());
 
-						HeapFree(hHeap, 0, lpClassName);
+						HeapSafeFree(hHeap, 0, lpClassName);
 					} else
 						Trace(TEXT("HeapAlloc failed"));
 				} else
@@ -137,7 +138,7 @@ DWORD CALLBACK DeviceInstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_opt_ 
 			} else
 				Trace(TEXT("DriverPackageGetPath 2 failed: %08X"), res);
 
-			HeapFree(hHeap, 0, lpDsInfPath);
+			HeapSafeFree(hHeap, 0, lpDsInfPath);
 		} else
 			Trace(TEXT("HeapAlloc failed"));
 	} else
@@ -199,7 +200,7 @@ DWORD CALLBACK DeviceUninstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_opt
 												} else
 													Trace(TEXT("SetupDiGetDeviceRegistryProperty 2 failed: %08X"), res = GetLastError());
 
-												HeapFree(hHeap, 0, lpHardwareIds);
+												HeapSafeFree(hHeap, 0, lpHardwareIds);
 											} else
 												Trace(TEXT("HeapAlloc failed"));
 										} else
@@ -216,7 +217,7 @@ DWORD CALLBACK DeviceUninstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_opt
 						} else
 							Trace(TEXT("SetupDiGetINFClass 2 failed: %08X"), res = GetLastError());
 
-						HeapFree(hHeap, 0, lpClassName);
+						HeapSafeFree(hHeap, 0, lpClassName);
 					} else
 						Trace(TEXT("HeapAlloc failed"));
 				} else
@@ -224,7 +225,7 @@ DWORD CALLBACK DeviceUninstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_opt
 			} else
 				Trace(TEXT("DriverPackageGetPath 2 failed: %08X"), res);
 
-			HeapFree(hHeap, 0, lpDsInfPath);
+			HeapSafeFree(hHeap, 0, lpDsInfPath);
 		} else
 			Trace(TEXT("HeapAlloc failed"));
 	} else
