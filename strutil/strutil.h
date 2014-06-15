@@ -53,6 +53,8 @@ HRESULT StringCchAVPrintfW( _In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR 
 #define StringToA StringWToA
 #define StringToW StringAClone
 #define StringTo StringToW
+#define StringATo StringAToW
+#define StringWTo StringTo
 #define StringCbAPrintf StringCbAPrintfW
 #define StringCchAPrintf StringCchAPrintfW
 #define StringCbAVPrintf StringCbAVPrintfW
@@ -61,6 +63,8 @@ HRESULT StringCchAVPrintfW( _In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR 
 #define StringToA StringAClone
 #define StringToW StringAToW
 #define StringTo StringToA
+#define StringATo StringTo
+#define StringWTo StringWToA
 #define StringCbAPrintf StringCbAPrintfA
 #define StringCchAPrintf StringCchAPrintfA
 #define StringCbAVPrintf StringCbAVPrintfA
