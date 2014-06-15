@@ -34,8 +34,6 @@ __user_code
 
 #include "devsane.h"
 
-VOID Trace(_In_ LPCTSTR pszFormat, ...);
-
 DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Out_ PINSTALLERINFO pInstallerInfo, _Outptr_result_maybenull_ LPVOID *plpData);
 
 #endif

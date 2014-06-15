@@ -30,35 +30,7 @@
 
 #include "resource.h"
 #include "strutil.h"
-
-
-VOID Trace(_In_ LPCTSTR pszFormat, ...)
-{
-#ifdef _DEBUG
-	PTSTR lpMsg, lpOut;
-	va_list argList;
-	HANDLE hHeap;
-	size_t cbLen;
-	HRESULT hr;
-
-	hHeap = GetProcessHeap();
-	if (hHeap) {
-		va_start(argList, pszFormat);
-		hr = StringCchAVPrintf(hHeap, &lpMsg, &cbLen, pszFormat, argList);
-		va_end(argList);
-		if (SUCCEEDED(hr)) {
-			hr = StringCchAPrintf(hHeap, &lpOut, &cbLen, TEXT("devsane: %s\r\n"), lpMsg);
-			if (SUCCEEDED(hr)) {
-				OutputDebugString(lpOut);
-				HeapFree(hHeap, 0, lpOut);
-			}
-			HeapFree(hHeap, 0, lpMsg);
-		}
-	}
-#else
-	UNREFERENCED_PARAMETER(pszFormat);
-#endif
-}
+#include "strutil_dbg.h"
 
 
 DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Out_ PINSTALLERINFO pInstallerInfo, _Outptr_result_maybenull_ LPVOID *plpData)

@@ -25,6 +25,7 @@
 #include <newdev.h>
 
 #include "strutil.h"
+#include "strutil_dbg.h"
 #include "devsane_util.h"
 
 
@@ -154,6 +155,8 @@ DWORD CALLBACK DeviceUninstall(_In_ HANDLE hHeap, _In_ LPTSTR lpInfPath, _In_opt
 	DWORD res;
 	GUID guid;
 	int i;
+
+	UNREFERENCED_PARAMETER(nCmdShow);
 
 	Trace(TEXT("DeviceUninstall(%s, %d)"), lpInfPath, nCmdShow);
 

@@ -24,6 +24,7 @@
 #include <difxapi.h>
 
 #include "strutil.h"
+#include "strutil_dbg.h"
 #include "devsane_util.h"
 
 
