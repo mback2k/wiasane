@@ -88,6 +88,7 @@ SANE_Status WINSANE_Device::Open()
 	SANE_Status status;
 	SANE_Handle handle;
 	SANE_String resource;
+	BOOL required_auth;
 	LONG written;
 	HRESULT hr;
 
@@ -115,8 +116,11 @@ SANE_Status WINSANE_Device::Open()
 			delete[] resource;
 			if (status != SANE_STATUS_GOOD)
 				return status;
+			required_auth = TRUE;
+		} else {
+			required_auth = FALSE;
 		}
-	} while (resource);
+	} while (required_auth);
 
 	if (!this->sock->IsConnected())
 		return SANE_STATUS_IO_ERROR;
@@ -438,6 +442,7 @@ SANE_Status WINSANE_Device::Start(_Outptr_result_maybenull_ PWINSANE_Scan *scan)
 	SANE_Word port;
 	SANE_Word byte_order;
 	SANE_String resource;
+	BOOL required_auth;
 	LONG written;
 	HRESULT hr;
 
@@ -477,8 +482,11 @@ SANE_Status WINSANE_Device::Start(_Outptr_result_maybenull_ PWINSANE_Scan *scan)
 			delete[] resource;
 			if (status != SANE_STATUS_GOOD)
 				return status;
+			required_auth = TRUE;
+		} else {
+			required_auth = FALSE;
 		}
-	} while (resource);
+	} while (required_auth);
 
 	if (!this->sock->IsConnected())
 		return SANE_STATUS_IO_ERROR;

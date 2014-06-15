@@ -554,6 +554,7 @@ HRESULT WINSANE_Option::ReadValueResult(_Inout_ PSANE_Word value_type, _Inout_ P
 	SANE_Status status;
 	SANE_Word info, pointer;
 	SANE_String resource;
+	BOOL required_auth;
 	LONG readlen;
 	HRESULT hr;
 
@@ -601,11 +602,14 @@ HRESULT WINSANE_Option::ReadValueResult(_Inout_ PSANE_Word value_type, _Inout_ P
 				delete[] resource;
 				if (status != SANE_STATUS_GOOD)
 					return status;
+				required_auth = TRUE;
+			} else {
+				required_auth = FALSE;
 			}
 		} else {
-			resource = NULL;
+			required_auth = FALSE;
 		}
-	} while (resource);
+	} while (required_auth);
 
 	if (!this->sock->IsConnected())
 		return E_ABORT;
