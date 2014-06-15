@@ -55,43 +55,54 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 	pContext->usPort = WINSANE_DEFAULT_PORT;
 
 	st = ReadRegistryLong(hHeap, hOpenKey, TEXT("Port"), &dwValue);
-	if (st != ERROR_SUCCESS)
+	if (st != ERROR_SUCCESS) {
+		RegCloseKey(hOpenKey);
 		return HRESULT_FROM_WIN32(st);
+	}
 
 	pContext->usPort = (USHORT) dwValue;
 
 	st = ReadRegistryString(hHeap, hOpenKey, TEXT("Host"), &lpszValue, &dwValue);
-	if (st != ERROR_SUCCESS)
+	if (st != ERROR_SUCCESS) {
+		RegCloseKey(hOpenKey);
 		return HRESULT_FROM_WIN32(st);
+	}
 
 	if (pContext->pszHost)
 		HeapFree(hHeap, 0, pContext->pszHost);
 	pContext->pszHost = lpszValue;
 
 	st = ReadRegistryString(hHeap, hOpenKey, TEXT("Name"), &lpszValue, &dwValue);
-	if (st != ERROR_SUCCESS)
+	if (st != ERROR_SUCCESS) {
+		RegCloseKey(hOpenKey);
 		return HRESULT_FROM_WIN32(st);
+	}
 
 	if (pContext->pszName)
 		HeapFree(hHeap, 0, pContext->pszName);
 	pContext->pszName = lpszValue;
 
 	st = ReadRegistryString(hHeap, hOpenKey, TEXT("Username"), &lpszValue, &dwValue);
-	if (st != ERROR_SUCCESS && st != ERROR_FILE_NOT_FOUND)
+	if (st != ERROR_SUCCESS && st != ERROR_FILE_NOT_FOUND) {
+		RegCloseKey(hOpenKey);
 		return HRESULT_FROM_WIN32(st);
+	}
 
 	if (pContext->pszUsername)
 		HeapFree(hHeap, 0, pContext->pszUsername);
 	pContext->pszUsername = lpszValue;
 
 	st = ReadRegistryString(hHeap, hOpenKey, TEXT("Password"), &lpszValue, &dwValue);
-	if (st != ERROR_SUCCESS && st != ERROR_FILE_NOT_FOUND)
+	if (st != ERROR_SUCCESS && st != ERROR_FILE_NOT_FOUND) {
+		RegCloseKey(hOpenKey);
 		return HRESULT_FROM_WIN32(st);
+	}
 
 	if (pContext->pszPassword)
 		HeapFree(hHeap, 0, pContext->pszPassword);
 	pContext->pszPassword = lpszValue;
 
+	RegCloseKey(hOpenKey);
 	return S_OK;
 }
 
