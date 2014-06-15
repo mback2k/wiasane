@@ -27,6 +27,7 @@
 #include "dllmain.h"
 #include "resource.h"
 #include "strutil.h"
+#include "strutil_reg.h"
 #include "strutil_dbg.h"
 
 
@@ -170,8 +171,8 @@ DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 DWORD QueryDeviceData(_In_ PCOISANE_Data privateData)
 {
 	HKEY hDeviceKey, hDeviceDataKey;
-	DWORD cbData, dwType, dwPort;
-	PTSTR lpString;
+	LPTSTR lpszValue;
+	DWORD dwValue;
 	LONG res;
 
 	hDeviceKey = SetupDiOpenDevRegKey(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_ENUMERATE_SUB_KEYS);
@@ -180,76 +181,41 @@ DWORD QueryDeviceData(_In_ PCOISANE_Data privateData)
 
 	res = RegOpenKeyEx(hDeviceKey, TEXT("DeviceData"), 0, KEY_QUERY_VALUE, &hDeviceDataKey);
 	if (res == ERROR_SUCCESS) {
-		res = RegQueryValueEx(hDeviceDataKey, TEXT("Port"), NULL, &dwType, NULL, &cbData);
-		if (res == ERROR_SUCCESS && dwType == REG_DWORD && cbData == sizeof(DWORD)) {
-			res = RegQueryValueEx(hDeviceDataKey, TEXT("Port"), NULL, &dwType, (LPBYTE) &dwPort, &cbData);
-			if (res == ERROR_SUCCESS) {
-				privateData->usPort = (USHORT) dwPort;
-			}
+		res = ReadRegistryLong(privateData->hHeap, hDeviceDataKey, TEXT("Port"), &dwValue);
+		if (res == ERROR_SUCCESS) {
+			privateData->usPort = (USHORT) dwValue;
 		}
 
-		res = RegQueryValueEx(hDeviceDataKey, TEXT("Host"), NULL, &dwType, NULL, &cbData);
-		if (res == ERROR_SUCCESS && dwType == REG_SZ) {
-			lpString = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, cbData);
-			if (lpString) {
-				res = RegQueryValueEx(hDeviceDataKey, TEXT("Host"), NULL, &dwType, (LPBYTE) lpString, &cbData);
-				if (res == ERROR_SUCCESS) {
-					if (privateData->lpHost) {
-						HeapFree(privateData->hHeap, 0, privateData->lpHost);
-					}
-					privateData->lpHost = lpString;
-				} else {
-					HeapFree(privateData->hHeap, 0, lpString);
-				}
+		res = ReadRegistryString(privateData->hHeap, hDeviceDataKey, TEXT("Host"), &lpszValue, &dwValue);
+		if (res == ERROR_SUCCESS) {
+			if (privateData->lpHost) {
+				HeapFree(privateData->hHeap, 0, privateData->lpHost);
 			}
+			privateData->lpHost = lpszValue;
 		}
 
-		res = RegQueryValueEx(hDeviceDataKey, TEXT("Name"), NULL, &dwType, NULL, &cbData);
-		if (res == ERROR_SUCCESS && dwType == REG_SZ) {
-			lpString = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, cbData);
-			if (lpString) {
-				res = RegQueryValueEx(hDeviceDataKey, TEXT("Name"), NULL, &dwType, (LPBYTE) lpString, &cbData);
-				if (res == ERROR_SUCCESS) {
-					if (privateData->lpName) {
-						HeapFree(privateData->hHeap, 0, privateData->lpName);
-					}
-					privateData->lpName = lpString;
-				} else {
-					HeapFree(privateData->hHeap, 0, lpString);
-				}
+		res = ReadRegistryString(privateData->hHeap, hDeviceDataKey, TEXT("Name"), &lpszValue, &dwValue);
+		if (res == ERROR_SUCCESS) {
+			if (privateData->lpName) {
+				HeapFree(privateData->hHeap, 0, privateData->lpName);
 			}
+			privateData->lpName = lpszValue;
 		}
 
-		res = RegQueryValueEx(hDeviceDataKey, TEXT("Username"), NULL, &dwType, NULL, &cbData);
-		if (res == ERROR_SUCCESS && dwType == REG_SZ) {
-			lpString = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, cbData);
-			if (lpString) {
-				res = RegQueryValueEx(hDeviceDataKey, TEXT("Username"), NULL, &dwType, (LPBYTE) lpString, &cbData);
-				if (res == ERROR_SUCCESS) {
-					if (privateData->lpUsername) {
-						HeapFree(privateData->hHeap, 0, privateData->lpUsername);
-					}
-					privateData->lpUsername = lpString;
-				} else {
-					HeapFree(privateData->hHeap, 0, lpString);
-				}
+		res = ReadRegistryString(privateData->hHeap, hDeviceDataKey, TEXT("Username"), &lpszValue, &dwValue);
+		if (res == ERROR_SUCCESS) {
+			if (privateData->lpUsername) {
+				HeapFree(privateData->hHeap, 0, privateData->lpUsername);
 			}
+			privateData->lpUsername = lpszValue;
 		}
 
-		res = RegQueryValueEx(hDeviceDataKey, TEXT("Password"), NULL, &dwType, NULL, &cbData);
-		if (res == ERROR_SUCCESS && dwType == REG_SZ) {
-			lpString = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, cbData);
-			if (lpString) {
-				res = RegQueryValueEx(hDeviceDataKey, TEXT("Password"), NULL, &dwType, (LPBYTE) lpString, &cbData);
-				if (res == ERROR_SUCCESS) {
-					if (privateData->lpPassword) {
-						HeapFree(privateData->hHeap, 0, privateData->lpPassword);
-					}
-					privateData->lpPassword = lpString;
-				} else {
-					HeapFree(privateData->hHeap, 0, lpString);
-				}
+		res = ReadRegistryString(privateData->hHeap, hDeviceDataKey, TEXT("Password"), &lpszValue, &dwValue);
+		if (res == ERROR_SUCCESS) {
+			if (privateData->lpPassword) {
+				HeapFree(privateData->hHeap, 0, privateData->lpPassword);
 			}
+			privateData->lpPassword = lpszValue;
 		}
 
 		RegCloseKey(hDeviceDataKey);
