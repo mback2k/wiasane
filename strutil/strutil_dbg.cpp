@@ -43,9 +43,9 @@ VOID Trace_(_In_ LPCTSTR lpszPrefix, _In_ LPCTSTR lpszFormat, ...)
 		va_start(argList, lpszFormat);
 		hr = StringCchAVPrintf(hHeap, &lpszMsg, &cbLen, lpszFormat, argList);
 		va_end(argList);
-		if (SUCCEEDED(hr)) {
+		if (SUCCEEDED(hr) && lpszMsg) {
 			hr = StringCchAPrintf(hHeap, &lpOut, &cbLen, TEXT("%s: %s\r\n"), lpszPrefix, lpszMsg);
-			if (SUCCEEDED(hr)) {
+			if (SUCCEEDED(hr) && lpOut) {
 				OutputDebugString(lpOut);
 				HeapSafeFree(hHeap, 0, lpOut);
 			}
