@@ -24,7 +24,7 @@
 #include <stdarg.h>
 
 
-LPTSTR StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString)
+LPTSTR WINAPI StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString)
 {
 	LPTSTR pszCopy;
 	size_t cbCopy;
@@ -51,7 +51,7 @@ LPTSTR StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString)
 }
 
 
-LPSTR StringWToA(_In_ HANDLE hHeap, _In_ LPWSTR pszString)
+LPSTR WINAPI StringWToA(_In_ HANDLE hHeap, _In_ LPWSTR pszString)
 {
 	LPSTR pszCopy;
 	int iLength;
@@ -76,7 +76,7 @@ LPSTR StringWToA(_In_ HANDLE hHeap, _In_ LPWSTR pszString)
 	return pszCopy;
 }
 
-LPWSTR StringAToW(_In_ HANDLE hHeap, _In_ LPSTR pszString)
+LPWSTR WINAPI StringAToW(_In_ HANDLE hHeap, _In_ LPSTR pszString)
 {
 	LPWSTR pszCopy;
 	int iLength;

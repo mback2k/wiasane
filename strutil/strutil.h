@@ -32,10 +32,10 @@ __user_code
 #include <tchar.h>
 #include <strsafe.h>
 
-LPTSTR StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString);
+LPTSTR WINAPI StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString);
 
-LPSTR StringWToA(_In_ HANDLE hHeap, _In_ LPWSTR pszString);
-LPWSTR StringAToW(_In_ HANDLE hHeap, _In_ LPSTR pszString);
+LPSTR WINAPI StringWToA(_In_ HANDLE hHeap, _In_ LPWSTR pszString);
+LPWSTR WINAPI StringAToW(_In_ HANDLE hHeap, _In_ LPSTR pszString);
 
 HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...);
 HRESULT StringCbAPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...);
