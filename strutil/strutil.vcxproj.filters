@@ -27,6 +27,9 @@
     <ClCompile Include="strutil_reg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="strutil_mem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="strutil.h">
@@ -39,6 +42,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="strutil_reg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="strutil_mem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
