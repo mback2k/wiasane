@@ -28,6 +28,7 @@
 #include "resource.h"
 #include "strutil.h"
 #include "strutil_dbg.h"
+#include "strutil_mem.h"
 #include "strutil_res.h"
 #include "coisane_util.h"
 
@@ -255,15 +256,15 @@ UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uM
 
 				if (privateData->uiReferences == 0) {
 					if (privateData->lpHost)
-						HeapFree(privateData->hHeap, 0, privateData->lpHost);
+						HeapSafeFree(privateData->hHeap, 0, privateData->lpHost);
 					if (privateData->lpName)
-						HeapFree(privateData->hHeap, 0, privateData->lpName);
+						HeapSafeFree(privateData->hHeap, 0, privateData->lpName);
 					if (privateData->lpUsername)
-						HeapFree(privateData->hHeap, 0, privateData->lpUsername);
+						HeapSafeFree(privateData->hHeap, 0, privateData->lpUsername);
 					if (privateData->lpPassword)
-						HeapFree(privateData->hHeap, 0, privateData->lpPassword);
+						HeapSafeFree(privateData->hHeap, 0, privateData->lpPassword);
 
-					HeapFree(privateData->hHeap, 0, privateData);
+					HeapSafeFree(privateData->hHeap, 0, privateData);
 					ppsp->lParam = NULL;
 				}
 			}
@@ -338,11 +339,11 @@ BOOL ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 		res = GetDlgItemText(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, lpName, MAX_PATH);
 		if (res) {
 			if (privateData->lpName) {
-				HeapFree(privateData->hHeap, 0, privateData->lpName);
+				HeapSafeFree(privateData->hHeap, 0, privateData->lpName);
 			}
 			privateData->lpName = lpName;
 		} else {
-			HeapFree(privateData->hHeap, 0, lpName);
+			HeapSafeFree(privateData->hHeap, 0, lpName);
 		}
 	} else {
 		res = FALSE;
@@ -353,11 +354,11 @@ BOOL ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 		if (lpUsername) {
 			if (GetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, lpUsername, MAX_PATH)) {
 				if (privateData->lpUsername) {
-					HeapFree(privateData->hHeap, 0, privateData->lpUsername);
+					HeapSafeFree(privateData->hHeap, 0, privateData->lpUsername);
 				}
 				privateData->lpUsername = lpUsername;
 			} else {
-				HeapFree(privateData->hHeap, 0, lpUsername);
+				HeapSafeFree(privateData->hHeap, 0, lpUsername);
 			}
 		}
 
@@ -365,11 +366,11 @@ BOOL ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 		if (lpPassword) {
 			if (GetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, lpPassword, MAX_PATH)) {
 				if (privateData->lpPassword) {
-					HeapFree(privateData->hHeap, 0, privateData->lpPassword);
+					HeapSafeFree(privateData->hHeap, 0, privateData->lpPassword);
 				}
 				privateData->lpPassword = lpPassword;
 			} else {
-				HeapFree(privateData->hHeap, 0, lpPassword);
+				HeapSafeFree(privateData->hHeap, 0, lpPassword);
 			}
 		}
 
@@ -433,9 +434,9 @@ WINSANE_API_CALLBACK PropertyPageAuthCallback(_In_ SANE_String_Const resource, _
 		if (lpPassword) {
 			strcpy_s(username, SANE_MAX_USERNAME_LEN, lpUsername);
 			strcpy_s(password, SANE_MAX_PASSWORD_LEN, lpPassword);
-			HeapFree(hHeap, 0, lpPassword);
+			HeapSafeFree(hHeap, 0, lpPassword);
 		}
-		HeapFree(hHeap, 0, lpUsername);
+		HeapSafeFree(hHeap, 0, lpUsername);
 	}
 
 	Trace(TEXT("Username: %hs (%d)"), username, strlen(username));

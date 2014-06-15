@@ -28,6 +28,7 @@
 #include "resource.h"
 #include "strutil.h"
 #include "strutil_dbg.h"
+#include "strutil_mem.h"
 #include "strutil_res.h"
 #include "coisane_util.h"
 
@@ -269,15 +270,15 @@ UINT CALLBACK PropSheetPageProcWizardPage(_In_ HWND hwnd, _In_ UINT uMsg, _Inout
 
 				if (privateData->uiReferences == 0) {
 					if (privateData->lpHost)
-						HeapFree(privateData->hHeap, 0, privateData->lpHost);
+						HeapSafeFree(privateData->hHeap, 0, privateData->lpHost);
 					if (privateData->lpName)
-						HeapFree(privateData->hHeap, 0, privateData->lpName);
+						HeapSafeFree(privateData->hHeap, 0, privateData->lpName);
 					if (privateData->lpUsername)
-						HeapFree(privateData->hHeap, 0, privateData->lpUsername);
+						HeapSafeFree(privateData->hHeap, 0, privateData->lpUsername);
 					if (privateData->lpPassword)
-						HeapFree(privateData->hHeap, 0, privateData->lpPassword);
+						HeapSafeFree(privateData->hHeap, 0, privateData->lpPassword);
 
-					HeapFree(privateData->hHeap, 0, privateData);
+					HeapSafeFree(privateData->hHeap, 0, privateData);
 					ppsp->lParam = NULL;
 				}
 			}
@@ -310,7 +311,7 @@ BOOL InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 
 						privateData->lpHost = strField;
 					} else {
-						HeapFree(privateData->hHeap, 0, strField);
+						HeapSafeFree(privateData->hHeap, 0, strField);
 					}
 				} else {
 					res = FALSE;
@@ -356,11 +357,11 @@ BOOL NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 		res = GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_HOST, lpHost, MAX_PATH);
 		if (res) {
 			if (privateData->lpHost) {
-				HeapFree(privateData->hHeap, 0, privateData->lpHost);
+				HeapSafeFree(privateData->hHeap, 0, privateData->lpHost);
 			}
 			privateData->lpHost = lpHost;
 		} else {
-			HeapFree(privateData->hHeap, 0, lpHost);
+			HeapSafeFree(privateData->hHeap, 0, lpHost);
 		}
 	} else {
 		res = FALSE;
@@ -435,11 +436,11 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 		res = GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER, lpName, MAX_PATH);
 		if (res) {
 			if (privateData->lpName) {
-				HeapFree(privateData->hHeap, 0, privateData->lpName);
+				HeapSafeFree(privateData->hHeap, 0, privateData->lpName);
 			}
 			privateData->lpName = lpName;
 		} else {
-			HeapFree(privateData->hHeap, 0, lpName);
+			HeapSafeFree(privateData->hHeap, 0, lpName);
 		}
 	} else {
 		res = FALSE;
@@ -450,11 +451,11 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 		if (lpUsername) {
 			if (GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SCANNER_EDIT_USERNAME, lpUsername, MAX_PATH)) {
 				if (privateData->lpUsername) {
-					HeapFree(privateData->hHeap, 0, privateData->lpUsername);
+					HeapSafeFree(privateData->hHeap, 0, privateData->lpUsername);
 				}
 				privateData->lpUsername = lpUsername;
 			} else {
-				HeapFree(privateData->hHeap, 0, lpUsername);
+				HeapSafeFree(privateData->hHeap, 0, lpUsername);
 			}
 		}
 
@@ -462,11 +463,11 @@ BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 		if (lpPassword) {
 			if (GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SCANNER_EDIT_PASSWORD, lpPassword, MAX_PATH)) {
 				if (privateData->lpPassword) {
-					HeapFree(privateData->hHeap, 0, privateData->lpPassword);
+					HeapSafeFree(privateData->hHeap, 0, privateData->lpPassword);
 				}
 				privateData->lpPassword = lpPassword;
 			} else {
-				HeapFree(privateData->hHeap, 0, lpPassword);
+				HeapSafeFree(privateData->hHeap, 0, lpPassword);
 			}
 		}
 
@@ -527,9 +528,9 @@ WINSANE_API_CALLBACK WizardPageAuthCallback(_In_ SANE_String_Const resource, _In
 		if (lpPassword) {
 			strcpy_s(username, SANE_MAX_USERNAME_LEN, lpUsername);
 			strcpy_s(password, SANE_MAX_PASSWORD_LEN, lpPassword);
-			HeapFree(hHeap, 0, lpPassword);
+			HeapSafeFree(hHeap, 0, lpPassword);
 		}
-		HeapFree(hHeap, 0, lpUsername);
+		HeapSafeFree(hHeap, 0, lpUsername);
 	}
 
 	Trace(TEXT("Username: %hs (%d)"), username, strlen(username));

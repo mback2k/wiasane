@@ -28,6 +28,7 @@
 #include "resource.h"
 #include "strutil.h"
 #include "strutil_reg.h"
+#include "strutil_mem.h"
 #include "strutil_dbg.h"
 
 
@@ -133,7 +134,7 @@ DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) lpStr, (DWORD) cbLen);
 			if (hDeviceKey != INVALID_HANDLE_VALUE)
 				RegSetValueEx(hDeviceKey, TEXT("FriendlyName"), 0, REG_SZ, (LPBYTE) lpStr, (DWORD) cbLen);
-			HeapFree(privateData->hHeap, 0, lpStr);
+			HeapSafeFree(privateData->hHeap, 0, lpStr);
 			if (!res)
 				ret = GetLastError();
 		}
@@ -143,7 +144,7 @@ DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 		hr = StringCbAPrintf(privateData->hHeap, &lpStr, &cbLen, TEXT("%hs %hs %hs (%hs)"), vendor, model, type, name);
 		if (SUCCEEDED(hr)) {
 			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) lpStr, (DWORD) cbLen);
-			HeapFree(privateData->hHeap, 0, lpStr);
+			HeapSafeFree(privateData->hHeap, 0, lpStr);
 			if (!res)
 				ret = GetLastError();
 		}
@@ -155,7 +156,7 @@ DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_MFG, (PBYTE) (PBYTE) lpStr, (DWORD) cbLen);
 			if (hDeviceKey != INVALID_HANDLE_VALUE)
 				RegSetValueEx(hDeviceKey, TEXT("Vendor"), 0, REG_SZ, (LPBYTE) lpStr, (DWORD) cbLen);
-			HeapFree(privateData->hHeap, 0, lpStr);
+			HeapSafeFree(privateData->hHeap, 0, lpStr);
 			if (!res)
 				ret = GetLastError();
 		}
@@ -189,7 +190,7 @@ DWORD QueryDeviceData(_In_ PCOISANE_Data privateData)
 		res = ReadRegistryString(privateData->hHeap, hDeviceDataKey, TEXT("Host"), &lpszValue, &dwValue);
 		if (res == ERROR_SUCCESS) {
 			if (privateData->lpHost) {
-				HeapFree(privateData->hHeap, 0, privateData->lpHost);
+				HeapSafeFree(privateData->hHeap, 0, privateData->lpHost);
 			}
 			privateData->lpHost = lpszValue;
 		}
@@ -197,7 +198,7 @@ DWORD QueryDeviceData(_In_ PCOISANE_Data privateData)
 		res = ReadRegistryString(privateData->hHeap, hDeviceDataKey, TEXT("Name"), &lpszValue, &dwValue);
 		if (res == ERROR_SUCCESS) {
 			if (privateData->lpName) {
-				HeapFree(privateData->hHeap, 0, privateData->lpName);
+				HeapSafeFree(privateData->hHeap, 0, privateData->lpName);
 			}
 			privateData->lpName = lpszValue;
 		}
@@ -205,7 +206,7 @@ DWORD QueryDeviceData(_In_ PCOISANE_Data privateData)
 		res = ReadRegistryString(privateData->hHeap, hDeviceDataKey, TEXT("Username"), &lpszValue, &dwValue);
 		if (res == ERROR_SUCCESS) {
 			if (privateData->lpUsername) {
-				HeapFree(privateData->hHeap, 0, privateData->lpUsername);
+				HeapSafeFree(privateData->hHeap, 0, privateData->lpUsername);
 			}
 			privateData->lpUsername = lpszValue;
 		}
@@ -213,7 +214,7 @@ DWORD QueryDeviceData(_In_ PCOISANE_Data privateData)
 		res = ReadRegistryString(privateData->hHeap, hDeviceDataKey, TEXT("Password"), &lpszValue, &dwValue);
 		if (res == ERROR_SUCCESS) {
 			if (privateData->lpPassword) {
-				HeapFree(privateData->hHeap, 0, privateData->lpPassword);
+				HeapSafeFree(privateData->hHeap, 0, privateData->lpPassword);
 			}
 			privateData->lpPassword = lpszValue;
 		}
@@ -301,7 +302,7 @@ DWORD UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 	RegCloseKey(hDeviceKey);
 
 	if (lpResolutions)
-		HeapFree(privateData->hHeap, 0, lpResolutions);
+		HeapSafeFree(privateData->hHeap, 0, lpResolutions);
 
 	return NO_ERROR;
 }
@@ -332,7 +333,7 @@ size_t CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device
 						for (index = 2; index <= pWordList[0]; index++) {
 							lpResolutions = *ppszResolutions;
 							StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pWordList[index]);
-							HeapFree(privateData->hHeap, 0, lpResolutions);
+							HeapSafeFree(privateData->hHeap, 0, lpResolutions);
 						}
 						break;
 
@@ -341,7 +342,7 @@ size_t CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device
 						for (index = 2; index <= pWordList[0]; index++) {
 							lpResolutions = *ppszResolutions;
 							StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, SANE_UNFIX(pWordList[index]));
-							HeapFree(privateData->hHeap, 0, lpResolutions);
+							HeapSafeFree(privateData->hHeap, 0, lpResolutions);
 						}
 						break;
 				}
