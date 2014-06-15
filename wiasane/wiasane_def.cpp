@@ -49,6 +49,14 @@ HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Co
 		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszName);
 		pContext->pszName = NULL;
 	}
+	if (pContext->pszUsername) {
+		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszUsername);
+		pContext->pszUsername = NULL;
+	}
+	if (pContext->pszPassword) {
+		HeapFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pszPassword);
+		pContext->pszPassword = NULL;
+	}
 
 	//
 	// Open DeviceData section to read driver specific information
