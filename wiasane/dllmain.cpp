@@ -20,7 +20,7 @@
 
 #include "dllmain.h"
 
-HINSTANCE g_hModuleInstance = NULL; // instance of this MicroDriver (used for loading from a resource)
+static HINSTANCE g_hModuleInstance = NULL; // instance of this MicroDriver (used for loading from a resource)
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 {

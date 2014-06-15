@@ -40,7 +40,7 @@
 #include "strutil.h"
 
 
-PWIASANE_Context g_pContext = NULL; // global instance of the WIASANE context with device information
+static PWIASANE_Context g_pContext = NULL; // global instance of the WIASANE context with device information
 
 WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 { // depends on command

@@ -32,7 +32,7 @@
 #include "coisane_util.h"
 
 
-PCOISANE_Data g_pWizardPageData = NULL; // global instance of the COISANE data with device information
+static PCOISANE_Data g_pWizardPageData = NULL; // global instance of the COISANE data with device information
 
 DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
 {

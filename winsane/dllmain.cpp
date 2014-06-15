@@ -22,7 +22,7 @@
 
 #include <winsock2.h>
 
-BOOL g_bWinsockStarted = FALSE; // global Winsock initialization status
+static BOOL g_bWinsockStarted = FALSE; // global Winsock initialization status
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 {

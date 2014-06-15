@@ -22,9 +22,9 @@
 
 #include <commctrl.h>
 
-HINSTANCE g_hModuleInstance = NULL; // instance of this CoInstaller (used for loading from a resource)
-HANDLE g_hActivationContext = NULL; // global ActivationContext handle
-BOOL g_bCommonControls = FALSE;	// global CommonControls initialization status
+static HINSTANCE g_hModuleInstance = NULL; // instance of this CoInstaller (used for loading from a resource)
+static HANDLE g_hActivationContext = NULL; // global ActivationContext handle
+static BOOL g_bCommonControls = FALSE;	// global CommonControls initialization status
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 {
