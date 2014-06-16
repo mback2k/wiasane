@@ -165,7 +165,7 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 				case PSN_WIZNEXT:
 					Trace(TEXT("PSN_WIZNEXT"));
 					if (!NextWizardPageServer(hwndDlg, pData)) {
-						MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+						MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
 						return TRUE;
 					}
