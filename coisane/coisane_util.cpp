@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -32,7 +32,7 @@
 #include "strutil_dbg.h"
 
 
-HINF OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _Out_opt_ PUINT ErrorLine)
+HINF WINAPI OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _Out_opt_ PUINT ErrorLine)
 {
 	SP_DRVINFO_DATA DriverInfoData;
 	SP_DRVINFO_DETAIL_DATA DriverInfoDetailData;
@@ -64,7 +64,7 @@ HINF OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfo
 }
 
 
-DWORD UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags)
+DWORD WINAPI UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags)
 {
 	SP_DEVINSTALL_PARAMS devInstallParams;
 	BOOL res;
@@ -80,10 +80,10 @@ DWORD UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DA
 	if (!res)
 		return GetLastError();
 
-	return NO_ERROR;
+	return ERROR_SUCCESS;
 }
 
-DWORD ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD StateChange, _In_ DWORD Scope)
+DWORD WINAPI ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD StateChange, _In_ DWORD Scope)
 {
 	SP_PROPCHANGE_PARAMS propChangeParams;
 	BOOL res;
@@ -103,10 +103,10 @@ DWORD ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDev
 	if (!res)
 		return GetLastError();
 
-	return NO_ERROR;
+	return ERROR_SUCCESS;
 }
 
-DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
+DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
 {
 	SANE_String_Const name, type, model, vendor;
 	HKEY hDeviceKey;
@@ -119,7 +119,7 @@ DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 	if (!device)
 		return ERROR_INVALID_PARAMETER;
 
-	ret = NO_ERROR;
+	ret = ERROR_SUCCESS;
 
 	name = device->GetName();
 	type = device->GetType();
@@ -169,7 +169,7 @@ DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 }
 
 
-DWORD QueryDeviceData(_In_ PCOISANE_Data privateData)
+DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data privateData)
 {
 	HKEY hDeviceKey, hDeviceDataKey;
 	LPTSTR lpszValue;
@@ -224,10 +224,10 @@ DWORD QueryDeviceData(_In_ PCOISANE_Data privateData)
 
 	RegCloseKey(hDeviceKey);
 
-	return NO_ERROR;
+	return ERROR_SUCCESS;
 }
 
-DWORD UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
+DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
 {
 	HKEY hDeviceKey, hDeviceDataKey;
 	DWORD cbData, dwPort;
@@ -304,11 +304,11 @@ DWORD UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 	if (lpResolutions)
 		HeapSafeFree(privateData->hHeap, 0, lpResolutions);
 
-	return NO_ERROR;
+	return ERROR_SUCCESS;
 }
 
 
-size_t CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device, _Outptr_result_maybenull_ LPTSTR *ppszResolutions)
+size_t WINAPI CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device, _Outptr_result_maybenull_ LPTSTR *ppszResolutions)
 {
 	PWINSANE_Option resolution;
 	PSANE_Word pWordList;
