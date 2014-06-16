@@ -106,7 +106,7 @@ DWORD WINAPI ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DA
 	return ERROR_SUCCESS;
 }
 
-DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
+DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device)
 {
 	SANE_String_Const name, type, model, vendor;
 	HKEY hDeviceKey;
@@ -126,37 +126,37 @@ DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Devi
 	model = device->GetModel();
 	vendor = device->GetVendor();
 
-	hDeviceKey = SetupDiOpenDevRegKey(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_SET_VALUE);
+	hDeviceKey = SetupDiOpenDevRegKey(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_SET_VALUE);
 
 	if (vendor && model) {
-		hr = StringCbAPrintf(privateData->hHeap, &lpStr, &cbLen, TEXT("%hs %hs"), vendor, model);
+		hr = StringCbAPrintf(pData->hHeap, &lpStr, &cbLen, TEXT("%hs %hs"), vendor, model);
 		if (SUCCEEDED(hr) && lpStr) {
-			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) lpStr, (DWORD) cbLen);
+			res = SetupDiSetDeviceRegistryProperty(pData->hDeviceInfoSet, pData->pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) lpStr, (DWORD) cbLen);
 			if (hDeviceKey != INVALID_HANDLE_VALUE)
 				RegSetValueEx(hDeviceKey, TEXT("FriendlyName"), 0, REG_SZ, (LPBYTE) lpStr, (DWORD) cbLen);
-			HeapSafeFree(privateData->hHeap, 0, lpStr);
+			HeapSafeFree(pData->hHeap, 0, lpStr);
 			if (!res)
 				ret = GetLastError();
 		}
 	}
 
 	if (vendor && model && type && name) {
-		hr = StringCbAPrintf(privateData->hHeap, &lpStr, &cbLen, TEXT("%hs %hs %hs (%hs)"), vendor, model, type, name);
+		hr = StringCbAPrintf(pData->hHeap, &lpStr, &cbLen, TEXT("%hs %hs %hs (%hs)"), vendor, model, type, name);
 		if (SUCCEEDED(hr) && lpStr) {
-			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) lpStr, (DWORD) cbLen);
-			HeapSafeFree(privateData->hHeap, 0, lpStr);
+			res = SetupDiSetDeviceRegistryProperty(pData->hDeviceInfoSet, pData->pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) lpStr, (DWORD) cbLen);
+			HeapSafeFree(pData->hHeap, 0, lpStr);
 			if (!res)
 				ret = GetLastError();
 		}
 	}
 
 	if (vendor) {
-		hr = StringCbAPrintf(privateData->hHeap, &lpStr, &cbLen, TEXT("%hs"), vendor);
+		hr = StringCbAPrintf(pData->hHeap, &lpStr, &cbLen, TEXT("%hs"), vendor);
 		if (SUCCEEDED(hr) && lpStr) {
-			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_MFG, (PBYTE) (PBYTE) lpStr, (DWORD) cbLen);
+			res = SetupDiSetDeviceRegistryProperty(pData->hDeviceInfoSet, pData->pDeviceInfoData, SPDRP_MFG, (PBYTE) (PBYTE) lpStr, (DWORD) cbLen);
 			if (hDeviceKey != INVALID_HANDLE_VALUE)
 				RegSetValueEx(hDeviceKey, TEXT("Vendor"), 0, REG_SZ, (LPBYTE) lpStr, (DWORD) cbLen);
-			HeapSafeFree(privateData->hHeap, 0, lpStr);
+			HeapSafeFree(pData->hHeap, 0, lpStr);
 			if (!res)
 				ret = GetLastError();
 		}
@@ -169,54 +169,54 @@ DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Devi
 }
 
 
-DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data privateData)
+DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData)
 {
 	HKEY hDeviceKey, hDeviceDataKey;
 	LPTSTR lpszValue;
 	DWORD dwValue;
 	LONG res;
 
-	hDeviceKey = SetupDiOpenDevRegKey(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_ENUMERATE_SUB_KEYS);
+	hDeviceKey = SetupDiOpenDevRegKey(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_ENUMERATE_SUB_KEYS);
 	if (hDeviceKey == INVALID_HANDLE_VALUE)
 		return GetLastError();
 
 	res = RegOpenKeyEx(hDeviceKey, TEXT("DeviceData"), 0, KEY_QUERY_VALUE, &hDeviceDataKey);
 	if (res == ERROR_SUCCESS) {
-		res = ReadRegistryLong(privateData->hHeap, hDeviceDataKey, TEXT("Port"), &dwValue);
+		res = ReadRegistryLong(pData->hHeap, hDeviceDataKey, TEXT("Port"), &dwValue);
 		if (res == ERROR_SUCCESS) {
-			privateData->usPort = (USHORT) dwValue;
+			pData->usPort = (USHORT) dwValue;
 		}
 
-		res = ReadRegistryString(privateData->hHeap, hDeviceDataKey, TEXT("Host"), &lpszValue, &dwValue);
+		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Host"), &lpszValue, &dwValue);
 		if (res == ERROR_SUCCESS) {
-			if (privateData->lpHost) {
-				HeapSafeFree(privateData->hHeap, 0, privateData->lpHost);
+			if (pData->lpHost) {
+				HeapSafeFree(pData->hHeap, 0, pData->lpHost);
 			}
-			privateData->lpHost = lpszValue;
+			pData->lpHost = lpszValue;
 		}
 
-		res = ReadRegistryString(privateData->hHeap, hDeviceDataKey, TEXT("Name"), &lpszValue, &dwValue);
+		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Name"), &lpszValue, &dwValue);
 		if (res == ERROR_SUCCESS) {
-			if (privateData->lpName) {
-				HeapSafeFree(privateData->hHeap, 0, privateData->lpName);
+			if (pData->lpName) {
+				HeapSafeFree(pData->hHeap, 0, pData->lpName);
 			}
-			privateData->lpName = lpszValue;
+			pData->lpName = lpszValue;
 		}
 
-		res = ReadRegistryString(privateData->hHeap, hDeviceDataKey, TEXT("Username"), &lpszValue, &dwValue);
+		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Username"), &lpszValue, &dwValue);
 		if (res == ERROR_SUCCESS) {
-			if (privateData->lpUsername) {
-				HeapSafeFree(privateData->hHeap, 0, privateData->lpUsername);
+			if (pData->lpUsername) {
+				HeapSafeFree(pData->hHeap, 0, pData->lpUsername);
 			}
-			privateData->lpUsername = lpszValue;
+			pData->lpUsername = lpszValue;
 		}
 
-		res = ReadRegistryString(privateData->hHeap, hDeviceDataKey, TEXT("Password"), &lpszValue, &dwValue);
+		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Password"), &lpszValue, &dwValue);
 		if (res == ERROR_SUCCESS) {
-			if (privateData->lpPassword) {
-				HeapSafeFree(privateData->hHeap, 0, privateData->lpPassword);
+			if (pData->lpPassword) {
+				HeapSafeFree(pData->hHeap, 0, pData->lpPassword);
 			}
-			privateData->lpPassword = lpszValue;
+			pData->lpPassword = lpszValue;
 		}
 
 		RegCloseKey(hDeviceDataKey);
@@ -227,7 +227,7 @@ DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data privateData)
 	return ERROR_SUCCESS;
 }
 
-DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device)
+DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device)
 {
 	HKEY hDeviceKey, hDeviceDataKey;
 	DWORD cbData, dwPort;
@@ -239,12 +239,12 @@ DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Devi
 	if (!device)
 		return ERROR_INVALID_PARAMETER;
 
-	hDeviceKey = SetupDiOpenDevRegKey(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_ENUMERATE_SUB_KEYS);
+	hDeviceKey = SetupDiOpenDevRegKey(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_ENUMERATE_SUB_KEYS);
 	if (hDeviceKey == INVALID_HANDLE_VALUE)
 		return GetLastError();
 
 	if (device->Open() == SANE_STATUS_GOOD) {
-		cbResolutions = CreateResolutionList(privateData, device, &lpResolutions);
+		cbResolutions = CreateResolutionList(pData, device, &lpResolutions);
 
 		device->Close();
 	} else {
@@ -254,40 +254,40 @@ DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Devi
 
 	res = RegOpenKeyEx(hDeviceKey, TEXT("DeviceData"), 0, KEY_SET_VALUE, &hDeviceDataKey);
 	if (res == ERROR_SUCCESS) {
-		if (privateData->usPort) {
-			dwPort = (DWORD) privateData->usPort;
+		if (pData->usPort) {
+			dwPort = (DWORD) pData->usPort;
 			RegSetValueEx(hDeviceDataKey, TEXT("Port"), 0, REG_DWORD, (LPBYTE) &dwPort, sizeof(DWORD));
 		}
 
-		if (privateData->lpHost) {
-			hr = StringCbLength(privateData->lpHost, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
+		if (pData->lpHost) {
+			hr = StringCbLength(pData->lpHost, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
 			if (SUCCEEDED(hr)) {
 				cbData = (DWORD) cbLength + sizeof(TCHAR);
-				RegSetValueEx(hDeviceDataKey, TEXT("Host"), 0, REG_SZ, (LPBYTE) privateData->lpHost, cbData);
+				RegSetValueEx(hDeviceDataKey, TEXT("Host"), 0, REG_SZ, (LPBYTE) pData->lpHost, cbData);
 			}
 		}
 
-		if (privateData->lpName) {
-			hr = StringCbLength(privateData->lpName, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
+		if (pData->lpName) {
+			hr = StringCbLength(pData->lpName, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
 			if (SUCCEEDED(hr)) {
 				cbData = (DWORD) cbLength + sizeof(TCHAR);
-				RegSetValueEx(hDeviceDataKey, TEXT("Name"), 0, REG_SZ, (LPBYTE) privateData->lpName, cbData);
+				RegSetValueEx(hDeviceDataKey, TEXT("Name"), 0, REG_SZ, (LPBYTE) pData->lpName, cbData);
 			}
 		}
 
-		if (privateData->lpUsername) {
-			hr = StringCbLength(privateData->lpUsername, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
+		if (pData->lpUsername) {
+			hr = StringCbLength(pData->lpUsername, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
 			if (SUCCEEDED(hr)) {
 				cbData = (DWORD) cbLength + sizeof(TCHAR);
-				RegSetValueEx(hDeviceDataKey, TEXT("Username"), 0, REG_SZ, (LPBYTE) privateData->lpUsername, cbData);
+				RegSetValueEx(hDeviceDataKey, TEXT("Username"), 0, REG_SZ, (LPBYTE) pData->lpUsername, cbData);
 			}
 		}
 
-		if (privateData->lpPassword) {
-			hr = StringCbLength(privateData->lpPassword, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
+		if (pData->lpPassword) {
+			hr = StringCbLength(pData->lpPassword, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
 			if (SUCCEEDED(hr)) {
 				cbData = (DWORD) cbLength + sizeof(TCHAR);
-				RegSetValueEx(hDeviceDataKey, TEXT("Password"), 0, REG_SZ, (LPBYTE) privateData->lpPassword, cbData);
+				RegSetValueEx(hDeviceDataKey, TEXT("Password"), 0, REG_SZ, (LPBYTE) pData->lpPassword, cbData);
 			}
 		}
 
@@ -302,13 +302,13 @@ DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Devi
 	RegCloseKey(hDeviceKey);
 
 	if (lpResolutions)
-		HeapSafeFree(privateData->hHeap, 0, lpResolutions);
+		HeapSafeFree(pData->hHeap, 0, lpResolutions);
 
 	return ERROR_SUCCESS;
 }
 
 
-size_t WINAPI CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device, _Outptr_result_maybenull_ LPTSTR *ppszResolutions)
+size_t WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device, _Outptr_result_maybenull_ LPTSTR *ppszResolutions)
 {
 	PWINSANE_Option resolution;
 	PSANE_Word pWordList;
@@ -330,28 +330,28 @@ size_t WINAPI CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE
 			if (pWordList && pWordList[0] > 0) {
 				switch (resolution->GetType()) {
 					case SANE_TYPE_INT:
-						hr = StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%d"), pWordList[1]);
+						hr = StringCbAPrintf(pData->hHeap, ppszResolutions, &cbResolutions, TEXT("%d"), pWordList[1]);
 						if (FAILED(hr))
 							break;
 						for (index = 2; index <= pWordList[0]; index++) {
 							lpResolutions = *ppszResolutions;
 							if (!lpResolutions)
 								break;
-							StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pWordList[index]);
-							HeapSafeFree(privateData->hHeap, 0, lpResolutions);
+							StringCbAPrintf(pData->hHeap, ppszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pWordList[index]);
+							HeapSafeFree(pData->hHeap, 0, lpResolutions);
 						}
 						break;
 
 					case SANE_TYPE_FIXED:
-						hr = StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%d"), SANE_UNFIX(pWordList[1]));
+						hr = StringCbAPrintf(pData->hHeap, ppszResolutions, &cbResolutions, TEXT("%d"), SANE_UNFIX(pWordList[1]));
 						if (FAILED(hr))
 							break;
 						for (index = 2; index <= pWordList[0]; index++) {
 							lpResolutions = *ppszResolutions;
 							if (!lpResolutions)
 								break;
-							StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, SANE_UNFIX(pWordList[index]));
-							HeapSafeFree(privateData->hHeap, 0, lpResolutions);
+							StringCbAPrintf(pData->hHeap, ppszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, SANE_UNFIX(pWordList[index]));
+							HeapSafeFree(pData->hHeap, 0, lpResolutions);
 						}
 						break;
 				}

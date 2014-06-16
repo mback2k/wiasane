@@ -40,7 +40,7 @@ DWORD WINAPI AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEV
 	SP_ADDPROPERTYPAGE_DATA addPropertyPageData;
 	HPROPSHEETPAGE hPropSheetPage;
 	PROPSHEETPAGE propSheetPage;
-	PCOISANE_Data privateData;
+	PCOISANE_Data pData;
 	HANDLE hActCtx, hHeap;
 	HINSTANCE hInstance;
 	BOOL res;
@@ -64,14 +64,14 @@ DWORD WINAPI AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEV
 	if (addPropertyPageData.NumDynamicPages >= MAX_INSTALLWIZARD_DYNAPAGES)
 		return NO_ERROR;
 
-	privateData = (PCOISANE_Data) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(COISANE_Data));
-	if (!privateData)
+	pData = (PCOISANE_Data) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(COISANE_Data));
+	if (!pData)
 		return ERROR_OUTOFMEMORY;
 
-	privateData->hHeap = hHeap;
-	privateData->hInstance = hInstance;
-	privateData->hDeviceInfoSet = hDeviceInfoSet;
-	privateData->pDeviceInfoData = pDeviceInfoData;
+	pData->hHeap = hHeap;
+	pData->hInstance = hInstance;
+	pData->hDeviceInfoSet = hDeviceInfoSet;
+	pData->pDeviceInfoData = pDeviceInfoData;
 
 	ZeroMemory(&propSheetPage, sizeof(propSheetPage));
 	propSheetPage.dwSize = sizeof(propSheetPage);
@@ -81,7 +81,7 @@ DWORD WINAPI AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEV
 	propSheetPage.pfnDlgProc = &DialogProcPropertyPageAdvanced;
 	propSheetPage.pfnCallback = &PropSheetPageProcPropertyPageAdvanced;
 	propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_PROPERTIES);
-	propSheetPage.lParam = (LPARAM) privateData;
+	propSheetPage.lParam = (LPARAM) pData;
 
 	hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
 	if (!hPropSheetPage)
@@ -98,7 +98,7 @@ DWORD WINAPI AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEV
 INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	LPPROPSHEETPAGE lpPropSheetPage;
-	PCOISANE_Data privateData;
+	PCOISANE_Data pData;
 
 	UNREFERENCED_PARAMETER(wParam);
 
@@ -106,9 +106,9 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 		case WM_INITDIALOG:
 			Trace(TEXT("WM_INITDIALOG"));
 			lpPropSheetPage = (LPPROPSHEETPAGE) lParam;
-			privateData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
 
-			InitPropertyPageAdvanced(hwndDlg, privateData);
+			InitPropertyPageAdvanced(hwndDlg, pData);
 			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
 			break;
 
@@ -118,15 +118,15 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 			if (!lpPropSheetPage)
 				break;
 
-			privateData = (PCOISANE_Data) lpPropSheetPage->lParam;
-			if (!privateData)
+			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!pData)
 				break;
 
 			switch (((LPNMHDR) lParam)->code) {
 				case PSN_APPLY:
 					Trace(TEXT("PSN_APPLY"));
-					if (!ExitPropertyPageAdvanced(hwndDlg, privateData)) {
-						MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+					if (!ExitPropertyPageAdvanced(hwndDlg, pData)) {
+						MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
 						return TRUE;
 					}
@@ -148,14 +148,14 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 			if (!lpPropSheetPage)
 				break;
 
-			privateData = (PCOISANE_Data) lpPropSheetPage->lParam;
-			if (!privateData)
+			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!pData)
 				break;
 
 			switch (HIWORD(wParam)) {
 				case BN_CLICKED:
 					Trace(TEXT("BN_CLICKED"));
-					return DialogProcPropertyPageAdvancedBtnClicked(hwndDlg, LOWORD(wParam), privateData);
+					return DialogProcPropertyPageAdvancedBtnClicked(hwndDlg, LOWORD(wParam), pData);
 					break;
 			}
 			break;
@@ -164,56 +164,56 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 	return FALSE;
 }
 
-INT_PTR CALLBACK DialogProcPropertyPageAdvancedBtnClicked(_In_ HWND hwndDlg, _In_ UINT hwndDlgItem, _Inout_ PCOISANE_Data privateData)
+INT_PTR CALLBACK DialogProcPropertyPageAdvancedBtnClicked(_In_ HWND hwndDlg, _In_ UINT hwndDlgItem, _Inout_ PCOISANE_Data pData)
 {
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
 	PWINSANE_Params oParams;
 
-	oSession = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
+	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
 	if (oSession) {
-		g_pPropertyPageData = privateData;
+		g_pPropertyPageData = pData;
 		if (oSession->Init(NULL, &PropertyPageAuthCallback) == SANE_STATUS_GOOD) {
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
-				oDevice = oSession->GetDevice(privateData->lpName);
+				oDevice = oSession->GetDevice(pData->lpName);
 				if (oDevice) {
 					if (oDevice->Open() == SANE_STATUS_GOOD) {
 						switch (hwndDlgItem) {
 							case IDC_PROPERTIES_BUTTON_CHECK:
 								if (oDevice->GetParams(&oParams) == SANE_STATUS_GOOD) {
 									delete oParams;
-									MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_CHECK_SUCCESSFUL, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONINFORMATION | MB_OK);
+									MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_CHECK_SUCCESSFUL, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONINFORMATION | MB_OK);
 								} else {
-									MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_CHECK_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+									MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_CHECK_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
 								}
 								break;
 
 							case IDC_PROPERTIES_BUTTON_RESET:
 								if (oDevice->Cancel() == SANE_STATUS_GOOD) {
-									MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_RESET_SUCCESSFUL, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONINFORMATION | MB_OK);
+									MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_RESET_SUCCESSFUL, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONINFORMATION | MB_OK);
 								} else {
-									MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_RESET_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+									MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_RESET_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
 								}
 								break;
 						}
 						oDevice->Close();
 					} else {
-						MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+						MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
 					}
 				} else {
-					MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+					MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
 				}
 			} else {
-				MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+				MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
 			}
 			oSession->Exit();
 		} else {
-			MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+			MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
 		}
 		g_pPropertyPageData = NULL;
 		delete oSession;
 	} else {
-		MessageBoxR(privateData->hHeap, privateData->hInstance, hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+		MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
 	}
 
 	return FALSE;
@@ -221,7 +221,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvancedBtnClicked(_In_ HWND hwndDlg, _In
 
 UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp)
 {
-	PCOISANE_Data privateData;
+	PCOISANE_Data pData;
 	UINT ret;
 
 	UNREFERENCED_PARAMETER(hwnd);
@@ -229,42 +229,42 @@ UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uM
 	ret = 0;
 
 	if (ppsp && ppsp->lParam) {
-		privateData = (PCOISANE_Data) ppsp->lParam;
+		pData = (PCOISANE_Data) ppsp->lParam;
 	} else {
-		privateData = NULL;
+		pData = NULL;
 	}
 
 	switch (uMsg) {
 		case PSPCB_ADDREF:
 			Trace(TEXT("PSPCB_ADDREF"));
-			if (privateData) {
-				privateData->uiReferences++;
+			if (pData) {
+				pData->uiReferences++;
 			}
 			break;
 
 		case PSPCB_CREATE:
 			Trace(TEXT("PSPCB_CREATE"));
-			if (privateData) {
+			if (pData) {
 				ret = 1;
 			}
 			break;
 
 		case PSPCB_RELEASE:
 			Trace(TEXT("PSPCB_RELEASE"));
-			if (privateData) {
-				privateData->uiReferences--;
+			if (pData) {
+				pData->uiReferences--;
 
-				if (privateData->uiReferences == 0) {
-					if (privateData->lpHost)
-						HeapSafeFree(privateData->hHeap, 0, privateData->lpHost);
-					if (privateData->lpName)
-						HeapSafeFree(privateData->hHeap, 0, privateData->lpName);
-					if (privateData->lpUsername)
-						HeapSafeFree(privateData->hHeap, 0, privateData->lpUsername);
-					if (privateData->lpPassword)
-						HeapSafeFree(privateData->hHeap, 0, privateData->lpPassword);
+				if (pData->uiReferences == 0) {
+					if (pData->lpHost)
+						HeapSafeFree(pData->hHeap, 0, pData->lpHost);
+					if (pData->lpName)
+						HeapSafeFree(pData->hHeap, 0, pData->lpName);
+					if (pData->lpUsername)
+						HeapSafeFree(pData->hHeap, 0, pData->lpUsername);
+					if (pData->lpPassword)
+						HeapSafeFree(pData->hHeap, 0, pData->lpPassword);
 
-					HeapSafeFree(privateData->hHeap, 0, privateData);
+					HeapSafeFree(pData->hHeap, 0, pData);
 					ppsp->lParam = NULL;
 				}
 			}
@@ -274,7 +274,7 @@ UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uM
 	return ret;
 }
 
-BOOL WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
+BOOL WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
@@ -301,15 +301,15 @@ BOOL WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pr
 		res = FALSE;
 	}
 
-	QueryDeviceData(privateData);
+	QueryDeviceData(pData);
 
-	if (!privateData->lpHost)
-		privateData->lpHost = StringAClone(privateData->hHeap, TEXT("localhost"));
+	if (!pData->lpHost)
+		pData->lpHost = StringAClone(pData->hHeap, TEXT("localhost"));
 
-	if (!privateData->usPort)
-		privateData->usPort = WINSANE_DEFAULT_PORT;
+	if (!pData->usPort)
+		pData->usPort = WINSANE_DEFAULT_PORT;
 
-	oSession = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
+	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
 	if (oSession) {
 		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
 			hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER);
@@ -331,19 +331,19 @@ BOOL WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pr
 		res = FALSE;
 	}
 
-	if (privateData->lpName)
-		SendDlgItemMessage(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, CB_SELECTSTRING, (WPARAM) -1, (LPARAM) privateData->lpName);
+	if (pData->lpName)
+		SendDlgItemMessage(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, CB_SELECTSTRING, (WPARAM) -1, (LPARAM) pData->lpName);
 
-	if (privateData->lpUsername)
-		SetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, privateData->lpUsername);
+	if (pData->lpUsername)
+		SetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, pData->lpUsername);
 
-	if (privateData->lpPassword)
-		SetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, privateData->lpPassword);
+	if (pData->lpPassword)
+		SetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, pData->lpPassword);
 
 	return res;
 }
 
-BOOL WINAPI ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
+BOOL WINAPI ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
 	SP_DEVINSTALL_PARAMS devInstallParams;
 	PWINSANE_Session oSession;
@@ -353,62 +353,62 @@ BOOL WINAPI ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pr
 	LPTSTR lpPassword;
 	BOOL res;
 
-	lpName = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
+	lpName = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
 	if (lpName) {
 		res = GetDlgItemText(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, lpName, MAX_PATH);
 		if (res) {
-			if (privateData->lpName) {
-				HeapSafeFree(privateData->hHeap, 0, privateData->lpName);
+			if (pData->lpName) {
+				HeapSafeFree(pData->hHeap, 0, pData->lpName);
 			}
-			privateData->lpName = lpName;
+			pData->lpName = lpName;
 		} else {
-			HeapSafeFree(privateData->hHeap, 0, lpName);
+			HeapSafeFree(pData->hHeap, 0, lpName);
 		}
 	} else {
 		res = FALSE;
 	}
 
 	if (res) {
-		lpUsername = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
+		lpUsername = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
 		if (lpUsername) {
 			if (GetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, lpUsername, MAX_PATH)) {
-				if (privateData->lpUsername) {
-					HeapSafeFree(privateData->hHeap, 0, privateData->lpUsername);
+				if (pData->lpUsername) {
+					HeapSafeFree(pData->hHeap, 0, pData->lpUsername);
 				}
-				privateData->lpUsername = lpUsername;
+				pData->lpUsername = lpUsername;
 			} else {
-				HeapSafeFree(privateData->hHeap, 0, lpUsername);
+				HeapSafeFree(pData->hHeap, 0, lpUsername);
 			}
 		}
 
-		lpPassword = (LPTSTR) HeapAlloc(privateData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
+		lpPassword = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
 		if (lpPassword) {
 			if (GetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, lpPassword, MAX_PATH)) {
-				if (privateData->lpPassword) {
-					HeapSafeFree(privateData->hHeap, 0, privateData->lpPassword);
+				if (pData->lpPassword) {
+					HeapSafeFree(pData->hHeap, 0, pData->lpPassword);
 				}
-				privateData->lpPassword = lpPassword;
+				pData->lpPassword = lpPassword;
 			} else {
-				HeapSafeFree(privateData->hHeap, 0, lpPassword);
+				HeapSafeFree(pData->hHeap, 0, lpPassword);
 			}
 		}
 
-		oSession = WINSANE_Session::Remote(privateData->lpHost, privateData->usPort);
+		oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
 		if (oSession) {
-			g_pPropertyPageData = privateData;
+			g_pPropertyPageData = pData;
 			if (oSession->Init(NULL, &PropertyPageAuthCallback) == SANE_STATUS_GOOD) {
 				if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
-					oDevice = oSession->GetDevice(privateData->lpName);
+					oDevice = oSession->GetDevice(pData->lpName);
 					if (oDevice) {
-						UpdateDeviceInfo(privateData, oDevice);
-						UpdateDeviceData(privateData, oDevice);
+						UpdateDeviceInfo(pData, oDevice);
+						UpdateDeviceData(pData, oDevice);
 
 						ZeroMemory(&devInstallParams, sizeof(SP_DEVINSTALL_PARAMS));
 						devInstallParams.cbSize = sizeof(SP_DEVINSTALL_PARAMS);
-						res = SetupDiGetDeviceInstallParams(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, &devInstallParams);
+						res = SetupDiGetDeviceInstallParams(pData->hDeviceInfoSet, pData->pDeviceInfoData, &devInstallParams);
 						if (res) {
 							devInstallParams.FlagsEx |= DI_FLAGSEX_PROPCHANGE_PENDING;
-							res = SetupDiSetDeviceInstallParams(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, &devInstallParams);
+							res = SetupDiSetDeviceInstallParams(pData->hDeviceInfoSet, pData->pDeviceInfoData, &devInstallParams);
 						}
 					} else {
 						res = FALSE;

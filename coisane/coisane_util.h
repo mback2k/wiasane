@@ -38,11 +38,11 @@ HINF WINAPI OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDev
 
 DWORD WINAPI UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags);
 DWORD WINAPI ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD StateChange, _In_ DWORD Scope);
-DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device);
+DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device);
 
-DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data privateData);
-DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device);
+DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData);
+DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device);
 
-size_t WINAPI CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device device, _Outptr_result_maybenull_ LPTSTR *ppszResolutions);
+size_t WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device, _Outptr_result_maybenull_ LPTSTR *ppszResolutions);
 
 #endif
