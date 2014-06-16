@@ -23,6 +23,7 @@
 #include <tchar.h>
 #include <strsafe.h>
 #include <malloc.h>
+#include <commctrl.h>
 
 #include "dllmain.h"
 #include "resource.h"
@@ -61,7 +62,7 @@ DWORD WINAPI NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_
 	if (!res)
 		return GetLastError();
 
-	if (!(newDeviceWizardData.NumDynamicPages < MAX_INSTALLWIZARD_DYNAPAGES - 1))
+	if (!(newDeviceWizardData.NumDynamicPages < MAX_INSTALLWIZARD_DYNAPAGES - 3))
 		return NO_ERROR;
 
 	pData = (PCOISANE_Data) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(COISANE_Data));
@@ -92,11 +93,29 @@ DWORD WINAPI NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_
 	
 	newDeviceWizardData.DynamicPages[newDeviceWizardData.NumDynamicPages++] = hPropSheetPage;
 
+	propSheetPage.pfnDlgProc = &DialogProcWizardPageProgress;
+	propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_WIZARD_PAGE_PROGRESS);
+
+	hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
+	if (!hPropSheetPage)
+		return GetLastError();
+
+	newDeviceWizardData.DynamicPages[newDeviceWizardData.NumDynamicPages++] = hPropSheetPage;
+
 	propSheetPage.pfnDlgProc = &DialogProcWizardPageScanner;
 	propSheetPage.pfnCallback = &PropSheetPageProcWizardPage;
 	propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_WIZARD_PAGE_SCANNER);
 	propSheetPage.pszHeaderTitle = MAKEINTRESOURCE(IDS_WIZARD_PAGE_SCANNER_HEADER_TITLE);
 	propSheetPage.pszHeaderSubTitle = MAKEINTRESOURCE(IDS_WIZARD_PAGE_SCANNER_HEADER_SUBTITLE);
+
+	hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
+	if (!hPropSheetPage)
+		return GetLastError();
+
+	newDeviceWizardData.DynamicPages[newDeviceWizardData.NumDynamicPages++] = hPropSheetPage;
+
+	propSheetPage.pfnDlgProc = &DialogProcWizardPageProgress;
+	propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_WIZARD_PAGE_PROGRESS);
 
 	hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
 	if (!hPropSheetPage)
@@ -234,6 +253,8 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 
 				case PSN_WIZBACK:
 					Trace(TEXT("PSN_WIZBACK"));
+					SetWindowLong(hwndDlg, DWLP_MSGRESULT, IDD_WIZARD_PAGE_SERVER);
+					return TRUE;
 					break;
 
 				case PSN_WIZNEXT:
@@ -252,6 +273,92 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 				case PSN_QUERYCANCEL:
 					Trace(TEXT("PSN_QUERYCANCEL"));
 					ChangeDeviceState(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_DISABLE, DICS_FLAG_GLOBAL);
+					break;
+			}
+			break;
+	}
+
+	return FALSE;
+}
+
+INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
+{
+	LPPROPSHEETPAGE lpPropSheetPage;
+	PCOISANE_Data pData;
+	HWND hwnd;
+
+	UNREFERENCED_PARAMETER(wParam);
+
+	switch (uMsg) {
+		case WM_INITDIALOG:
+			Trace(TEXT("WM_INITDIALOG"));
+			lpPropSheetPage = (LPPROPSHEETPAGE) lParam;
+			if (!lpPropSheetPage)
+				break;
+
+			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!pData)
+				break;
+
+			pData->hwndDlg = hwndDlg;
+
+			InitWizardPageProgress(hwndDlg, pData);
+			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
+			break;
+
+		case WM_NOTIFY:
+			Trace(TEXT("WM_NOTIFY"));
+			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			if (!lpPropSheetPage)
+				break;
+
+			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!pData)
+				break;
+
+			switch (((LPNMHDR) lParam)->code) {
+				case PSN_SETACTIVE:
+					Trace(TEXT("PSN_SETACTIVE"));
+					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
+					PropSheet_SetWizButtons(pData->hwndPropDlg, PSWIZB_BACK);
+
+					hwnd = GetDlgItem(pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ANIMATE);
+					if (hwnd) {
+						Animate_Play(hwnd, 0, -1, -1);
+					}
+
+					if (pData->hThread) {
+						SetThreadPriority(pData->hThread, THREAD_PRIORITY_BELOW_NORMAL);
+						ResumeThread(pData->hThread);
+					}
+					break;
+
+				case PSN_KILLACTIVE:
+					Trace(TEXT("PSN_KILLACTIVE"));
+					hwnd = GetDlgItem(pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ANIMATE);
+					if (hwnd) {
+						Animate_Stop(hwnd);
+					}
+
+					pData->hThread = NULL;
+					pData->hwndPropDlg = NULL;
+					break;
+
+				case PSN_WIZBACK:
+					Trace(TEXT("PSN_WIZBACK"));
+					break;
+
+				case PSN_WIZNEXT:
+					Trace(TEXT("PSN_WIZNEXT"));
+					break;
+
+				case PSN_WIZFINISH:
+					Trace(TEXT("PSN_WIZFINISH"));
+					break;
+
+				case PSN_QUERYCANCEL:
+					Trace(TEXT("PSN_QUERYCANCEL"));
+					return TRUE;
 					break;
 			}
 			break;
@@ -376,7 +483,6 @@ BOOL WINAPI InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 
 BOOL WINAPI NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
-	PWINSANE_Session oSession;
 	LPTSTR lpHost;
 	USHORT usPort;
 	BOOL bPort;
@@ -400,18 +506,59 @@ BOOL WINAPI NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 	pData->lpHost = lpHost;
 	pData->usPort = usPort;
 
-	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
-	if (oSession) {
-		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
-			if (oSession->Exit() == SANE_STATUS_GOOD) {
-				delete oSession;
-				return TRUE;
-			}
-		}
-		delete oSession;
+	pData->hThread = CreateThread(NULL, 0, &ProcWizardPageServer, pData, CREATE_SUSPENDED, NULL);
+	if (!pData->hThread)
+		return FALSE;
+
+	return TRUE;
+}
+
+DWORD WINAPI ProcWizardPageServer(_In_ LPVOID lpParameter)
+{
+	PWINSANE_Session oSession;
+	PCOISANE_Data pData;
+	HANDLE hThread;
+	size_t cbLen;
+	PTSTR lpStr;
+	HRESULT hr;
+
+	pData = (PCOISANE_Data) lpParameter;
+	if (!pData)
+		return 0;
+
+	hThread = pData->hThread;
+
+	hr = StringCbAPrintf(pData->hHeap, &lpStr, &cbLen, TEXT("%s:%d"), pData->lpHost, pData->usPort);
+	if (SUCCEEDED(hr) && lpStr) {
+		SetDlgItemText(pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_SUB, lpStr);
+		HeapSafeFree(pData->hHeap, 0, lpStr);
 	}
 
-	return FALSE;
+	SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_CONNECT);
+	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
+	if (oSession) {
+		SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_INIT);
+		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
+			if (oSession->Exit() == SANE_STATUS_GOOD) {
+				if (pData->hThread == hThread) {
+					PropSheet_PressButton(pData->hwndPropDlg, PSBTN_NEXT);
+				}
+				return 0;
+			} else if (pData->hThread == hThread) {
+				MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+			}
+		} else if (pData->hThread == hThread) {
+			MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+		}
+		delete oSession;
+	} else if (pData->hThread == hThread) {
+		MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+	}
+
+	if (pData->hThread == hThread) {
+		PropSheet_PressButton(pData->hwndPropDlg, PSBTN_BACK);
+	}
+	return 0;
 }
 
 
@@ -450,8 +597,6 @@ BOOL WINAPI InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData
 
 BOOL WINAPI NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
-	PWINSANE_Session oSession;
-	PWINSANE_Device oDevice;
 	LPTSTR lpName, lpUsername, lpPassword;
 	size_t cbLength;
 	DWORD res;
@@ -485,11 +630,44 @@ BOOL WINAPI NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData
 	pData->lpUsername = lpUsername;
 	pData->lpPassword = lpPassword;
 
+	pData->hThread = CreateThread(NULL, 0, &ProcWizardPageScanner, pData, CREATE_SUSPENDED, NULL);
+	if (!pData->hThread)
+		return FALSE;
+
+	return TRUE;
+}
+
+DWORD WINAPI ProcWizardPageScanner(_In_ LPVOID lpParameter)
+{
+	PWINSANE_Session oSession;
+	PWINSANE_Device oDevice;
+	PCOISANE_Data pData;
+	HANDLE hThread;
+	size_t cbLen;
+	PTSTR lpStr;
+	HRESULT hr;
+
+	pData = (PCOISANE_Data) lpParameter;
+	if (!pData)
+		return 0;
+
+	hThread = pData->hThread;
+
+	hr = StringCbAPrintf(pData->hHeap, &lpStr, &cbLen, TEXT("%s:%d\n%s"), pData->lpHost, pData->usPort, pData->lpName);
+	if (SUCCEEDED(hr) && lpStr) {
+		SetDlgItemText(pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_SUB, lpStr);
+		HeapSafeFree(pData->hHeap, 0, lpStr);
+	}
+
+	SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_CONNECT);
 	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
 	if (oSession) {
 		g_pWizardPageData = pData;
+		SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_INIT);
 		if (oSession->Init(NULL, &WizardPageAuthCallback) == SANE_STATUS_GOOD) {
+			SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_FIND);
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
+				SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_OPEN);
 				oDevice = oSession->GetDevice(pData->lpName);
 				if (oDevice) {
 					UpdateDeviceInfo(pData, oDevice);
@@ -501,17 +679,71 @@ BOOL WINAPI NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData
 					if (oSession->Exit() == SANE_STATUS_GOOD) {
 						g_pWizardPageData = NULL;
 						delete oSession;
-						return TRUE;
+
+						if (pData->hThread == hThread) {
+							PropSheet_PressButton(pData->hwndPropDlg, PSBTN_NEXT);
+						}
+						return 0;
+					} else if (pData->hThread == hThread) {
+						MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 					}
+				} else if (pData->hThread == hThread) {
+					MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 				}
+			} else if (pData->hThread == hThread) {
+				MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 			}
 			oSession->Exit();
+		} else if (pData->hThread == hThread) {
+			MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 		}
 		g_pWizardPageData = NULL;
 		delete oSession;
+	} else if (pData->hThread == hThread) {
+		MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 	}
 
-	return FALSE;
+	if (pData->hThread == hThread) {
+		PropSheet_PressButton(pData->hwndPropDlg, PSBTN_BACK);
+	}
+	return 0;
+}
+
+
+BOOL WINAPI InitWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+{
+	HINSTANCE hInst;
+	HANDLE hIcon;
+	HWND hwnd;
+	BOOL res;
+
+	UNREFERENCED_PARAMETER(pData);
+
+	hInst = GetWiaDefInstance();
+	if (hInst) {
+		hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ICON);
+		if (hwnd) {
+			hIcon = LoadImage(hInst, MAKEINTRESOURCE(105), IMAGE_ICON, 32, 32, LR_SHARED);
+			if (hIcon) {
+				res = PostMessage(hwnd, STM_SETICON, (WPARAM) hIcon, (LPARAM) 0);
+			} else {
+				res = FALSE;
+			}
+		} else {
+			res = FALSE;
+		}
+
+		hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ANIMATE);
+		if (hwnd) {
+			res = Animate_OpenEx(hwnd, hInst, MAKEINTRESOURCE(1001));
+		} else {
+			res = FALSE;
+		}
+	} else {
+		res = FALSE;
+	}
+
+	return res;
 }
 
 
