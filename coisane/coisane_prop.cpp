@@ -95,6 +95,7 @@ DWORD WINAPI AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEV
 	return NO_ERROR;
 }
 
+
 INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	LPPROPSHEETPAGE lpPropSheetPage;
@@ -106,7 +107,14 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 		case WM_INITDIALOG:
 			Trace(TEXT("WM_INITDIALOG"));
 			lpPropSheetPage = (LPPROPSHEETPAGE) lParam;
+			if (!lpPropSheetPage)
+				break;
+
 			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!pData)
+				break;
+
+			pData->hwndDlg = hwndDlg;
 
 			InitPropertyPageAdvanced(hwndDlg, pData);
 			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
@@ -123,6 +131,16 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 				break;
 
 			switch (((LPNMHDR) lParam)->code) {
+				case PSN_SETACTIVE:
+					Trace(TEXT("PSN_SETACTIVE"));
+					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
+					break;
+
+				case PSN_KILLACTIVE:
+					Trace(TEXT("PSN_KILLACTIVE"));
+					pData->hwndPropDlg = NULL;
+					break;
+
 				case PSN_APPLY:
 					Trace(TEXT("PSN_APPLY"));
 					if (!ExitPropertyPageAdvanced(hwndDlg, pData)) {
@@ -219,6 +237,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvancedBtnClicked(_In_ HWND hwndDlg, _In
 	return FALSE;
 }
 
+
 UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp)
 {
 	PCOISANE_Data pData;
@@ -273,6 +292,7 @@ UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uM
 
 	return ret;
 }
+
 
 BOOL WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {

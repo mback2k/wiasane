@@ -111,6 +111,7 @@ DWORD WINAPI NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_
 	return NO_ERROR;
 }
 
+
 INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _In_ WPARAM wParam, _In_ LPARAM lParam)
 {
 	LPPROPSHEETPAGE lpPropSheetPage;
@@ -122,7 +123,14 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 		case WM_INITDIALOG:
 			Trace(TEXT("WM_INITDIALOG"));
 			lpPropSheetPage = (LPPROPSHEETPAGE) lParam;
+			if (!lpPropSheetPage)
+				break;
+
 			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!pData)
+				break;
+
+			pData->hwndDlg = hwndDlg;
 
 			InitWizardPageServer(hwndDlg, pData);
 			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
@@ -141,7 +149,13 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 			switch (((LPNMHDR) lParam)->code) {
 				case PSN_SETACTIVE:
 					Trace(TEXT("PSN_SETACTIVE"));
-					PropSheet_SetWizButtons(((LPNMHDR) lParam)->hwndFrom, PSWIZB_NEXT);
+					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
+					PropSheet_SetWizButtons(pData->hwndPropDlg, PSWIZB_NEXT | PSWIZB_CANCEL);
+					break;
+
+				case PSN_KILLACTIVE:
+					Trace(TEXT("PSN_KILLACTIVE"));
+					pData->hwndPropDlg = NULL;
 					break;
 
 				case PSN_WIZBACK:
@@ -183,7 +197,14 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 		case WM_INITDIALOG:
 			Trace(TEXT("WM_INITDIALOG"));
 			lpPropSheetPage = (LPPROPSHEETPAGE) lParam;
+			if (!lpPropSheetPage)
+				break;
+
 			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!pData)
+				break;
+
+			pData->hwndDlg = hwndDlg;
 
 			InitWizardPageScanner(hwndDlg, pData);
 			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
@@ -192,12 +213,23 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 		case WM_NOTIFY:
 			Trace(TEXT("WM_NOTIFY"));
 			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			if (!lpPropSheetPage)
+				break;
+
 			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!pData)
+				break;
 
 			switch (((LPNMHDR) lParam)->code) {
 				case PSN_SETACTIVE:
 					Trace(TEXT("PSN_SETACTIVE"));
-					PropSheet_SetWizButtons(((LPNMHDR) lParam)->hwndFrom, PSWIZB_BACK | PSWIZB_NEXT);
+					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
+					PropSheet_SetWizButtons(pData->hwndPropDlg, PSWIZB_BACK | PSWIZB_NEXT | PSWIZB_CANCEL);
+					break;
+
+				case PSN_KILLACTIVE:
+					Trace(TEXT("PSN_KILLACTIVE"));
+					pData->hwndPropDlg = NULL;
 					break;
 
 				case PSN_WIZBACK:
@@ -227,6 +259,7 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 
 	return FALSE;
 }
+
 
 UINT CALLBACK PropSheetPageProcWizardPage(_In_ HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp)
 {
