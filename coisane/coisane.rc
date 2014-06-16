@@ -112,7 +112,7 @@ FONT 9, "Segoe UI", 0, 0, 0x0
 BEGIN
     LTEXT           "",IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN,20,8,276,8
     ICON            "",IDC_WIZARD_PAGE_PROGRESS_ICON,20,22,20,20,0,WS_EX_TRANSPARENT
-    LTEXT           "",IDC_WIZARD_PAGE_PROGRESS_TEXT,56,22,240,22,SS_NOPREFIX
+    LTEXT           "",IDC_WIZARD_PAGE_PROGRESS_TEXT_SUB,56,22,240,22,SS_NOPREFIX
     CONTROL         "Progress",IDC_WIZARD_PAGE_PROGRESS_ANIMATE,"SysAnimate32",ACS_TRANSPARENT,66,60,198,28,WS_EX_TRANSPARENT
 END
 
@@ -183,6 +183,10 @@ BEGIN
     IDS_SESSION_INIT_FAILED "Scanner session initialization failed."
     IDS_SESSION_CONNECT_FAILED "Scanner session connect failed."
     IDS_SESSION_STEP_CONNECT "Trying to connect to the following SANE server:"
+END
+
+STRINGTABLE
+BEGIN
     IDS_SESSION_STEP_INIT   "Trying to initialize a session with the following SANE server:"
     IDS_DEVICE_STEP_FIND    "Trying to select the following SANE device:"
     IDS_DEVICE_STEP_OPEN    "Trying to open and query the following SANE device:"
