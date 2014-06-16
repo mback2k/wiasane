@@ -33,7 +33,9 @@ __user_code
 #include <windows.h>
 
 HINSTANCE GetModuleInstance();
+HINSTANCE GetWiaDefInstance();
 HINSTANCE GetStiCiInstance();
+HINSTANCE GetStiInstance();
 HANDLE GetActivationContext();
 
 #endif

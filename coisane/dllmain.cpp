@@ -23,7 +23,9 @@
 #include <commctrl.h>
 
 static HINSTANCE g_hModuleInstance = NULL; // instance of this CoInstaller (used for loading from a resource)
+static HINSTANCE g_hWiaDefInstance = NULL; // instance of the wiadefui.dll (used for loading from a resource)
 static HINSTANCE g_hStiCiInstance = NULL; // instance of the sti_ci.dll (used for loading from a resource)
+static HINSTANCE g_hStiInstance = NULL; // instance of the sti.dll (used for loading from a resource)
 static HANDLE g_hActivationContext = NULL; // global ActivationContext handle
 static BOOL g_bCommonControls = FALSE;	// global CommonControls initialization status
 
@@ -38,8 +40,14 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 
 	switch (dwReason) {
 		case DLL_PROCESS_ATTACH:
+			if (!g_hStiInstance) {
+				g_hStiInstance = LoadLibrary(TEXT("sti.dll"));
+			}
 			if (!g_hStiCiInstance) {
 				g_hStiCiInstance = LoadLibrary(TEXT("sti_ci.dll"));
+			}
+			if (!g_hWiaDefInstance) {
+				g_hWiaDefInstance = LoadLibrary(TEXT("wiadefui.dll"));
 			}
 
 		case DLL_THREAD_ATTACH:
@@ -63,9 +71,17 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 			break;
 
 		case DLL_PROCESS_DETACH:
+			if (g_hWiaDefInstance) {
+				FreeLibrary(g_hWiaDefInstance);
+				g_hWiaDefInstance = NULL;
+			}
 			if (g_hStiCiInstance) {
 				FreeLibrary(g_hStiCiInstance);
 				g_hStiCiInstance = NULL;
+			}
+			if (g_hStiInstance) {
+				FreeLibrary(g_hStiInstance);
+				g_hStiInstance = NULL;
 			}
 			break;
 	}
@@ -78,9 +94,19 @@ HINSTANCE GetModuleInstance()
 	return g_hModuleInstance;
 }
 
+HINSTANCE GetWiaDefInstance()
+{
+	return g_hWiaDefInstance;
+}
+
 HINSTANCE GetStiCiInstance()
 {
 	return g_hStiCiInstance;
+}
+
+HINSTANCE GetStiInstance()
+{
+	return g_hStiInstance;
 }
 
 HANDLE GetActivationContext()
