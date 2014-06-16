@@ -78,12 +78,13 @@ DWORD WINAPI NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_
 	propSheetPage.dwFlags = PSP_USECALLBACK | PSP_USEHEADERTITLE | PSP_USEHEADERSUBTITLE;
 	propSheetPage.hActCtx = hActCtx;
 	propSheetPage.hInstance = hInstance;
+	propSheetPage.lParam = (LPARAM) pData;
+
 	propSheetPage.pfnDlgProc = &DialogProcWizardPageServer;
 	propSheetPage.pfnCallback = &PropSheetPageProcWizardPage;
 	propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_WIZARD_PAGE_SERVER);
 	propSheetPage.pszHeaderTitle = MAKEINTRESOURCE(IDS_WIZARD_PAGE_SERVER_HEADER_TITLE);
 	propSheetPage.pszHeaderSubTitle = MAKEINTRESOURCE(IDS_WIZARD_PAGE_SERVER_HEADER_SUBTITLE);
-	propSheetPage.lParam = (LPARAM) pData;
 
 	hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
 	if (!hPropSheetPage)
@@ -91,17 +92,11 @@ DWORD WINAPI NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_
 	
 	newDeviceWizardData.DynamicPages[newDeviceWizardData.NumDynamicPages++] = hPropSheetPage;
 
-	ZeroMemory(&propSheetPage, sizeof(propSheetPage));
-	propSheetPage.dwSize = sizeof(propSheetPage);
-	propSheetPage.dwFlags = PSP_USECALLBACK | PSP_USEHEADERTITLE | PSP_USEHEADERSUBTITLE;
-	propSheetPage.hActCtx = hActCtx;
-	propSheetPage.hInstance = hInstance;
 	propSheetPage.pfnDlgProc = &DialogProcWizardPageScanner;
 	propSheetPage.pfnCallback = &PropSheetPageProcWizardPage;
 	propSheetPage.pszTemplate = MAKEINTRESOURCE(IDD_WIZARD_PAGE_SCANNER);
 	propSheetPage.pszHeaderTitle = MAKEINTRESOURCE(IDS_WIZARD_PAGE_SCANNER_HEADER_TITLE);
 	propSheetPage.pszHeaderSubTitle = MAKEINTRESOURCE(IDS_WIZARD_PAGE_SCANNER_HEADER_SUBTITLE);
-	propSheetPage.lParam = (LPARAM) pData;
 
 	hPropSheetPage = CreatePropertySheetPage(&propSheetPage);
 	if (!hPropSheetPage)
