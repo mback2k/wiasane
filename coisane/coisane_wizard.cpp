@@ -346,43 +346,39 @@ BOOL WINAPI NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 	PWINSANE_Session oSession;
 	LPTSTR lpHost;
 	USHORT usPort;
-	BOOL res;
+	BOOL bPort;
+	size_t cbLength;
+	DWORD res;
 
-	lpHost = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
-	if (lpHost) {
-		res = GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_HOST, lpHost, MAX_PATH);
-		if (res) {
-			if (pData->lpHost) {
-				HeapSafeFree(pData->hHeap, 0, pData->lpHost);
-			}
-			pData->lpHost = lpHost;
-		} else {
-			HeapSafeFree(pData->hHeap, 0, lpHost);
-		}
-	} else {
-		res = FALSE;
+	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_HOST, &lpHost, &cbLength);
+	if (res != ERROR_SUCCESS) {
+		return FALSE;
 	}
 
-	if (res) {
-		usPort = (USHORT) GetDlgItemInt(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_PORT, &res, FALSE);
-		if (res) {
-			pData->usPort = usPort;
+	usPort = (USHORT) GetDlgItemInt(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_PORT, &bPort, FALSE);
+	if (!bPort) {
+		HeapSafeFree(pData->hHeap, 0, lpHost);
+		return FALSE;
+	}
 
-			oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
-			if (oSession) {
-				if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
-					res = oSession->Exit() == SANE_STATUS_GOOD;
-				} else {
-					res = FALSE;
-				}
+	if (pData->lpHost) {
+		HeapSafeFree(pData->hHeap, 0, pData->lpHost);
+	}
+	pData->lpHost = lpHost;
+	pData->usPort = usPort;
+
+	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
+	if (oSession) {
+		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
+			if (oSession->Exit() == SANE_STATUS_GOOD) {
 				delete oSession;
-			} else {
-				res = FALSE;
+				return TRUE;
 			}
 		}
+		delete oSession;
 	}
 
-	return res;
+	return FALSE;
 }
 
 
@@ -423,85 +419,66 @@ BOOL WINAPI NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData
 {
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
-	LPTSTR lpName;
-	LPTSTR lpUsername;
-	LPTSTR lpPassword;
-	BOOL res;
+	LPTSTR lpName, lpUsername, lpPassword;
+	size_t cbLength;
+	DWORD res;
 
-	lpName = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
-	if (lpName) {
-		res = GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER, lpName, MAX_PATH);
-		if (res) {
-			if (pData->lpName) {
-				HeapSafeFree(pData->hHeap, 0, pData->lpName);
-			}
-			pData->lpName = lpName;
-		} else {
-			HeapSafeFree(pData->hHeap, 0, lpName);
-		}
-	} else {
-		res = FALSE;
+	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER, &lpName, &cbLength);
+	if (res != ERROR_SUCCESS) {
+		return FALSE;
 	}
 
-	if (res) {
-		lpUsername = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
-		if (lpUsername) {
-			if (GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SCANNER_EDIT_USERNAME, lpUsername, MAX_PATH)) {
-				if (pData->lpUsername) {
-					HeapSafeFree(pData->hHeap, 0, pData->lpUsername);
-				}
-				pData->lpUsername = lpUsername;
-			} else {
-				HeapSafeFree(pData->hHeap, 0, lpUsername);
-			}
-		}
+	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_WIZARD_PAGE_SCANNER_EDIT_USERNAME, &lpUsername, &cbLength);
+	if (res != ERROR_SUCCESS) {
+		HeapSafeFree(pData->hHeap, 0, lpName);
+		return FALSE;
+	}
 
-		lpPassword = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
-		if (lpPassword) {
-			if (GetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SCANNER_EDIT_PASSWORD, lpPassword, MAX_PATH)) {
-				if (pData->lpPassword) {
-					HeapSafeFree(pData->hHeap, 0, pData->lpPassword);
-				}
-				pData->lpPassword = lpPassword;
-			} else {
-				HeapSafeFree(pData->hHeap, 0, lpPassword);
-			}
-		}
+	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_WIZARD_PAGE_SCANNER_EDIT_PASSWORD, &lpPassword, &cbLength);
+	if (res != ERROR_SUCCESS) {
+		HeapSafeFree(pData->hHeap, 0, lpUsername);
+		HeapSafeFree(pData->hHeap, 0, lpName);
+		return FALSE;
+	}
 
-		oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
-		if (oSession) {
-			g_pWizardPageData = pData;
-			if (oSession->Init(NULL, &WizardPageAuthCallback) == SANE_STATUS_GOOD) {
-				if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
-					oDevice = oSession->GetDevice(pData->lpName);
-					if (oDevice) {
-						UpdateDeviceInfo(pData, oDevice);
-						UpdateDeviceData(pData, oDevice);
+	if (pData->lpName)
+		HeapSafeFree(pData->hHeap, 0, pData->lpName);
+	if (pData->lpUsername)
+		HeapSafeFree(pData->hHeap, 0, pData->lpUsername);
+	if (pData->lpPassword)
+		HeapSafeFree(pData->hHeap, 0, pData->lpPassword);
 
-						ChangeDeviceState(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_ENABLE, DICS_FLAG_GLOBAL);
-						ChangeDeviceState(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_PROPCHANGE, DICS_FLAG_GLOBAL);
+	pData->lpName = lpName;
+	pData->lpUsername = lpUsername;
+	pData->lpPassword = lpPassword;
 
-						res = TRUE;
-					} else {
-						res = FALSE;
+	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
+	if (oSession) {
+		g_pWizardPageData = pData;
+		if (oSession->Init(NULL, &WizardPageAuthCallback) == SANE_STATUS_GOOD) {
+			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
+				oDevice = oSession->GetDevice(pData->lpName);
+				if (oDevice) {
+					UpdateDeviceInfo(pData, oDevice);
+					UpdateDeviceData(pData, oDevice);
+
+					ChangeDeviceState(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_ENABLE, DICS_FLAG_GLOBAL);
+					ChangeDeviceState(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_PROPCHANGE, DICS_FLAG_GLOBAL);
+
+					if (oSession->Exit() == SANE_STATUS_GOOD) {
+						g_pWizardPageData = NULL;
+						delete oSession;
+						return TRUE;
 					}
-				} else {
-					res = FALSE;
 				}
-				if (oSession->Exit() != SANE_STATUS_GOOD) {
-					res = FALSE;
-				}
-			} else {
-				res = FALSE;
 			}
-			g_pWizardPageData = NULL;
-			delete oSession;
-		} else {
-			res = FALSE;
+			oSession->Exit();
 		}
+		g_pWizardPageData = NULL;
+		delete oSession;
 	}
 
-	return res;
+	return FALSE;
 }
 
 

@@ -348,88 +348,71 @@ BOOL WINAPI ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 	SP_DEVINSTALL_PARAMS devInstallParams;
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
-	LPTSTR lpName;
-	LPTSTR lpUsername;
-	LPTSTR lpPassword;
-	BOOL res;
+	LPTSTR lpName, lpUsername, lpPassword;
+	size_t cbLength;
+	DWORD res;
 
-	lpName = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
-	if (lpName) {
-		res = GetDlgItemText(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, lpName, MAX_PATH);
-		if (res) {
-			if (pData->lpName) {
-				HeapSafeFree(pData->hHeap, 0, pData->lpName);
-			}
-			pData->lpName = lpName;
-		} else {
-			HeapSafeFree(pData->hHeap, 0, lpName);
-		}
-	} else {
-		res = FALSE;
+	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, &lpName, &cbLength);
+	if (res != ERROR_SUCCESS) {
+		return FALSE;
 	}
 
-	if (res) {
-		lpUsername = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
-		if (lpUsername) {
-			if (GetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, lpUsername, MAX_PATH)) {
-				if (pData->lpUsername) {
-					HeapSafeFree(pData->hHeap, 0, pData->lpUsername);
-				}
-				pData->lpUsername = lpUsername;
-			} else {
-				HeapSafeFree(pData->hHeap, 0, lpUsername);
-			}
-		}
+	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, &lpUsername, &cbLength);
+	if (res != ERROR_SUCCESS) {
+		HeapSafeFree(pData->hHeap, 0, lpName);
+		return FALSE;
+	}
 
-		lpPassword = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(TCHAR) * MAX_PATH);
-		if (lpPassword) {
-			if (GetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, lpPassword, MAX_PATH)) {
-				if (pData->lpPassword) {
-					HeapSafeFree(pData->hHeap, 0, pData->lpPassword);
-				}
-				pData->lpPassword = lpPassword;
-			} else {
-				HeapSafeFree(pData->hHeap, 0, lpPassword);
-			}
-		}
+	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, &lpPassword, &cbLength);
+	if (res != ERROR_SUCCESS) {
+		HeapSafeFree(pData->hHeap, 0, lpUsername);
+		HeapSafeFree(pData->hHeap, 0, lpName);
+		return FALSE;
+	}
 
-		oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
-		if (oSession) {
-			g_pPropertyPageData = pData;
-			if (oSession->Init(NULL, &PropertyPageAuthCallback) == SANE_STATUS_GOOD) {
-				if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
-					oDevice = oSession->GetDevice(pData->lpName);
-					if (oDevice) {
-						UpdateDeviceInfo(pData, oDevice);
-						UpdateDeviceData(pData, oDevice);
+	if (pData->lpName)
+		HeapSafeFree(pData->hHeap, 0, pData->lpName);
+	if (pData->lpUsername)
+		HeapSafeFree(pData->hHeap, 0, pData->lpUsername);
+	if (pData->lpPassword)
+		HeapSafeFree(pData->hHeap, 0, pData->lpPassword);
 
+	pData->lpName = lpName;
+	pData->lpUsername = lpUsername;
+	pData->lpPassword = lpPassword;
+
+	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
+	if (oSession) {
+		g_pPropertyPageData = pData;
+		if (oSession->Init(NULL, &PropertyPageAuthCallback) == SANE_STATUS_GOOD) {
+			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
+				oDevice = oSession->GetDevice(pData->lpName);
+				if (oDevice) {
+					UpdateDeviceInfo(pData, oDevice);
+					UpdateDeviceData(pData, oDevice);
+
+					if (oSession->Exit() == SANE_STATUS_GOOD) {
 						ZeroMemory(&devInstallParams, sizeof(SP_DEVINSTALL_PARAMS));
 						devInstallParams.cbSize = sizeof(SP_DEVINSTALL_PARAMS);
 						res = SetupDiGetDeviceInstallParams(pData->hDeviceInfoSet, pData->pDeviceInfoData, &devInstallParams);
 						if (res) {
 							devInstallParams.FlagsEx |= DI_FLAGSEX_PROPCHANGE_PENDING;
 							res = SetupDiSetDeviceInstallParams(pData->hDeviceInfoSet, pData->pDeviceInfoData, &devInstallParams);
+							if (res) {
+								g_pPropertyPageData = NULL;
+								delete oSession;
+								return TRUE;
+							}
 						}
-					} else {
-						res = FALSE;
 					}
-				} else {
-					res = FALSE;
 				}
-				if (oSession->Exit() != SANE_STATUS_GOOD) {
-					res = FALSE;
-				}
-			} else {
-				res = FALSE;
 			}
-			g_pPropertyPageData = NULL;
-			delete oSession;
-		} else {
-			res = FALSE;
 		}
+		g_pPropertyPageData = NULL;
+		delete oSession;
 	}
 
-	return res;
+	return FALSE;
 }
 
 
