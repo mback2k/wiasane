@@ -35,7 +35,7 @@
 
 static PCOISANE_Data g_pWizardPageData = NULL; // global instance of the COISANE data with device information
 
-DWORD NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
+DWORD WINAPI NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
 {
 	SP_NEWDEVICEWIZARD_DATA newDeviceWizardData;
 	HPROPSHEETPAGE hPropSheetPage;
@@ -288,7 +288,8 @@ UINT CALLBACK PropSheetPageProcWizardPage(_In_ HWND hwnd, _In_ UINT uMsg, _Inout
 	return ret;
 }
 
-BOOL InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
+
+BOOL WINAPI InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 {
 	INFCONTEXT InfContext;
 	HINF InfFile;
@@ -345,7 +346,7 @@ BOOL InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 	return res;
 }
 
-BOOL NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
+BOOL WINAPI NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 {
 	PWINSANE_Session oSession;
 	LPTSTR lpHost;
@@ -389,7 +390,8 @@ BOOL NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 	return res;
 }
 
-BOOL InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
+
+BOOL WINAPI InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 {
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
@@ -422,7 +424,7 @@ BOOL InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 	return res;
 }
 
-BOOL NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
+BOOL WINAPI NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateData)
 {
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
