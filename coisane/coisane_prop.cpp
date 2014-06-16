@@ -278,9 +278,28 @@ BOOL InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data privateDa
 {
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
+	HINSTANCE hInst;
+	HANDLE hIcon;
 	LONG index;
 	HWND hwnd;
 	BOOL res;
+
+	hInst = GetStiCiInstance();
+	if (hInst) {
+		hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_ICON);
+		if (hwnd) {
+			hIcon = LoadImage(hInst, MAKEINTRESOURCE(1000), IMAGE_ICON, 32, 32, LR_SHARED);
+			if (hIcon) {
+				res = PostMessage(hwnd, STM_SETICON, (WPARAM) hIcon, (LPARAM) 0);
+			} else {
+				res = FALSE;
+			}
+		} else {
+			res = FALSE;
+		}
+	} else {
+		res = FALSE;
+	}
 
 	QueryDeviceData(privateData);
 

@@ -40,6 +40,8 @@
 #define IDC_WIZARD_PAGE_SCANNER_TEXT_PASSWORD 1022
 #define IDC_WIZARD_PAGE_SCANNER_EDIT_PASSWORD 1023
 #define IDC_WIZARD_PAGE_SCANNER_GROUP_CREDENTIALS 1024
+#define IDC_PROPERTIES_TEXT_MAIN        1028
+#define IDC_PROPERTIES_ICON             1030
 
 // Next default values for new objects
 // 
@@ -47,7 +49,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        804
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1025
+#define _APS_NEXT_CONTROL_VALUE         1031
 #define _APS_NEXT_SYMED_VALUE           802
 #endif
 #endif
