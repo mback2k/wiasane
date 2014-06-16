@@ -61,7 +61,7 @@ DWORD WINAPI NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_
 	if (!res)
 		return GetLastError();
 
-	if (newDeviceWizardData.NumDynamicPages >= MAX_INSTALLWIZARD_DYNAPAGES - 1)
+	if (!(newDeviceWizardData.NumDynamicPages < MAX_INSTALLWIZARD_DYNAPAGES - 1))
 		return NO_ERROR;
 
 	pData = (PCOISANE_Data) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(COISANE_Data));
