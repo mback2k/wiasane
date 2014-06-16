@@ -32,6 +32,43 @@
 #include "strutil_dbg.h"
 
 
+DWORD WINAPI GetDlgItemAText(_In_ HANDLE hHeap, _In_ HWND hDlg, _In_ int nIDDlgItem, _Outptr_opt_result_maybenull_ LPTSTR *plpszText, _Out_ size_t *pcbLength)
+{
+	HWND hwndDlgItem;
+	LPTSTR lpszText;
+	size_t cbLength;
+	int iLength;
+
+	if (!plpszText || !pcbLength)
+		return ERROR_INVALID_PARAMETER;
+
+	*plpszText = NULL;
+	*pcbLength = 0;
+
+	hwndDlgItem = GetDlgItem(hDlg, nIDDlgItem);
+	if (!hwndDlgItem)
+		return GetLastError();
+
+	iLength = GetWindowTextLength(hwndDlgItem);
+	if (iLength < 0)
+		return ERROR_INVALID_DATA;
+
+	iLength++;
+	cbLength = iLength * sizeof(TCHAR);
+
+	lpszText = (LPTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbLength);
+	if (!lpszText)
+		return ERROR_OUTOFMEMORY;
+
+	GetDlgItemText(hDlg, nIDDlgItem, lpszText, iLength);
+
+	*plpszText = lpszText;
+	*pcbLength = cbLength;
+
+	return ERROR_SUCCESS;
+}
+
+
 HINF WINAPI OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _Out_opt_ PUINT ErrorLine)
 {
 	SP_DRVINFO_DATA DriverInfoData;
