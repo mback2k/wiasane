@@ -130,7 +130,7 @@ DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 
 	if (vendor && model) {
 		hr = StringCbAPrintf(privateData->hHeap, &lpStr, &cbLen, TEXT("%hs %hs"), vendor, model);
-		if (SUCCEEDED(hr)) {
+		if (SUCCEEDED(hr) && lpStr) {
 			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) lpStr, (DWORD) cbLen);
 			if (hDeviceKey != INVALID_HANDLE_VALUE)
 				RegSetValueEx(hDeviceKey, TEXT("FriendlyName"), 0, REG_SZ, (LPBYTE) lpStr, (DWORD) cbLen);
@@ -142,7 +142,7 @@ DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 
 	if (vendor && model && type && name) {
 		hr = StringCbAPrintf(privateData->hHeap, &lpStr, &cbLen, TEXT("%hs %hs %hs (%hs)"), vendor, model, type, name);
-		if (SUCCEEDED(hr)) {
+		if (SUCCEEDED(hr) && lpStr) {
 			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) lpStr, (DWORD) cbLen);
 			HeapSafeFree(privateData->hHeap, 0, lpStr);
 			if (!res)
@@ -152,7 +152,7 @@ DWORD UpdateDeviceInfo(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device devi
 
 	if (vendor) {
 		hr = StringCbAPrintf(privateData->hHeap, &lpStr, &cbLen, TEXT("%hs"), vendor);
-		if (SUCCEEDED(hr)) {
+		if (SUCCEEDED(hr) && lpStr) {
 			res = SetupDiSetDeviceRegistryProperty(privateData->hDeviceInfoSet, privateData->pDeviceInfoData, SPDRP_MFG, (PBYTE) (PBYTE) lpStr, (DWORD) cbLen);
 			if (hDeviceKey != INVALID_HANDLE_VALUE)
 				RegSetValueEx(hDeviceKey, TEXT("Vendor"), 0, REG_SZ, (LPBYTE) lpStr, (DWORD) cbLen);
@@ -314,6 +314,7 @@ size_t CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device
 	PSANE_Word pWordList;
 	LPTSTR lpResolutions;
 	size_t cbResolutions;
+	HRESULT hr;
 	int index;
 
 	if (!ppszResolutions)
@@ -329,18 +330,26 @@ size_t CreateResolutionList(_In_ PCOISANE_Data privateData, _In_ PWINSANE_Device
 			if (pWordList && pWordList[0] > 0) {
 				switch (resolution->GetType()) {
 					case SANE_TYPE_INT:
-						StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%d"), pWordList[1]);
+						hr = StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%d"), pWordList[1]);
+						if (FAILED(hr))
+							break;
 						for (index = 2; index <= pWordList[0]; index++) {
 							lpResolutions = *ppszResolutions;
+							if (!lpResolutions)
+								break;
 							StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pWordList[index]);
 							HeapSafeFree(privateData->hHeap, 0, lpResolutions);
 						}
 						break;
 
 					case SANE_TYPE_FIXED:
-						StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%d"), SANE_UNFIX(pWordList[1]));
+						hr = StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%d"), SANE_UNFIX(pWordList[1]));
+						if (FAILED(hr))
+							break;
 						for (index = 2; index <= pWordList[0]; index++) {
 							lpResolutions = *ppszResolutions;
+							if (!lpResolutions)
+								break;
 							StringCbAPrintf(privateData->hHeap, ppszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, SANE_UNFIX(pWordList[index]));
 							HeapSafeFree(privateData->hHeap, 0, lpResolutions);
 						}
