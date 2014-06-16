@@ -35,4 +35,7 @@ __user_code
 int WINAPI LoadAString(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ UINT uID, _Out_ LPTSTR *ppszBuffer);
 int WINAPI MessageBoxR(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ HWND hwnd, _In_ UINT uText, _In_ UINT uCaption, _In_ UINT uType);
 
+BOOL WINAPI SetWindowTextR(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ HWND hWnd, _In_ UINT uText);
+BOOL WINAPI SetDlgItemTextR(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ HWND hDlg, _In_ int nIDDlgItem, _In_ UINT uText);
+
 #endif

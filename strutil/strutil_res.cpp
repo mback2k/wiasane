@@ -54,3 +54,34 @@ int WINAPI MessageBoxR(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ HWN
 
 	return msgBoxID;
 }
+
+
+BOOL WINAPI SetWindowTextR(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ HWND hWnd, _In_ UINT uText)
+{
+	LPCTSTR lpText;
+	BOOL res;
+
+	if (LoadAString(hHeap, hInstance, uText, (LPTSTR*) &lpText) > 0) {
+		res = SetWindowText(hWnd, lpText);
+		HeapSafeFree(hHeap, 0, (LPVOID) lpText);
+	} else {
+		res = SetWindowText(hWnd, TEXT(""));
+	}
+
+	return res;
+}
+
+BOOL WINAPI SetDlgItemTextR(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ HWND hDlg, _In_ int nIDDlgItem, _In_ UINT uText)
+{
+	LPCTSTR lpText;
+	BOOL res;
+
+	if (LoadAString(hHeap, hInstance, uText, (LPTSTR*) &lpText) > 0) {
+		res = SetDlgItemText(hDlg, nIDDlgItem, lpText);
+		HeapSafeFree(hHeap, 0, (LPVOID) lpText);
+	} else {
+		res = SetDlgItemText(hDlg, nIDDlgItem, TEXT(""));
+	}
+
+	return res;
+}
