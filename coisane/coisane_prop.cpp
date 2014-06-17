@@ -369,21 +369,24 @@ BOOL WINAPI ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
 	LPTSTR lpName, lpUsername, lpPassword;
-	size_t cbLength;
 	DWORD res;
 
-	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, &lpName, &cbLength);
+	lpName = NULL;
+	lpUsername = NULL;
+	lpPassword = NULL;
+
+	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, &lpName, NULL);
 	if (res != ERROR_SUCCESS) {
 		return FALSE;
 	}
 
-	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, &lpUsername, &cbLength);
+	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, &lpUsername, NULL);
 	if (res != ERROR_SUCCESS) {
 		HeapSafeFree(pData->hHeap, 0, lpName);
 		return FALSE;
 	}
 
-	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, &lpPassword, &cbLength);
+	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, &lpPassword, NULL);
 	if (res != ERROR_SUCCESS) {
 		HeapSafeFree(pData->hHeap, 0, lpUsername);
 		HeapSafeFree(pData->hHeap, 0, lpName);
