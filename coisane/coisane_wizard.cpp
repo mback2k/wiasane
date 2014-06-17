@@ -149,6 +149,7 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 			if (!pData)
 				break;
 
+			pData->uiReferences++;
 			pData->hwndDlg = hwndDlg;
 
 			InitWizardPageServer(hwndDlg, pData);
@@ -200,6 +201,19 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 					break;
 			}
 			break;
+
+		case WM_DESTROY:
+			Trace(TEXT("WM_DESTROY"));
+			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			if (!lpPropSheetPage)
+				break;
+
+			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!pData)
+				break;
+
+			pData->uiReferences--;
+			break;
 	}
 
 	return FALSE;
@@ -223,6 +237,7 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 			if (!pData)
 				break;
 
+			pData->uiReferences++;
 			pData->hwndDlg = hwndDlg;
 
 			InitWizardPageScanner(hwndDlg, pData);
@@ -276,6 +291,19 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 					break;
 			}
 			break;
+
+		case WM_DESTROY:
+			Trace(TEXT("WM_DESTROY"));
+			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			if (!lpPropSheetPage)
+				break;
+
+			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!pData)
+				break;
+
+			pData->uiReferences--;
+			break;
 	}
 
 	return FALSE;
@@ -300,6 +328,7 @@ INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg,
 			if (!pData)
 				break;
 
+			pData->uiReferences++;
 			pData->hwndDlg = hwndDlg;
 
 			InitWizardPageProgress(hwndDlg, pData);
@@ -361,6 +390,19 @@ INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg,
 					return TRUE;
 					break;
 			}
+			break;
+
+		case WM_DESTROY:
+			Trace(TEXT("WM_DESTROY"));
+			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			if (!lpPropSheetPage)
+				break;
+
+			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!pData)
+				break;
+
+			pData->uiReferences--;
 			break;
 	}
 

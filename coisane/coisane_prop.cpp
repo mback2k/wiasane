@@ -114,6 +114,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 			if (!pData)
 				break;
 
+			pData->uiReferences++;
 			pData->hwndDlg = hwndDlg;
 
 			InitPropertyPageAdvanced(hwndDlg, pData);
@@ -176,6 +177,19 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 					return DialogProcPropertyPageAdvancedBtnClicked(hwndDlg, LOWORD(wParam), pData);
 					break;
 			}
+			break;
+
+		case WM_DESTROY:
+			Trace(TEXT("WM_DESTROY"));
+			lpPropSheetPage = (LPPROPSHEETPAGE) GetWindowLongPtr(hwndDlg, GWLP_USERDATA);
+			if (!lpPropSheetPage)
+				break;
+
+			pData = (PCOISANE_Data) lpPropSheetPage->lParam;
+			if (!pData)
+				break;
+
+			pData->uiReferences--;
 			break;
 	}
 
