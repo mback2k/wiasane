@@ -32,7 +32,9 @@ __user_code
 #include <tchar.h>
 #include <strsafe.h>
 
+_Success_(return == ERROR_SUCCESS)
 LONG WINAPI ReadRegistryLong(_In_ HANDLE hHeap, _In_ HKEY hKey, _In_opt_ LPCTSTR lpcszValueName, _Out_ DWORD *pdwValue);
-LONG WINAPI ReadRegistryString(_In_ HANDLE hHeap, _In_ HKEY hKey, _In_opt_ LPCTSTR lpcszValueName, _Outptr_result_maybenull_ LPTSTR *plpszValue, _Out_ DWORD *pdwLength);
+_Success_(return == ERROR_SUCCESS)
+LONG WINAPI ReadRegistryString(_In_ HANDLE hHeap, _In_ HKEY hKey, _In_opt_ LPCTSTR lpcszValueName, _Outptr_result_nullonfailure_ LPTSTR *plpszValue, _Out_opt_ LPDWORD lpcbLength);
 
 #endif

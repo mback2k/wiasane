@@ -22,9 +22,10 @@
 
 #include "strutil_mem.h"
 
+_Success_(return == ERROR_SUCCESS)
 LONG WINAPI ReadRegistryLong(_In_ HANDLE hHeap, _In_ HKEY hKey, _In_opt_ LPCTSTR lpcszValueName, _Out_ DWORD *pdwValue)
 {
-	DWORD dwType, dwLength, dwValue;
+	DWORD dwType, cbLength, dwValue;
 	LONG lStatus;
 
 	UNREFERENCED_PARAMETER(hHeap);
@@ -35,52 +36,54 @@ LONG WINAPI ReadRegistryLong(_In_ HANDLE hHeap, _In_ HKEY hKey, _In_opt_ LPCTSTR
 	*pdwValue = 0;
 
 	dwType = REG_DWORD;
-	dwLength = sizeof(DWORD);
+	cbLength = sizeof(DWORD);
 
-	lStatus = RegQueryValueEx(hKey, lpcszValueName, NULL, &dwType, (LPBYTE) &dwValue, &dwLength);
+	lStatus = RegQueryValueEx(hKey, lpcszValueName, NULL, &dwType, (LPBYTE) &dwValue, &cbLength);
 	if (lStatus != ERROR_SUCCESS)
 		return lStatus;
 
 	if (dwType != REG_DWORD)
 		return ERROR_INVALID_DATATYPE;
 
-	if (dwLength != sizeof(DWORD))
+	if (cbLength != sizeof(DWORD))
 		return ERROR_INVALID_DATA;
 
 	*pdwValue = dwValue;
 	return ERROR_SUCCESS;
 }
 
-LONG WINAPI ReadRegistryString(_In_ HANDLE hHeap, _In_ HKEY hKey, _In_opt_ LPCTSTR lpcszValueName, _Outptr_result_maybenull_ LPTSTR *plpszValue, _Out_ DWORD *pdwLength)
+_Success_(return == ERROR_SUCCESS)
+LONG WINAPI ReadRegistryString(_In_ HANDLE hHeap, _In_ HKEY hKey, _In_opt_ LPCTSTR lpcszValueName, _Outptr_result_nullonfailure_ LPTSTR *plpszValue, _Out_opt_ LPDWORD lpcbLength)
 {
-	DWORD dwType, dwLength;
+	DWORD dwType, cbLength;
 	LPTSTR lpszValue;
 	LONG lStatus;
 
-	if (!plpszValue || !pdwLength)
+	if (!plpszValue)
 		return ERROR_INVALID_PARAMETER;
 
 	*plpszValue = NULL;
-	*pdwLength = 0;
+	if (lpcbLength)
+		*lpcbLength = 0;
 
 	dwType = REG_SZ;
-	dwLength = 0;
+	cbLength = 0;
 
-	lStatus = RegQueryValueEx(hKey, lpcszValueName, NULL, &dwType, NULL, &dwLength);
+	lStatus = RegQueryValueEx(hKey, lpcszValueName, NULL, &dwType, NULL, &cbLength);
 	if (lStatus != ERROR_SUCCESS)
 		return lStatus;
 
 	if (dwType != REG_SZ)
 		return ERROR_INVALID_DATATYPE;
 
-	if (!dwLength)
+	if (!cbLength)
 		return ERROR_EMPTY;
 
-	lpszValue = (LPTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, dwLength);
+	lpszValue = (LPTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbLength);
 	if (!lpszValue)
 		return GetLastError();
 
-	lStatus = RegQueryValueEx(hKey, lpcszValueName, NULL, &dwType, (LPBYTE) lpszValue, &dwLength);
+	lStatus = RegQueryValueEx(hKey, lpcszValueName, NULL, &dwType, (LPBYTE) lpszValue, &cbLength);
 	if (lStatus != ERROR_SUCCESS) {
 		HeapSafeFree(hHeap, 0, lpszValue);
 		return lStatus;
@@ -91,12 +94,14 @@ LONG WINAPI ReadRegistryString(_In_ HANDLE hHeap, _In_ HKEY hKey, _In_opt_ LPCTS
 		return ERROR_INVALID_DATATYPE;
 	}
 
-	if (!dwLength) {
+	if (!cbLength) {
 		HeapSafeFree(hHeap, 0, lpszValue);
 		return ERROR_EMPTY;
 	}
 
 	*plpszValue = lpszValue;
-	*pdwLength = dwLength;
+	if (lpcbLength)
+		*lpcbLength = cbLength;
+
 	return ERROR_SUCCESS;
 }
