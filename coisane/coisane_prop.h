@@ -46,7 +46,12 @@ VOID WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 VOID WINAPI FreePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
 
 BOOL WINAPI ShowPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
+DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter);
+
 BOOL WINAPI SavePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
+
+VOID WINAPI ShowPropertyPageAdvancedProgress(_In_ HWND hwndDlg);
+VOID WINAPI HidePropertyPageAdvancedProgress(_In_ HWND hwndDlg);
 
 WINSANE_API_CALLBACK PropertyPageAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password);
 

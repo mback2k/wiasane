@@ -144,6 +144,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 				case PSN_KILLACTIVE:
 					Trace(TEXT("PSN_KILLACTIVE"));
 					pData->hwndPropDlg = NULL;
+					pData->hThread = NULL;
 					break;
 
 				case PSN_APPLY:
@@ -332,6 +333,13 @@ VOID WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 		}
 	}
 
+	hInst = GetWiaDefInstance();
+	if (hInst) {
+		hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_PROGRESS_ANIMATE);
+		if (hwnd) {
+			Animate_OpenEx(hwnd, hInst, MAKEINTRESOURCE(1001));
+		}
+	}
 }
 
 VOID WINAPI FreePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
@@ -340,6 +348,11 @@ VOID WINAPI FreePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 	HWND hwnd;
 
 	UNREFERENCED_PARAMETER(pData);
+
+	hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_PROGRESS_ANIMATE);
+	if (hwnd) {
+		Animate_Close(hwnd);
+	}
 
 	hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_ICON);
 	if (hwnd) {
@@ -353,10 +366,35 @@ VOID WINAPI FreePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 
 BOOL WINAPI ShowPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
+	pData->hThread = CreateThread(NULL, 0, &ThreadProcShowPropertyPageAdvanced, pData, CREATE_SUSPENDED, NULL);
+	if (!pData->hThread)
+		return FALSE;
+
+	ShowPropertyPageAdvancedProgress(hwndDlg);
+
+	SetThreadPriority(pData->hThread, THREAD_PRIORITY_BELOW_NORMAL);
+	ResumeThread(pData->hThread);
+
+	return TRUE;
+}
+
+DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter)
+{
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
+	PCOISANE_Data pData;
+	HANDLE hThread;
+	size_t cbLen;
+	PTSTR lpStr;
+	HRESULT hr;
 	LONG index;
 	HWND hwnd;
+
+	pData = (PCOISANE_Data) lpParameter;
+	if (!pData)
+		return 0;
+
+	hThread = pData->hThread;
 
 	QueryDeviceData(pData);
 
@@ -366,10 +404,18 @@ BOOL WINAPI ShowPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 	if (!pData->usPort)
 		pData->usPort = WINSANE_DEFAULT_PORT;
 
+	hr = StringCbAPrintf(pData->hHeap, &lpStr, &cbLen, TEXT("%s:%d"), pData->lpHost, pData->usPort);
+	if (SUCCEEDED(hr) && lpStr) {
+		SetDlgItemText(pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT, lpStr);
+		HeapSafeFree(pData->hHeap, 0, lpStr);
+	}
+
+	SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_CONNECT);
 	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
 	if (oSession) {
+		SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_INIT);
 		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
-			hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER);
+			hwnd = GetDlgItem(pData->hwndDlg, IDC_PROPERTIES_COMBO_SCANNER);
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
 				SendMessageA(hwnd, CB_RESETCONTENT, (WPARAM) 0, (LPARAM) 0);
 				for (index = 0; index < oSession->GetDevices(); index++) {
@@ -379,26 +425,25 @@ BOOL WINAPI ShowPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 					}
 				}
 			}
-			res = oSession->Exit() == SANE_STATUS_GOOD;
-		} else {
-			res = FALSE;
+			oSession->Exit();
 		}
 		delete oSession;
-	} else {
-		res = FALSE;
 	}
 
 	if (pData->lpName)
-		SendDlgItemMessage(hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, CB_SELECTSTRING, (WPARAM) -1, (LPARAM) pData->lpName);
+		SendDlgItemMessage(pData->hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, CB_SELECTSTRING, (WPARAM) -1, (LPARAM) pData->lpName);
 
 	if (pData->lpUsername)
-		SetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, pData->lpUsername);
+		SetDlgItemText(pData->hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, pData->lpUsername);
 
 	if (pData->lpPassword)
-		SetDlgItemText(hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, pData->lpPassword);
+		SetDlgItemText(pData->hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, pData->lpPassword);
 
-	return res;
+	HidePropertyPageAdvancedProgress(pData->hwndDlg);
+
+	return 0;
 }
+
 
 BOOL WINAPI SavePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
@@ -473,6 +518,57 @@ BOOL WINAPI SavePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 	}
 
 	return FALSE;
+}
+
+
+static VOID WINAPI SwitchPropertyPageAdvancedProgress(_In_ HWND hwndDlg, _In_ BOOL bVisible)
+{
+	int progress[] = {IDC_PROPERTIES_PROGRESS_ANIMATE, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDC_PROPERTIES_PROGRESS_TEXT};
+	int properties[] = {IDC_PROPERTIES_COMBO_SCANNER, IDC_PROPERTIES_TEXT_SCANNER, IDC_PROPERTIES_GROUP_CREDENTIALS,
+						IDC_PROPERTIES_TEXT_USERNAME, IDC_PROPERTIES_EDIT_USERNAME, IDC_PROPERTIES_TEXT_PASSWORD,
+						IDC_PROPERTIES_EDIT_PASSWORD, IDC_PROPERTIES_BUTTON_CHECK, IDC_PROPERTIES_BUTTON_RESET};
+	int index, show;
+	HWND hwnd;
+
+	show = bVisible ? SW_SHOW : SW_HIDE;
+	for (index = 0; index < sizeof(progress)/sizeof(progress[0]); index++) {
+		hwnd = GetDlgItem(hwndDlg, progress[index]);
+		if (hwnd) {
+			ShowWindowAsync(hwnd, show);
+		}
+	}
+
+	show = bVisible ? SW_HIDE : SW_SHOW;
+	for (index = 0; index < sizeof(properties)/sizeof(properties[0]); index++) {
+		hwnd = GetDlgItem(hwndDlg, properties[index]);
+		if (hwnd) {
+			ShowWindowAsync(hwnd, show);
+		}
+	}
+}
+
+VOID WINAPI ShowPropertyPageAdvancedProgress(_In_ HWND hwndDlg)
+{
+	HWND hwnd;
+
+	SwitchPropertyPageAdvancedProgress(hwndDlg, TRUE);
+
+	hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_PROGRESS_ANIMATE);
+	if (hwnd) {
+		Animate_Play(hwnd, 0, -1, -1);
+	}
+}
+
+VOID WINAPI HidePropertyPageAdvancedProgress(_In_ HWND hwndDlg)
+{
+	HWND hwnd;
+
+	hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_PROGRESS_ANIMATE);
+	if (hwnd) {
+		Animate_Stop(hwnd);
+	}
+
+	SwitchPropertyPageAdvancedProgress(hwndDlg, FALSE);
 }
 
 
