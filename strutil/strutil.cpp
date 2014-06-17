@@ -70,10 +70,10 @@ LPSTR WINAPI StringConvWToA(_In_ HANDLE hHeap, _In_ LPWSTR lpszString)
 	if (!iLength)
 		return NULL;
 
-	if ((iLength + sizeof(CHAR)) <= iLength)
+	if ((iLength+1) <= iLength)
 		return NULL;
 
-	iLength += sizeof(CHAR);
+	iLength += 1;
 	lpszCopy = (LPSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, iLength);
 	if (!lpszCopy)
 		return NULL;
