@@ -240,7 +240,6 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 			pData->uiReferences++;
 			pData->hwndDlg = hwndDlg;
 
-			InitWizardPageScanner(hwndDlg, pData);
 			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
 			break;
 
@@ -259,10 +258,18 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 					Trace(TEXT("PSN_SETACTIVE"));
 					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
 					PropSheet_SetWizButtons(pData->hwndPropDlg, PSWIZB_BACK | PSWIZB_NEXT | PSWIZB_CANCEL);
+					if (!ShowWizardPageScanner(hwndDlg, pData)) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
+						return TRUE;
+					}
 					break;
 
 				case PSN_KILLACTIVE:
 					Trace(TEXT("PSN_KILLACTIVE"));
+					if (!HideWizardPageScanner(hwndDlg, pData)) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, TRUE);
+						return TRUE;
+					}
 					pData->hwndPropDlg = NULL;
 					break;
 
@@ -414,6 +421,7 @@ INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg,
 UINT CALLBACK PropSheetPageProcWizardPage(_In_ HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp)
 {
 	PCOISANE_Data pData;
+	LONG device;
 	UINT ret;
 
 	UNREFERENCED_PARAMETER(hwnd);
@@ -455,6 +463,13 @@ UINT CALLBACK PropSheetPageProcWizardPage(_In_ HWND hwnd, _In_ UINT uMsg, _Inout
 						HeapSafeFree(pData->hHeap, 0, pData->lpUsername);
 					if (pData->lpPassword)
 						HeapSafeFree(pData->hHeap, 0, pData->lpPassword);
+
+					if (pData->lpNames) {
+						for (device = 0; pData->lpNames[device]; device++) {
+							HeapSafeFree(pData->hHeap, 0, pData->lpNames[device]);
+						}
+						HeapSafeFree(pData->hHeap, 0, pData->lpNames);
+					}
 
 					HeapSafeFree(pData->hHeap, 0, pData);
 					ppsp->lParam = NULL;
@@ -558,7 +573,9 @@ BOOL WINAPI NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 DWORD WINAPI ProcWizardPageServer(_In_ LPVOID lpParameter)
 {
 	PWINSANE_Session oSession;
+	PWINSANE_Device oDevice;
 	PCOISANE_Data pData;
+	LONG devices, device;
 	HANDLE hThread;
 	size_t cbLen;
 	PTSTR lpStr;
@@ -581,13 +598,39 @@ DWORD WINAPI ProcWizardPageServer(_In_ LPVOID lpParameter)
 	if (oSession) {
 		SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_INIT);
 		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
-			if (oSession->Exit() == SANE_STATUS_GOOD) {
-				if (pData->hThread == hThread) {
-					PropSheet_PressButton(pData->hwndPropDlg, PSBTN_NEXT);
+			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
+				devices = oSession->GetDevices();
+				if (devices > 0) {
+					if (pData->lpNames) {
+						for (device = 0; pData->lpNames[device]; device++) {
+							HeapSafeFree(pData->hHeap, 0, pData->lpNames[device]);
+						}
+						HeapSafeFree(pData->hHeap, 0, pData->lpNames);
+					}
+					pData->lpNames = (LPTSTR*) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(LPTSTR) * (devices+1));
+					if (pData->lpNames) {
+						for (device = 0; device < devices; device++) {
+							oDevice = oSession->GetDevice(device);
+							if (oDevice) {
+								pData->lpNames[device] = StringATo(pData->hHeap, (LPSTR) oDevice->GetName());
+							}
+						}
+					}
+					if (oSession->Exit() == SANE_STATUS_GOOD) {
+						delete oSession;
+
+						if (pData->hThread == hThread) {
+							PropSheet_PressButton(pData->hwndPropDlg, PSBTN_NEXT);
+						}
+						return 0;
+					} else if (pData->hThread == hThread) {
+						MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+					}
+				} else if (pData->hThread == hThread) {
+					MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 				}
-				return 0;
 			} else if (pData->hThread == hThread) {
-				MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+				MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 			}
 		} else if (pData->hThread == hThread) {
 			MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
@@ -604,37 +647,37 @@ DWORD WINAPI ProcWizardPageServer(_In_ LPVOID lpParameter)
 }
 
 
-BOOL WINAPI InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+BOOL WINAPI ShowWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
-	PWINSANE_Session oSession;
-	PWINSANE_Device oDevice;
-	LONG index;
+	LONG device;
 	HWND hwnd;
-	BOOL res;
 
-	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
-	if (oSession) {
-		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
-			hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER);
-			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
-				SendMessageA(hwnd, CB_RESETCONTENT, (WPARAM) 0, (LPARAM) 0);
-				for (index = 0; index < oSession->GetDevices(); index++) {
-					oDevice = oSession->GetDevice(index);
-					if (oDevice) {
-						SendMessageA(hwnd, CB_ADDSTRING, (WPARAM) 0, (LPARAM) oDevice->GetName());
-					}
-				}
-			}
-			res = oSession->Exit() == SANE_STATUS_GOOD;
-		} else {
-			res = FALSE;
+	if (!pData->lpNames)
+		return FALSE;
+
+	hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER);
+	if (hwnd) {
+		SendMessage(hwnd, CB_RESETCONTENT, (WPARAM) 0, (LPARAM) 0);
+		for (device = 0; pData->lpNames[device]; device++) {
+			SendMessage(hwnd, CB_ADDSTRING, (WPARAM) 0, (LPARAM) pData->lpNames[device]);
 		}
-		delete oSession;
-	} else {
-		res = FALSE;
 	}
 
-	return res;
+	return TRUE;
+}
+
+BOOL WINAPI HideWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+{
+	HWND hwnd;
+
+	UNREFERENCED_PARAMETER(pData);
+
+	hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER);
+	if (hwnd) {
+		SendMessage(hwnd, CB_RESETCONTENT, (WPARAM) 0, (LPARAM) 0);
+	}
+
+	return TRUE;
 }
 
 BOOL WINAPI NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)

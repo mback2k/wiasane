@@ -45,6 +45,7 @@ typedef struct _COISANE_Data {
 	LPTSTR lpName;
 	LPTSTR lpUsername;
 	LPTSTR lpPassword;
+	LPTSTR *lpNames;
 } COISANE_Data, *PCOISANE_Data;
 
 DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, OPTIONAL _Inout_ PCOINSTALLER_CONTEXT_DATA Context);

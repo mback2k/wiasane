@@ -47,7 +47,8 @@ VOID WINAPI InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 BOOL WINAPI NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
 DWORD WINAPI ProcWizardPageServer(_In_ LPVOID lpParameter);
 
-BOOL WINAPI InitWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
+BOOL WINAPI ShowWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
+BOOL WINAPI HideWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
 BOOL WINAPI NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
 DWORD WINAPI ProcWizardPageScanner(_In_ LPVOID lpParameter);
 
