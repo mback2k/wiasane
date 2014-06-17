@@ -402,6 +402,7 @@ INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg,
 			if (!pData)
 				break;
 
+			FreeWizardPageProgress(hwndDlg, pData);
 			pData->uiReferences--;
 			break;
 	}
@@ -754,40 +755,51 @@ DWORD WINAPI ProcWizardPageScanner(_In_ LPVOID lpParameter)
 }
 
 
-BOOL WINAPI InitWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+VOID WINAPI InitWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
 	HINSTANCE hInst;
-	HANDLE hIcon;
+	HICON hIcon;
 	HWND hwnd;
-	BOOL res;
 
 	UNREFERENCED_PARAMETER(pData);
 
 	hInst = GetWiaDefInstance();
-	if (hInst) {
-		hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ICON);
-		if (hwnd) {
-			hIcon = LoadImage(hInst, MAKEINTRESOURCE(105), IMAGE_ICON, 32, 32, LR_SHARED);
-			if (hIcon) {
-				res = PostMessage(hwnd, STM_SETICON, (WPARAM) hIcon, (LPARAM) 0);
-			} else {
-				res = FALSE;
-			}
-		} else {
-			res = FALSE;
-		}
+	if (!hInst)
+		return;
 
-		hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ANIMATE);
-		if (hwnd) {
-			res = Animate_OpenEx(hwnd, hInst, MAKEINTRESOURCE(1001));
-		} else {
-			res = FALSE;
+	hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ICON);
+	if (hwnd) {
+		hIcon = (HICON) LoadImage(hInst, MAKEINTRESOURCE(105), IMAGE_ICON, 32, 32, 0);
+		if (hIcon) {
+			SendMessage(hwnd, STM_SETICON, (WPARAM) hIcon, (LPARAM) 0);
 		}
-	} else {
-		res = FALSE;
 	}
 
-	return res;
+	hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ANIMATE);
+	if (hwnd) {
+		Animate_OpenEx(hwnd, hInst, MAKEINTRESOURCE(1001));
+	}
+}
+
+VOID WINAPI FreeWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+{
+	HICON hIcon;
+	HWND hwnd;
+
+	UNREFERENCED_PARAMETER(pData);
+
+	hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ANIMATE);
+	if (hwnd) {
+		Animate_Close(hwnd);
+	}
+
+	hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ICON);
+	if (hwnd) {
+		hIcon = (HICON) SendMessage(hwnd, STM_GETICON, (WPARAM) 0, (LPARAM) 0);
+		if (hIcon) {
+			DestroyIcon(hIcon);
+		}
+	}
 }
 
 
