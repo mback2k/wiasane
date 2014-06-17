@@ -384,8 +384,7 @@ DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter)
 	PWINSANE_Device oDevice;
 	PCOISANE_Data pData;
 	HANDLE hThread;
-	size_t cbLen;
-	PTSTR lpStr;
+	PTSTR lpText;
 	HRESULT hr;
 	LONG index;
 	HWND hwnd;
@@ -404,10 +403,10 @@ DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter)
 	if (!pData->usPort)
 		pData->usPort = WINSANE_DEFAULT_PORT;
 
-	hr = StringCbAPrintf(pData->hHeap, &lpStr, &cbLen, TEXT("%s:%d"), pData->lpHost, pData->usPort);
-	if (SUCCEEDED(hr) && lpStr) {
-		SetDlgItemText(pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT, lpStr);
-		HeapSafeFree(pData->hHeap, 0, lpStr);
+	hr = StringCbAPrintf(pData->hHeap, &lpText, NULL, TEXT("%s:%d"), pData->lpHost, pData->usPort);
+	if (SUCCEEDED(hr)) {
+		SetDlgItemText(pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT, lpText);
+		HeapSafeFree(pData->hHeap, 0, lpText);
 	}
 
 	SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_CONNECT);

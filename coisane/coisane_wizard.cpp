@@ -580,8 +580,7 @@ DWORD WINAPI ThreadProcNextWizardPageServer(_In_ LPVOID lpParameter)
 	PCOISANE_Data pData;
 	LONG devices, device;
 	HANDLE hThread;
-	size_t cbLen;
-	PTSTR lpStr;
+	PTSTR lpText;
 	HRESULT hr;
 
 	pData = (PCOISANE_Data) lpParameter;
@@ -590,10 +589,10 @@ DWORD WINAPI ThreadProcNextWizardPageServer(_In_ LPVOID lpParameter)
 
 	hThread = pData->hThread;
 
-	hr = StringCbAPrintf(pData->hHeap, &lpStr, &cbLen, TEXT("%s:%d"), pData->lpHost, pData->usPort);
-	if (SUCCEEDED(hr) && lpStr) {
-		SetDlgItemText(pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_SUB, lpStr);
-		HeapSafeFree(pData->hHeap, 0, lpStr);
+	hr = StringCbAPrintf(pData->hHeap, &lpText, NULL, TEXT("%s:%d"), pData->lpHost, pData->usPort);
+	if (SUCCEEDED(hr)) {
+		SetDlgItemText(pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_SUB, lpText);
+		HeapSafeFree(pData->hHeap, 0, lpText);
 	}
 
 	SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_CONNECT);
@@ -734,8 +733,7 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 	PWINSANE_Device oDevice;
 	PCOISANE_Data pData;
 	HANDLE hThread;
-	size_t cbLen;
-	PTSTR lpStr;
+	PTSTR lpText;
 	HRESULT hr;
 
 	pData = (PCOISANE_Data) lpParameter;
@@ -744,10 +742,10 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 
 	hThread = pData->hThread;
 
-	hr = StringCbAPrintf(pData->hHeap, &lpStr, &cbLen, TEXT("%s:%d\n%s"), pData->lpHost, pData->usPort, pData->lpName);
-	if (SUCCEEDED(hr) && lpStr) {
-		SetDlgItemText(pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_SUB, lpStr);
-		HeapSafeFree(pData->hHeap, 0, lpStr);
+	hr = StringCbAPrintf(pData->hHeap, &lpText, NULL, TEXT("%s:%d\n%s"), pData->lpHost, pData->usPort, pData->lpName);
+	if (SUCCEEDED(hr)) {
+		SetDlgItemText(pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_SUB, lpText);
+		HeapSafeFree(pData->hHeap, 0, lpText);
 	}
 
 	SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_CONNECT);
