@@ -32,22 +32,21 @@
 
 VOID Trace_(_In_ LPCTSTR lpszPrefix, _In_ LPCTSTR lpszFormat, ...)
 {
-	LPTSTR lpszMsg, lpOut;
+	LPTSTR lpszMsg, lpszOut;
 	va_list argList;
 	HANDLE hHeap;
-	size_t cbLen;
 	HRESULT hr;
 
 	hHeap = GetProcessHeap();
 	if (hHeap) {
 		va_start(argList, lpszFormat);
-		hr = StringCchAVPrintf(hHeap, &lpszMsg, &cbLen, lpszFormat, argList);
+		hr = StringCchAVPrintf(hHeap, &lpszMsg, NULL, lpszFormat, argList);
 		va_end(argList);
-		if (SUCCEEDED(hr) && lpszMsg) {
-			hr = StringCchAPrintf(hHeap, &lpOut, &cbLen, TEXT("%s: %s\r\n"), lpszPrefix, lpszMsg);
-			if (SUCCEEDED(hr) && lpOut) {
-				OutputDebugString(lpOut);
-				HeapSafeFree(hHeap, 0, lpOut);
+		if (SUCCEEDED(hr)) {
+			hr = StringCchAPrintf(hHeap, &lpszOut, NULL, TEXT("%s: %s\r\n"), lpszPrefix, lpszMsg);
+			if (SUCCEEDED(hr)) {
+				OutputDebugString(lpszOut);
+				HeapSafeFree(hHeap, 0, lpszOut);
 			}
 			HeapSafeFree(hHeap, 0, lpszMsg);
 		}
