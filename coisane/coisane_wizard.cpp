@@ -268,7 +268,7 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 
 				case PSN_WIZBACK:
 					Trace(TEXT("PSN_WIZBACK"));
-					SetWindowLong(hwndDlg, DWLP_MSGRESULT, IDD_WIZARD_PAGE_SERVER);
+					SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, IDD_WIZARD_PAGE_SERVER);
 					return TRUE;
 					break;
 
