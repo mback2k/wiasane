@@ -115,8 +115,6 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 				break;
 
 			pData->uiReferences++;
-			pData->hwndDlg = hwndDlg;
-
 			InitPropertyPageAdvanced(hwndDlg, pData);
 			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
 			break;
@@ -134,6 +132,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 			switch (((LPNMHDR) lParam)->code) {
 				case PSN_SETACTIVE:
 					Trace(TEXT("PSN_SETACTIVE"));
+					pData->hwndDlg = hwndDlg;
 					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
 					if (!ShowPropertyPageAdvanced(hwndDlg, pData)) {
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
@@ -144,6 +143,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 				case PSN_KILLACTIVE:
 					Trace(TEXT("PSN_KILLACTIVE"));
 					pData->hwndPropDlg = NULL;
+					pData->hwndDlg = NULL;
 					pData->hThread = NULL;
 					break;
 
