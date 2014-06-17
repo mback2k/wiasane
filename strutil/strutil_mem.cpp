@@ -20,45 +20,59 @@
 
 #include "strutil_mem.h"
 
-BOOL WINAPI HeapSafeFree(_In_ HANDLE hHeap, _In_ DWORD dwFlags, _In_ LPVOID lpMem)
+BOOL WINAPI HeapSafeFree(_Inout_ HANDLE hHeap, _In_ DWORD dwFlags, _In_opt_ _Post_ptr_invalid_ LPVOID lpMem)
 {
-	size_t cbMem;
+	SIZE_T cbMem;
+	BOOL res;
 
 	if (!hHeap || !lpMem)
 		return FALSE;
 
-	cbMem = HeapSize(hHeap, dwFlags, lpMem);
-	if (cbMem > 0)
-		ZeroMemory(lpMem, cbMem);
+	if (!HeapLock(hHeap))
+		return FALSE;
 
-	return HeapFree(hHeap, dwFlags, lpMem);
+	cbMem = HeapSize(hHeap, dwFlags, lpMem);
+	if (cbMem > 0 && cbMem != (SIZE_T)-1)
+		SecureZeroMemory(lpMem, cbMem);
+
+	res = HeapFree(hHeap, dwFlags, lpMem);
+
+	HeapUnlock(hHeap);
+
+	return res;
 }
 
 
-HLOCAL WINAPI LocalSafeFree(_In_ HLOCAL hMem)
+HLOCAL WINAPI LocalSafeFree(_Pre_opt_valid_ HLOCAL hMem)
 {
-	size_t cbMem;
+	SIZE_T cbMem;
 
 	if (!hMem)
+		return hMem;
+
+	if (!LocalLock(hMem))
 		return hMem;
 
 	cbMem = LocalSize(hMem);
 	if (cbMem > 0)
-		ZeroMemory(hMem, cbMem);
+		SecureZeroMemory(hMem, cbMem);
 
 	return LocalFree(hMem);
 }
 
-HGLOBAL WINAPI GlobalSafeFree(_In_ HGLOBAL hMem)
+HGLOBAL WINAPI GlobalSafeFree(_Pre_opt_valid_ HGLOBAL hMem)
 {
-	size_t cbMem;
+	SIZE_T cbMem;
 
 	if (!hMem)
 		return hMem;
 
+	if (!GlobalLock(hMem))
+		return hMem;
+
 	cbMem = GlobalSize(hMem);
 	if (cbMem > 0)
-		ZeroMemory(hMem, cbMem);
+		SecureZeroMemory(hMem, cbMem);
 
 	return GlobalFree(hMem);
 }

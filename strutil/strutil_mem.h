@@ -30,9 +30,9 @@ __user_code
 
 #include <windows.h>
 
-BOOL WINAPI HeapSafeFree(_In_ HANDLE hHeap, _In_ DWORD dwFlags, _In_ LPVOID lpMem);
+BOOL WINAPI HeapSafeFree(_Inout_ HANDLE hHeap, _In_ DWORD dwFlags, _In_opt_ _Post_ptr_invalid_ LPVOID lpMem);
 
-HLOCAL WINAPI LocalSafeFree(_In_ HLOCAL hMem);
-HGLOBAL WINAPI GlobalSafeFree(_In_ HGLOBAL hMem);
+HLOCAL WINAPI LocalSafeFree(_Pre_opt_valid_ HLOCAL hMem);
+HGLOBAL WINAPI GlobalSafeFree(_Pre_opt_valid_ HGLOBAL hMem);
 
 #endif
