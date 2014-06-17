@@ -150,8 +150,6 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 				break;
 
 			pData->uiReferences++;
-			pData->hwndDlg = hwndDlg;
-
 			InitWizardPageServer(hwndDlg, pData);
 			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
 			break;
@@ -169,6 +167,7 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 			switch (((LPNMHDR) lParam)->code) {
 				case PSN_SETACTIVE:
 					Trace(TEXT("PSN_SETACTIVE"));
+					pData->hwndDlg = hwndDlg;
 					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
 					PropSheet_SetWizButtons(pData->hwndPropDlg, PSWIZB_NEXT | PSWIZB_CANCEL);
 					break;
@@ -176,6 +175,7 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 				case PSN_KILLACTIVE:
 					Trace(TEXT("PSN_KILLACTIVE"));
 					pData->hwndPropDlg = NULL;
+					pData->hwndDlg = NULL;
 					break;
 
 				case PSN_WIZBACK:
@@ -238,8 +238,6 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 				break;
 
 			pData->uiReferences++;
-			pData->hwndDlg = hwndDlg;
-
 			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
 			break;
 
@@ -256,6 +254,7 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 			switch (((LPNMHDR) lParam)->code) {
 				case PSN_SETACTIVE:
 					Trace(TEXT("PSN_SETACTIVE"));
+					pData->hwndDlg = hwndDlg;
 					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
 					PropSheet_SetWizButtons(pData->hwndPropDlg, PSWIZB_BACK | PSWIZB_NEXT | PSWIZB_CANCEL);
 					if (!ShowWizardPageScanner(hwndDlg, pData)) {
@@ -271,6 +270,7 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 						return TRUE;
 					}
 					pData->hwndPropDlg = NULL;
+					pData->hwndDlg = NULL;
 					break;
 
 				case PSN_WIZBACK:
@@ -336,8 +336,6 @@ INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg,
 				break;
 
 			pData->uiReferences++;
-			pData->hwndDlg = hwndDlg;
-
 			InitWizardPageProgress(hwndDlg, pData);
 			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
 			break;
@@ -355,6 +353,7 @@ INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg,
 			switch (((LPNMHDR) lParam)->code) {
 				case PSN_SETACTIVE:
 					Trace(TEXT("PSN_SETACTIVE"));
+					pData->hwndDlg = hwndDlg;
 					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
 					PropSheet_SetWizButtons(pData->hwndPropDlg, PSWIZB_BACK);
 
@@ -376,8 +375,9 @@ INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg,
 						Animate_Stop(hwnd);
 					}
 
-					pData->hThread = NULL;
 					pData->hwndPropDlg = NULL;
+					pData->hwndDlg = NULL;
+					pData->hThread = NULL;
 					break;
 
 				case PSN_WIZBACK:
