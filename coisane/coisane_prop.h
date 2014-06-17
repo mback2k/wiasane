@@ -42,8 +42,11 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvancedBtnClicked(_In_ HWND hwndDlg, _In
 
 UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp);
 
-BOOL WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
-BOOL WINAPI ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
+VOID WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
+VOID WINAPI FreePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
+
+BOOL WINAPI ShowPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
+BOOL WINAPI SavePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
 
 WINSANE_API_CALLBACK PropertyPageAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password);
 

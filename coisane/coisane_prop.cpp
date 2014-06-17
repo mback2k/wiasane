@@ -135,6 +135,10 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 				case PSN_SETACTIVE:
 					Trace(TEXT("PSN_SETACTIVE"));
 					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
+					if (!ShowPropertyPageAdvanced(hwndDlg, pData)) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
+						return TRUE;
+					}
 					break;
 
 				case PSN_KILLACTIVE:
@@ -144,7 +148,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 
 				case PSN_APPLY:
 					Trace(TEXT("PSN_APPLY"));
-					if (!ExitPropertyPageAdvanced(hwndDlg, pData)) {
+					if (!SavePropertyPageAdvanced(hwndDlg, pData)) {
 						MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
 						return TRUE;
@@ -189,6 +193,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 			if (!pData)
 				break;
 
+			FreePropertyPageAdvanced(hwndDlg, pData);
 			pData->uiReferences--;
 			break;
 	}
@@ -308,32 +313,50 @@ UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uM
 }
 
 
-BOOL WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+VOID WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
-	PWINSANE_Session oSession;
-	PWINSANE_Device oDevice;
 	HINSTANCE hInst;
-	HANDLE hIcon;
-	LONG index;
+	HICON hIcon;
 	HWND hwnd;
-	BOOL res;
+
+	UNREFERENCED_PARAMETER(pData);
 
 	hInst = GetStiCiInstance();
 	if (hInst) {
 		hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_ICON);
 		if (hwnd) {
-			hIcon = LoadImage(hInst, MAKEINTRESOURCE(1000), IMAGE_ICON, 32, 32, LR_SHARED);
+			hIcon = (HICON) LoadImage(hInst, MAKEINTRESOURCE(1000), IMAGE_ICON, 32, 32, 0);
 			if (hIcon) {
-				res = PostMessage(hwnd, STM_SETICON, (WPARAM) hIcon, (LPARAM) 0);
-			} else {
-				res = FALSE;
+				SendMessage(hwnd, STM_SETICON, (WPARAM) hIcon, (LPARAM) 0);
 			}
-		} else {
-			res = FALSE;
 		}
-	} else {
-		res = FALSE;
 	}
+
+}
+
+VOID WINAPI FreePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+{
+	HICON hIcon;
+	HWND hwnd;
+
+	UNREFERENCED_PARAMETER(pData);
+
+	hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_ICON);
+	if (hwnd) {
+		hIcon = (HICON) SendMessage(hwnd, STM_GETICON, (WPARAM) 0, (LPARAM) 0);
+		if (hIcon) {
+			DestroyIcon(hIcon);
+		}
+	}
+}
+
+
+BOOL WINAPI ShowPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+{
+	PWINSANE_Session oSession;
+	PWINSANE_Device oDevice;
+	LONG index;
+	HWND hwnd;
 
 	QueryDeviceData(pData);
 
@@ -377,7 +400,7 @@ BOOL WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 	return res;
 }
 
-BOOL WINAPI ExitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+BOOL WINAPI SavePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
 	SP_DEVINSTALL_PARAMS devInstallParams;
 	PWINSANE_Session oSession;
