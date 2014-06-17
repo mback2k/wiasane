@@ -466,61 +466,58 @@ UINT CALLBACK PropSheetPageProcWizardPage(_In_ HWND hwnd, _In_ UINT uMsg, _Inout
 }
 
 
-BOOL WINAPI InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+VOID WINAPI InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
 	INFCONTEXT InfContext;
 	HINF InfFile;
-	LPTSTR strField;
-	INT intField;
+	LPTSTR lpHost;
+	INT iPort;
 	DWORD size;
 	BOOL res;
+
+	lpHost = NULL;
+	iPort = WINSANE_DEFAULT_PORT;
 
 	InfFile = OpenInfFile(pData->hDeviceInfoSet, pData->pDeviceInfoData, NULL);
 	if (InfFile != INVALID_HANDLE_VALUE) {
 		res = SetupFindFirstLine(InfFile, TEXT("WIASANE.DeviceData"), TEXT("Host"), &InfContext);
 		if (res) {
 			res = SetupGetStringField(&InfContext, 1, NULL, 0, &size);
-			if (res) {
-				strField = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, size * sizeof(TCHAR));
-				if (strField) {
-					res = SetupGetStringField(&InfContext, 1, strField, size, NULL);
-					if (res) {
-						res = SetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_HOST, strField);
-
-						pData->lpHost = strField;
-					} else {
-						HeapSafeFree(pData->hHeap, 0, strField);
+			if (res && size > 0 && (size+1) > size) {
+				lpHost = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, (size+1) * sizeof(TCHAR));
+				if (lpHost) {
+					res = SetupGetStringField(&InfContext, 1, lpHost, size, NULL);
+					if (!res) {
+						HeapSafeFree(pData->hHeap, 0, lpHost);
+						lpHost = NULL;
 					}
-				} else {
-					res = FALSE;
 				}
 			}
 		}
 
+		res = SetupFindFirstLine(InfFile, TEXT("WIASANE.DeviceData"), TEXT("Port"), &InfContext);
 		if (res) {
-			res = SetupFindFirstLine(InfFile, TEXT("WIASANE.DeviceData"), TEXT("Port"), &InfContext);
-			if (res) {
-				res = SetupGetIntField(&InfContext, 1, &intField);
-				if (res) {
-					res = SetDlgItemInt(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_PORT, intField, FALSE);
-
-					pData->usPort = (USHORT) intField;
-				}
+			res = SetupGetIntField(&InfContext, 1, &iPort);
+			if (!res) {
+				iPort = WINSANE_DEFAULT_PORT;
 			}
 		}
 
 		SetupCloseInfFile(InfFile);
-	} else {
-		res = FALSE;
 	}
 
-	if (!pData->lpHost)
+	if (pData->lpHost)
+		HeapSafeFree(pData->hHeap, 0, pData->lpHost);
+
+	if (lpHost)
+		pData->lpHost = lpHost;
+	else
 		pData->lpHost = StringAClone(pData->hHeap, TEXT("localhost"));
 
-	if (!pData->usPort)
-		pData->usPort = WINSANE_DEFAULT_PORT;
+	pData->usPort = (USHORT) iPort;
 
-	return res;
+	SetDlgItemText(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_HOST, pData->lpHost);
+	SetDlgItemInt(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_PORT, pData->usPort, FALSE);
 }
 
 BOOL WINAPI NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
