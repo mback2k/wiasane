@@ -563,14 +563,14 @@ BOOL WINAPI NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 	pData->lpHost = lpHost;
 	pData->usPort = usPort;
 
-	pData->hThread = CreateThread(NULL, 0, &ProcWizardPageServer, pData, CREATE_SUSPENDED, NULL);
+	pData->hThread = CreateThread(NULL, 0, &ThreadProcNextWizardPageServer, pData, CREATE_SUSPENDED, NULL);
 	if (!pData->hThread)
 		return FALSE;
 
 	return TRUE;
 }
 
-DWORD WINAPI ProcWizardPageServer(_In_ LPVOID lpParameter)
+DWORD WINAPI ThreadProcNextWizardPageServer(_In_ LPVOID lpParameter)
 {
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
@@ -718,14 +718,14 @@ BOOL WINAPI NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData
 	pData->lpUsername = lpUsername;
 	pData->lpPassword = lpPassword;
 
-	pData->hThread = CreateThread(NULL, 0, &ProcWizardPageScanner, pData, CREATE_SUSPENDED, NULL);
+	pData->hThread = CreateThread(NULL, 0, &ThreadProcNextWizardPageScanner, pData, CREATE_SUSPENDED, NULL);
 	if (!pData->hThread)
 		return FALSE;
 
 	return TRUE;
 }
 
-DWORD WINAPI ProcWizardPageScanner(_In_ LPVOID lpParameter)
+DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 {
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;

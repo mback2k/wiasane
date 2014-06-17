@@ -45,12 +45,12 @@ UINT CALLBACK PropSheetPageProcWizardPage(_In_ HWND hwnd, _In_ UINT uMsg, _Inout
 
 VOID WINAPI InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
 BOOL WINAPI NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
-DWORD WINAPI ProcWizardPageServer(_In_ LPVOID lpParameter);
+DWORD WINAPI ThreadProcNextWizardPageServer(_In_ LPVOID lpParameter);
 
 BOOL WINAPI ShowWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
 BOOL WINAPI HideWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
 BOOL WINAPI NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
-DWORD WINAPI ProcWizardPageScanner(_In_ LPVOID lpParameter);
+DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter);
 
 VOID WINAPI InitWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
 VOID WINAPI FreeWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
