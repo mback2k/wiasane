@@ -37,17 +37,25 @@ LPTSTR WINAPI StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString);
 LPSTR WINAPI StringWToA(_In_ HANDLE hHeap, _In_ LPWSTR pszString);
 LPWSTR WINAPI StringAToW(_In_ HANDLE hHeap, _In_ LPSTR pszString);
 
-HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...);
-HRESULT StringCbAPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...);
+_Success_(SUCCEEDED(return))
+HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPSTR *plpszDest, _Out_opt_ size_t *pcbDest, _In_ LPCSTR lpszFormat, ...);
+_Success_(SUCCEEDED(return))
+HRESULT StringCbAPrintfW(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPWSTR *plpszDest, _Out_opt_ size_t *pcbDest, _In_ LPCWSTR lpszFormat, ...);
 
-HRESULT StringCchAPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...);
-HRESULT StringCchAPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...);
+_Success_(SUCCEEDED(return))
+HRESULT StringCchAPrintfA(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPSTR *plpszDest, _Out_opt_ size_t *pcchDest, _In_ LPCSTR lpszFormat, ...);
+_Success_(SUCCEEDED(return))
+HRESULT StringCchAPrintfW(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPWSTR *plpszDest, _Out_opt_ size_t *pcchDest, _In_ LPCWSTR lpszFormat, ...);
 
-HRESULT StringCbAVPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, _In_ va_list argList);
-HRESULT StringCbAVPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList);
+_Success_(SUCCEEDED(return))
+HRESULT StringCbAVPrintfA(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPSTR *plpszDest, _Out_opt_ size_t *pcbDest, _In_ LPCSTR lpszFormat, _In_ va_list argList);
+_Success_(SUCCEEDED(return))
+HRESULT StringCbAVPrintfW(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPWSTR *plpszDest, _Out_opt_ size_t *pcbDest, _In_ LPCWSTR lpszFormat, _In_ va_list argList);
 
-HRESULT StringCchAVPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, _In_ va_list argList);
-HRESULT StringCchAVPrintfW( _In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList);
+_Success_(SUCCEEDED(return))
+HRESULT StringCchAVPrintfA(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPSTR *plpszDest, _Out_opt_ size_t *pcchDest, _In_ LPCSTR lpszFormat, _In_ va_list argList);
+_Success_(SUCCEEDED(return))
+HRESULT StringCchAVPrintfW( _In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPWSTR *plpszDest, _Out_opt_ size_t *pcchDest, _In_ LPCWSTR lpszFormat, _In_ va_list argList);
 
 #ifdef UNICODE
 #define StringToA StringWToA

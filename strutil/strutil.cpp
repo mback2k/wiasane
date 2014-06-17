@@ -103,137 +103,159 @@ LPWSTR WINAPI StringAToW(_In_ HANDLE hHeap, _In_ LPSTR pszString)
 }
 
 
-HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...)
+_Success_(SUCCEEDED(return))
+HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPSTR *plpszDest, _Out_opt_ size_t *pcbDest, _In_ LPCSTR lpszFormat, ...)
 {
 	va_list argList;
 	HRESULT hr;
 
-	va_start(argList, pszFormat);
-	hr = StringCbAVPrintfA(hHeap, ppszDest, pcbDest, pszFormat, argList);
+	va_start(argList, lpszFormat);
+	hr = StringCbAVPrintfA(hHeap, plpszDest, pcbDest, lpszFormat, argList);
 	va_end(argList);
 
 	return hr;
 }
 
-HRESULT StringCbAPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...)
+_Success_(SUCCEEDED(return))
+HRESULT StringCbAPrintfW(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPWSTR *plpszDest, _Out_opt_ size_t *pcbDest, _In_ LPCWSTR lpszFormat, ...)
 {
 	va_list argList;
 	HRESULT hr;
 
-	va_start(argList, pszFormat);
-	hr = StringCbAVPrintfW(hHeap, ppszDest, pcbDest, pszFormat, argList);
-	va_end(argList);
-
-	return hr;
-}
-
-
-HRESULT StringCchAPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, ...)
-{
-	va_list argList;
-	HRESULT hr;
-
-	va_start(argList, pszFormat);
-	hr = StringCchAVPrintfA(hHeap, ppszDest, pcbDest, pszFormat, argList);
-	va_end(argList);
-
-	return hr;
-}
-
-HRESULT StringCchAPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, ...)
-{
-	va_list argList;
-	HRESULT hr;
-
-	va_start(argList, pszFormat);
-	hr = StringCchAVPrintfW(hHeap, ppszDest, pcbDest, pszFormat, argList);
+	va_start(argList, lpszFormat);
+	hr = StringCbAVPrintfW(hHeap, plpszDest, pcbDest, lpszFormat, argList);
 	va_end(argList);
 
 	return hr;
 }
 
 
-HRESULT StringCbAVPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, _In_ va_list argList)
+_Success_(SUCCEEDED(return))
+HRESULT StringCchAPrintfA(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPSTR *plpszDest, _Out_opt_ size_t *pcchDest, _In_ LPCSTR lpszFormat, ...)
 {
+	va_list argList;
 	HRESULT hr;
 
-	hr = StringCchAVPrintfA(hHeap, ppszDest, pcbDest, pszFormat, argList);
-
-	if (SUCCEEDED(hr))
-		*pcbDest *= sizeof(CHAR);
+	va_start(argList, lpszFormat);
+	hr = StringCchAVPrintfA(hHeap, plpszDest, pcchDest, lpszFormat, argList);
+	va_end(argList);
 
 	return hr;
 }
 
-HRESULT StringCbAVPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList)
+_Success_(SUCCEEDED(return))
+HRESULT StringCchAPrintfW(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPWSTR *plpszDest, _Out_opt_ size_t *pcchDest, _In_ LPCWSTR lpszFormat, ...)
 {
+	va_list argList;
 	HRESULT hr;
 
-	hr = StringCchAVPrintfW(hHeap, ppszDest, pcbDest, pszFormat, argList);
-
-	if (SUCCEEDED(hr))
-		*pcbDest *= sizeof(WCHAR);
+	va_start(argList, lpszFormat);
+	hr = StringCchAVPrintfW(hHeap, plpszDest, pcchDest, lpszFormat, argList);
+	va_end(argList);
 
 	return hr;
 }
 
 
-HRESULT StringCchAVPrintfA(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCSTR pszFormat, _In_ va_list argList)
+_Success_(SUCCEEDED(return))
+HRESULT StringCbAVPrintfA(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPSTR *plpszDest, _Out_opt_ size_t *pcbDest, _In_ LPCSTR lpszFormat, _In_ va_list argList)
 {
-	LPSTR pszDest;
-	int cbDest;
+	size_t cchDest;
+	HRESULT hr;
 
-	if (!hHeap || !ppszDest || !pcbDest || !pszFormat)
+	cchDest = 0;
+	hr = StringCchAVPrintfA(hHeap, plpszDest, &cchDest, lpszFormat, argList);
+
+	if (SUCCEEDED(hr) && pcbDest)
+		*pcbDest = cchDest * sizeof(CHAR);
+
+	return hr;
+}
+
+_Success_(SUCCEEDED(return))
+HRESULT StringCbAVPrintfW(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPWSTR *plpszDest, _Out_opt_ size_t *pcbDest, _In_ LPCWSTR lpszFormat, _In_ va_list argList)
+{
+	size_t cchDest;
+	HRESULT hr;
+
+	cchDest = 0;
+	hr = StringCchAVPrintfW(hHeap, plpszDest, &cchDest, lpszFormat, argList);
+
+	if (SUCCEEDED(hr) && pcbDest)
+		*pcbDest = cchDest * sizeof(WCHAR);
+
+	return hr;
+}
+
+
+_Success_(SUCCEEDED(return))
+HRESULT StringCchAVPrintfA(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPSTR *plpszDest, _Out_opt_ size_t *pcchDest, _In_ LPCSTR lpszFormat, _In_ va_list argList)
+{
+	LPSTR lpszDest;
+	int cchDest;
+
+	if (!hHeap || !plpszDest || !lpszFormat)
 		return STRSAFE_E_INVALID_PARAMETER;
 
-	*ppszDest = NULL;
-	*pcbDest = 0;
+	*plpszDest = NULL;
+	if (pcchDest)
+		*pcchDest = 0;
 
-	cbDest = _vscprintf(pszFormat, argList);
-	if (cbDest < 0 || cbDest > STRSAFE_MAX_CCH)
+	cchDest = _vscprintf(lpszFormat, argList);
+	if (cchDest < 0 || cchDest > STRSAFE_MAX_CCH)
 		return STRSAFE_E_INVALID_PARAMETER;
 
-	cbDest += 1;
-	pszDest = (PCHAR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbDest * sizeof(CHAR));
-	if (pszDest) {
-		cbDest = vsprintf_s(pszDest, cbDest, pszFormat, argList);
-		if (cbDest >= 0) {
-			*pcbDest = cbDest + 1;
-			*ppszDest = pszDest;
+	if ((cchDest+1) <= cchDest)
+		return STRSAFE_E_INVALID_PARAMETER;
+
+	cchDest += 1;
+	lpszDest = (LPSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cchDest * sizeof(CHAR));
+	if (lpszDest) {
+		cchDest = vsprintf_s(lpszDest, cchDest, lpszFormat, argList);
+		if (cchDest >= 0) {
+			*plpszDest = lpszDest;
+			if (pcchDest)
+				*pcchDest = cchDest;
 			return S_OK;
 		} else {
-			HeapSafeFree(hHeap, 0, pszDest);
+			HeapSafeFree(hHeap, 0, lpszDest);
 		}
 	}
 
 	return STRSAFE_E_INSUFFICIENT_BUFFER;
 }
 
-HRESULT StringCchAVPrintfW(_In_ HANDLE hHeap, _Outptr_result_maybenull_ LPWSTR *ppszDest, _Out_ size_t *pcbDest, _In_ LPCWSTR pszFormat, _In_ va_list argList)
+_Success_(SUCCEEDED(return))
+HRESULT StringCchAVPrintfW(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPWSTR *plpszDest, _Out_opt_ size_t *pcchDest, _In_ LPCWSTR lpszFormat, _In_ va_list argList)
 {
-	LPWSTR pszDest;
-	int cbDest;
+	LPWSTR lpszDest;
+	int cchDest;
 
-	if (!hHeap || !ppszDest || !pcbDest || !pszFormat)
+	if (!hHeap || !plpszDest || !lpszFormat)
 		return STRSAFE_E_INVALID_PARAMETER;
 
-	*ppszDest = NULL;
-	*pcbDest = 0;
+	*plpszDest = NULL;
+	if (pcchDest)
+		*pcchDest = 0;
 
-	cbDest = _vscwprintf(pszFormat, argList);
-	if (cbDest < 0 || cbDest > STRSAFE_MAX_CCH)
+	cchDest = _vscwprintf(lpszFormat, argList);
+	if (cchDest < 0 || cchDest > STRSAFE_MAX_CCH)
 		return STRSAFE_E_INVALID_PARAMETER;
 
-	cbDest += 1;
-	pszDest = (PWCHAR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbDest * sizeof(WCHAR));
-	if (pszDest) {
-		cbDest = vswprintf_s(pszDest, cbDest, pszFormat, argList);
-		if (cbDest >= 0) {
-			*pcbDest = cbDest + 1;
-			*ppszDest = pszDest;
+	if ((cchDest+1) <= cchDest)
+		return STRSAFE_E_INVALID_PARAMETER;
+
+	cchDest += 1;
+	lpszDest = (LPWSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cchDest * sizeof(WCHAR));
+	if (lpszDest) {
+		cchDest = vswprintf_s(lpszDest, cchDest, lpszFormat, argList);
+		if (cchDest >= 0) {
+			*plpszDest = lpszDest;
+			if (pcchDest)
+				*pcchDest = cchDest;
 			return S_OK;
 		} else {
-			HeapSafeFree(hHeap, 0, pszDest);
+			HeapSafeFree(hHeap, 0, lpszDest);
 		}
 	}
 
