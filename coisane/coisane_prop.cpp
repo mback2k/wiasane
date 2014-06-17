@@ -338,7 +338,7 @@ BOOL WINAPI InitPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 	QueryDeviceData(pData);
 
 	if (!pData->lpHost)
-		pData->lpHost = StringAClone(pData->hHeap, TEXT("localhost"));
+		pData->lpHost = StringDup(pData->hHeap, TEXT("localhost"));
 
 	if (!pData->usPort)
 		pData->usPort = WINSANE_DEFAULT_PORT;
@@ -467,9 +467,9 @@ WINSANE_API_CALLBACK PropertyPageAuthCallback(_In_ SANE_String_Const resource, _
 	if (!hHeap)
 		return;
 
-	lpUsername = StringToA(hHeap, g_pPropertyPageData->lpUsername);
+	lpUsername = StringConvToA(hHeap, g_pPropertyPageData->lpUsername);
 	if (lpUsername) {
-		lpPassword = StringToA(hHeap, g_pPropertyPageData->lpPassword);
+		lpPassword = StringConvToA(hHeap, g_pPropertyPageData->lpPassword);
 		if (lpPassword) {
 			strcpy_s(username, SANE_MAX_USERNAME_LEN, lpUsername);
 			strcpy_s(password, SANE_MAX_PASSWORD_LEN, lpPassword);

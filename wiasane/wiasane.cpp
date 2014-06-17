@@ -734,9 +734,9 @@ WINSANE_API_CALLBACK SessionAuthCallback(_In_ SANE_String_Const resource, _Inout
 	if (!hHeap)
 		return;
 
-	lpUsername = StringToA(hHeap, g_pContext->pszUsername);
+	lpUsername = StringConvToA(hHeap, g_pContext->pszUsername);
 	if (lpUsername) {
-		lpPassword = StringToA(hHeap, g_pContext->pszPassword);
+		lpPassword = StringConvToA(hHeap, g_pContext->pszPassword);
 		if (lpPassword) {
 			strcpy_s(username, SANE_MAX_USERNAME_LEN, lpUsername);
 			strcpy_s(password, SANE_MAX_PASSWORD_LEN, lpPassword);

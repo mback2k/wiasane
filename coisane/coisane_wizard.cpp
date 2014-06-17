@@ -531,7 +531,7 @@ VOID WINAPI InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 	if (lpHost)
 		pData->lpHost = lpHost;
 	else
-		pData->lpHost = StringAClone(pData->hHeap, TEXT("localhost"));
+		pData->lpHost = StringDup(pData->hHeap, TEXT("localhost"));
 
 	pData->usPort = (USHORT) iPort;
 
@@ -615,7 +615,7 @@ DWORD WINAPI ThreadProcNextWizardPageServer(_In_ LPVOID lpParameter)
 						for (device = 0; device < devices; device++) {
 							oDevice = oSession->GetDevice(device);
 							if (oDevice) {
-								pData->lpNames[device] = StringATo(pData->hHeap, (LPSTR) oDevice->GetName());
+								pData->lpNames[device] = StringConvATo(pData->hHeap, (LPSTR) oDevice->GetName());
 							}
 						}
 					}
@@ -863,9 +863,9 @@ WINSANE_API_CALLBACK WizardPageAuthCallback(_In_ SANE_String_Const resource, _In
 	if (!hHeap)
 		return;
 
-	lpUsername = StringToA(hHeap, g_pWizardPageData->lpUsername);
+	lpUsername = StringConvToA(hHeap, g_pWizardPageData->lpUsername);
 	if (lpUsername) {
-		lpPassword = StringToA(hHeap, g_pWizardPageData->lpPassword);
+		lpPassword = StringConvToA(hHeap, g_pWizardPageData->lpPassword);
 		if (lpPassword) {
 			strcpy_s(username, SANE_MAX_USERNAME_LEN, lpUsername);
 			strcpy_s(password, SANE_MAX_PASSWORD_LEN, lpPassword);

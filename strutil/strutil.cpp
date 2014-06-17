@@ -25,81 +25,96 @@
 
 #include "strutil_mem.h"
 
-LPTSTR WINAPI StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString)
+_Success_(return != NULL)
+LPTSTR WINAPI StringDup(_In_ HANDLE hHeap, _In_ LPTSTR lpszString)
 {
-	LPTSTR pszCopy;
+	LPTSTR lpszCopy;
 	size_t cbCopy;
 	HRESULT hr;
 
-	if (!pszString)
+	if (!lpszString)
 		return NULL;
 
-	hr = StringCbLength(pszString, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbCopy);
+	hr = StringCbLength(lpszString, (STRSAFE_MAX_CCH-1) * sizeof(TCHAR), &cbCopy);
 	if (FAILED(hr))
 		return NULL;
 
-	pszCopy = (PTCHAR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbCopy + sizeof(TCHAR));
-	if (!pszCopy)
+	if ((cbCopy + sizeof(TCHAR)) <= cbCopy)
 		return NULL;
 
-	hr = StringCbCopy(pszCopy, cbCopy + sizeof(TCHAR), pszString);
+	cbCopy += sizeof(TCHAR);
+	lpszCopy = (LPTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbCopy);
+	if (!lpszCopy)
+		return NULL;
+
+	hr = StringCbCopyN(lpszCopy, cbCopy, lpszString, cbCopy);
 	if (FAILED(hr)) {
-		HeapSafeFree(hHeap, 0, pszCopy);
+		HeapSafeFree(hHeap, 0, lpszCopy);
 		return NULL;
 	}
 
-	return pszCopy;
+	return lpszCopy;
 }
 
 
-LPSTR WINAPI StringWToA(_In_ HANDLE hHeap, _In_ LPWSTR pszString)
+_Success_(return != NULL)
+LPSTR WINAPI StringConvWToA(_In_ HANDLE hHeap, _In_ LPWSTR lpszString)
 {
-	LPSTR pszCopy;
+	LPSTR lpszCopy;
 	int iLength;
 
-	if (!pszString)
+	if (!lpszString)
 		return NULL;
 
-	iLength = WideCharToMultiByte(CP_ACP, 0, pszString, -1, NULL, 0, NULL, NULL);
+	iLength = WideCharToMultiByte(CP_ACP, 0, lpszString, -1, NULL, 0, NULL, NULL);
 	if (!iLength)
 		return NULL;
 
-	pszCopy = (LPSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, iLength);
-	if (!pszCopy)
+	if ((iLength + sizeof(CHAR)) <= iLength)
 		return NULL;
 
-	iLength = WideCharToMultiByte(CP_ACP, 0, pszString, -1, pszCopy, iLength, NULL, NULL);
+	iLength += sizeof(CHAR);
+	lpszCopy = (LPSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, iLength);
+	if (!lpszCopy)
+		return NULL;
+
+	iLength = WideCharToMultiByte(CP_ACP, 0, lpszString, -1, lpszCopy, iLength, NULL, NULL);
 	if (!iLength) {
-		HeapSafeFree(hHeap, 0, pszCopy);
+		HeapSafeFree(hHeap, 0, lpszCopy);
 		return NULL;
 	}
 
-	return pszCopy;
+	return lpszCopy;
 }
 
-LPWSTR WINAPI StringAToW(_In_ HANDLE hHeap, _In_ LPSTR pszString)
+_Success_(return != NULL)
+LPWSTR WINAPI StringConvAToW(_In_ HANDLE hHeap, _In_ LPSTR lpszString)
 {
-	LPWSTR pszCopy;
+	LPWSTR lpszCopy;
 	int iLength;
 
-	if (!pszString)
+	if (!lpszString)
 		return NULL;
 
-	iLength = MultiByteToWideChar(CP_ACP, 0, pszString, -1, NULL, 0);
+	iLength = MultiByteToWideChar(CP_ACP, 0, lpszString, -1, NULL, 0);
 	if (!iLength)
 		return NULL;
 
-	pszCopy = (LPWSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, iLength);
-	if (!pszCopy)
+	if ((iLength+1) <= iLength)
 		return NULL;
 
-	iLength = MultiByteToWideChar(CP_ACP, 0, pszString, -1, pszCopy, iLength);
+	iLength += 1;
+	lpszCopy = (LPWSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, iLength * sizeof(TCHAR));
+	if (!lpszCopy)
+		return NULL;
+
+	iLength = MultiByteToWideChar(CP_ACP, 0, lpszString, -1, lpszCopy, iLength);
 	if (!iLength) {
-		HeapSafeFree(hHeap, 0, pszCopy);
+		HeapSafeFree(hHeap, 0, lpszCopy);
 		return NULL;
 	}
 
-	return pszCopy;
+	return lpszCopy;
 }
 
 

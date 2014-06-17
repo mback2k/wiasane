@@ -339,7 +339,7 @@ PWINSANE_Option WINSANE_Device::GetOption(_In_ PTSTR pszName)
 
 	hHeap = GetProcessHeap();
 	if (hHeap) {
-		name = (SANE_String_Const) StringToA(hHeap, pszName);
+		name = (SANE_String_Const) StringConvToA(hHeap, pszName);
 		if (name) {
 			option = this->GetOption(name);
 			HeapFree(hHeap, 0, (LPVOID) name);

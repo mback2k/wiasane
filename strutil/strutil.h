@@ -32,10 +32,13 @@ __user_code
 #include <tchar.h>
 #include <strsafe.h>
 
-LPTSTR WINAPI StringAClone(_In_ HANDLE hHeap, _In_ LPTSTR pszString);
+_Success_(return != NULL)
+LPTSTR WINAPI StringDup(_In_ HANDLE hHeap, _In_ LPTSTR lpszString);
 
-LPSTR WINAPI StringWToA(_In_ HANDLE hHeap, _In_ LPWSTR pszString);
-LPWSTR WINAPI StringAToW(_In_ HANDLE hHeap, _In_ LPSTR pszString);
+_Success_(return != NULL)
+LPSTR WINAPI StringConvWToA(_In_ HANDLE hHeap, _In_ LPWSTR lpszString);
+_Success_(return != NULL)
+LPWSTR WINAPI StringConvAToW(_In_ HANDLE hHeap, _In_ LPSTR lpszString);
 
 _Success_(SUCCEEDED(return))
 HRESULT StringCbAPrintfA(_In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPSTR *plpszDest, _Out_opt_ size_t *pcbDest, _In_ LPCSTR lpszFormat, ...);
@@ -58,21 +61,19 @@ _Success_(SUCCEEDED(return))
 HRESULT StringCchAVPrintfW( _In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPWSTR *plpszDest, _Out_opt_ size_t *pcchDest, _In_ LPCWSTR lpszFormat, _In_ va_list argList);
 
 #ifdef UNICODE
-#define StringToA StringWToA
-#define StringToW StringAClone
-#define StringTo StringToW
-#define StringATo StringAToW
-#define StringWTo StringTo
+#define StringConvToA StringConvWToA
+#define StringConvToW StringDup
+#define StringConvATo StringConvAToW
+#define StringConvWTo StringDup
 #define StringCbAPrintf StringCbAPrintfW
 #define StringCchAPrintf StringCchAPrintfW
 #define StringCbAVPrintf StringCbAVPrintfW
 #define StringCchAVPrintf StringCchAVPrintfW
 #else
-#define StringToA StringAClone
-#define StringToW StringAToW
-#define StringTo StringToA
-#define StringATo StringTo
-#define StringWTo StringWToA
+#define StringConvToA StringDup
+#define StringConvToW StringConvAToW
+#define StringConvATo StringDup
+#define StringConvWTo StringConvWToA
 #define StringCbAPrintf StringCbAPrintfA
 #define StringCchAPrintf StringCchAPrintfA
 #define StringCbAVPrintf StringCbAVPrintfA

@@ -435,7 +435,7 @@ PWINSANE_Device WINSANE_Session::GetDevice(_In_ PTSTR pszName)
 
 	hHeap = GetProcessHeap();
 	if (hHeap) {
-		name = (SANE_String_Const) StringToA(hHeap, pszName);
+		name = (SANE_String_Const) StringConvToA(hHeap, pszName);
 		if (name) {
 			device = this->GetDevice(name);
 			HeapFree(hHeap, 0, (LPVOID) name);
