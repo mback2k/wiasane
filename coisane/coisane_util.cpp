@@ -31,19 +31,20 @@
 #include "strutil_mem.h"
 #include "strutil_dbg.h"
 
-
-DWORD WINAPI GetDlgItemAText(_In_ HANDLE hHeap, _In_ HWND hDlg, _In_ int nIDDlgItem, _Outptr_opt_result_maybenull_ LPTSTR *plpszText, _Out_ size_t *pcbLength)
+_Success_(return == ERROR_SUCCESS)
+DWORD WINAPI GetDlgItemAText(_In_ HANDLE hHeap, _In_ HWND hDlg, _In_ int nIDDlgItem, _Outptr_result_nullonfailure_ LPTSTR *plpszText, _Out_opt_ size_t *pcchLength)
 {
 	HWND hwndDlgItem;
 	LPTSTR lpszText;
 	size_t cbLength;
 	int iLength;
 
-	if (!plpszText || !pcbLength)
+	if (!plpszText)
 		return ERROR_INVALID_PARAMETER;
 
 	*plpszText = NULL;
-	*pcbLength = 0;
+	if (pcchLength)
+		*pcchLength = 0;
 
 	hwndDlgItem = GetDlgItem(hDlg, nIDDlgItem);
 	if (!hwndDlgItem)
@@ -53,29 +54,33 @@ DWORD WINAPI GetDlgItemAText(_In_ HANDLE hHeap, _In_ HWND hDlg, _In_ int nIDDlgI
 	if (iLength < 0)
 		return ERROR_INVALID_DATA;
 
-	iLength++;
+	if ((iLength+1) <= iLength)
+		return ERROR_INVALID_DATA;
+
+	iLength += 1;
 	cbLength = iLength * sizeof(TCHAR);
 
 	lpszText = (LPTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbLength);
 	if (!lpszText)
 		return ERROR_OUTOFMEMORY;
 
-	GetDlgItemText(hDlg, nIDDlgItem, lpszText, iLength);
+	iLength = GetDlgItemText(hDlg, nIDDlgItem, lpszText, iLength);
 
 	*plpszText = lpszText;
-	*pcbLength = cbLength;
+	if (pcchLength)
+		*pcchLength = iLength;
 
 	return ERROR_SUCCESS;
 }
 
-
+_Success_(return != INVALID_HANDLE_VALUE)
 HINF WINAPI OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _Out_opt_ PUINT ErrorLine)
 {
 	SP_DRVINFO_DATA DriverInfoData;
 	SP_DRVINFO_DETAIL_DATA DriverInfoDetailData;
 	HINF FileHandle;
 
-	if (NULL != ErrorLine)
+	if (ErrorLine)
 		*ErrorLine = 0;
 
 	DriverInfoData.cbSize = sizeof(SP_DRVINFO_DATA);
@@ -224,7 +229,7 @@ DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData)
 			pData->usPort = (USHORT) dwValue;
 		}
 
-		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Host"), &lpszValue, &dwValue);
+		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Host"), &lpszValue, NULL);
 		if (res == ERROR_SUCCESS) {
 			if (pData->lpHost) {
 				HeapSafeFree(pData->hHeap, 0, pData->lpHost);
@@ -232,7 +237,7 @@ DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData)
 			pData->lpHost = lpszValue;
 		}
 
-		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Name"), &lpszValue, &dwValue);
+		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Name"), &lpszValue, NULL);
 		if (res == ERROR_SUCCESS) {
 			if (pData->lpName) {
 				HeapSafeFree(pData->hHeap, 0, pData->lpName);
@@ -240,7 +245,7 @@ DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData)
 			pData->lpName = lpszValue;
 		}
 
-		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Username"), &lpszValue, &dwValue);
+		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Username"), &lpszValue, NULL);
 		if (res == ERROR_SUCCESS) {
 			if (pData->lpUsername) {
 				HeapSafeFree(pData->hHeap, 0, pData->lpUsername);
@@ -248,7 +253,7 @@ DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData)
 			pData->lpUsername = lpszValue;
 		}
 
-		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Password"), &lpszValue, &dwValue);
+		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Password"), &lpszValue, NULL);
 		if (res == ERROR_SUCCESS) {
 			if (pData->lpPassword) {
 				HeapSafeFree(pData->hHeap, 0, pData->lpPassword);
