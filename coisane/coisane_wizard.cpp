@@ -152,6 +152,7 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 			pData->uiReferences++;
 			InitWizardPageServer(hwndDlg, pData);
 			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
+			return TRUE;
 			break;
 
 		case WM_NOTIFY:
@@ -239,6 +240,7 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 
 			pData->uiReferences++;
 			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
+			return TRUE;
 			break;
 
 		case WM_NOTIFY:
@@ -338,6 +340,7 @@ INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg,
 			pData->uiReferences++;
 			InitWizardPageProgress(hwndDlg, pData);
 			SetWindowLongPtr(hwndDlg, GWLP_USERDATA, lParam);
+			return TRUE;
 			break;
 
 		case WM_NOTIFY:
