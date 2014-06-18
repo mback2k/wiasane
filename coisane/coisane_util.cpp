@@ -300,7 +300,7 @@ DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDe
 		return GetLastError();
 
 	if (oDevice->Open() == SANE_STATUS_GOOD) {
-		CreateResolutionList(pData, oDevice, &lpResolutions, &cbResolutions);
+		CreateResolutionList(pData->hHeap, oDevice, &lpResolutions, &cbResolutions);
 
 		oDevice->Close();
 	} else {
@@ -365,7 +365,7 @@ DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDe
 
 
 _Success_(return == ERROR_SUCCESS)
-DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDevice, _Outptr_result_maybenull_ LPTSTR *plpszResolutions, _Out_opt_ size_t *pcbResolutions)
+DWORD WINAPI CreateResolutionList(_In_ HANDLE hHeap, _In_ PWINSANE_Device oDevice, _Outptr_result_maybenull_ LPTSTR *plpszResolutions, _Out_opt_ size_t *pcbResolutions)
 {
 	LPTSTR lpResolutions, lpszResolutions;
 	PWINSANE_Option oResolution;
@@ -398,13 +398,13 @@ DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device
 	if (pWordList && pWordList[0] > 0) {
 		switch (oResolution->GetType()) {
 			case SANE_TYPE_INT:
-				hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%d"), pWordList[1]);
+				hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%d"), pWordList[1]);
 				if (FAILED(hr))
 					return ERROR_OUTOFMEMORY;
 				for (index = 2; index <= pWordList[0]; index++) {
 					lpResolutions = lpszResolutions;
-					hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pWordList[index]);
-					HeapSafeFree(pData->hHeap, 0, lpResolutions);
+					hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pWordList[index]);
+					HeapSafeFree(hHeap, 0, lpResolutions);
 					lpResolutions = NULL;
 					if (FAILED(hr))
 						return ERROR_OUTOFMEMORY;
@@ -412,13 +412,13 @@ DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device
 				break;
 
 			case SANE_TYPE_FIXED:
-				hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%d"), SANE_UNFIX(pWordList[1]));
+				hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%d"), SANE_UNFIX(pWordList[1]));
 				if (FAILED(hr))
 					return ERROR_OUTOFMEMORY;
 				for (index = 2; index <= pWordList[0]; index++) {
 					lpResolutions = lpszResolutions;
-					hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, SANE_UNFIX(pWordList[index]));
-					HeapSafeFree(pData->hHeap, 0, lpResolutions);
+					hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, SANE_UNFIX(pWordList[index]));
+					HeapSafeFree(hHeap, 0, lpResolutions);
 					lpResolutions = NULL;
 					if (FAILED(hr))
 						return ERROR_OUTOFMEMORY;

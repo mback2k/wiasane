@@ -56,6 +56,6 @@ _Success_(return == ERROR_SUCCESS)
 DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDevice);
 
 _Success_(return == ERROR_SUCCESS)
-DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDevice, _Outptr_result_maybenull_ LPTSTR *plpszResolutions, _Out_opt_ size_t *pcbResolutions);
+DWORD WINAPI CreateResolutionList(_In_ HANDLE hHeap, _In_ PWINSANE_Device oDevice, _Outptr_result_maybenull_ LPTSTR *plpszResolutions, _Out_opt_ size_t *pcbResolutions);
 
 #endif
