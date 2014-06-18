@@ -375,7 +375,7 @@ DWORD WINAPI CreateResolutionList(_In_ HANDLE hHeap, _In_ PWINSANE_Device oDevic
 	int index;
 
 	if (!plpszResolutions)
-		return 0;
+		return ERROR_INVALID_PARAMETER;
 
 	*plpszResolutions = NULL;
 	if (pcbResolutions)
@@ -383,6 +383,9 @@ DWORD WINAPI CreateResolutionList(_In_ HANDLE hHeap, _In_ PWINSANE_Device oDevic
 
 	lpszResolutions = NULL;
 	cbResolutions = 0;
+
+	if (!oDevice)
+		return ERROR_INVALID_PARAMETER;
 
 	if (oDevice->FetchOptions() != SANE_STATUS_GOOD)
 		return ERROR_INVALID_DATA;
