@@ -461,7 +461,6 @@ DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter)
 	if (oSession) {
 		SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_INIT);
 		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
-			SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_FIND);
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
 				devices = oSession->GetDevices();
 				if (devices > 0) {
@@ -592,6 +591,8 @@ DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
 	PWINSANE_Device oDevice;
 	PCOISANE_Data pData;
 	HANDLE hThread;
+	PTSTR lpText;
+	HRESULT hr;
 	BOOL res;
 
 	pData = (PCOISANE_Data) lpParameter;
@@ -600,13 +601,21 @@ DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
 
 	hThread = pData->hThread;
 
+	hr = StringCbAPrintf(pData->hHeap, &lpText, NULL, TEXT("%s:%d\n%s"), pData->lpHost, pData->usPort, pData->lpName);
+	if (SUCCEEDED(hr)) {
+		SetDlgItemText(pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT, lpText);
+		HeapSafeFree(pData->hHeap, 0, lpText);
+	}
+
 	SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_CONNECT);
 	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
 	if (oSession) {
 		g_pPropertyPageData = pData;
 		SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_INIT);
 		if (oSession->Init(NULL, &PropertyPageAuthCallback) == SANE_STATUS_GOOD) {
+			SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_FIND);
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
+				SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_OPEN);
 				oDevice = oSession->GetDevice(pData->lpName);
 				if (oDevice) {
 					UpdateDeviceInfo(pData, oDevice);
