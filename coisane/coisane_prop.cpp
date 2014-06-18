@@ -261,6 +261,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvancedBtnClicked(_In_ HWND hwndDlg, _In
 UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uMsg, _Inout_ LPPROPSHEETPAGE ppsp)
 {
 	PCOISANE_Data pData;
+	LONG device;
 	UINT ret;
 
 	UNREFERENCED_PARAMETER(hwnd);
@@ -302,6 +303,13 @@ UINT CALLBACK PropSheetPageProcPropertyPageAdvanced(_In_ HWND hwnd, _In_ UINT uM
 						HeapSafeFree(pData->hHeap, 0, pData->lpUsername);
 					if (pData->lpPassword)
 						HeapSafeFree(pData->hHeap, 0, pData->lpPassword);
+
+					if (pData->lpNames) {
+						for (device = 0; pData->lpNames[device]; device++) {
+							HeapSafeFree(pData->hHeap, 0, pData->lpNames[device]);
+						}
+						HeapSafeFree(pData->hHeap, 0, pData->lpNames);
+					}
 
 					HeapSafeFree(pData->hHeap, 0, pData);
 					ppsp->lParam = NULL;
@@ -383,10 +391,10 @@ DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter)
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
 	PCOISANE_Data pData;
+	LONG devices, device;
 	HANDLE hThread;
 	PTSTR lpText;
 	HRESULT hr;
-	LONG index;
 	HWND hwnd;
 
 	pData = (PCOISANE_Data) lpParameter;
@@ -414,19 +422,39 @@ DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter)
 	if (oSession) {
 		SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_INIT);
 		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
-			hwnd = GetDlgItem(pData->hwndDlg, IDC_PROPERTIES_COMBO_SCANNER);
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
-				SendMessageA(hwnd, CB_RESETCONTENT, (WPARAM) 0, (LPARAM) 0);
-				for (index = 0; index < oSession->GetDevices(); index++) {
-					oDevice = oSession->GetDevice(index);
-					if (oDevice) {
-						SendMessageA(hwnd, CB_ADDSTRING, (WPARAM) 0, (LPARAM) oDevice->GetName());
+				devices = oSession->GetDevices();
+				if (devices > 0) {
+					if (pData->lpNames) {
+						for (device = 0; pData->lpNames[device]; device++) {
+							HeapSafeFree(pData->hHeap, 0, pData->lpNames[device]);
+						}
+						HeapSafeFree(pData->hHeap, 0, pData->lpNames);
+					}
+					pData->lpNames = (LPTSTR*) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(LPTSTR) * (devices+1));
+					if (pData->lpNames) {
+						for (device = 0; device < devices; device++) {
+							oDevice = oSession->GetDevice(device);
+							if (oDevice) {
+								pData->lpNames[device] = StringConvATo(pData->hHeap, (LPSTR) oDevice->GetName());
+							}
+						}
 					}
 				}
 			}
 			oSession->Exit();
 		}
 		delete oSession;
+	}
+
+	if (pData->lpNames) {
+		hwnd = GetDlgItem(pData->hwndDlg, IDC_PROPERTIES_COMBO_SCANNER);
+		if (hwnd) {
+			SendMessage(hwnd, CB_RESETCONTENT, (WPARAM) 0, (LPARAM) 0);
+			for (device = 0; pData->lpNames[device]; device++) {
+				SendMessage(hwnd, CB_ADDSTRING, (WPARAM) 0, (LPARAM) pData->lpNames[device]);
+			}
+		}
 	}
 
 	if (pData->lpName)
