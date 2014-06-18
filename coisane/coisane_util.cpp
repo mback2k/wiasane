@@ -100,17 +100,20 @@ HINF WINAPI OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDev
 	FileHandle = SetupOpenInfFile(DriverInfoDetailData.InfFileName, NULL, INF_STYLE_WIN4, ErrorLine);
 	if (FileHandle == INVALID_HANDLE_VALUE) {
 		Trace(TEXT("Fail: SetupOpenInfFile"));
+		return INVALID_HANDLE_VALUE;
 	}
 
 	return FileHandle;
 }
 
 
+_Success_(return == ERROR_SUCCESS)
 DWORD WINAPI UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags)
 {
 	return UpdateInstallDeviceFlagsEx(hDeviceInfoSet, pDeviceInfoData, dwFlags, 0);
 }
 
+_Success_(return == ERROR_SUCCESS)
 DWORD WINAPI UpdateInstallDeviceFlagsEx(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags, _In_ DWORD dwFlagsEx)
 {
 	SP_DEVINSTALL_PARAMS devInstallParams;
@@ -132,6 +135,7 @@ DWORD WINAPI UpdateInstallDeviceFlagsEx(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_D
 }
 
 
+_Success_(return == ERROR_SUCCESS)
 DWORD WINAPI ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD StateChange, _In_ DWORD Scope)
 {
 	SP_PROPCHANGE_PARAMS propChangeParams;
@@ -155,6 +159,7 @@ DWORD WINAPI ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DA
 	return ERROR_SUCCESS;
 }
 
+_Success_(return == ERROR_SUCCESS)
 DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device)
 {
 	SANE_String_Const name, type, model, vendor;
@@ -218,6 +223,7 @@ DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device dev
 }
 
 
+_Success_(return == ERROR_SUCCESS)
 DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData)
 {
 	HKEY hDeviceKey, hDeviceDataKey;
@@ -276,6 +282,7 @@ DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData)
 	return ERROR_SUCCESS;
 }
 
+_Success_(return == ERROR_SUCCESS)
 DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device)
 {
 	HKEY hDeviceKey, hDeviceDataKey;
@@ -357,6 +364,7 @@ DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device dev
 }
 
 
+_Success_(return > 0)
 size_t WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device, _Outptr_result_maybenull_ LPTSTR *ppszResolutions)
 {
 	PWINSANE_Option resolution;
