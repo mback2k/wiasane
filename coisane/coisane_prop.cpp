@@ -177,9 +177,26 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 				break;
 
 			switch (HIWORD(wParam)) {
+				case EN_CHANGE:
+				case CBN_SELCHANGE:
+					Trace(TEXT("EN_CHANGE | CBN_SELCHANGE"));
+					switch (LOWORD(wParam)) {
+						case IDC_PROPERTIES_COMBO_SCANNER:
+						case IDC_PROPERTIES_EDIT_USERNAME:
+						case IDC_PROPERTIES_EDIT_PASSWORD:
+							PropSheet_Changed(GetParent(hwndDlg), hwndDlg);
+							break;
+					}
+					break;
+
 				case BN_CLICKED:
 					Trace(TEXT("BN_CLICKED"));
-					return DialogProcPropertyPageAdvancedBtnClicked(hwndDlg, LOWORD(wParam), pData);
+					switch (LOWORD(wParam)) {
+						case IDC_PROPERTIES_BUTTON_CHECK:
+						case IDC_PROPERTIES_BUTTON_RESET:
+							return DialogProcPropertyPageAdvancedBtnClicked(hwndDlg, LOWORD(wParam), pData);
+							break;
+					}
 					break;
 			}
 			break;
