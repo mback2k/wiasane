@@ -54,6 +54,8 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter);
 
 VOID WINAPI InitWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
 VOID WINAPI FreeWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
+BOOL WINAPI ShowWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
+BOOL WINAPI HideWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
 
 WINSANE_API_CALLBACK WizardPageAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password);
 

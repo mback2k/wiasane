@@ -322,7 +322,6 @@ INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg,
 {
 	LPPROPSHEETPAGE lpPropSheetPage;
 	PCOISANE_Data pData;
-	HWND hwnd;
 
 	UNREFERENCED_PARAMETER(wParam);
 
@@ -359,28 +358,25 @@ INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg,
 					pData->hwndDlg = hwndDlg;
 					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
 					PropSheet_SetWizButtons(pData->hwndPropDlg, PSWIZB_BACK);
-
-					hwnd = GetDlgItem(pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ANIMATE);
-					if (hwnd) {
-						Animate_Play(hwnd, 0, -1, -1);
+					if (ShowWizardPageProgress(hwndDlg, pData)) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, 0);
+					} else {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
 					}
-
-					if (pData->hThread) {
-						SetThreadPriority(pData->hThread, THREAD_PRIORITY_BELOW_NORMAL);
-						ResumeThread(pData->hThread);
-					}
+					return TRUE;
 					break;
 
 				case PSN_KILLACTIVE:
-					Trace(TEXT("PSN_KILLACTIVE"));
-					hwnd = GetDlgItem(pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ANIMATE);
-					if (hwnd) {
-						Animate_Stop(hwnd);
+				case PSN_QUERYCANCEL:
+					Trace(TEXT("PSN_KILLACTIVE | PSN_QUERYCANCEL"));
+					if (HideWizardPageProgress(hwndDlg, pData)) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, FALSE);
+						pData->hwndPropDlg = NULL;
+						pData->hwndDlg = NULL;
+					} else {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, TRUE);
 					}
-
-					pData->hwndPropDlg = NULL;
-					pData->hwndDlg = NULL;
-					pData->hThread = NULL;
+					return TRUE;
 					break;
 
 				case PSN_WIZBACK:
@@ -393,11 +389,6 @@ INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg,
 
 				case PSN_WIZFINISH:
 					Trace(TEXT("PSN_WIZFINISH"));
-					break;
-
-				case PSN_QUERYCANCEL:
-					Trace(TEXT("PSN_QUERYCANCEL"));
-					return TRUE;
 					break;
 			}
 			break;
@@ -844,6 +835,59 @@ VOID WINAPI FreeWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pDat
 			DestroyIcon(hIcon);
 		}
 	}
+}
+
+BOOL WINAPI ShowWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+{
+	HWND hwndParent, hwnd;
+	HMENU hMenu;
+	DWORD res;
+
+	if (!pData->hThread)
+		return FALSE;
+
+	SetThreadPriority(pData->hThread, THREAD_PRIORITY_BELOW_NORMAL);
+	res = ResumeThread(pData->hThread);
+	if (res == (DWORD)-1)
+		return FALSE;
+
+	hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ANIMATE);
+	if (hwnd) {
+		Animate_Play(hwnd, 0, -1, -1);
+	}
+
+	hwndParent = GetParent(hwndDlg);
+	if (hwndParent) {
+		hMenu = GetSystemMenu(hwndParent, FALSE);
+		if (hMenu) {
+			EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		}
+	}
+
+	return TRUE;
+}
+
+BOOL WINAPI HideWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+{
+	HWND hwndParent, hwnd;
+	HMENU hMenu;
+
+	hwndParent = GetParent(hwndDlg);
+	if (hwndParent) {
+		hMenu = GetSystemMenu(hwndParent, FALSE);
+		if (hMenu) {
+			EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
+		}
+	}
+
+	hwnd = GetDlgItem(hwndDlg, IDC_WIZARD_PAGE_PROGRESS_ANIMATE);
+	if (hwnd) {
+		Animate_Stop(hwnd);
+	}
+
+	pData->hThread = NULL;
+
+	return TRUE;
 }
 
 
