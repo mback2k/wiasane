@@ -300,7 +300,7 @@ DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device dev
 		return GetLastError();
 
 	if (device->Open() == SANE_STATUS_GOOD) {
-		cbResolutions = CreateResolutionList(pData, device, &lpResolutions);
+		CreateResolutionList(pData, device, &lpResolutions, &cbResolutions);
 
 		device->Close();
 	} else {
@@ -364,57 +364,70 @@ DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device dev
 }
 
 
-_Success_(return > 0)
-size_t WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device, _Outptr_result_maybenull_ LPTSTR *ppszResolutions)
+_Success_(return == ERROR_SUCCESS)
+DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device, _Outptr_result_nullonfailure_ LPTSTR *plpszResolutions, _Out_opt_ size_t *pcbResolutions)
 {
-	PWINSANE_Option resolution;
+	LPTSTR lpResolutions, lpszResolutions;
+	PWINSANE_Option oResolution;
 	PSANE_Word pWordList;
-	LPTSTR lpResolutions;
 	size_t cbResolutions;
 	HRESULT hr;
 	int index;
 
-	if (!ppszResolutions)
+	if (!plpszResolutions)
 		return 0;
 
-	*ppszResolutions = NULL;
+	*plpszResolutions = NULL;
+	if (pcbResolutions)
+		*pcbResolutions = 0;
+
+	lpszResolutions = NULL;
 	cbResolutions = 0;
 
-	if (device->FetchOptions() == SANE_STATUS_GOOD) {
-		resolution = device->GetOption("resolution");
-		if (resolution && resolution->GetConstraintType() == SANE_CONSTRAINT_WORD_LIST) {
-			pWordList = resolution->GetConstraintWordList();
-			if (pWordList && pWordList[0] > 0) {
-				switch (resolution->GetType()) {
-					case SANE_TYPE_INT:
-						hr = StringCbAPrintf(pData->hHeap, ppszResolutions, &cbResolutions, TEXT("%d"), pWordList[1]);
-						if (FAILED(hr))
-							break;
-						for (index = 2; index <= pWordList[0]; index++) {
-							lpResolutions = *ppszResolutions;
-							if (!lpResolutions)
-								break;
-							StringCbAPrintf(pData->hHeap, ppszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pWordList[index]);
-							HeapSafeFree(pData->hHeap, 0, lpResolutions);
-						}
-						break;
+	if (device->FetchOptions() != SANE_STATUS_GOOD)
+		return ERROR_INVALID_DATA;
 
-					case SANE_TYPE_FIXED:
-						hr = StringCbAPrintf(pData->hHeap, ppszResolutions, &cbResolutions, TEXT("%d"), SANE_UNFIX(pWordList[1]));
-						if (FAILED(hr))
-							break;
-						for (index = 2; index <= pWordList[0]; index++) {
-							lpResolutions = *ppszResolutions;
-							if (!lpResolutions)
-								break;
-							StringCbAPrintf(pData->hHeap, ppszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, SANE_UNFIX(pWordList[index]));
-							HeapSafeFree(pData->hHeap, 0, lpResolutions);
-						}
-						break;
+	oResolution = device->GetOption("resolution");
+	if (!oResolution)
+		return ERROR_NOT_SUPPORTED;
+
+	if (oResolution->GetConstraintType() != SANE_CONSTRAINT_WORD_LIST)
+		return ERROR_NOT_SUPPORTED;
+
+	pWordList = oResolution->GetConstraintWordList();
+	if (pWordList && pWordList[0] > 0) {
+		switch (oResolution->GetType()) {
+			case SANE_TYPE_INT:
+				hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%d"), pWordList[1]);
+				if (FAILED(hr))
+					return ERROR_OUTOFMEMORY;
+				for (index = 2; index <= pWordList[0]; index++) {
+					lpResolutions = lpszResolutions;
+					hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pWordList[index]);
+					HeapSafeFree(pData->hHeap, 0, lpResolutions);
+					if (FAILED(hr))
+						return ERROR_OUTOFMEMORY;
 				}
-			}
+				break;
+
+			case SANE_TYPE_FIXED:
+				hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%d"), SANE_UNFIX(pWordList[1]));
+				if (FAILED(hr))
+					return ERROR_OUTOFMEMORY;
+				for (index = 2; index <= pWordList[0]; index++) {
+					lpResolutions = lpszResolutions;
+					hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, SANE_UNFIX(pWordList[index]));
+					HeapSafeFree(pData->hHeap, 0, lpResolutions);
+					if (FAILED(hr))
+						return ERROR_OUTOFMEMORY;
+				}
+				break;
 		}
 	}
 
-	return cbResolutions;
+	*plpszResolutions = lpszResolutions;
+	if (pcbResolutions)
+		*pcbResolutions = cbResolutions;
+
+	return ERROR_SUCCESS;
 }

@@ -55,7 +55,7 @@ DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData);
 _Success_(return == ERROR_SUCCESS)
 DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device);
 
-_Success_(return > 0)
-size_t WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device, _Outptr_result_maybenull_ LPTSTR *ppszResolutions);
+_Success_(return == ERROR_SUCCESS)
+DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device, _Outptr_result_nullonfailure_ LPTSTR *plpszResolutions, _Out_opt_ size_t *pcbResolutions);
 
 #endif
