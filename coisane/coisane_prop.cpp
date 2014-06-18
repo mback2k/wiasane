@@ -586,14 +586,13 @@ BOOL WINAPI SavePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 
 DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
 {
-	SP_DEVINSTALL_PARAMS devInstallParams;
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
 	PCOISANE_Data pData;
 	HANDLE hThread;
 	PTSTR lpText;
 	HRESULT hr;
-	BOOL res;
+	DWORD res;
 
 	pData = (PCOISANE_Data) lpParameter;
 	if (!pData)
@@ -622,30 +621,24 @@ DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
 					UpdateDeviceData(pData, oDevice);
 
 					if (oSession->Exit() == SANE_STATUS_GOOD) {
-						ZeroMemory(&devInstallParams, sizeof(SP_DEVINSTALL_PARAMS));
-						devInstallParams.cbSize = sizeof(SP_DEVINSTALL_PARAMS);
-						res = SetupDiGetDeviceInstallParams(pData->hDeviceInfoSet, pData->pDeviceInfoData, &devInstallParams);
-						if (res) {
-							devInstallParams.FlagsEx |= DI_FLAGSEX_PROPCHANGE_PENDING;
-							res = SetupDiSetDeviceInstallParams(pData->hDeviceInfoSet, pData->pDeviceInfoData, &devInstallParams);
-							if (res) {
-								g_pPropertyPageData = NULL;
-								delete oSession;
+						res = UpdateInstallDeviceFlagsEx(pData->hDeviceInfoSet, pData->pDeviceInfoData, 0, DI_FLAGSEX_PROPCHANGE_PENDING);
+						if (res == ERROR_SUCCESS) {
+							g_pPropertyPageData = NULL;
+							delete oSession;
 
-								if (pData->hThread != hThread)
-									return 0;
-
-								HidePropertyPageAdvancedProgress(pData->hwndDlg);
-
-								pData->bPropChanged = FALSE;
-								PropSheet_UnChanged(pData->hwndPropDlg, pData->hwndDlg);
-								PropSheet_CancelToClose(pData->hwndPropDlg);
-
-								pData->hThread = NULL;
-								PropSheet_PressButton(pData->hwndPropDlg, PSBTN_OK);
-
+							if (pData->hThread != hThread)
 								return 0;
-							}
+
+							HidePropertyPageAdvancedProgress(pData->hwndDlg);
+
+							pData->bPropChanged = FALSE;
+							PropSheet_UnChanged(pData->hwndPropDlg, pData->hwndDlg);
+							PropSheet_CancelToClose(pData->hwndPropDlg);
+
+							pData->hThread = NULL;
+							PropSheet_PressButton(pData->hwndPropDlg, PSBTN_OK);
+
+							return 0;
 						}
 					} else if (pData->hThread == hThread) {
 						MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
