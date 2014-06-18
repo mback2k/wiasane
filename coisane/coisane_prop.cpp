@@ -616,6 +616,7 @@ DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
 
 								pData->bPropChanged = FALSE;
 								PropSheet_UnChanged(pData->hwndPropDlg, pData->hwndDlg);
+								PropSheet_CancelToClose(pData->hwndPropDlg);
 
 								pData->hThread = NULL;
 								PropSheet_PressButton(pData->hwndPropDlg, PSBTN_OK);
