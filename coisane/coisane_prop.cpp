@@ -141,7 +141,8 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 					break;
 
 				case PSN_KILLACTIVE:
-					Trace(TEXT("PSN_KILLACTIVE"));
+				case PSN_QUERYCANCEL:
+					Trace(TEXT("PSN_KILLACTIVE | PSN_QUERYCANCEL"));
 					if (pData->hThread) {
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, TRUE);
 						return TRUE;
@@ -161,10 +162,6 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 
 				case PSN_RESET:
 					Trace(TEXT("PSN_RESET"));
-					break;
-
-				case PSN_QUERYCANCEL:
-					Trace(TEXT("PSN_QUERYCANCEL"));
 					break;
 			}
 			break;
@@ -582,7 +579,8 @@ static VOID WINAPI SwitchPropertyPageAdvancedProgress(_In_ HWND hwndDlg, _In_ BO
 
 VOID WINAPI ShowPropertyPageAdvancedProgress(_In_ HWND hwndDlg)
 {
-	HWND hwnd;
+	HWND hwndParent, hwnd;
+	HMENU hMenu;
 
 	SwitchPropertyPageAdvancedProgress(hwndDlg, TRUE);
 
@@ -590,11 +588,44 @@ VOID WINAPI ShowPropertyPageAdvancedProgress(_In_ HWND hwndDlg)
 	if (hwnd) {
 		Animate_Play(hwnd, 0, -1, -1);
 	}
+
+	hwndParent = GetParent(hwndDlg);
+	if (hwndParent) {
+		hwnd = GetDlgItem(hwndParent, IDOK);
+		if (hwnd) {
+			EnableWindow(hwnd, FALSE);
+		}
+		hwnd = GetDlgItem(hwndParent, IDCANCEL);
+		if (hwnd) {
+			EnableWindow(hwnd, FALSE);
+		}
+		hMenu = GetSystemMenu(hwndParent, FALSE);
+		if (hMenu) {
+			EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+		}
+	}
 }
 
 VOID WINAPI HidePropertyPageAdvancedProgress(_In_ HWND hwndDlg)
 {
-	HWND hwnd;
+	HWND hwndParent, hwnd;
+	HMENU hMenu;
+
+	hwndParent = GetParent(hwndDlg);
+	if (hwndParent) {
+		hMenu = GetSystemMenu(hwndParent, FALSE);
+		if (hMenu) {
+			EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
+		}
+		hwnd = GetDlgItem(hwndParent, IDCANCEL);
+		if (hwnd) {
+			EnableWindow(hwnd, TRUE);
+		}
+		hwnd = GetDlgItem(hwndParent, IDOK);
+		if (hwnd) {
+			EnableWindow(hwnd, TRUE);
+		}
+	}
 
 	hwnd = GetDlgItem(hwndDlg, IDC_PROPERTIES_PROGRESS_ANIMATE);
 	if (hwnd) {
