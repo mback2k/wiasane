@@ -405,6 +405,7 @@ DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device
 					lpResolutions = lpszResolutions;
 					hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pWordList[index]);
 					HeapSafeFree(pData->hHeap, 0, lpResolutions);
+					lpResolutions = NULL;
 					if (FAILED(hr))
 						return ERROR_OUTOFMEMORY;
 				}
@@ -418,6 +419,7 @@ DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device
 					lpResolutions = lpszResolutions;
 					hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, SANE_UNFIX(pWordList[index]));
 					HeapSafeFree(pData->hHeap, 0, lpResolutions);
+					lpResolutions = NULL;
 					if (FAILED(hr))
 						return ERROR_OUTOFMEMORY;
 				}
