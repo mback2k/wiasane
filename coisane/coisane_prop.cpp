@@ -192,6 +192,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 						case IDC_PROPERTIES_EDIT_USERNAME:
 						case IDC_PROPERTIES_EDIT_PASSWORD:
 							PropSheet_Changed(pData->hwndPropDlg, pData->hwndDlg);
+							pData->bPropChanged = TRUE;
 							break;
 					}
 					break;
@@ -409,6 +410,9 @@ VOID WINAPI FreePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 
 BOOL WINAPI ShowPropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
+	if (pData->hThread)
+		return TRUE;
+
 	pData->hThread = CreateThread(NULL, 0, &ThreadProcShowPropertyPageAdvanced, pData, CREATE_SUSPENDED, NULL);
 	if (!pData->hThread)
 		return FALSE;
@@ -482,6 +486,9 @@ DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter)
 		delete oSession;
 	}
 
+	if (pData->hThread != hThread)
+		return 0;
+
 	if (pData->lpNames) {
 		hwnd = GetDlgItem(pData->hwndDlg, IDC_PROPERTIES_COMBO_SCANNER);
 		if (hwnd) {
@@ -503,20 +510,23 @@ DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter)
 
 	HidePropertyPageAdvancedProgress(pData->hwndDlg);
 
-	if (pData->hThread == hThread) {
-		pData->hThread = NULL;
-	}
+	pData->bPropChanged = FALSE;
+	pData->hThread = NULL;
+
 	return 0;
 }
 
 
 BOOL WINAPI SavePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
-	SP_DEVINSTALL_PARAMS devInstallParams;
-	PWINSANE_Session oSession;
-	PWINSANE_Device oDevice;
 	LPTSTR lpName, lpUsername, lpPassword;
 	DWORD res;
+
+	if (pData->hThread)
+		return FALSE;
+
+	if (pData->bPropChanged == FALSE)
+		return TRUE;
 
 	lpName = NULL;
 	lpUsername = NULL;
@@ -551,6 +561,33 @@ BOOL WINAPI SavePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 	pData->lpUsername = lpUsername;
 	pData->lpPassword = lpPassword;
 
+	pData->hThread = CreateThread(NULL, 0, &ThreadProcSavePropertyPageAdvanced, pData, CREATE_SUSPENDED, NULL);
+	if (!pData->hThread)
+		return FALSE;
+
+	ShowPropertyPageAdvancedProgress(pData->hwndDlg);
+
+	SetThreadPriority(pData->hThread, THREAD_PRIORITY_BELOW_NORMAL);
+	ResumeThread(pData->hThread);
+
+	return FALSE;
+}
+
+DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
+{
+	SP_DEVINSTALL_PARAMS devInstallParams;
+	PWINSANE_Session oSession;
+	PWINSANE_Device oDevice;
+	PCOISANE_Data pData;
+	HANDLE hThread;
+	BOOL res;
+
+	pData = (PCOISANE_Data) lpParameter;
+	if (!pData)
+		return 0;
+
+	hThread = pData->hThread;
+
 	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
 	if (oSession) {
 		g_pPropertyPageData = pData;
@@ -571,7 +608,19 @@ BOOL WINAPI SavePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 							if (res) {
 								g_pPropertyPageData = NULL;
 								delete oSession;
-								return TRUE;
+
+								if (pData->hThread != hThread)
+									return 0;
+
+								HidePropertyPageAdvancedProgress(pData->hwndDlg);
+
+								pData->bPropChanged = FALSE;
+								PropSheet_UnChanged(pData->hwndPropDlg, pData->hwndDlg);
+
+								pData->hThread = NULL;
+								PropSheet_PressButton(pData->hwndPropDlg, PSBTN_OK);
+
+								return 0;
 							}
 						}
 					}
@@ -582,7 +631,14 @@ BOOL WINAPI SavePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pD
 		delete oSession;
 	}
 
-	return FALSE;
+	if (pData->hThread != hThread)
+		return 0;
+
+	HidePropertyPageAdvancedProgress(pData->hwndDlg);
+
+	pData->hThread = NULL;
+
+	return 0;
 }
 
 

@@ -33,6 +33,7 @@ __user_code
 
 typedef struct _COISANE_Data {
 	UINT uiReferences;
+	BOOL bPropChanged;
 	HANDLE hHeap;
 	HANDLE hThread;
 	HWND hwndDlg;
