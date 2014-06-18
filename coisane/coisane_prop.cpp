@@ -142,9 +142,12 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 
 				case PSN_KILLACTIVE:
 					Trace(TEXT("PSN_KILLACTIVE"));
+					if (pData->hThread) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, TRUE);
+						return TRUE;
+					}
 					pData->hwndPropDlg = NULL;
 					pData->hwndDlg = NULL;
-					pData->hThread = NULL;
 					break;
 
 				case PSN_APPLY:
@@ -468,6 +471,9 @@ DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter)
 
 	HidePropertyPageAdvancedProgress(pData->hwndDlg);
 
+	if (pData->hThread == hThread) {
+		pData->hThread = NULL;
+	}
 	return 0;
 }
 
