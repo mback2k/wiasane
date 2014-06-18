@@ -48,14 +48,14 @@ DWORD WINAPI UpdateInstallDeviceFlagsEx(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_D
 _Success_(return == ERROR_SUCCESS)
 DWORD WINAPI ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD StateChange, _In_ DWORD Scope);
 _Success_(return == ERROR_SUCCESS)
-DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device);
+DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDevice);
 
 _Success_(return == ERROR_SUCCESS)
 DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData);
 _Success_(return == ERROR_SUCCESS)
-DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device);
+DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDevice);
 
 _Success_(return == ERROR_SUCCESS)
-DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device, _Outptr_result_nullonfailure_ LPTSTR *plpszResolutions, _Out_opt_ size_t *pcbResolutions);
+DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDevice, _Outptr_result_nullonfailure_ LPTSTR *plpszResolutions, _Out_opt_ size_t *pcbResolutions);
 
 #endif

@@ -160,7 +160,7 @@ DWORD WINAPI ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DA
 }
 
 _Success_(return == ERROR_SUCCESS)
-DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device)
+DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDevice)
 {
 	SANE_String_Const name, type, model, vendor;
 	HKEY hDeviceKey;
@@ -170,15 +170,15 @@ DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device dev
 	DWORD ret;
 	BOOL res;
 
-	if (!device)
+	if (!oDevice)
 		return ERROR_INVALID_PARAMETER;
 
 	ret = ERROR_SUCCESS;
 
-	name = device->GetName();
-	type = device->GetType();
-	model = device->GetModel();
-	vendor = device->GetVendor();
+	name = oDevice->GetName();
+	type = oDevice->GetType();
+	model = oDevice->GetModel();
+	vendor = oDevice->GetVendor();
 
 	hDeviceKey = SetupDiOpenDevRegKey(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_SET_VALUE);
 
@@ -283,26 +283,26 @@ DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData)
 }
 
 _Success_(return == ERROR_SUCCESS)
-DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device)
+DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDevice)
 {
 	HKEY hDeviceKey, hDeviceDataKey;
-	DWORD cbData, dwPort;
-	LPTSTR lpResolutions;
 	size_t cbResolutions, cbLength;
+	LPTSTR lpResolutions;
+	DWORD cbData, dwPort;
 	HRESULT hr;
 	LONG res;
 
-	if (!device)
+	if (!oDevice)
 		return ERROR_INVALID_PARAMETER;
 
 	hDeviceKey = SetupDiOpenDevRegKey(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_ENUMERATE_SUB_KEYS);
 	if (hDeviceKey == INVALID_HANDLE_VALUE)
 		return GetLastError();
 
-	if (device->Open() == SANE_STATUS_GOOD) {
-		CreateResolutionList(pData, device, &lpResolutions, &cbResolutions);
+	if (oDevice->Open() == SANE_STATUS_GOOD) {
+		CreateResolutionList(pData, oDevice, &lpResolutions, &cbResolutions);
 
-		device->Close();
+		oDevice->Close();
 	} else {
 		lpResolutions = NULL;
 		cbResolutions = 0;
@@ -365,7 +365,7 @@ DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device dev
 
 
 _Success_(return == ERROR_SUCCESS)
-DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device device, _Outptr_result_nullonfailure_ LPTSTR *plpszResolutions, _Out_opt_ size_t *pcbResolutions)
+DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDevice, _Outptr_result_nullonfailure_ LPTSTR *plpszResolutions, _Out_opt_ size_t *pcbResolutions)
 {
 	LPTSTR lpResolutions, lpszResolutions;
 	PWINSANE_Option oResolution;
@@ -384,10 +384,10 @@ DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device
 	lpszResolutions = NULL;
 	cbResolutions = 0;
 
-	if (device->FetchOptions() != SANE_STATUS_GOOD)
+	if (oDevice->FetchOptions() != SANE_STATUS_GOOD)
 		return ERROR_INVALID_DATA;
 
-	oResolution = device->GetOption("resolution");
+	oResolution = oDevice->GetOption("resolution");
 	if (!oResolution)
 		return ERROR_NOT_SUPPORTED;
 
