@@ -196,7 +196,6 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 					if (NextWizardPageServer(hwndDlg, pData)) {
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, 0);
 					} else {
-						MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
 					}
 					return TRUE;
@@ -300,7 +299,6 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 					if (NextWizardPageScanner(hwndDlg, pData)) {
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, 0);
 					} else {
-						MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
 					}
 					return TRUE;
@@ -582,11 +580,13 @@ BOOL WINAPI NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 
 	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_HOST, &lpHost, NULL);
 	if (res != ERROR_SUCCESS) {
+		MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 		return FALSE;
 	}
 
 	usPort = (USHORT) GetDlgItemInt(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_PORT, &bPort, FALSE);
 	if (!bPort) {
+		MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 		HeapSafeFree(pData->hHeap, 0, lpHost);
 		return FALSE;
 	}
@@ -666,6 +666,7 @@ DWORD WINAPI ThreadProcNextWizardPageServer(_In_ LPVOID lpParameter)
 			} else if (pData->hThread == hThread) {
 				MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 			}
+			oSession->Exit();
 		} else if (pData->hThread == hThread) {
 			MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 		}
@@ -726,17 +727,20 @@ BOOL WINAPI NextWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData
 
 	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER, &lpName, NULL);
 	if (res != ERROR_SUCCESS) {
+		MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 		return FALSE;
 	}
 
 	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_WIZARD_PAGE_SCANNER_EDIT_USERNAME, &lpUsername, NULL);
 	if (res != ERROR_SUCCESS) {
+		MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 		HeapSafeFree(pData->hHeap, 0, lpName);
 		return FALSE;
 	}
 
 	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_WIZARD_PAGE_SCANNER_EDIT_PASSWORD, &lpPassword, NULL);
 	if (res != ERROR_SUCCESS) {
+		MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 		HeapSafeFree(pData->hHeap, 0, lpUsername);
 		HeapSafeFree(pData->hHeap, 0, lpName);
 		return FALSE;
