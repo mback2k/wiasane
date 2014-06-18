@@ -108,6 +108,11 @@ HINF WINAPI OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDev
 
 DWORD WINAPI UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags)
 {
+	return UpdateInstallDeviceFlagsEx(hDeviceInfoSet, pDeviceInfoData, dwFlags, 0);
+}
+
+DWORD WINAPI UpdateInstallDeviceFlagsEx(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags, _In_ DWORD dwFlagsEx)
+{
 	SP_DEVINSTALL_PARAMS devInstallParams;
 	BOOL res;
 
@@ -118,12 +123,14 @@ DWORD WINAPI UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEV
 		return GetLastError();
 
 	devInstallParams.Flags |= dwFlags;
+	devInstallParams.FlagsEx |= dwFlagsEx;
 	res = SetupDiSetDeviceInstallParams(hDeviceInfoSet, pDeviceInfoData, &devInstallParams);
 	if (!res)
 		return GetLastError();
 
 	return ERROR_SUCCESS;
 }
+
 
 DWORD WINAPI ChangeDeviceState(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD StateChange, _In_ DWORD Scope)
 {
