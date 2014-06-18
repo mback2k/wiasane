@@ -850,26 +850,24 @@ VOID WINAPI FreeWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pDat
 WINSANE_API_CALLBACK WizardPageAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password)
 {
 	LPSTR lpUsername, lpPassword;
-	HANDLE hHeap;
+	PCOISANE_Data pData;
 
 	if (!g_pWizardPageData || !resource || !strlen(resource) || !username || !password)
 		return;
 
 	Trace(TEXT("------ WizardPageAuthCallback(resource='%hs') ------"), resource);
 
-	hHeap = GetProcessHeap();
-	if (!hHeap)
-		return;
+	pData = g_pWizardPageData;
 
-	lpUsername = StringConvToA(hHeap, g_pWizardPageData->lpUsername);
+	lpUsername = StringConvToA(pData->hHeap, pData->lpUsername);
 	if (lpUsername) {
-		lpPassword = StringConvToA(hHeap, g_pWizardPageData->lpPassword);
+		lpPassword = StringConvToA(pData->hHeap, pData->lpPassword);
 		if (lpPassword) {
 			strcpy_s(username, SANE_MAX_USERNAME_LEN, lpUsername);
 			strcpy_s(password, SANE_MAX_PASSWORD_LEN, lpPassword);
-			HeapSafeFree(hHeap, 0, lpPassword);
+			HeapSafeFree(pData->hHeap, 0, lpPassword);
 		}
-		HeapSafeFree(hHeap, 0, lpUsername);
+		HeapSafeFree(pData->hHeap, 0, lpUsername);
 	}
 
 	Trace(TEXT("Username: %hs (%d)"), username, strlen(username));
