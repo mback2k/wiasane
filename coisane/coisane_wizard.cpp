@@ -171,12 +171,20 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 					pData->hwndDlg = hwndDlg;
 					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
 					PropSheet_SetWizButtons(pData->hwndPropDlg, PSWIZB_NEXT | PSWIZB_CANCEL);
+					if (ShowWizardPageServer(hwndDlg, pData)) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, 0);
+					} else {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
+					}
+					return TRUE;
 					break;
 
 				case PSN_KILLACTIVE:
 					Trace(TEXT("PSN_KILLACTIVE"));
+					SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, FALSE);
 					pData->hwndPropDlg = NULL;
 					pData->hwndDlg = NULL;
+					return TRUE;
 					break;
 
 				case PSN_WIZBACK:
@@ -185,11 +193,13 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 
 				case PSN_WIZNEXT:
 					Trace(TEXT("PSN_WIZNEXT"));
-					if (!NextWizardPageServer(hwndDlg, pData)) {
+					if (NextWizardPageServer(hwndDlg, pData)) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, 0);
+					} else {
 						MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
-						return TRUE;
 					}
+					return TRUE;
 					break;
 
 				case PSN_WIZFINISH:
@@ -259,20 +269,24 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 					pData->hwndDlg = hwndDlg;
 					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
 					PropSheet_SetWizButtons(pData->hwndPropDlg, PSWIZB_BACK | PSWIZB_NEXT | PSWIZB_CANCEL);
-					if (!ShowWizardPageScanner(hwndDlg, pData)) {
+					if (ShowWizardPageScanner(hwndDlg, pData)) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, 0);
+					} else {
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
-						return TRUE;
 					}
+					return TRUE;
 					break;
 
 				case PSN_KILLACTIVE:
 					Trace(TEXT("PSN_KILLACTIVE"));
-					if (!HideWizardPageScanner(hwndDlg, pData)) {
+					if (HideWizardPageScanner(hwndDlg, pData)) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, FALSE);
+						pData->hwndPropDlg = NULL;
+						pData->hwndDlg = NULL;
+					} else {
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, TRUE);
-						return TRUE;
 					}
-					pData->hwndPropDlg = NULL;
-					pData->hwndDlg = NULL;
+					return TRUE;
 					break;
 
 				case PSN_WIZBACK:
@@ -283,11 +297,13 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 
 				case PSN_WIZNEXT:
 					Trace(TEXT("PSN_WIZNEXT"));
-					if (!NextWizardPageScanner(hwndDlg, pData)) {
+					if (NextWizardPageScanner(hwndDlg, pData)) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, 0);
+					} else {
 						MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
-						return TRUE;
 					}
+					return TRUE;
 					break;
 
 				case PSN_WIZFINISH:
@@ -381,10 +397,12 @@ INT_PTR CALLBACK DialogProcWizardPageProgress(_In_ HWND hwndDlg, _In_ UINT uMsg,
 
 				case PSN_WIZBACK:
 					Trace(TEXT("PSN_WIZBACK"));
+					pData->hThread = NULL;
 					break;
 
 				case PSN_WIZNEXT:
 					Trace(TEXT("PSN_WIZNEXT"));
+					pData->hThread = NULL;
 					break;
 
 				case PSN_WIZFINISH:
@@ -530,6 +548,28 @@ VOID WINAPI InitWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 	SetDlgItemInt(hwndDlg, IDC_WIZARD_PAGE_SERVER_EDIT_PORT, pData->usPort, FALSE);
 }
 
+BOOL WINAPI ShowWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
+{
+	HWND hwndParent, hwnd;
+	HMENU hMenu;
+
+	UNREFERENCED_PARAMETER(pData);
+
+	hwndParent = GetParent(hwndDlg);
+	if (hwndParent) {
+		hMenu = GetSystemMenu(hwndParent, FALSE);
+		if (hMenu) {
+			EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
+		}
+		hwnd = GetDlgItem(hwndParent, IDCANCEL);
+		if (hwnd) {
+			EnableWindow(hwnd, TRUE);
+		}
+	}
+
+	return TRUE;
+}
+
 BOOL WINAPI NextWizardPageServer(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData)
 {
 	LPTSTR lpHost;
@@ -613,6 +653,7 @@ DWORD WINAPI ThreadProcNextWizardPageServer(_In_ LPVOID lpParameter)
 						delete oSession;
 
 						if (pData->hThread == hThread) {
+							pData->hThread = NULL;
 							PropSheet_PressButton(pData->hwndPropDlg, PSBTN_NEXT);
 						}
 						return 0;
@@ -634,6 +675,7 @@ DWORD WINAPI ThreadProcNextWizardPageServer(_In_ LPVOID lpParameter)
 	}
 
 	if (pData->hThread == hThread) {
+		pData->hThread = NULL;
 		PropSheet_PressButton(pData->hwndPropDlg, PSBTN_BACK);
 	}
 	return 0;
@@ -761,6 +803,7 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 						delete oSession;
 
 						if (pData->hThread == hThread) {
+							pData->hThread = NULL;
 							PropSheet_PressButton(pData->hwndPropDlg, PSBTN_NEXT);
 						}
 						return 0;
@@ -784,6 +827,7 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 	}
 
 	if (pData->hThread == hThread) {
+		pData->hThread = NULL;
 		PropSheet_PressButton(pData->hwndPropDlg, PSBTN_BACK);
 	}
 	return 0;
@@ -858,6 +902,10 @@ BOOL WINAPI ShowWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pDat
 
 	hwndParent = GetParent(hwndDlg);
 	if (hwndParent) {
+		hwnd = GetDlgItem(hwndParent, IDCANCEL);
+		if (hwnd) {
+			EnableWindow(hwnd, FALSE);
+		}
 		hMenu = GetSystemMenu(hwndParent, FALSE);
 		if (hMenu) {
 			EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
@@ -872,11 +920,18 @@ BOOL WINAPI HideWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pDat
 	HWND hwndParent, hwnd;
 	HMENU hMenu;
 
+	if (pData->hThread)
+		return FALSE;
+
 	hwndParent = GetParent(hwndDlg);
 	if (hwndParent) {
 		hMenu = GetSystemMenu(hwndParent, FALSE);
 		if (hMenu) {
 			EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
+		}
+		hwnd = GetDlgItem(hwndParent, IDCANCEL);
+		if (hwnd) {
+			EnableWindow(hwnd, TRUE);
 		}
 	}
 
@@ -884,8 +939,6 @@ BOOL WINAPI HideWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pDat
 	if (hwnd) {
 		Animate_Stop(hwnd);
 	}
-
-	pData->hThread = NULL;
 
 	return TRUE;
 }
