@@ -638,27 +638,35 @@ VOID WINAPI HidePropertyPageAdvancedProgress(_In_ HWND hwndDlg)
 
 WINSANE_API_CALLBACK PropertyPageAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password)
 {
+	LPTSTR lptUsername, lptPassword;
 	LPSTR lpUsername, lpPassword;
-	HANDLE hHeap;
+	PCOISANE_Data pData;
+	BOOL res;
 
 	if (!g_pPropertyPageData || !resource || !strlen(resource) || !username || !password)
 		return;
 
 	Trace(TEXT("------ PropertyPageAuthCallback(resource='%hs') ------"), resource);
 
-	hHeap = GetProcessHeap();
-	if (!hHeap)
-		return;
+	pData = g_pPropertyPageData;
 
-	lpUsername = StringConvToA(hHeap, g_pPropertyPageData->lpUsername);
-	if (lpUsername) {
-		lpPassword = StringConvToA(hHeap, g_pPropertyPageData->lpPassword);
-		if (lpPassword) {
-			strcpy_s(username, SANE_MAX_USERNAME_LEN, lpUsername);
-			strcpy_s(password, SANE_MAX_PASSWORD_LEN, lpPassword);
-			HeapSafeFree(hHeap, 0, lpPassword);
+	res = GetDlgItemAText(pData->hHeap, pData->hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, &lptUsername, NULL);
+	if (res == ERROR_SUCCESS) {
+		res = GetDlgItemAText(pData->hHeap, pData->hwndDlg, IDC_PROPERTIES_EDIT_PASSWORD, &lptPassword, NULL);
+		if (res == ERROR_SUCCESS) {
+			lpUsername = StringConvToA(pData->hHeap, lptUsername);
+			if (lpUsername) {
+				lpPassword = StringConvToA(pData->hHeap, lptPassword);
+				if (lpPassword) {
+					strcpy_s(username, SANE_MAX_USERNAME_LEN, lpUsername);
+					strcpy_s(password, SANE_MAX_PASSWORD_LEN, lpPassword);
+					HeapSafeFree(pData->hHeap, 0, lpPassword);
+				}
+				HeapSafeFree(pData->hHeap, 0, lpUsername);
+			}
+			HeapSafeFree(pData->hHeap, 0, lptPassword);
 		}
-		HeapSafeFree(hHeap, 0, lpUsername);
+		HeapSafeFree(pData->hHeap, 0, lptUsername);
 	}
 
 	Trace(TEXT("Username: %hs (%d)"), username, strlen(username));
