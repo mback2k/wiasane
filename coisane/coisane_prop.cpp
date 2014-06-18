@@ -231,13 +231,22 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvancedBtnClicked(_In_ HWND hwndDlg, _In
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
 	PWINSANE_Params oParams;
+	LPTSTR lpName;
+	BOOL res;
+
+	lpName = NULL;
+
+	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, &lpName, NULL);
+	if (res != ERROR_SUCCESS) {
+		return FALSE;
+	}
 
 	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
 	if (oSession) {
 		g_pPropertyPageData = pData;
 		if (oSession->Init(NULL, &PropertyPageAuthCallback) == SANE_STATUS_GOOD) {
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
-				oDevice = oSession->GetDevice(pData->lpName);
+				oDevice = oSession->GetDevice(lpName);
 				if (oDevice) {
 					if (oDevice->Open() == SANE_STATUS_GOOD) {
 						switch (hwndDlgItem) {
@@ -277,6 +286,8 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvancedBtnClicked(_In_ HWND hwndDlg, _In
 	} else {
 		MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
 	}
+
+	HeapSafeFree(pData->hHeap, 0, lpName);
 
 	return FALSE;
 }
