@@ -74,36 +74,36 @@ DWORD WINAPI GetDlgItemAText(_In_ HANDLE hHeap, _In_ HWND hDlg, _In_ int nIDDlgI
 }
 
 _Success_(return != INVALID_HANDLE_VALUE)
-HINF WINAPI OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _Out_opt_ PUINT ErrorLine)
+HINF WINAPI OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _Out_opt_ PUINT puiErrorLine)
 {
-	SP_DRVINFO_DATA DriverInfoData;
-	SP_DRVINFO_DETAIL_DATA DriverInfoDetailData;
-	HINF FileHandle;
+	SP_DRVINFO_DETAIL_DATA driverInfoDetailData;
+	SP_DRVINFO_DATA driverInfoData;
+	HINF hFileHandle;
 
-	if (ErrorLine)
-		*ErrorLine = 0;
+	if (puiErrorLine)
+		*puiErrorLine = 0;
 
-	DriverInfoData.cbSize = sizeof(SP_DRVINFO_DATA);
-	if (!SetupDiGetSelectedDriver(hDeviceInfoSet, pDeviceInfoData, &DriverInfoData)) {
+	driverInfoData.cbSize = sizeof(SP_DRVINFO_DATA);
+	if (!SetupDiGetSelectedDriver(hDeviceInfoSet, pDeviceInfoData, &driverInfoData)) {
 		Trace(TEXT("Fail: SetupDiGetSelectedDriver"));
 		return INVALID_HANDLE_VALUE;
 	}
 
-	DriverInfoDetailData.cbSize = sizeof(SP_DRVINFO_DETAIL_DATA);
-	if (!SetupDiGetDriverInfoDetail(hDeviceInfoSet, pDeviceInfoData, &DriverInfoData, &DriverInfoDetailData, sizeof(SP_DRVINFO_DETAIL_DATA), NULL)) {
+	driverInfoDetailData.cbSize = sizeof(SP_DRVINFO_DETAIL_DATA);
+	if (!SetupDiGetDriverInfoDetail(hDeviceInfoSet, pDeviceInfoData, &driverInfoData, &driverInfoDetailData, sizeof(SP_DRVINFO_DETAIL_DATA), NULL)) {
 		if (GetLastError() != ERROR_INSUFFICIENT_BUFFER) {
 			Trace(TEXT("Fail: SetupDiGetDriverInfoDetail"));
 			return INVALID_HANDLE_VALUE;
 		}
 	}
 
-	FileHandle = SetupOpenInfFile(DriverInfoDetailData.InfFileName, NULL, INF_STYLE_WIN4, ErrorLine);
-	if (FileHandle == INVALID_HANDLE_VALUE) {
+	hFileHandle = SetupOpenInfFile(driverInfoDetailData.InfFileName, NULL, INF_STYLE_WIN4, puiErrorLine);
+	if (hFileHandle == INVALID_HANDLE_VALUE) {
 		Trace(TEXT("Fail: SetupOpenInfFile"));
 		return INVALID_HANDLE_VALUE;
 	}
 
-	return FileHandle;
+	return hFileHandle;
 }
 
 
