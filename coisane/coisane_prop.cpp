@@ -134,34 +134,41 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 					Trace(TEXT("PSN_SETACTIVE"));
 					pData->hwndDlg = hwndDlg;
 					pData->hwndPropDlg = ((LPNMHDR) lParam)->hwndFrom;
-					if (!ShowPropertyPageAdvanced(hwndDlg, pData)) {
+					if (ShowPropertyPageAdvanced(hwndDlg, pData)) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, 0);
+					} else {
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
-						return TRUE;
 					}
+					return TRUE;
 					break;
 
 				case PSN_KILLACTIVE:
 				case PSN_QUERYCANCEL:
 					Trace(TEXT("PSN_KILLACTIVE | PSN_QUERYCANCEL"));
-					if (pData->hThread) {
+					if (!pData->hThread) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, FALSE);
+					} else {
 						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, TRUE);
-						return TRUE;
 					}
-					pData->hwndPropDlg = NULL;
-					pData->hwndDlg = NULL;
+					return TRUE;
 					break;
 
 				case PSN_APPLY:
 					Trace(TEXT("PSN_APPLY"));
-					if (!SavePropertyPageAdvanced(hwndDlg, pData)) {
-						MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
-						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, -1);
-						return TRUE;
+					if (SavePropertyPageAdvanced(hwndDlg, pData)) {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, PSNRET_NOERROR);
+						pData->hwndPropDlg = NULL;
+						pData->hwndDlg = NULL;
+					} else {
+						SetWindowLongPtr(hwndDlg, DWLP_MSGRESULT, PSNRET_INVALID_NOCHANGEPAGE);
 					}
+					return TRUE;
 					break;
 
 				case PSN_RESET:
 					Trace(TEXT("PSN_RESET"));
+					pData->hwndPropDlg = NULL;
+					pData->hwndDlg = NULL;
 					break;
 			}
 			break;
@@ -184,7 +191,7 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 						case IDC_PROPERTIES_COMBO_SCANNER:
 						case IDC_PROPERTIES_EDIT_USERNAME:
 						case IDC_PROPERTIES_EDIT_PASSWORD:
-							PropSheet_Changed(GetParent(hwndDlg), hwndDlg);
+							PropSheet_Changed(pData->hwndPropDlg, pData->hwndDlg);
 							break;
 					}
 					break;
@@ -666,6 +673,9 @@ WINSANE_API_CALLBACK PropertyPageAuthCallback(_In_ SANE_String_Const resource, _
 	Trace(TEXT("------ PropertyPageAuthCallback(resource='%hs') ------"), resource);
 
 	pData = g_pPropertyPageData;
+
+	lptUsername = NULL;
+	lptPassword = NULL;
 
 	res = GetDlgItemAText(pData->hHeap, pData->hwndDlg, IDC_PROPERTIES_EDIT_USERNAME, &lptUsername, NULL);
 	if (res == ERROR_SUCCESS) {
