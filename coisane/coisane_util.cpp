@@ -184,35 +184,35 @@ DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDe
 
 	if (vendor && model) {
 		hr = StringCbAPrintf(pData->hHeap, &lpStr, &cbLen, TEXT("%hs %hs"), vendor, model);
-		if (SUCCEEDED(hr) && lpStr) {
+		if (SUCCEEDED(hr)) {
 			res = SetupDiSetDeviceRegistryProperty(pData->hDeviceInfoSet, pData->pDeviceInfoData, SPDRP_FRIENDLYNAME, (PBYTE) lpStr, (DWORD) cbLen);
+			if (!res)
+				ret = GetLastError();
 			if (hDeviceKey != INVALID_HANDLE_VALUE)
 				RegSetValueEx(hDeviceKey, TEXT("FriendlyName"), 0, REG_SZ, (LPBYTE) lpStr, (DWORD) cbLen);
 			HeapSafeFree(pData->hHeap, 0, lpStr);
-			if (!res)
-				ret = GetLastError();
 		}
 	}
 
 	if (vendor && model && type && name) {
 		hr = StringCbAPrintf(pData->hHeap, &lpStr, &cbLen, TEXT("%hs %hs %hs (%hs)"), vendor, model, type, name);
-		if (SUCCEEDED(hr) && lpStr) {
+		if (SUCCEEDED(hr)) {
 			res = SetupDiSetDeviceRegistryProperty(pData->hDeviceInfoSet, pData->pDeviceInfoData, SPDRP_DEVICEDESC, (PBYTE) lpStr, (DWORD) cbLen);
-			HeapSafeFree(pData->hHeap, 0, lpStr);
 			if (!res)
 				ret = GetLastError();
+			HeapSafeFree(pData->hHeap, 0, lpStr);
 		}
 	}
 
 	if (vendor) {
 		hr = StringCbAPrintf(pData->hHeap, &lpStr, &cbLen, TEXT("%hs"), vendor);
-		if (SUCCEEDED(hr) && lpStr) {
+		if (SUCCEEDED(hr)) {
 			res = SetupDiSetDeviceRegistryProperty(pData->hDeviceInfoSet, pData->pDeviceInfoData, SPDRP_MFG, (PBYTE) (PBYTE) lpStr, (DWORD) cbLen);
+			if (!res)
+				ret = GetLastError();
 			if (hDeviceKey != INVALID_HANDLE_VALUE)
 				RegSetValueEx(hDeviceKey, TEXT("Vendor"), 0, REG_SZ, (LPBYTE) lpStr, (DWORD) cbLen);
 			HeapSafeFree(pData->hHeap, 0, lpStr);
-			if (!res)
-				ret = GetLastError();
 		}
 	}
 
