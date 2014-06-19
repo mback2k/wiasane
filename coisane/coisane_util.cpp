@@ -290,77 +290,99 @@ DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDe
 	LPTSTR lpResolutions;
 	DWORD cbData, dwPort;
 	HRESULT hr;
+	DWORD ret;
 	LONG res;
 
-	if (!oDevice)
+	if (!pData || !oDevice)
 		return ERROR_INVALID_PARAMETER;
+
+	ret = ERROR_SUCCESS;
 
 	hDeviceKey = SetupDiOpenDevRegKey(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_ENUMERATE_SUB_KEYS);
 	if (hDeviceKey == INVALID_HANDLE_VALUE)
 		return GetLastError();
 
-	if (oDevice->Open() == SANE_STATUS_GOOD) {
-		CreateResolutionList(pData->hHeap, oDevice, &lpResolutions, &cbResolutions);
+	if (oDevice->Open() != SANE_STATUS_GOOD)
+		return ERROR_INVALID_ACCESS;
 
-		oDevice->Close();
-	} else {
-		lpResolutions = NULL;
-		cbResolutions = 0;
-	}
+	ret = CreateResolutionList(pData->hHeap, oDevice, &lpResolutions, &cbResolutions);
+
+	oDevice->Close();
+
+	if (ret != ERROR_SUCCESS)
+		return ret;
 
 	res = RegOpenKeyEx(hDeviceKey, TEXT("DeviceData"), 0, KEY_SET_VALUE, &hDeviceDataKey);
 	if (res == ERROR_SUCCESS) {
 		if (pData->usPort) {
 			dwPort = (DWORD) pData->usPort;
-			RegSetValueEx(hDeviceDataKey, TEXT("Port"), 0, REG_DWORD, (LPBYTE) &dwPort, sizeof(DWORD));
-		}
+			res = RegSetValueEx(hDeviceDataKey, TEXT("Port"), 0, REG_DWORD, (LPBYTE) &dwPort, sizeof(DWORD));
+			if (res != ERROR_SUCCESS)
+				ret = res;
+		} else
+			ret = ERROR_INVALID_DATA;
 
 		if (pData->lpHost) {
 			hr = StringCbLength(pData->lpHost, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
 			if (SUCCEEDED(hr)) {
 				cbData = (DWORD) cbLength + sizeof(TCHAR);
-				RegSetValueEx(hDeviceDataKey, TEXT("Host"), 0, REG_SZ, (LPBYTE) pData->lpHost, cbData);
+				res = RegSetValueEx(hDeviceDataKey, TEXT("Host"), 0, REG_SZ, (LPBYTE) pData->lpHost, cbData);
+				if (res != ERROR_SUCCESS)
+					ret = res;
 			}
-		}
+		} else
+			ret = ERROR_INVALID_DATA;
 
 		if (pData->lpName) {
 			hr = StringCbLength(pData->lpName, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
 			if (SUCCEEDED(hr)) {
 				cbData = (DWORD) cbLength + sizeof(TCHAR);
-				RegSetValueEx(hDeviceDataKey, TEXT("Name"), 0, REG_SZ, (LPBYTE) pData->lpName, cbData);
+				res = RegSetValueEx(hDeviceDataKey, TEXT("Name"), 0, REG_SZ, (LPBYTE) pData->lpName, cbData);
+				if (res != ERROR_SUCCESS)
+					ret = res;
 			}
-		}
+		} else
+			ret = ERROR_INVALID_DATA;
 
 		if (pData->lpUsername) {
 			hr = StringCbLength(pData->lpUsername, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
 			if (SUCCEEDED(hr)) {
 				cbData = (DWORD) cbLength + sizeof(TCHAR);
-				RegSetValueEx(hDeviceDataKey, TEXT("Username"), 0, REG_SZ, (LPBYTE) pData->lpUsername, cbData);
+				res = RegSetValueEx(hDeviceDataKey, TEXT("Username"), 0, REG_SZ, (LPBYTE) pData->lpUsername, cbData);
+				if (res != ERROR_SUCCESS)
+					ret = res;
 			}
-		}
+		} else
+			ret = ERROR_INVALID_DATA;
 
 		if (pData->lpPassword) {
 			hr = StringCbLength(pData->lpPassword, STRSAFE_MAX_CCH * sizeof(TCHAR), &cbLength);
 			if (SUCCEEDED(hr)) {
 				cbData = (DWORD) cbLength + sizeof(TCHAR);
-				RegSetValueEx(hDeviceDataKey, TEXT("Password"), 0, REG_SZ, (LPBYTE) pData->lpPassword, cbData);
+				res = RegSetValueEx(hDeviceDataKey, TEXT("Password"), 0, REG_SZ, (LPBYTE) pData->lpPassword, cbData);
+				if (res != ERROR_SUCCESS)
+					ret = res;
 			}
-		}
+		} else
+			ret = ERROR_INVALID_DATA;
 
 		if (lpResolutions) {
 			cbData = (DWORD) cbResolutions;
-			RegSetValueEx(hDeviceDataKey, TEXT("Resolutions"), 0, REG_SZ, (LPBYTE) lpResolutions, cbData);
+			res = RegSetValueEx(hDeviceDataKey, TEXT("Resolutions"), 0, REG_SZ, (LPBYTE) lpResolutions, cbData);
+			if (res != ERROR_SUCCESS)
+				ret = res;
 		}
 
 		RegCloseKey(hDeviceDataKey);
-	}
+	} else
+		ret = res;
 
 	RegCloseKey(hDeviceKey);
 
 	if (lpResolutions)
 		HeapSafeFree(pData->hHeap, 0, lpResolutions);
 
-	return ERROR_SUCCESS;
+	return ret;
 }
 
 
