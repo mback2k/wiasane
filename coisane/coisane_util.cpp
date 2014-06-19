@@ -226,10 +226,15 @@ DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDe
 _Success_(return == ERROR_SUCCESS)
 DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData)
 {
+	LPTSTR lpHost, lpName, lpUsername, lpPassword;
 	HKEY hDeviceKey, hDeviceDataKey;
-	LPTSTR lpszValue;
-	DWORD dwValue;
+	DWORD dwPort, ret;
 	LONG res;
+
+	if (!pData)
+		return ERROR_INVALID_PARAMETER;
+
+	ret = ERROR_SUCCESS;
 
 	hDeviceKey = SetupDiOpenDevRegKey(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_FLAG_GLOBAL, 0, DIREG_DRV, KEY_ENUMERATE_SUB_KEYS);
 	if (hDeviceKey == INVALID_HANDLE_VALUE)
@@ -237,49 +242,61 @@ DWORD WINAPI QueryDeviceData(_In_ PCOISANE_Data pData)
 
 	res = RegOpenKeyEx(hDeviceKey, TEXT("DeviceData"), 0, KEY_QUERY_VALUE, &hDeviceDataKey);
 	if (res == ERROR_SUCCESS) {
-		res = ReadRegistryLong(pData->hHeap, hDeviceDataKey, TEXT("Port"), &dwValue);
-		if (res == ERROR_SUCCESS) {
-			pData->usPort = (USHORT) dwValue;
-		}
+		dwPort = WINSANE_DEFAULT_PORT;
+		lpHost = NULL;
+		lpName = NULL;
+		lpUsername = NULL;
+		lpPassword = NULL;
 
-		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Host"), &lpszValue, NULL);
+		res = ReadRegistryLong(pData->hHeap, hDeviceDataKey, TEXT("Port"), &dwPort);
+		if (res == ERROR_SUCCESS) {
+			pData->usPort = (USHORT) dwPort;
+		} else
+			ret = res;
+
+		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Host"), &lpHost, NULL);
 		if (res == ERROR_SUCCESS) {
 			if (pData->lpHost) {
 				HeapSafeFree(pData->hHeap, 0, pData->lpHost);
 			}
-			pData->lpHost = lpszValue;
-		}
+			pData->lpHost = lpHost;
+		} else
+			ret = res;
 
-		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Name"), &lpszValue, NULL);
+		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Name"), &lpName, NULL);
 		if (res == ERROR_SUCCESS) {
 			if (pData->lpName) {
 				HeapSafeFree(pData->hHeap, 0, pData->lpName);
 			}
-			pData->lpName = lpszValue;
-		}
+			pData->lpName = lpName;
+		} else
+			ret = res;
 
-		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Username"), &lpszValue, NULL);
+		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Username"), &lpUsername, NULL);
 		if (res == ERROR_SUCCESS) {
 			if (pData->lpUsername) {
 				HeapSafeFree(pData->hHeap, 0, pData->lpUsername);
 			}
-			pData->lpUsername = lpszValue;
-		}
+			pData->lpUsername = lpUsername;
+		} else
+			ret = res;
 
-		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Password"), &lpszValue, NULL);
+		res = ReadRegistryString(pData->hHeap, hDeviceDataKey, TEXT("Password"), &lpPassword, NULL);
 		if (res == ERROR_SUCCESS) {
 			if (pData->lpPassword) {
 				HeapSafeFree(pData->hHeap, 0, pData->lpPassword);
 			}
-			pData->lpPassword = lpszValue;
-		}
+			pData->lpPassword = lpPassword;
+		} else
+			ret = res;
 
 		RegCloseKey(hDeviceDataKey);
-	}
+	} else
+		ret = res;
 
 	RegCloseKey(hDeviceKey);
 
-	return ERROR_SUCCESS;
+	return ret;
 }
 
 _Success_(return == ERROR_SUCCESS)
