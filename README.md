@@ -38,7 +38,6 @@ Features
 To be improved
 --------------
 - Make WIA driver use asynchronous network connections (in progress)
-- Make wizard and property pages use threaded device I/O handling (in progress)
 - Handling of rounding issues while converting between units of length
 - Handling of errors while using automatic document feeder or duplex mode
 
