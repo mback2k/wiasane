@@ -796,23 +796,26 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 				SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_OPEN);
 				oDevice = oSession->GetDevice(pData->lpName);
 				if (oDevice) {
-					UpdateDeviceInfo(pData, oDevice);
-					UpdateDeviceData(pData, oDevice);
+					if (UpdateDeviceInfo(pData, oDevice) == ERROR_SUCCESS &&
+						UpdateDeviceData(pData, oDevice) == ERROR_SUCCESS) {
 
-					ChangeDeviceState(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_ENABLE, DICS_FLAG_GLOBAL);
-					ChangeDeviceState(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_PROPCHANGE, DICS_FLAG_GLOBAL);
+						ChangeDeviceState(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_ENABLE, DICS_FLAG_GLOBAL);
+						ChangeDeviceState(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_PROPCHANGE, DICS_FLAG_GLOBAL);
 
-					if (oSession->Exit() == SANE_STATUS_GOOD) {
-						g_pWizardPageData = NULL;
-						delete oSession;
+						if (oSession->Exit() == SANE_STATUS_GOOD) {
+							g_pWizardPageData = NULL;
+							delete oSession;
 
-						if (pData->hThread == hThread) {
-							pData->hThread = NULL;
-							PropSheet_PressButton(pData->hwndPropDlg, PSBTN_NEXT);
+							if (pData->hThread == hThread) {
+								pData->hThread = NULL;
+								PropSheet_PressButton(pData->hwndPropDlg, PSBTN_NEXT);
+							}
+							return 0;
+						} else if (pData->hThread == hThread) {
+							MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 						}
-						return 0;
 					} else if (pData->hThread == hThread) {
-						MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+						MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 					}
 				} else if (pData->hThread == hThread) {
 					MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
