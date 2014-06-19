@@ -369,8 +369,10 @@ DWORD WINAPI CreateResolutionList(_In_ HANDLE hHeap, _In_ PWINSANE_Device oDevic
 {
 	LPTSTR lpResolutions, lpszResolutions;
 	PWINSANE_Option oResolution;
+	PSANE_Range pRangeSpec;
 	PSANE_Word pWordList;
 	size_t cbResolutions;
+	SANE_Word quant;
 	HRESULT hr;
 	int index;
 
@@ -394,40 +396,102 @@ DWORD WINAPI CreateResolutionList(_In_ HANDLE hHeap, _In_ PWINSANE_Device oDevic
 	if (!oResolution)
 		return ERROR_NOT_SUPPORTED;
 
-	if (oResolution->GetConstraintType() != SANE_CONSTRAINT_WORD_LIST)
-		return ERROR_NOT_SUPPORTED;
-
-	pWordList = oResolution->GetConstraintWordList();
-	if (pWordList && pWordList[0] > 0) {
-		switch (oResolution->GetType()) {
-			case SANE_TYPE_INT:
-				hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%d"), pWordList[1]);
-				if (FAILED(hr))
-					return ERROR_OUTOFMEMORY;
-				for (index = 2; index <= pWordList[0]; index++) {
-					lpResolutions = lpszResolutions;
-					hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pWordList[index]);
-					HeapSafeFree(hHeap, 0, lpResolutions);
-					lpResolutions = NULL;
+	switch (oResolution->GetConstraintType()) {
+		case SANE_CONSTRAINT_RANGE:
+			pRangeSpec = oResolution->GetConstraintRange();
+			if (pRangeSpec->quant)
+				quant = pRangeSpec->quant;
+			else if (pRangeSpec->min)
+				quant = pRangeSpec->min;
+			else
+				return ERROR_SUCCESS;
+			switch (oResolution->GetType()) {
+				case SANE_TYPE_INT:
+					hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%d"), pRangeSpec->min);
 					if (FAILED(hr))
 						return ERROR_OUTOFMEMORY;
-				}
-				break;
+					for (index = 2; (quant*index) > pRangeSpec->min && (quant*index) <= pRangeSpec->max; index++) {
+						lpResolutions = lpszResolutions;
+						if (index <= 12)
+							hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, quant*index);
+						else
+							hr = S_FALSE;
+						HeapSafeFree(hHeap, 0, lpResolutions);
+						lpResolutions = NULL;
+						if (FAILED(hr))
+							return ERROR_OUTOFMEMORY;
+						else if (hr == S_FALSE)
+							return ERROR_SUCCESS;
+					}
+					break;
 
-			case SANE_TYPE_FIXED:
-				hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%d"), SANE_UNFIX(pWordList[1]));
-				if (FAILED(hr))
-					return ERROR_OUTOFMEMORY;
-				for (index = 2; index <= pWordList[0]; index++) {
-					lpResolutions = lpszResolutions;
-					hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, SANE_UNFIX(pWordList[index]));
-					HeapSafeFree(hHeap, 0, lpResolutions);
-					lpResolutions = NULL;
+				case SANE_TYPE_FIXED:
+					hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%.0f"), SANE_UNFIX(pRangeSpec->min));
 					if (FAILED(hr))
 						return ERROR_OUTOFMEMORY;
+					for (index = 2; (quant*index) > pRangeSpec->min && (quant*index) <= pRangeSpec->max; index++) {
+						lpResolutions = lpszResolutions;
+						if (index <= 12)
+							hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %.0f"), lpResolutions, SANE_UNFIX(quant*index));
+						else
+							hr = S_FALSE;
+						HeapSafeFree(hHeap, 0, lpResolutions);
+						lpResolutions = NULL;
+						if (FAILED(hr))
+							return ERROR_OUTOFMEMORY;
+						else if (hr == S_FALSE)
+							return ERROR_SUCCESS;
+					}
+					break;
+
+				default:
+					return ERROR_NOT_SUPPORTED;
+					break;
+			}
+			break;
+
+		case SANE_CONSTRAINT_WORD_LIST:
+			pWordList = oResolution->GetConstraintWordList();
+			if (pWordList && pWordList[0] > 0) {
+				switch (oResolution->GetType()) {
+					case SANE_TYPE_INT:
+						hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%d"), pWordList[1]);
+						if (FAILED(hr))
+							return ERROR_OUTOFMEMORY;
+						for (index = 2; index <= pWordList[0]; index++) {
+							lpResolutions = lpszResolutions;
+							hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pWordList[index]);
+							HeapSafeFree(hHeap, 0, lpResolutions);
+							lpResolutions = NULL;
+							if (FAILED(hr))
+								return ERROR_OUTOFMEMORY;
+						}
+						break;
+
+					case SANE_TYPE_FIXED:
+						hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%.0f"), SANE_UNFIX(pWordList[1]));
+						if (FAILED(hr))
+							return ERROR_OUTOFMEMORY;
+						for (index = 2; index <= pWordList[0]; index++) {
+							lpResolutions = lpszResolutions;
+							hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %.0f"), lpResolutions, SANE_UNFIX(pWordList[index]));
+							HeapSafeFree(hHeap, 0, lpResolutions);
+							lpResolutions = NULL;
+							if (FAILED(hr))
+								return ERROR_OUTOFMEMORY;
+						}
+						break;
+
+					default:
+						return ERROR_NOT_SUPPORTED;
+						break;
 				}
-				break;
-		}
+			}
+			break;
+
+		default:
+			return ERROR_SUCCESS;
+			break;
 	}
 
 	*plpszResolutions = lpszResolutions;
