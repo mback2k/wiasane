@@ -229,66 +229,30 @@ INT_PTR CALLBACK DialogProcPropertyPageAdvanced(_In_ HWND hwndDlg, _In_ UINT uMs
 
 INT_PTR CALLBACK DialogProcPropertyPageAdvancedBtnClicked(_In_ HWND hwndDlg, _In_ UINT hwndDlgItem, _Inout_ PCOISANE_Data pData)
 {
-	PWINSANE_Session oSession;
-	PWINSANE_Device oDevice;
-	PWINSANE_Params oParams;
-	LPTSTR lpName;
-	BOOL res;
-
-	lpName = NULL;
-
-	res = GetDlgItemAText(pData->hHeap, hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, &lpName, NULL);
-	if (res != ERROR_SUCCESS) {
+	if (pData->hThread)
 		return FALSE;
+
+	switch (hwndDlgItem) {
+		case IDC_PROPERTIES_BUTTON_CHECK:
+			pData->hThread = CreateThread(NULL, 0, &ThreadProcCheckDevice, pData, CREATE_SUSPENDED, NULL);
+			break;
+
+		case IDC_PROPERTIES_BUTTON_RESET:
+			pData->hThread = CreateThread(NULL, 0, &ThreadProcResetDevice, pData, CREATE_SUSPENDED, NULL);
+			break;
+
+		default:
+			pData->hThread = NULL;
+			break;
 	}
 
-	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
-	if (oSession) {
-		g_pPropertyPageData = pData;
-		if (oSession->Init(NULL, &PropertyPageAuthCallback) == SANE_STATUS_GOOD) {
-			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
-				oDevice = oSession->GetDevice(lpName);
-				if (oDevice) {
-					if (oDevice->Open() == SANE_STATUS_GOOD) {
-						switch (hwndDlgItem) {
-							case IDC_PROPERTIES_BUTTON_CHECK:
-								if (oDevice->GetParams(&oParams) == SANE_STATUS_GOOD) {
-									delete oParams;
-									MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_CHECK_SUCCESSFUL, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONINFORMATION | MB_OK);
-								} else {
-									MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_CHECK_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
-								}
-								break;
+	if (!pData->hThread)
+		return FALSE;
 
-							case IDC_PROPERTIES_BUTTON_RESET:
-								if (oDevice->Cancel() == SANE_STATUS_GOOD) {
-									MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_RESET_SUCCESSFUL, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONINFORMATION | MB_OK);
-								} else {
-									MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_PROPERTIES_SCANNER_RESET_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
-								}
-								break;
-						}
-						oDevice->Close();
-					} else {
-						MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
-					}
-				} else {
-					MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
-				}
-			} else {
-				MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
-			}
-			oSession->Exit();
-		} else {
-			MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
-		}
-		g_pPropertyPageData = NULL;
-		delete oSession;
-	} else {
-		MessageBoxR(pData->hHeap, pData->hInstance, hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
-	}
+	ShowPropertyPageAdvancedProgress(hwndDlg);
 
-	HeapSafeFree(pData->hHeap, 0, lpName);
+	SetThreadPriority(pData->hThread, THREAD_PRIORITY_BELOW_NORMAL);
+	ResumeThread(pData->hThread);
 
 	return FALSE;
 }
@@ -670,6 +634,127 @@ DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
 	} else if (pData->hThread == hThread) {
 		MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 	}
+
+	if (pData->hThread != hThread)
+		return 0;
+
+	HidePropertyPageAdvancedProgress(pData->hwndDlg);
+
+	pData->hThread = NULL;
+
+	return 0;
+}
+
+
+static VOID WINAPI PerformDeviceAction(_In_ HANDLE hThread, _In_ UINT hwndDlgItem, _Inout_ PCOISANE_Data pData)
+{
+	PWINSANE_Session oSession;
+	PWINSANE_Device oDevice;
+	PWINSANE_Params oParams;
+	LPTSTR lpText, lpName;
+	HRESULT hr;
+	BOOL res;
+
+	lpName = NULL;
+
+	res = GetDlgItemAText(pData->hHeap, pData->hwndDlg, IDC_PROPERTIES_COMBO_SCANNER, &lpName, NULL);
+	if (res != ERROR_SUCCESS)
+		return;
+
+	hr = StringCbAPrintf(pData->hHeap, &lpText, NULL, TEXT("%s:%d\n%s"), pData->lpHost, pData->usPort, pData->lpName);
+	if (SUCCEEDED(hr)) {
+		SetDlgItemText(pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT, lpText);
+		HeapSafeFree(pData->hHeap, 0, lpText);
+	}
+
+	SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_CONNECT);
+	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
+	if (oSession) {
+		g_pPropertyPageData = pData;
+		SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_INIT);
+		if (oSession->Init(NULL, &PropertyPageAuthCallback) == SANE_STATUS_GOOD) {
+			SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_FIND);
+			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
+				oDevice = oSession->GetDevice(lpName);
+				if (oDevice) {
+					SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_OPEN);
+					if (oDevice->Open() == SANE_STATUS_GOOD) {
+						switch (hwndDlgItem) {
+							case IDC_PROPERTIES_BUTTON_CHECK:
+								if (oDevice->GetParams(&oParams) == SANE_STATUS_GOOD) {
+									delete oParams;
+									MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_PROPERTIES_SCANNER_CHECK_SUCCESSFUL, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONINFORMATION | MB_OK);
+								} else if (pData->hThread == hThread) {
+									MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_PROPERTIES_SCANNER_CHECK_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+								}
+								break;
+
+							case IDC_PROPERTIES_BUTTON_RESET:
+								if (oDevice->Cancel() == SANE_STATUS_GOOD) {
+									MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_PROPERTIES_SCANNER_RESET_SUCCESSFUL, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONINFORMATION | MB_OK);
+								} else if (pData->hThread == hThread) {
+									MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_PROPERTIES_SCANNER_RESET_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONEXCLAMATION | MB_OK);
+								}
+								break;
+						}
+						oDevice->Close();
+					} else if (pData->hThread == hThread) {
+						MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+					}
+				} else if (pData->hThread == hThread) {
+					MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+				}
+			} else if (pData->hThread == hThread) {
+				MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+			}
+			oSession->Exit();
+		} else if (pData->hThread == hThread) {
+			MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+		}
+		g_pPropertyPageData = NULL;
+		delete oSession;
+	} else if (pData->hThread == hThread) {
+		MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+	}
+
+	HeapSafeFree(pData->hHeap, 0, lpName);
+}
+
+DWORD WINAPI ThreadProcCheckDevice(_In_ LPVOID lpParameter)
+{
+	PCOISANE_Data pData;
+	HANDLE hThread;
+
+	pData = (PCOISANE_Data) lpParameter;
+	if (!pData)
+		return 0;
+
+	hThread = pData->hThread;
+
+	PerformDeviceAction(hThread, IDC_PROPERTIES_BUTTON_CHECK, pData);
+
+	if (pData->hThread != hThread)
+		return 0;
+
+	HidePropertyPageAdvancedProgress(pData->hwndDlg);
+
+	pData->hThread = NULL;
+
+	return 0;
+}
+
+DWORD WINAPI ThreadProcResetDevice(_In_ LPVOID lpParameter)
+{
+	PCOISANE_Data pData;
+	HANDLE hThread;
+
+	pData = (PCOISANE_Data) lpParameter;
+	if (!pData)
+		return 0;
+
+	hThread = pData->hThread;
+
+	PerformDeviceAction(hThread, IDC_PROPERTIES_BUTTON_RESET, pData);
 
 	if (pData->hThread != hThread)
 		return 0;

@@ -51,6 +51,9 @@ DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter);
 BOOL WINAPI SavePropertyPageAdvanced(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData);
 DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter);
 
+DWORD WINAPI ThreadProcCheckDevice(_In_ LPVOID lpParameter);
+DWORD WINAPI ThreadProcResetDevice(_In_ LPVOID lpParameter);
+
 VOID WINAPI ShowPropertyPageAdvancedProgress(_In_ HWND hwndDlg);
 VOID WINAPI HidePropertyPageAdvancedProgress(_In_ HWND hwndDlg);
 
