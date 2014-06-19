@@ -434,6 +434,7 @@ DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter)
 	HANDLE hThread;
 	PTSTR lpText;
 	HRESULT hr;
+	DWORD res;
 	HWND hwnd;
 
 	pData = (PCOISANE_Data) lpParameter;
@@ -442,7 +443,15 @@ DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter)
 
 	hThread = pData->hThread;
 
-	QueryDeviceData(pData);
+	res = QueryDeviceData(pData);
+	if (res != ERROR_SUCCESS) {
+		HidePropertyPageAdvancedProgress(pData->hwndDlg);
+
+		pData->bPropChanged = FALSE;
+		pData->hThread = NULL;
+
+		return 0;
+	}
 
 	if (!pData->lpHost)
 		pData->lpHost = StringDup(pData->hHeap, TEXT("localhost"));
