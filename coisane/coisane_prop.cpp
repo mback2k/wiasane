@@ -623,9 +623,9 @@ DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
 		if (oSession->Init(NULL, &PropertyPageAuthCallback) == SANE_STATUS_GOOD) {
 			SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_FIND);
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
-				SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_OPEN);
 				oDevice = oSession->GetDevice(pData->lpName);
 				if (oDevice) {
+					SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_OPEN);
 					if (UpdateDeviceInfo(pData, oDevice) == ERROR_SUCCESS &&
 						UpdateDeviceData(pData, oDevice) == ERROR_SUCCESS) {
 
