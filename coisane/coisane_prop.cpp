@@ -432,7 +432,7 @@ DWORD WINAPI ThreadProcShowPropertyPageAdvanced(_In_ LPVOID lpParameter)
 	PCOISANE_Data pData;
 	LONG devices, device;
 	HANDLE hThread;
-	PTSTR lpText;
+	LPTSTR lpText;
 	HRESULT hr;
 	DWORD res;
 	HWND hwnd;
@@ -599,7 +599,7 @@ DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
 	PWINSANE_Device oDevice;
 	PCOISANE_Data pData;
 	HANDLE hThread;
-	PTSTR lpText;
+	LPTSTR lpText;
 	HRESULT hr;
 	DWORD res;
 

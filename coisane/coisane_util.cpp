@@ -164,8 +164,8 @@ DWORD WINAPI UpdateDeviceInfo(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDe
 {
 	SANE_String_Const name, type, model, vendor;
 	HKEY hDeviceKey;
+	LPTSTR lpStr;
 	size_t cbLen;
-	PTSTR lpStr;
 	HRESULT hr;
 	DWORD ret;
 	BOOL res;

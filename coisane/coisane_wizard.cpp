@@ -611,7 +611,7 @@ DWORD WINAPI ThreadProcNextWizardPageServer(_In_ LPVOID lpParameter)
 	PCOISANE_Data pData;
 	LONG devices, device;
 	HANDLE hThread;
-	PTSTR lpText;
+	LPTSTR lpText;
 	HRESULT hr;
 
 	pData = (PCOISANE_Data) lpParameter;
@@ -773,7 +773,7 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 	PWINSANE_Device oDevice;
 	PCOISANE_Data pData;
 	HANDLE hThread;
-	PTSTR lpText;
+	LPTSTR lpText;
 	HRESULT hr;
 
 	pData = (PCOISANE_Data) lpParameter;

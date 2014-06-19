@@ -29,7 +29,7 @@ HINSTANCE g_hModuleInstance = NULL; // instance of this Application (used for lo
 
 int WINAPI _tWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPTSTR lpCmdLine, _In_ int nCmdShow)
 {
-	PTSTR lpszType, lpszMode, lpszFile;
+	LPTSTR lpszType, lpszMode, lpszFile;
 	HANDLE hHeap;
 	HWND hwnd;
 
