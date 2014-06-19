@@ -697,6 +697,9 @@ BOOL WINAPI ShowWizardPageScanner(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pData
 		for (device = 0; pData->lpNames[device]; device++) {
 			SendMessage(hwnd, CB_ADDSTRING, (WPARAM) 0, (LPARAM) pData->lpNames[device]);
 		}
+		if (pData->lpName) {
+			SendMessage(hwnd, CB_SELECTSTRING, (WPARAM) -1, (LPARAM) pData->lpName);
+		}
 	}
 
 	return TRUE;
