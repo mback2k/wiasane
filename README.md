@@ -31,7 +31,7 @@ Features
 - Support for contrast and brightness settings
 - Support for single-sided scanning from a flatbed
 - Support for automatic document feeder and duplex mode
-- Support for username- und password-based authentication
+- Support for username- and password-based authentication
 - Integrated property page for device modification
 - Integrated wizard during driver/device installation
 
@@ -48,7 +48,8 @@ and build against Windows 7 as well as Windows Driver Kit 8.0.
 
 All Visual Studio project files are created, modified, tested and used
 with Visual Studio 2012. This version is also used to build the
-released driver packages as well as included libraries and applications.
+released driver packages as well as included libraries and applications
+using a Windows Server 2008 R2 build machine.
 
 The installer is created and compiled using Inno Setup 5.5 or newer.
 
