@@ -23,6 +23,7 @@
 #include <tchar.h>
 #include <strsafe.h>
 #include <malloc.h>
+#include <regstr.h>
 #include <commctrl.h>
 
 #include "dllmain.h"
@@ -208,6 +209,7 @@ INT_PTR CALLBACK DialogProcWizardPageServer(_In_ HWND hwndDlg, _In_ UINT uMsg, _
 				case PSN_QUERYCANCEL:
 					Trace(TEXT("PSN_QUERYCANCEL"));
 					ChangeDeviceState(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_DISABLE, DICS_FLAG_GLOBAL);
+					UpdateDeviceConfigFlags(pData->hDeviceInfoSet, pData->pDeviceInfoData, CONFIGFLAG_FINISHINSTALL_UI);
 					break;
 			}
 			break;
@@ -311,6 +313,7 @@ INT_PTR CALLBACK DialogProcWizardPageScanner(_In_ HWND hwndDlg, _In_ UINT uMsg, 
 				case PSN_QUERYCANCEL:
 					Trace(TEXT("PSN_QUERYCANCEL"));
 					ChangeDeviceState(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_DISABLE, DICS_FLAG_GLOBAL);
+					UpdateDeviceConfigFlags(pData->hDeviceInfoSet, pData->pDeviceInfoData, CONFIGFLAG_FINISHINSTALL_UI);
 					break;
 			}
 			break;
