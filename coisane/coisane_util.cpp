@@ -108,6 +108,24 @@ HINF WINAPI OpenInfFile(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDev
 
 
 _Success_(return == ERROR_SUCCESS)
+DWORD WINAPI UpdateDeviceConfigFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags)
+{
+	DWORD dwConfigFlags;
+	BOOL res;
+
+	res = SetupDiGetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_CONFIGFLAGS, NULL, (PBYTE) &dwConfigFlags, sizeof(dwConfigFlags), NULL);
+	if (!res)
+		return GetLastError();
+
+	dwConfigFlags |= dwFlags;
+	res = SetupDiSetDeviceRegistryProperty(hDeviceInfoSet, pDeviceInfoData, SPDRP_CONFIGFLAGS, (PBYTE) &dwConfigFlags, sizeof(dwConfigFlags));
+	if (!res)
+		return GetLastError();
+
+	return ERROR_SUCCESS;
+}
+
+_Success_(return == ERROR_SUCCESS)
 DWORD WINAPI UpdateInstallDeviceFlags(_In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, _In_ DWORD dwFlags)
 {
 	return UpdateInstallDeviceFlagsEx(hDeviceInfoSet, pDeviceInfoData, dwFlags, 0);
