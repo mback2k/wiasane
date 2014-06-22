@@ -125,7 +125,10 @@ begin
       begin
         Sleep(500);
         if GetWindowsVersion >= $06020000 then
-          MsgBox(CustomMessage('FinishInstallAction'), mbInformation, MB_OK);
+        begin
+          if not Exec(ExpandConstant('{sys}\newdev.exe'), '6', ExpandConstant('{sys}'), SW_SHOW, ewWaitUntilTerminated, ResultCode)
+            then MsgBox(CustomMessage('FinishInstallAction'), mbInformation, MB_OK);
+        end;
       end;
     end;
     WizardForm.StatusLabel.Caption := StatusLabel;
