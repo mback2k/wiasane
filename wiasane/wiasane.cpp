@@ -321,6 +321,11 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_LOAD_ADF: // online
 			Trace(TEXT("CMD_LOAD_ADF"));
 
+			if (pContext->pTask && pContext->pTask->bUsingADF) {
+				hr = S_OK;
+				break;
+			}
+
 			hr = OpenScannerDevice(pValue->pScanInfo, pContext);
 			if (SUCCEEDED(hr)) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SOURCE);
@@ -355,7 +360,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 				CloseScannerDevice(pValue->pScanInfo, pContext);
 			}
-
 			break;
 
 		case CMD_UNLOAD_ADF: // online
