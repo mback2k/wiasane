@@ -840,9 +840,11 @@ HRESULT ExitScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	if (!pScanInfo || !pContext || !pContext->oSession)
 		return E_INVALIDARG;
 
-	if (pContext->oDevice) {
+	if (pContext->oDevice)
 		CloseScannerDevice(pScanInfo, pContext);
-	}
+
+	if (pContext->uiDevRef > 0)
+		return S_FALSE;
 
 	if (pContext->oSession->IsInitialized()) {
 		status = pContext->oSession->Exit();
@@ -895,7 +897,7 @@ HRESULT CloseScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 		pContext->uiDevRef--;
 
 	if (pContext->uiDevRef > 0)
-		return S_OK;
+		return S_FALSE;
 
 	if (pContext->pTask) {
 		if (pContext->pTask->oScan) {
