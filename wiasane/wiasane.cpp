@@ -283,7 +283,11 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			if (SUCCEEDED(hr)) {
 				pValue->lVal = MCRO_STATUS_OK;
 
-				ExitScannerSession(pValue->pScanInfo, pContext);
+				if (pContext->pTask && pContext->pTask->bUsingADF) {
+					CloseScannerDevice(pValue->pScanInfo, pContext);
+				} else {
+					ExitScannerSession(pValue->pScanInfo, pContext);
+				}
 			} else {
 				pValue->lVal = MCRO_ERROR_OFFLINE;
 			}
