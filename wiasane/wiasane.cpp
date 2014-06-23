@@ -424,68 +424,74 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			if (FAILED(hr))
 				return hr;
 
-			if (pContext->pTask && pContext->pTask->oScan)
-				return WIA_ERROR_BUSY;
+			if (pContext->pTask && pContext->pTask->oScan) {
+				if (pContext->pTask->bUsingADF) {
+					Trace(TEXT("SCAN_FIRST using ADF"));
+				} else {
+					Trace(TEXT("SCAN_FIRST during busy device"));
+					return WIA_ERROR_BUSY;
+				}
+			} else {
+				hr = SetScanMode(pContext);
+				if (FAILED(hr)) {
+					Trace(TEXT("Failed to set scan mode: %08x"), hr);
+					return hr;
+				}
 
-			hr = SetScanMode(pContext);
-			if (FAILED(hr)) {
-				Trace(TEXT("Failed to set scan mode: %08x"), hr);
-				return hr;
+				hr = SetScanWindow(pContext);
+				if (FAILED(hr)) {
+					Trace(TEXT("Failed to set scan window: %08x"), hr);
+					return hr;
+				}
+
+				hr = SetScannerSettings(pScanInfo, pContext);
+				if (FAILED(hr)) {
+					Trace(TEXT("Failed to set scanner settings: %08x"), hr);
+					return hr;
+				}
+
+				if (!pContext->pTask)
+					pContext->pTask = (PWIASANE_Task) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(WIASANE_Task));
+
+				if (!pContext->pTask)
+					return E_OUTOFMEMORY;
+
+				status = pContext->oDevice->Start(&pContext->pTask->oScan);
+				if (status != SANE_STATUS_GOOD)
+					return GetErrorCode(status);
+
+				if (!pContext->pTask->oScan)
+					return E_OUTOFMEMORY;
+
+				status = pContext->pTask->oScan->Connect();
+				if (status != SANE_STATUS_GOOD)
+					return GetErrorCode(status);
+
+				Trace(TEXT("Byte-order: %04x"), pContext->pTask->oScan->GetByteOrder());
+
+				hr = FetchScannerParams(pScanInfo, pContext);
+				if (FAILED(hr))
+					return hr;
+
+				if (pScanInfo->PixelBits == 1)
+					pContext->pTask->lByteGapX = ((LONG) ceil(pScanInfo->Window.xExtent / 8.0)) - pScanInfo->WidthBytes;
+				else if ((pScanInfo->PixelBits % 8) == 0)
+					pContext->pTask->lByteGapX = (pScanInfo->Window.xExtent * (pScanInfo->PixelBits / 8)) - pScanInfo->WidthBytes;
+				else
+					pContext->pTask->lByteGapX = 0;
+
+				pContext->pTask->lByteGapY = (pScanInfo->Window.yExtent - pScanInfo->Lines) *
+											 (pScanInfo->WidthBytes + pContext->pTask->lByteGapX);
+
+				Trace(TEXT("X byte-gap: %d"), pContext->pTask->lByteGapX);
+				Trace(TEXT("Y byte-gap: %d"), pContext->pTask->lByteGapY);
+
+				pContext->pTask->uiTotal = ((pScanInfo->WidthBytes + pContext->pTask->lByteGapX) *
+											pScanInfo->Lines) + pContext->pTask->lByteGapY;
+				pContext->pTask->uiReceived = 0;
+
+				Trace(TEXT("Data: %d/%d"), pContext->pTask->uiReceived, pContext->pTask->uiTotal);
 			}
-
-			hr = SetScanWindow(pContext);
-			if (FAILED(hr)) {
-				Trace(TEXT("Failed to set scan window: %08x"), hr);
-				return hr;
-			}
-
-			hr = SetScannerSettings(pScanInfo, pContext);
-			if (FAILED(hr)) {
-				Trace(TEXT("Failed to set scanner settings: %08x"), hr);
-				return hr;
-			}
-
-			if (!pContext->pTask)
-				pContext->pTask = (PWIASANE_Task) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(WIASANE_Task));
-
-			if (!pContext->pTask)
-				return E_OUTOFMEMORY;
-
-			status = pContext->oDevice->Start(&pContext->pTask->oScan);
-			if (status != SANE_STATUS_GOOD)
-				return GetErrorCode(status);
-
-			if (!pContext->pTask->oScan)
-				return E_OUTOFMEMORY;
-
-			status = pContext->pTask->oScan->Connect();
-			if (status != SANE_STATUS_GOOD)
-				return GetErrorCode(status);
-
-			Trace(TEXT("Byte-order: %04x"), pContext->pTask->oScan->GetByteOrder());
-
-			hr = FetchScannerParams(pScanInfo, pContext);
-			if (FAILED(hr))
-				return hr;
-
-			if (pScanInfo->PixelBits == 1)
-				pContext->pTask->lByteGapX = ((LONG) ceil(pScanInfo->Window.xExtent / 8.0)) - pScanInfo->WidthBytes;
-			else if ((pScanInfo->PixelBits % 8) == 0)
-				pContext->pTask->lByteGapX = (pScanInfo->Window.xExtent * (pScanInfo->PixelBits / 8)) - pScanInfo->WidthBytes;
-			else
-				pContext->pTask->lByteGapX = 0;
-
-			pContext->pTask->lByteGapY = (pScanInfo->Window.yExtent - pScanInfo->Lines) *
-			                             (pScanInfo->WidthBytes + pContext->pTask->lByteGapX);
-
-			Trace(TEXT("X byte-gap: %d"), pContext->pTask->lByteGapX);
-			Trace(TEXT("Y byte-gap: %d"), pContext->pTask->lByteGapY);
-
-			pContext->pTask->uiTotal = ((pScanInfo->WidthBytes + pContext->pTask->lByteGapX) *
-			                            pScanInfo->Lines) + pContext->pTask->lByteGapY;
-			pContext->pTask->uiReceived = 0;
-
-			Trace(TEXT("Data: %d/%d"), pContext->pTask->uiReceived, pContext->pTask->uiTotal);
 
 		case SCAN_NEXT: // SCAN_FIRST will fall through to SCAN_NEXT (because it is expecting data)
 			if (lPhase == SCAN_NEXT)
