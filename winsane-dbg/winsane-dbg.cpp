@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2013, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -23,21 +23,27 @@
 int WINAPIV _tmain(int argc, TCHAR *argv[])
 {
 	PTSTR hostname;
+	USHORT port;
 
 	if (argc > 1) {
 		hostname = argv[1];
-		Debug(hostname);
+		if (argc > 2) {
+			port = (USHORT) _tstoi(argv[2]);
+		} else {
+			port = WINSANE_DEFAULT_PORT;
+		}
+		Debug(hostname, port);
 		exit(0);
 	} else {
 		exit(1);
 	}
 }
 
-VOID Debug(PTSTR hostname)
+VOID Debug(PTSTR hostname, USHORT port)
 {
 	WINSANE_Session *session;
 
-	session = WINSANE_Session::Remote(hostname);
+	session = WINSANE_Session::Remote(hostname, port);
 	if (session) {
 		DebugSession(session);
 		delete session;
