@@ -92,6 +92,9 @@
     <ProjectReference Include="..\winsane\winsane.vcxproj">
       <Project>{b210e114-bf47-442f-8a8e-6719b6359eb8}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\winsane-dbg\winsane-dbg.vcxproj">
+      <Project>{59a26f4a-bcf6-4ea0-85a4-20de17c36bbb}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

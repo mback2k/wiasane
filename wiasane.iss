@@ -21,6 +21,7 @@ Source: {#SourceDir32bit}\coisane.dll; DestDir: {app}; Flags: overwritereadonly 
 Source: {#SourceDir32bit}\devsane.exe; DestDir: {app}; Flags: overwritereadonly replacesameversion restartreplace uninsrestartdelete 32bit; Check: Not Is64BitInstallMode
 Source: {#SourceDir32bit}\wiasane.inf; DestDir: {app}; Flags: overwritereadonly replacesameversion restartreplace uninsrestartdelete 32bit; Check: Not Is64BitInstallMode
 Source: {#SourceDir32bit}\wiasane.cat; DestDir: {app}; Flags: overwritereadonly replacesameversion restartreplace uninsrestartdelete 32bit; Check: Not Is64BitInstallMode
+Source: {#SourceDir32bit}\winsane-dbg.exe; DestDir: {app}; Flags: overwritereadonly replacesameversion restartreplace uninsrestartdelete 32bit; Check: Not Is64BitInstallMode
 Source: {#RedistDir64bit}\*.dll; DestDir: {sys}; Flags: sharedfile uninsnosharedfileprompt uninsrestartdelete 64bit; Check: Is64BitInstallMode
 Source: {#SourceDir64bit}\winsane.dll; DestDir: {app}; Flags: overwritereadonly replacesameversion restartreplace uninsrestartdelete 64bit; Check: Is64BitInstallMode
 Source: {#SourceDir64bit}\wiasane.dll; DestDir: {app}; Flags: overwritereadonly replacesameversion restartreplace uninsrestartdelete 64bit; Check: Is64BitInstallMode
@@ -28,6 +29,7 @@ Source: {#SourceDir64bit}\coisane.dll; DestDir: {app}; Flags: overwritereadonly 
 Source: {#SourceDir64bit}\devsane.exe; DestDir: {app}; Flags: overwritereadonly replacesameversion restartreplace uninsrestartdelete 64bit; Check: Is64BitInstallMode
 Source: {#SourceDir64bit}\wiasane.inf; DestDir: {app}; Flags: overwritereadonly replacesameversion restartreplace uninsrestartdelete 64bit; Check: Is64BitInstallMode
 Source: {#SourceDir64bit}\wiasane.cat; DestDir: {app}; Flags: overwritereadonly replacesameversion restartreplace uninsrestartdelete 64bit; Check: Is64BitInstallMode
+Source: {#SourceDir64bit}\winsane-dbg.exe; DestDir: {app}; Flags: overwritereadonly replacesameversion restartreplace uninsrestartdelete 64bit; Check: Is64BitInstallMode
 [Icons]
 Name: {group}\{cm:StartInstallDevice}; Filename: {app}\devsane.exe; Parameters: device install wiasane.inf; WorkingDir: {app}; IconFilename: sti.dll
 Name: {group}\{cm:StartUninstallDriver}; Filename: {uninstallexe}; IconFilename: devmgr.dll; IconIndex: 4
