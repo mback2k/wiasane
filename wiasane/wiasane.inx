@@ -55,7 +55,7 @@ MicroDriver="wiasane.dll"
 Host=localhost
 Port=6566,1
 PollTimeout=20000,1
-Resolutions="100, 150, 200, 300, 600"
+Resolutions="75, 100, 150, 200, 300, 600"
 
 [WIASANE.AddReg]
 HKR,,HardwareConfig,0x00000001,1
