@@ -424,12 +424,12 @@ DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDe
 _Success_(return == ERROR_SUCCESS)
 DWORD WINAPI CreateResolutionList(_In_ HANDLE hHeap, _In_ PWINSANE_Device oDevice, _Outptr_result_maybenull_ LPTSTR *plpszResolutions, _Out_opt_ size_t *pcbResolutions)
 {
+	SANE_Word arrDefaultResolutions[6] = { 75, 100, 150, 200, 300, 600 };
 	LPTSTR lpResolutions, lpszResolutions;
 	PWINSANE_Option oResolution;
 	PSANE_Range pRangeSpec;
 	PSANE_Word pWordList;
 	size_t cbResolutions;
-	SANE_Word quant;
 	HRESULT hr;
 	int index;
 
@@ -456,29 +456,33 @@ DWORD WINAPI CreateResolutionList(_In_ HANDLE hHeap, _In_ PWINSANE_Device oDevic
 	switch (oResolution->GetConstraintType()) {
 		case SANE_CONSTRAINT_RANGE:
 			pRangeSpec = oResolution->GetConstraintRange();
-			if (pRangeSpec->quant)
-				quant = pRangeSpec->quant;
-			else if (pRangeSpec->min)
-				quant = pRangeSpec->min;
-			else
-				return ERROR_SUCCESS;
 			switch (oResolution->GetType()) {
 				case SANE_TYPE_INT:
 					hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%d"), pRangeSpec->min);
 					if (FAILED(hr))
 						return ERROR_OUTOFMEMORY;
-					for (index = 2; (quant*index) > pRangeSpec->min && (quant*index) <= pRangeSpec->max; index++) {
+					for (index = 0; index < 6; index++) {
+						if (arrDefaultResolutions[index] <= pRangeSpec->min &&
+							arrDefaultResolutions[index] >= pRangeSpec->max) {
+								continue;
+						}
+						if (pRangeSpec->quant && ((arrDefaultResolutions[index] - pRangeSpec->min) % pRangeSpec->quant)) {
+								continue;
+						}
 						lpResolutions = lpszResolutions;
-						if (index <= 12)
-							hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, quant*index);
-						else
-							hr = S_FALSE;
+						hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, arrDefaultResolutions[index]);
 						HeapSafeFree(hHeap, 0, lpResolutions);
 						lpResolutions = NULL;
 						if (FAILED(hr))
 							return ERROR_OUTOFMEMORY;
-						else if (hr == S_FALSE)
-							return ERROR_SUCCESS;
+					}
+					{
+						lpResolutions = lpszResolutions;
+						hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pRangeSpec->max);
+						HeapSafeFree(hHeap, 0, lpResolutions);
+						lpResolutions = NULL;
+						if (FAILED(hr))
+							return ERROR_OUTOFMEMORY;
 					}
 					break;
 
@@ -486,18 +490,25 @@ DWORD WINAPI CreateResolutionList(_In_ HANDLE hHeap, _In_ PWINSANE_Device oDevic
 					hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%.0f"), SANE_UNFIX(pRangeSpec->min));
 					if (FAILED(hr))
 						return ERROR_OUTOFMEMORY;
-					for (index = 2; (quant*index) > pRangeSpec->min && (quant*index) <= pRangeSpec->max; index++) {
+					for (index = 0; index < 6; index++) {
+						if (arrDefaultResolutions[index] <= SANE_UNFIX(pRangeSpec->min) &&
+							arrDefaultResolutions[index] >= SANE_UNFIX(pRangeSpec->max)) {
+								continue;
+						}
 						lpResolutions = lpszResolutions;
-						if (index <= 12)
-							hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %.0f"), lpResolutions, SANE_UNFIX(quant*index));
-						else
-							hr = S_FALSE;
+						hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, arrDefaultResolutions[index]);
 						HeapSafeFree(hHeap, 0, lpResolutions);
 						lpResolutions = NULL;
 						if (FAILED(hr))
 							return ERROR_OUTOFMEMORY;
-						else if (hr == S_FALSE)
-							return ERROR_SUCCESS;
+					}
+					{
+						lpResolutions = lpszResolutions;
+						hr = StringCbAPrintf(hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %.0f"), lpResolutions, SANE_UNFIX(pRangeSpec->max));
+						HeapSafeFree(hHeap, 0, lpResolutions);
+						lpResolutions = NULL;
+						if (FAILED(hr))
+							return ERROR_OUTOFMEMORY;
 					}
 					break;
 
