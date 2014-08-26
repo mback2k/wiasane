@@ -244,7 +244,7 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	if (oOption) {
 		if (oOption->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
 			range = oOption->GetConstraintRange();
-			pScanInfo->Contrast            = (range->min + range->max) / 2;
+			pScanInfo->Contrast            = range->min + ((range->max - range->min) / 2);
 			pScanInfo->ContrastRange.lMin  = range->min;
 			pScanInfo->ContrastRange.lMax  = range->max;
 			pScanInfo->ContrastRange.lStep = range->quant ? range->quant : 1;
@@ -264,7 +264,8 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	if (oOption) {
 		if (oOption->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
 			range = oOption->GetConstraintRange();
-			pScanInfo->IntensityRange.lMin  = (range->min + range->max) / 2;
+			pScanInfo->Intensity            = range->min + ((range->max - range->min) / 2);
+			pScanInfo->IntensityRange.lMin  = range->min;
 			pScanInfo->IntensityRange.lMax  = range->max;
 			pScanInfo->IntensityRange.lStep = range->quant ? range->quant : 1;
 		}
