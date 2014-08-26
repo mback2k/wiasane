@@ -38,6 +38,7 @@ _Analysis_mode_(_Analysis_code_type_user_driver_)
 #define WIASANE_OPTION_BRIGHTNESS	"brightness"
 #define WIASANE_OPTION_COMPRESSION	"compression"
 #define WIASANE_OPTION_CONTRAST		"contrast"
+#define WIASANE_OPTION_SHARPNESS	"sharpness"
 #define WIASANE_OPTION_MODE			"mode"
 #define WIASANE_OPTION_PREVIEW		"preview"
 #define WIASANE_OPTION_RESOLUTION	"resolution"

@@ -154,6 +154,9 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	}
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_CONTRAST);
+	if (!oOption) {
+		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SHARPNESS);
+	}
 	if (oOption) {
 		hr = oOption->SetValue(pScanInfo->Contrast);
 		if (FAILED(hr) && hr != E_NOTIMPL) {

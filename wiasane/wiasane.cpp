@@ -185,6 +185,9 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			if (pContext->oDevice) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_CONTRAST);
 				if (!oOption) {
+					oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SHARPNESS);
+				}
+				if (!oOption) {
 					hr = E_NOTIMPL;
 					break;
 				}

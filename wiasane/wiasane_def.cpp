@@ -241,6 +241,9 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	pScanInfo->ContrastRange.lStep = 1;
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_CONTRAST);
+	if (!oOption) {
+		oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SHARPNESS);
+	}
 	if (oOption) {
 		if (oOption->GetConstraintType() == SANE_CONSTRAINT_RANGE) {
 			range = oOption->GetConstraintRange();
