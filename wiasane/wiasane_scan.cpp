@@ -131,12 +131,13 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 				break;
 		}
 		if (FAILED(hr)) {
-			Trace(TEXT("Failed to set option 'mode' according to '%d': %08x"),
-				pScanInfo->DataType, hr);
+			Trace(TEXT("Failed to set option '%hs' according to '%d': %08x"),
+				oOption->GetName(), pScanInfo->DataType, hr);
 			return hr;
 		}
 	} else {
-		Trace(TEXT("Required option 'mode' is not supported."));
+		Trace(TEXT("Required option '%hs' is not supported."),
+			WIASANE_OPTION_MODE);
 		return E_NOTIMPL;
 	}
 
@@ -144,12 +145,13 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	if (oOption) {
 		hr = oOption->SetValue(pScanInfo->Xresolution);
 		if (FAILED(hr)) {
-			Trace(TEXT("Failed to set option 'resolution' to '%d': %08x"),
-				pScanInfo->Xresolution, hr);
+			Trace(TEXT("Failed to set option '%hs' to '%d': %08x"),
+				oOption->GetName(), pScanInfo->Xresolution, hr);
 			return hr;
 		}
 	} else {
-		Trace(TEXT("Required option 'resolution' is not supported."));
+		Trace(TEXT("Required option '%hs' is not supported."),
+			WIASANE_OPTION_RESOLUTION);
 		return E_NOTIMPL;
 	}
 
@@ -160,8 +162,8 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	if (oOption) {
 		hr = oOption->SetValue(pScanInfo->Contrast);
 		if (FAILED(hr) && hr != E_NOTIMPL) {
-			Trace(TEXT("Failed to set option 'contrast' to '%d': %08x"),
-				pScanInfo->Contrast, hr);
+			Trace(TEXT("Failed to set option '%hs' to '%d': %08x"),
+				oOption->GetName(), pScanInfo->Contrast, hr);
 			return hr;
 		}
 	}
@@ -170,8 +172,8 @@ HRESULT SetScannerSettings(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	if (oOption) {
 		hr = oOption->SetValue(pScanInfo->Intensity);
 		if (FAILED(hr) && hr != E_NOTIMPL) {
-			Trace(TEXT("Failed to set option 'brightness' to '%d': %08x"),
-				pScanInfo->Intensity, hr);
+			Trace(TEXT("Failed to set option '%hs' to '%d': %08x"),
+				oOption->GetName(), pScanInfo->Intensity, hr);
 			return hr;
 		}
 	}
@@ -192,53 +194,57 @@ HRESULT SetScanWindow(_Inout_ PWIASANE_Context pContext)
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_TL_X);
 	if (!oOption) {
-		Trace(TEXT("Required option 'tl-x' is not supported."));
+		Trace(TEXT("Required option '%hs' is not supported."),
+			WIASANE_OPTION_TL_X);
 		return E_NOTIMPL;
 	}
 
 	hr = SetOptionValueInch(oOption, pContext->dblTopLeftX);
 	if (FAILED(hr)) {
-		Trace(TEXT("Failed to set option 'tl-x' to '%f': %08x"),
-			pContext->dblTopLeftX, hr);
+		Trace(TEXT("Failed to set option '%hs' to '%f': %08x"),
+			oOption->GetName(), pContext->dblTopLeftX, hr);
 		return hr;
 	}
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_TL_Y);
 	if (!oOption) {
-		Trace(TEXT("Required option 'tl-y' is not supported."));
+		Trace(TEXT("Required option '%hs' is not supported."),
+			WIASANE_OPTION_TL_Y);
 		return E_NOTIMPL;
 	}
 
 	hr = SetOptionValueInch(oOption, pContext->dblTopLeftY);
 	if (FAILED(hr)) {
-		Trace(TEXT("Failed to set option 'tl-y' to '%f': %08x"),
-			pContext->dblTopLeftY, hr);
+		Trace(TEXT("Failed to set option '%hs' to '%f': %08x"),
+			oOption->GetName(), pContext->dblTopLeftY, hr);
 		return hr;
 	}
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BR_X);
 	if (!oOption) {
-		Trace(TEXT("Required option 'br-x' is not supported."));
+		Trace(TEXT("Required option '%hs' is not supported."),
+			WIASANE_OPTION_BR_X);
 		return E_NOTIMPL;
 	}
 
 	hr = SetOptionValueInch(oOption, pContext->dblBottomRightX);
 	if (FAILED(hr)) {
-		Trace(TEXT("Failed to set option 'br-x' to '%f': %08x"),
-			pContext->dblBottomRightX, hr);
+		Trace(TEXT("Failed to set option '%hs' to '%f': %08x"),
+			oOption->GetName(), pContext->dblBottomRightX, hr);
 		return hr;
 	}
 
 	oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BR_Y);
 	if (!oOption) {
-		Trace(TEXT("Required option 'br-y' is not supported."));
+		Trace(TEXT("Required option '%hs' is not supported."),
+			WIASANE_OPTION_BR_Y);
 		return E_NOTIMPL;
 	}
 
 	hr = SetOptionValueInch(oOption, pContext->dblBottomRightY);
 	if (FAILED(hr)) {
-		Trace(TEXT("Failed to set option 'br-y' to '%f': %08x"),
-			pContext->dblBottomRightY, hr);
+		Trace(TEXT("Failed to set option '%hs' to '%f': %08x"),
+			oOption->GetName(), pContext->dblBottomRightY, hr);
 		return hr;
 	}
 
