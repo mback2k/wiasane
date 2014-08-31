@@ -490,7 +490,7 @@ DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device
 			lpResolutions = lpszResolutions;
 			do {
 				count++;
-				lpResolutions = StrChr(lpResolutions, ',');
+				lpResolutions = StrChr(lpResolutions, TEXT(','));
 				if (lpResolutions) {
 					lpResolutions++;
 				}
@@ -500,9 +500,11 @@ DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device
 			if (pDefaultResolutions) {
 				lpResolutions = lpszResolutions;
 				for (index = 0; index < count; index++) {
-					StrTrim(lpResolutions, TEXT(" "));
+					while (*lpResolutions == TEXT(' ')) {
+						lpResolutions++;
+					}
 					pDefaultResolutions[index] = StrToInt(lpResolutions);
-					lpResolutions = StrChr(lpResolutions, ',');
+					lpResolutions = StrChr(lpResolutions, TEXT(','));
 					if (lpResolutions) {
 						lpResolutions++;
 					}
