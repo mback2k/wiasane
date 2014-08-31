@@ -22,6 +22,7 @@
 
 #include <tchar.h>
 #include <strsafe.h>
+#include <shlwapi.h>
 #include <malloc.h>
 
 #include "dllmain.h"
@@ -424,14 +425,18 @@ DWORD WINAPI UpdateDeviceData(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDe
 _Success_(return == ERROR_SUCCESS)
 DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device oDevice, _Outptr_result_maybenull_ LPTSTR *plpszResolutions, _Out_opt_ size_t *pcbResolutions)
 {
-	SANE_Word arrDefaultResolutions[6] = { 75, 100, 150, 200, 300, 600 };
 	LPTSTR lpResolutions, lpszResolutions;
+	PSANE_Word pDefaultResolutions;
 	PWINSANE_Option oResolution;
 	PSANE_Range pRangeSpec;
 	PSANE_Word pWordList;
 	size_t cbResolutions;
+	INFCONTEXT infContext;
+	int index, count;
+	HINF hInfFile;
 	HRESULT hr;
-	int index;
+	DWORD size;
+	BOOL res;
 
 	if (!plpszResolutions)
 		return ERROR_INVALID_PARAMETER;
@@ -439,9 +444,6 @@ DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device
 	*plpszResolutions = NULL;
 	if (pcbResolutions)
 		*pcbResolutions = 0;
-
-	lpszResolutions = NULL;
-	cbResolutions = 0;
 
 	if (!pData || !oDevice)
 		return ERROR_INVALID_PARAMETER;
@@ -453,62 +455,133 @@ DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device
 	if (!oResolution)
 		return ERROR_NOT_SUPPORTED;
 
+	pDefaultResolutions = NULL;
+	lpResolutions = NULL;
+	lpszResolutions = NULL;
+	cbResolutions = 0;
+
 	switch (oResolution->GetConstraintType()) {
 		case SANE_CONSTRAINT_RANGE:
+			hInfFile = OpenInfFile(pData->hDeviceInfoSet, pData->pDeviceInfoData, NULL);
+			if (hInfFile != INVALID_HANDLE_VALUE) {
+				res = SetupFindFirstLine(hInfFile, TEXT("WIASANE.DeviceData"), TEXT("Resolutions"), &infContext);
+				if (res) {
+					res = SetupGetStringField(&infContext, 1, NULL, 0, &size);
+					if (res && size > 0 && (size+1) > size) {
+						lpszResolutions = (LPTSTR) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, (size+1) * sizeof(TCHAR));
+						if (lpszResolutions) {
+							res = SetupGetStringField(&infContext, 1, lpszResolutions, size, NULL);
+							if (!res) {
+								HeapSafeFree(pData->hHeap, 0, lpszResolutions);
+								lpszResolutions = NULL;
+							}
+						}
+					}
+				}
+
+				SetupCloseInfFile(hInfFile);
+			}
+
+			if (!lpszResolutions) {
+				return ERROR_UNIDENTIFIED_ERROR;
+			}
+
+			count = 0;
+			lpResolutions = lpszResolutions;
+			do {
+				count++;
+				lpResolutions = StrChr(lpResolutions, ',');
+				if (lpResolutions) {
+					lpResolutions++;
+				}
+			} while (lpResolutions);
+
+			pDefaultResolutions = (PSANE_Word) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, count * sizeof(SANE_Word));
+			if (pDefaultResolutions) {
+				lpResolutions = lpszResolutions;
+				for (index = 0; index < count; index++) {
+					StrTrim(lpResolutions, TEXT(" "));
+					pDefaultResolutions[index] = StrToInt(lpResolutions);
+					lpResolutions = StrChr(lpResolutions, ',');
+					if (lpResolutions) {
+						lpResolutions++;
+					}
+				}
+			}
+
+			HeapSafeFree(pData->hHeap, 0, lpszResolutions);
+			lpszResolutions = NULL;
+
+			if (!pDefaultResolutions) {
+				return ERROR_UNIDENTIFIED_ERROR;
+			}
+
 			pRangeSpec = oResolution->GetConstraintRange();
 			switch (oResolution->GetType()) {
 				case SANE_TYPE_INT:
 					hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%d"), pRangeSpec->min);
-					if (FAILED(hr))
+					if (FAILED(hr)) {
+						HeapSafeFree(pData->hHeap, 0, pDefaultResolutions);
 						return ERROR_OUTOFMEMORY;
-					for (index = 0; index < 6; index++) {
-						if (arrDefaultResolutions[index] <= pRangeSpec->min &&
-							arrDefaultResolutions[index] >= pRangeSpec->max) {
+					}
+					for (index = 0; index < count; index++) {
+						if (pDefaultResolutions[index] <= pRangeSpec->min &&
+							pDefaultResolutions[index] >= pRangeSpec->max) {
 								continue;
 						}
-						if (pRangeSpec->quant && ((arrDefaultResolutions[index] - pRangeSpec->min) % pRangeSpec->quant)) {
+						if (pRangeSpec->quant && ((pDefaultResolutions[index] - pRangeSpec->min) % pRangeSpec->quant)) {
 								continue;
 						}
 						lpResolutions = lpszResolutions;
-						hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, arrDefaultResolutions[index]);
+						hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pDefaultResolutions[index]);
 						HeapSafeFree(pData->hHeap, 0, lpResolutions);
 						lpResolutions = NULL;
-						if (FAILED(hr))
+						if (FAILED(hr)) {
+							HeapSafeFree(pData->hHeap, 0, pDefaultResolutions);
 							return ERROR_OUTOFMEMORY;
+						}
 					}
 					{
 						lpResolutions = lpszResolutions;
 						hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pRangeSpec->max);
 						HeapSafeFree(pData->hHeap, 0, lpResolutions);
 						lpResolutions = NULL;
-						if (FAILED(hr))
+						if (FAILED(hr)) {
+							HeapSafeFree(pData->hHeap, 0, pDefaultResolutions);
 							return ERROR_OUTOFMEMORY;
+						}
 					}
 					break;
 
 				case SANE_TYPE_FIXED:
 					hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%.0f"), SANE_UNFIX(pRangeSpec->min));
-					if (FAILED(hr))
+					if (FAILED(hr)) {
+						HeapSafeFree(pData->hHeap, 0, pDefaultResolutions);
 						return ERROR_OUTOFMEMORY;
-					for (index = 0; index < 6; index++) {
-						if (arrDefaultResolutions[index] <= SANE_UNFIX(pRangeSpec->min) &&
-							arrDefaultResolutions[index] >= SANE_UNFIX(pRangeSpec->max)) {
+					}
+					for (index = 0; index < count; index++) {
+						if (pDefaultResolutions[index] <= SANE_UNFIX(pRangeSpec->min) &&
+							pDefaultResolutions[index] >= SANE_UNFIX(pRangeSpec->max)) {
 								continue;
 						}
 						lpResolutions = lpszResolutions;
-						hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, arrDefaultResolutions[index]);
+						hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %d"), lpResolutions, pDefaultResolutions[index]);
 						HeapSafeFree(pData->hHeap, 0, lpResolutions);
 						lpResolutions = NULL;
-						if (FAILED(hr))
+						if (FAILED(hr)) {
+							HeapSafeFree(pData->hHeap, 0, pDefaultResolutions);
 							return ERROR_OUTOFMEMORY;
+						}
 					}
 					{
 						lpResolutions = lpszResolutions;
 						hr = StringCbAPrintf(pData->hHeap, &lpszResolutions, &cbResolutions, TEXT("%s, %.0f"), lpResolutions, SANE_UNFIX(pRangeSpec->max));
 						HeapSafeFree(pData->hHeap, 0, lpResolutions);
 						lpResolutions = NULL;
-						if (FAILED(hr))
+						if (FAILED(hr)) {
+							HeapSafeFree(pData->hHeap, 0, pDefaultResolutions);
 							return ERROR_OUTOFMEMORY;
+						}
 					}
 					break;
 
@@ -516,6 +589,7 @@ DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device
 					return ERROR_NOT_SUPPORTED;
 					break;
 			}
+			HeapSafeFree(pData->hHeap, 0, pDefaultResolutions);
 			break;
 
 		case SANE_CONSTRAINT_WORD_LIST:

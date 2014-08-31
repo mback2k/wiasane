@@ -82,7 +82,7 @@
     <Link>
       <ModuleDefinitionFile>coisane.def</ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(SolutionDir)strutil\$(OutDir);$(SolutionDir)winsane\$(OutDir);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies);setupapi.lib;difxapi.lib;comctl32.lib;version.lib;strutil.lib;winsane.lib</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies);setupapi.lib;difxapi.lib;comctl32.lib;version.lib;shlwapi.lib;strutil.lib;winsane.lib</AdditionalDependencies>
       <GenerateDebugInformation>True</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
