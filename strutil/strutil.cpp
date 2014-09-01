@@ -26,28 +26,59 @@
 #include "strutil_mem.h"
 
 _Success_(return != NULL)
-LPTSTR WINAPI StringDup(_In_ HANDLE hHeap, _In_ LPTSTR lpszString)
+LPSTR WINAPI StringDupA(_In_ HANDLE hHeap, _In_ LPCSTR lpszString)
 {
-	LPTSTR lpszCopy;
+	LPSTR lpszCopy;
 	size_t cbCopy;
 	HRESULT hr;
 
 	if (!lpszString)
 		return NULL;
 
-	hr = StringCbLength(lpszString, (STRSAFE_MAX_CCH-1) * sizeof(TCHAR), &cbCopy);
+	hr = StringCbLengthA(lpszString, (STRSAFE_MAX_CCH-1) * sizeof(CHAR), &cbCopy);
 	if (FAILED(hr))
 		return NULL;
 
-	if ((cbCopy + sizeof(TCHAR)) <= cbCopy)
+	if ((cbCopy + sizeof(CHAR)) <= cbCopy)
 		return NULL;
 
-	cbCopy += sizeof(TCHAR);
-	lpszCopy = (LPTSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbCopy);
+	cbCopy += sizeof(CHAR);
+	lpszCopy = (LPSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbCopy);
 	if (!lpszCopy)
 		return NULL;
 
-	hr = StringCbCopyN(lpszCopy, cbCopy, lpszString, cbCopy);
+	hr = StringCbCopyNA(lpszCopy, cbCopy, lpszString, cbCopy);
+	if (FAILED(hr)) {
+		HeapSafeFree(hHeap, 0, lpszCopy);
+		return NULL;
+	}
+
+	return lpszCopy;
+}
+
+_Success_(return != NULL)
+LPWSTR WINAPI StringDupW(_In_ HANDLE hHeap, _In_ LPCWSTR lpszString)
+{
+	LPWSTR lpszCopy;
+	size_t cbCopy;
+	HRESULT hr;
+
+	if (!lpszString)
+		return NULL;
+
+	hr = StringCbLengthW(lpszString, (STRSAFE_MAX_CCH-1) * sizeof(WCHAR), &cbCopy);
+	if (FAILED(hr))
+		return NULL;
+
+	if ((cbCopy + sizeof(WCHAR)) <= cbCopy)
+		return NULL;
+
+	cbCopy += sizeof(WCHAR);
+	lpszCopy = (LPWSTR) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, cbCopy);
+	if (!lpszCopy)
+		return NULL;
+
+	hr = StringCbCopyNW(lpszCopy, cbCopy, lpszString, cbCopy);
 	if (FAILED(hr)) {
 		HeapSafeFree(hHeap, 0, lpszCopy);
 		return NULL;

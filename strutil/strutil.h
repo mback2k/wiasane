@@ -33,7 +33,9 @@ __user_code
 #include <strsafe.h>
 
 _Success_(return != NULL)
-LPTSTR WINAPI StringDup(_In_ HANDLE hHeap, _In_ LPTSTR lpszString);
+LPSTR WINAPI StringDupA(_In_ HANDLE hHeap, _In_ LPCSTR lpszString);
+_Success_(return != NULL)
+LPWSTR WINAPI StringDupW(_In_ HANDLE hHeap, _In_ LPCWSTR lpszString);
 
 _Success_(return != NULL)
 LPSTR WINAPI StringConvWToA(_In_ HANDLE hHeap, _In_ LPWSTR lpszString);
@@ -61,18 +63,20 @@ _Success_(SUCCEEDED(return))
 HRESULT StringCchAVPrintfW( _In_ HANDLE hHeap, _Outptr_result_nullonfailure_ LPWSTR *plpszDest, _Out_opt_ size_t *pcchDest, _In_ LPCWSTR lpszFormat, _In_ va_list argList);
 
 #ifdef UNICODE
+#define StringDup StringDupW
 #define StringConvToA StringConvWToA
-#define StringConvToW StringDup
+#define StringConvToW StringDupW
 #define StringConvATo StringConvAToW
-#define StringConvWTo StringDup
+#define StringConvWTo StringDupW
 #define StringCbAPrintf StringCbAPrintfW
 #define StringCchAPrintf StringCchAPrintfW
 #define StringCbAVPrintf StringCbAVPrintfW
 #define StringCchAVPrintf StringCchAVPrintfW
 #else
-#define StringConvToA StringDup
+#define StringDup StringDupA
+#define StringConvToA StringDupA
 #define StringConvToW StringConvAToW
-#define StringConvATo StringDup
+#define StringConvATo StringDupA
 #define StringConvWTo StringConvWToA
 #define StringCbAPrintf StringCbAPrintfA
 #define StringCchAPrintf StringCchAPrintfA
