@@ -22,7 +22,6 @@
 
 #include <tchar.h>
 #include <strsafe.h>
-#include <shlwapi.h>
 #include <malloc.h>
 
 #include "dllmain.h"
