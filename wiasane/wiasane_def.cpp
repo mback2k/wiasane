@@ -22,7 +22,6 @@
 
 #include <sti.h>
 #include <wia.h>
-#include <shlwapi.h>
 
 #include "wiasane_opt.h"
 #include "wiasane_scan.h"
@@ -163,16 +162,16 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	if (oOption && oOption->GetType() == SANE_TYPE_STRING && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
 		string_list = oOption->GetConstraintStringList();
 		for (index = 0; string_list[index] != NULL; index++) {
-			if (StrStrIA(string_list[index], WIASANE_SOURCE_ADF) ||
-				StrStrIA(string_list[index], WIASANE_SOURCE_ADF_EX)) {
+			if (_stricmp(string_list[index], WIASANE_SOURCE_ADF) ||
+				_stricmp(string_list[index], WIASANE_SOURCE_ADF_EX)) {
 				pScanInfo->ADF = max(pScanInfo->ADF, 1);
-				pContext->pValues->pszSourceADF = StrDupA(string_list[index]);
-			} else if (StrStrIA(string_list[index], WIASANE_SOURCE_DUPLEX)) {
+				pContext->pValues->pszSourceADF = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
+			} else if (_stricmp(string_list[index], WIASANE_SOURCE_DUPLEX)) {
 				pScanInfo->ADF = max(pScanInfo->ADF, 2);
-				pContext->pValues->pszSourceDuplex = StrDupA(string_list[index]);
-			} else if (StrStrIA(string_list[index], WIASANE_SOURCE_FLATBED) ||
+				pContext->pValues->pszSourceDuplex = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
+			} else if (_stricmp(string_list[index], WIASANE_SOURCE_FLATBED) ||
 					    !pContext->pValues->pszSourceFlatbed) {
-				pContext->pValues->pszSourceFlatbed = StrDupA(string_list[index]);
+				pContext->pValues->pszSourceFlatbed = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
 			}
 		}
 	}
@@ -184,17 +183,17 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	if (oOption && oOption->GetType() == SANE_TYPE_STRING && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
 		string_list = oOption->GetConstraintStringList();
 		for (index = 0; string_list[index] != NULL; index++) {
-			if (StrCmpIA(string_list[index], WIASANE_MODE_LINEART) == 0 ||
-				StrCmpIA(string_list[index], WIASANE_MODE_THRESHOLD) == 0) {
+			if (_stricmp(string_list[index], WIASANE_MODE_LINEART) == 0 ||
+				_stricmp(string_list[index], WIASANE_MODE_THRESHOLD) == 0) {
 				pScanInfo->SupportedDataTypes |= SUPPORT_BW;
-				pContext->pValues->pszModeThreshold = StrDupA(string_list[index]);
-			} else if (StrCmpIA(string_list[index], WIASANE_MODE_GRAY) == 0 ||
-					    StrCmpIA(string_list[index], WIASANE_MODE_GRAYSCALE) == 0) {
+				pContext->pValues->pszModeThreshold = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
+			} else if (_stricmp(string_list[index], WIASANE_MODE_GRAY) == 0 ||
+					    _stricmp(string_list[index], WIASANE_MODE_GRAYSCALE) == 0) {
 				pScanInfo->SupportedDataTypes |= SUPPORT_GRAYSCALE;
-				pContext->pValues->pszModeGrayscale = StrDupA(string_list[index]);
-			} else if (StrCmpIA(string_list[index], WIASANE_MODE_COLOR) == 0) {
+				pContext->pValues->pszModeGrayscale = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
+			} else if (_stricmp(string_list[index], WIASANE_MODE_COLOR) == 0) {
 				pScanInfo->SupportedDataTypes |= SUPPORT_COLOR;
-				pContext->pValues->pszModeColor = StrDupA(string_list[index]);
+				pContext->pValues->pszModeColor = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
 			}
 		}
 	}
@@ -316,27 +315,27 @@ HRESULT FreeScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 		return S_OK;
 
 	if (pContext->pValues->pszModeThreshold) {
-		LocalSafeFree(pContext->pValues->pszModeThreshold);
+		HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues->pszModeThreshold);
 		pContext->pValues->pszModeThreshold = NULL;
 	}
 	if (pContext->pValues->pszModeGrayscale) {
-		LocalSafeFree(pContext->pValues->pszModeGrayscale);
+		HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues->pszModeGrayscale);
 		pContext->pValues->pszModeGrayscale = NULL;
 	}
 	if (pContext->pValues->pszModeColor) {
-		LocalSafeFree(pContext->pValues->pszModeColor);
+		HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues->pszModeColor);
 		pContext->pValues->pszModeColor = NULL;
 	}
 	if (pContext->pValues->pszSourceFlatbed) {
-		LocalSafeFree(pContext->pValues->pszSourceFlatbed);
+		HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues->pszSourceFlatbed);
 		pContext->pValues->pszSourceFlatbed = NULL;
 	}
 	if (pContext->pValues->pszSourceADF) {
-		LocalSafeFree(pContext->pValues->pszSourceADF);
+		HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues->pszSourceADF);
 		pContext->pValues->pszSourceADF = NULL;
 	}
 	if (pContext->pValues->pszSourceDuplex) {
-		LocalSafeFree(pContext->pValues->pszSourceDuplex);
+		HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues->pszSourceDuplex);
 		pContext->pValues->pszSourceDuplex = NULL;
 	}
 
