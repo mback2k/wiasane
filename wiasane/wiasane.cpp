@@ -151,18 +151,24 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			if (pContext->oDevice) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_RESOLUTION);
 				if (!oOption) {
+					Trace(TEXT("Required option '%hs' is not supported."),
+						WIASANE_OPTION_RESOLUTION);
 					hr = E_NOTIMPL;
 					break;
 				}
 				if (!oOption->IsValidValue(pValue->lVal)) {
+					Trace(TEXT("Invalid value '%d' for option '%hs'."),
+						pValue->lVal, oOption->GetName());
 					hr = E_INVALIDARG;
 					break;
 				}
 			} else {
+				Trace(TEXT("No device selected."));
 				hr = E_FAIL;
 				break;
 			}
 
+			Trace(TEXT("Set Xresolution to '%d'."), pValue->lVal);
 			pValue->pScanInfo->Xresolution = pValue->lVal;
 			hr = S_OK;
 			break;
@@ -171,10 +177,13 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			Trace(TEXT("CMD_SETYRESOLUTION"));
 
 			if (pValue->pScanInfo->Xresolution != pValue->lVal) {
+				Trace(TEXT("Invalid value '%d' compared to '%d'."),
+					pValue->lVal, pValue->pScanInfo->Xresolution);
 				hr = E_INVALIDARG;
 				break;
 			}
 
+			Trace(TEXT("Set Yresolution to '%d'."), pValue->lVal);
 			pValue->pScanInfo->Yresolution = pValue->lVal;
 			hr = S_OK;
 			break;
@@ -188,18 +197,24 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 					oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SHARPNESS);
 				}
 				if (!oOption) {
+					Trace(TEXT("Option '%hs' or '%hs' is not supported."),
+						WIASANE_OPTION_CONTRAST, WIASANE_OPTION_SHARPNESS);
 					hr = E_NOTIMPL;
 					break;
 				}
 				if (!oOption->IsValidValue(pValue->lVal)) {
+					Trace(TEXT("Invalid value '%d' for option '%hs'."),
+						pValue->lVal, oOption->GetName());
 					hr = E_INVALIDARG;
 					break;
 				}
 			} else {
+				Trace(TEXT("No device selected."));
 				hr = E_FAIL;
 				break;
 			}
 
+			Trace(TEXT("Set Contrast to '%d'."), pValue->lVal);
 			pValue->pScanInfo->Contrast = pValue->lVal;
 			hr = S_OK;
 			break;
@@ -210,18 +225,24 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			if (pContext->oDevice) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BRIGHTNESS);
 				if (!oOption) {
+					Trace(TEXT("Option '%hs' or '%hs' is not supported."),
+						WIASANE_OPTION_BRIGHTNESS);
 					hr = E_NOTIMPL;
 					break;
 				}
 				if (!oOption->IsValidValue(pValue->lVal)) {
+					Trace(TEXT("Invalid value '%d' for option '%hs'."),
+						pValue->lVal, oOption->GetName());
 					hr = E_INVALIDARG;
 					break;
 				}
 			} else {
+				Trace(TEXT("No device selected."));
 				hr = E_FAIL;
 				break;
 			}
 
+			Trace(TEXT("Set Intensity to '%d'."), pValue->lVal);
 			pValue->pScanInfo->Intensity = pValue->lVal;
 			hr = S_OK;
 			break;
@@ -231,20 +252,24 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 			if (pValue->lVal == WIA_DATA_THRESHOLD && !(
 			    pValue->pScanInfo->SupportedDataTypes & SUPPORT_BW)) {
+					Trace(TEXT("Threshold mode is not supported."));
 					hr = E_NOTIMPL;
 					break;
 			}
 			if (pValue->lVal == WIA_DATA_GRAYSCALE && !(
 			    pValue->pScanInfo->SupportedDataTypes & SUPPORT_GRAYSCALE)) {
+					Trace(TEXT("Grayscale mode is not supported."));
 					hr = E_NOTIMPL;
 					break;
 			}
 			if (pValue->lVal == WIA_DATA_COLOR && !(
 			    pValue->pScanInfo->SupportedDataTypes & SUPPORT_COLOR)) {
+					Trace(TEXT("Color mode is not supported."));
 					hr = E_NOTIMPL;
 					break;
 			}
 
+			Trace(TEXT("Set DataType to '%d'."), pValue->lVal);
 			pValue->pScanInfo->DataType = pValue->lVal;
 			hr = S_OK;
 			break;
@@ -254,10 +279,12 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 			if (pValue->lVal != SCANMODE_FINALSCAN &&
 				pValue->lVal != SCANMODE_PREVIEWSCAN) {
+					Trace(TEXT("Unknown scan mode is not supported."));
 					hr = E_INVALIDARG;
 					break;
 			}
 
+			Trace(TEXT("Set lScanMode to '%d'."), pValue->lVal);
 			pContext->lScanMode = pValue->lVal;
 			hr = S_OK;
 			break;
@@ -265,6 +292,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_SETNEGATIVE: // offline
 			Trace(TEXT("CMD_SETNEGATIVE"));
 
+			Trace(TEXT("Set Negative to '%d'."), pValue->lVal);
 			pValue->pScanInfo->Negative = pValue->lVal;
 			hr = S_OK;
 			break;
