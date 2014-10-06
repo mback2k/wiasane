@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
-    <ProductionCertificate>E=info@marc-hoersken.de, CN=Marc Hörsken, L=Oberhausen, S=Nordrhein-Westfalen, C=DE, Description=iIR2G9Yg1O9171rQ | A134190D4A6EF60CFF10754897CEBFBDEA705255</ProductionCertificate>
+    <ProductionCertificate>E=info@marc-hoersken.de, CN=Marc Hörsken, L=Mannheim, S=Baden-Wuerttemberg, C=DE, Description=W6261QR3g96rz13c | 32EE5409DE44BC0B47C9B72DA8F82D9B166FC781</ProductionCertificate>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='x64'">
     <LocalDebuggerCommand>C:\Program Files (x86)\Windows Kits\8.0\Tools\x64\devcon.exe</LocalDebuggerCommand>
