@@ -32,6 +32,9 @@
 
 WINSANE_Session::WINSANE_Session(_In_ SOCKET sock)
 {
+	this->auth_callback_ex_userdata = NULL;
+	this->auth_callback_ex = NULL;
+	this->auth_callback = NULL;
 	this->sock = new WINSANE_Socket(sock);
 	this->initialized = FALSE;
 	this->num_devices = 0;
@@ -52,6 +55,9 @@ WINSANE_Session::~WINSANE_Session()
 	}
 
 	this->initialized = FALSE;
+	this->auth_callback = NULL;
+	this->auth_callback_ex = NULL;
+	this->auth_callback_ex_userdata = NULL;
 }
 
 PWINSANE_Session WINSANE_Session::Remote(_In_ PADDRINFOT addrInfo)
