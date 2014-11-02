@@ -37,8 +37,8 @@ WINSANE_Session::WINSANE_Session(_In_ SOCKET sock)
 	this->auth_callback = NULL;
 	this->sock = new WINSANE_Socket(sock);
 	this->initialized = FALSE;
-	this->num_devices = 0;
 	this->devices = NULL;
+	this->num_devices = 0;
 }
 
 WINSANE_Session::~WINSANE_Session()
@@ -314,6 +314,9 @@ SANE_Status WINSANE_Session::Exit()
 		return SANE_STATUS_IO_ERROR;
 
 	this->initialized = FALSE;
+	this->auth_callback = NULL;
+	this->auth_callback_ex = NULL;
+	this->auth_callback_ex_userdata = NULL;
 	return SANE_STATUS_GOOD;
 }
 
