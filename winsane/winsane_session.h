@@ -50,6 +50,7 @@ public:
 
 	/* Public API */
 	SANE_Status Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth_Callback authorize);
+	SANE_Status InitEx(_In_opt_ PSANE_Int version, _In_opt_ WINSANE_Auth_Callback authorize, _In_opt_ void *userdata);
 	SANE_Status Authorize(_In_ SANE_String resource);
 	BOOL IsInitialized();
 	SANE_Status Exit();
@@ -67,8 +68,10 @@ private:
 	PWINSANE_Device *devices;
 
 	BOOL initialized;
-	SANE_Auth_Callback auth_callback;
 	PWINSANE_Socket sock;
+	SANE_Auth_Callback auth_callback;
+	WINSANE_Auth_Callback auth_callback_ex;
+	void *auth_callback_ex_userdata;
 };
 
 #endif

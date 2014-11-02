@@ -159,13 +159,13 @@ SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth
 	LONG written;
 	HRESULT hr;
 
+	this->auth_callback = authorize;
+
 	if (!this->sock->IsConnected()) {
 		if (!this->sock->Reconnect()) {
 			return SANE_STATUS_IO_ERROR;
 		}
 	}
-
-	this->auth_callback = authorize;
 
 	version_code = SANE_VERSION_CODE(SANE_CURRENT_MAJOR, SANE_CURRENT_MINOR, 0);
 	if (version)
@@ -199,6 +199,14 @@ SANE_Status WINSANE_Session::Init(_In_opt_ PSANE_Int version, _In_opt_ SANE_Auth
 	return SANE_STATUS_GOOD;
 }
 
+SANE_Status WINSANE_Session::InitEx(_In_opt_ PSANE_Int version, _In_opt_ WINSANE_Auth_Callback authorize, _In_opt_ void *userdata)
+{
+	this->auth_callback_ex = authorize;
+	this->auth_callback_ex_userdata = userdata;
+
+	return this->Init(version, NULL);
+}
+
 SANE_Status WINSANE_Session::Authorize(_In_ SANE_String resource)
 {
 	SANE_Char username[SANE_MAX_USERNAME_LEN+1];
@@ -212,7 +220,7 @@ SANE_Status WINSANE_Session::Authorize(_In_ SANE_String resource)
 	HCRYPTHASH hHash;
 	HRESULT hr;
 
-	if (!this->auth_callback || !resource)
+	if ((!this->auth_callback && !this->auth_callback_ex) || !resource)
 		return SANE_STATUS_ACCESS_DENIED;
 
 	reslen = (DWORD) strlen(resource);
@@ -221,7 +229,10 @@ SANE_Status WINSANE_Session::Authorize(_In_ SANE_String resource)
 
 	ZeroMemory(username, sizeof(username));
 	ZeroMemory(password, sizeof(password));
-	this->auth_callback(resource, username, password);
+	if (this->auth_callback_ex)
+		this->auth_callback_ex(resource, username, password, this->auth_callback_ex_userdata);
+	else if (this->auth_callback)
+		this->auth_callback(resource, username, password);
 	username[SANE_MAX_USERNAME_LEN] = 0;
 	password[SANE_MAX_PASSWORD_LEN] = 0;
 

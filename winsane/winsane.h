@@ -31,6 +31,8 @@
 
 #define WINSANE_API_CALLBACK extern "C" void
 
+typedef void (*WINSANE_Auth_Callback) (SANE_String_Const resource, SANE_Char *username, SANE_Char *password, void *userdata);
+
 #ifdef WINSANE_EXPORTS
 #define WINSANE_API __declspec(dllexport)
 #else
