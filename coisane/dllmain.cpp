@@ -50,6 +50,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
 				g_hWiaDefInstance = LoadLibrary(TEXT("wiadefui.dll"));
 			}
 
+			// fall through to thread attachment
 		case DLL_THREAD_ATTACH:
 			if (!g_bCommonControls) {
 				ZeroMemory(&initCommonControlsEx, sizeof(INITCOMMONCONTROLSEX));
