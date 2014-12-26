@@ -30,6 +30,7 @@
 
 #include "resource.h"
 #include "strutil.h"
+#include "strutil_mem.h"
 #include "strutil_dbg.h"
 
 
@@ -85,6 +86,8 @@ DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Out_ PINSTALLERINFO pInstallerInfo, 
 					pInstallerInfo->pProductName = lpszValue;
 				} else
 					Trace(TEXT("VerQueryValue 2 failed: %08X"), GetLastError());
+
+				HeapSafeFree(hHeap, 0, lpszSubBlock);
 			} else
 				Trace(TEXT("StringCbAPrintf 1 failed: %08X"), hr);
 
@@ -97,6 +100,8 @@ DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Out_ PINSTALLERINFO pInstallerInfo, 
 					pInstallerInfo->pMfgName = lpszValue;
 				} else
 					Trace(TEXT("VerQueryValue 3 failed: %08X"), GetLastError());
+
+				HeapSafeFree(hHeap, 0, lpszSubBlock);
 			} else
 				Trace(TEXT("StringCbAPrintf 2 failed: %08X"), hr);
 		} else
