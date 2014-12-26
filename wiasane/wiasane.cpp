@@ -528,7 +528,8 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				Trace(TEXT("Data: %d/%d"), pContext->pTask->uiReceived, pContext->pTask->uiTotal);
 			}
 
-		case SCAN_NEXT: // SCAN_FIRST will fall through to SCAN_NEXT (because it is expecting data)
+			// SCAN_FIRST will fall through to SCAN_NEXT (because it is expecting data)
+		case SCAN_NEXT:
 			if (lPhase == SCAN_NEXT)
 				Trace(TEXT("SCAN_NEXT"));
 
