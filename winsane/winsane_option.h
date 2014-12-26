@@ -68,8 +68,8 @@ public:
 
 
 protected:
-	HRESULT GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _Out_ PVOID *value_result);
-	HRESULT SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _In_ PVOID value, _Out_ PVOID *value_result);
+	HRESULT GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _Out_ PBYTE *value_result);
+	HRESULT SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _In_ PBYTE value, _Out_ PBYTE *value_result);
 
 
 private:

@@ -257,7 +257,7 @@ HRESULT WINSANE_Option::GetValue(_Out_ double *value)
 
 HRESULT WINSANE_Option::GetValueBool(_Out_ PSANE_Bool value_bool)
 {
-	PVOID value;
+	PBYTE value;
 	HRESULT hr;
 
 	if (!value_bool)
@@ -281,7 +281,7 @@ HRESULT WINSANE_Option::GetValueBool(_Out_ PSANE_Bool value_bool)
 
 HRESULT WINSANE_Option::GetValueInt(_Out_ PSANE_Int value_int)
 {
-	PVOID value;
+	PBYTE value;
 	HRESULT hr;
 
 	if (!value_int)
@@ -305,7 +305,7 @@ HRESULT WINSANE_Option::GetValueInt(_Out_ PSANE_Int value_int)
 
 HRESULT WINSANE_Option::GetValueFixed(_Out_ PSANE_Fixed value_fixed)
 {
-	PVOID value;
+	PBYTE value;
 	HRESULT hr;
 
 	if (!value_fixed)
@@ -329,7 +329,7 @@ HRESULT WINSANE_Option::GetValueFixed(_Out_ PSANE_Fixed value_fixed)
 
 HRESULT WINSANE_Option::GetValueString(_Out_ PSANE_String value_string)
 {
-	PVOID value;
+	PBYTE value;
 	HRESULT hr;
 
 	if (!value_string)
@@ -378,7 +378,7 @@ HRESULT WINSANE_Option::SetValue(_In_ double value)
 
 HRESULT WINSANE_Option::SetValueBool(_In_ SANE_Bool value_bool)
 {
-	PVOID value;
+	PBYTE value;
 	HRESULT hr;
 
 	if (this->sane_option->type != SANE_TYPE_BOOL)
@@ -386,7 +386,7 @@ HRESULT WINSANE_Option::SetValueBool(_In_ SANE_Bool value_bool)
 
 	value_bool = htonl(value_bool);
 
-	hr = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Bool), (PVOID) &value_bool, &value);
+	hr = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Bool), (PBYTE) &value_bool, &value);
 	if (FAILED(hr))
 		return hr;
 
@@ -401,7 +401,7 @@ HRESULT WINSANE_Option::SetValueBool(_In_ SANE_Bool value_bool)
 
 HRESULT WINSANE_Option::SetValueInt(_In_ SANE_Int value_int)
 {
-	PVOID value;
+	PBYTE value;
 	HRESULT hr;
 
 	if (this->sane_option->type != SANE_TYPE_INT)
@@ -409,7 +409,7 @@ HRESULT WINSANE_Option::SetValueInt(_In_ SANE_Int value_int)
 
 	value_int = htonl(value_int);
 
-	hr = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Int), (PVOID) &value_int, &value);
+	hr = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Int), (PBYTE) &value_int, &value);
 	if (FAILED(hr))
 		return hr;
 
@@ -424,7 +424,7 @@ HRESULT WINSANE_Option::SetValueInt(_In_ SANE_Int value_int)
 
 HRESULT WINSANE_Option::SetValueFixed(_In_ SANE_Fixed value_fixed)
 {
-	PVOID value;
+	PBYTE value;
 	HRESULT hr;
 
 	if (this->sane_option->type != SANE_TYPE_FIXED)
@@ -432,7 +432,7 @@ HRESULT WINSANE_Option::SetValueFixed(_In_ SANE_Fixed value_fixed)
 
 	value_fixed = htonl(value_fixed);
 
-	hr = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Fixed), (PVOID) &value_fixed, &value);
+	hr = this->SetValue(this->sane_option->type, this->sane_option->size, this->sane_option->size / sizeof(SANE_Fixed), (PBYTE) &value_fixed, &value);
 	if (FAILED(hr))
 		return hr;
 
@@ -448,7 +448,7 @@ HRESULT WINSANE_Option::SetValueFixed(_In_ SANE_Fixed value_fixed)
 HRESULT WINSANE_Option::SetValueString(_In_ SANE_String_Const value_string)
 {
 	SANE_Word value_size;
-	PVOID value;
+	PBYTE value;
 	HRESULT hr;
 
 	if (this->sane_option->type != SANE_TYPE_STRING)
@@ -459,7 +459,7 @@ HRESULT WINSANE_Option::SetValueString(_In_ SANE_String_Const value_string)
 	else
 		value_size = 0;
 
-	hr = this->SetValue(this->sane_option->type, value_size, value_size, (PVOID) value_string, &value);
+	hr = this->SetValue(this->sane_option->type, value_size, value_size, (PBYTE) value_string, &value);
 	if (FAILED(hr))
 		return hr;
 
@@ -474,7 +474,7 @@ HRESULT WINSANE_Option::SetValueString(_In_ SANE_String_Const value_string)
 }
 
 
-HRESULT WINSANE_Option::GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _Out_ PVOID *value_result)
+HRESULT WINSANE_Option::GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _Out_ PBYTE *value_result)
 {
 	LONG written;
 	HRESULT hr;
@@ -512,7 +512,7 @@ HRESULT WINSANE_Option::GetValue(_In_ SANE_Word value_type, _In_ SANE_Word value
 	return S_OK;
 }
 
-HRESULT WINSANE_Option::SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _In_ PVOID value, _Out_ PVOID *value_result)
+HRESULT WINSANE_Option::SetValue(_In_ SANE_Word value_type, _In_ SANE_Word value_size, _In_ SANE_Word element_count, _In_ PBYTE value, _Out_ PBYTE *value_result)
 {
 	LONG written;
 	HRESULT hr;
