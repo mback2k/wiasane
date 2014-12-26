@@ -65,11 +65,14 @@ PWINSANE_Session WINSANE_Session::Remote(_In_ PADDRINFOT addrInfo)
 	SOCKET sock;
 
 	sock = socket(addrInfo->ai_family, addrInfo->ai_socktype, addrInfo->ai_protocol);
-	if (sock == INVALID_SOCKET)
+	if (sock == INVALID_SOCKET) {
 		return NULL;
+	}
 
-	if (connect(sock, addrInfo->ai_addr, (int) addrInfo->ai_addrlen) != 0)
+	if (connect(sock, addrInfo->ai_addr, (int) addrInfo->ai_addrlen) != 0) {
+		closesocket(sock);
 		return NULL;
+	}
 
 	return new WINSANE_Session(sock);
 }
