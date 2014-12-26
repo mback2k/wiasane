@@ -95,6 +95,7 @@ BOOL WINSANE_Socket::Reconnect()
 		return FALSE;
 	}
 
+	delete[] new_addr;
 	this->Disconnect();
 	this->Close();
 
