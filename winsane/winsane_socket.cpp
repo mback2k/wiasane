@@ -360,7 +360,7 @@ HRESULT WINSANE_Socket::ReadString(_Out_ PSANE_String s)
 	if (FAILED(hr))
 		return hr;
 
-	if (length > 0) {
+	if (length > 0 && length < MAXINT32) {
 		*s = new SANE_Char[length+1];
 		if (this->Read((PBYTE) *s, length) == length) {
 			(*s)[length] = '\0';
