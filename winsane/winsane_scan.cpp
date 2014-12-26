@@ -159,9 +159,6 @@ SANE_Status WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length)
 			this->state = COMPLETED;
 			return SANE_STATUS_EOF;
 		}
-		if (record_size == MAXUINT32) {
-			return SANE_STATUS_INVAL;
-		}
 
 		this->buf = (PBYTE) malloc(record_size);
 		if (!this->buf)
@@ -181,9 +178,6 @@ SANE_Status WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length)
 			if (size == SOCKET_ERROR) {
 				this->state = DISCONNECTED;
 				return SANE_STATUS_IO_ERROR;
-			}
-			if (size == MAXDWORD) {
-				return SANE_STATUS_INVAL;
 			}
 
 			this->bufoff += size;
