@@ -463,10 +463,12 @@ HRESULT WINSANE_Option::SetValueString(_In_ SANE_String_Const value_string)
 	if (FAILED(hr))
 		return hr;
 
-	if (value_string && value)
+	if (value_string && value) {
 		hr = strcmp(value_string, (SANE_String_Const) value) == 0 ? S_OK : FALSE;
-	else
+		delete[] value;
+	} else {
 		hr = value_string == (SANE_String_Const) value ? S_OK : S_FALSE;
+	}
 
 	return hr;
 }
