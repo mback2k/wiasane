@@ -159,6 +159,9 @@ SANE_Status WINSANE_Scan::Receive(_Inout_ PBYTE buffer, _Inout_ PDWORD length)
 			this->state = COMPLETED;
 			return SANE_STATUS_EOF;
 		}
+		if (record_size > (1024 * 1024 * 1024)) {
+			return SANE_STATUS_INVAL;
+		}
 
 		this->buf = (PBYTE) malloc(record_size);
 		if (!this->buf)
