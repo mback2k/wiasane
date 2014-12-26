@@ -532,7 +532,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			if (lPhase == SCAN_NEXT)
 				Trace(TEXT("SCAN_NEXT"));
 
-			if (!pBuffer)
+			if (!pBuffer || !plReceived)
 				break;
 
 			//
