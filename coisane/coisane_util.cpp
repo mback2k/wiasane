@@ -587,6 +587,7 @@ DWORD WINAPI CreateResolutionList(_In_ PCOISANE_Data pData, _In_ PWINSANE_Device
 					break;
 
 				default:
+					HeapSafeFree(pData->hHeap, 0, pDefaultResolutions);
 					return ERROR_NOT_SUPPORTED;
 					break;
 			}
