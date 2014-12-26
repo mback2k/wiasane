@@ -392,27 +392,27 @@ SANE_Status WINSANE_Device::GetParams(_Outptr_result_maybenull_ PWINSANE_Params 
 
 	sane_params = new SANE_Parameters();
 
-	this->sock->ReadWord((PSANE_Word) &sane_params->format);
+	hr = this->sock->ReadWord((PSANE_Word) &sane_params->format);
 	if (FAILED(hr))
 		goto fail;
 
-	this->sock->ReadWord(&sane_params->last_frame);
+	hr = this->sock->ReadWord(&sane_params->last_frame);
 	if (FAILED(hr))
 		goto fail;
 
-	this->sock->ReadWord(&sane_params->bytes_per_line);
+	hr = this->sock->ReadWord(&sane_params->bytes_per_line);
 	if (FAILED(hr))
 		goto fail;
 
-	this->sock->ReadWord(&sane_params->pixels_per_line);
+	hr = this->sock->ReadWord(&sane_params->pixels_per_line);
 	if (FAILED(hr))
 		goto fail;
 
-	this->sock->ReadWord(&sane_params->lines);
+	hr = this->sock->ReadWord(&sane_params->lines);
 	if (FAILED(hr))
 		goto fail;
 
-	this->sock->ReadWord(&sane_params->depth);
+	hr = this->sock->ReadWord(&sane_params->depth);
 	if (FAILED(hr))
 		goto fail;
 
