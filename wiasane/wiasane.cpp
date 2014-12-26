@@ -115,10 +115,12 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_RESETSCANNER: // online
 			Trace(TEXT("CMD_RESETSCANNER"));
 
+			// fall through to device reset
 		case CMD_STI_DEVICERESET: // online
 			if (lCommand == CMD_STI_DEVICERESET)
 				Trace(TEXT("CMD_STI_DEVICERESET"));
 
+			// fall through to diagnostics, including device reset
 		case CMD_STI_DIAGNOSTIC: // online
 			if (lCommand == CMD_STI_DIAGNOSTIC)
 				Trace(TEXT("CMD_STI_DIAGNOSTIC"));
