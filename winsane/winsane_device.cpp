@@ -239,6 +239,9 @@ SANE_Status WINSANE_Device::FetchOptions()
 				if (FAILED(hr))
 					break;
 
+				if (num_values == 0 || num_values > 255)
+					return SANE_STATUS_INVAL;
+
 				sane_option->constraint.word_list = new SANE_Word[num_values];
 				for (value = 0; value < num_values; value++) {
 					this->sock->ReadWord(&sane_option->constraint.word_list[value]);
@@ -249,6 +252,9 @@ SANE_Status WINSANE_Device::FetchOptions()
 				hr = this->sock->ReadWord(&num_values);
 				if (FAILED(hr))
 					break;
+
+				if (num_values == 0 || num_values > 255)
+					return SANE_STATUS_INVAL;
 
 				sane_option->constraint.string_list = new SANE_String_Const[num_values];
 				for (value = 0; value < num_values; value++) {
