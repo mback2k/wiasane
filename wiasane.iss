@@ -35,7 +35,7 @@ Name: {group}\{cm:StartInstallDevice}; Filename: {app}\devsane.exe; Parameters: 
 Name: {group}\{cm:StartUninstallDriver}; Filename: {uninstallexe}; IconFilename: devmgr.dll; IconIndex: 4
 [Setup]
 OutputDir=.
-MinVersion=0,6.1.7600
+MinVersion=0,6.0.6001
 ArchitecturesInstallIn64BitMode=x64
 ArchitecturesAllowed=x86 x64
 AppID={{B7D5E900-AF40-11DD-AD8B-0800200C9A65}
