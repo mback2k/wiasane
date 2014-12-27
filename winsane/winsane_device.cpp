@@ -187,6 +187,9 @@ SANE_Status WINSANE_Device::FetchOptions()
 	if (FAILED(hr))
 		return SANE_STATUS_IO_ERROR;
 
+	if (num_options == 0 || num_options > 255)
+		return SANE_STATUS_INVAL;
+
 	status = SANE_STATUS_GOOD;
 
 	if (this->num_options > 0)
