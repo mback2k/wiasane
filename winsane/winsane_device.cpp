@@ -187,7 +187,7 @@ SANE_Status WINSANE_Device::FetchOptions()
 	if (FAILED(hr))
 		return SANE_STATUS_IO_ERROR;
 
-	if (num_options == 0 || num_options > 255)
+	if (num_options < 1 || num_options > 255)
 		return SANE_STATUS_INVAL;
 
 	status = SANE_STATUS_GOOD;
@@ -239,7 +239,7 @@ SANE_Status WINSANE_Device::FetchOptions()
 				if (FAILED(hr))
 					break;
 
-				if (num_values == 0 || num_values > 255)
+				if (num_values < 1 || num_values > 255)
 					return SANE_STATUS_INVAL;
 
 				sane_option->constraint.word_list = new SANE_Word[num_values];
@@ -253,7 +253,7 @@ SANE_Status WINSANE_Device::FetchOptions()
 				if (FAILED(hr))
 					break;
 
-				if (num_values == 0 || num_values > 255)
+				if (num_values < 1 || num_values > 255)
 					return SANE_STATUS_INVAL;
 
 				sane_option->constraint.string_list = new SANE_String_Const[num_values];
