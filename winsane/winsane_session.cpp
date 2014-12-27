@@ -352,6 +352,9 @@ SANE_Status WINSANE_Session::FetchDevices()
 	if (status != SANE_STATUS_GOOD)
 		return status;
 
+	if (array_length == 0 || array_length > 255)
+		return SANE_STATUS_INVAL;
+
 	if (this->num_devices > 0)
 		this->ClearDevices();
 
