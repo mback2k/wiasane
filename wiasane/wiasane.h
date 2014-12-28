@@ -93,7 +93,7 @@ typedef struct _WIASANE_Context {
 	double dblBottomRightY;
 } WIASANE_Context, *PWIASANE_Context;
 
-WINSANE_API_CALLBACK SessionAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password);
+WINSANE_API_CALLBACK SessionAuthCallbackEx(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password, _In_ void *userdata);
 
 HRESULT CreateScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);
 HRESULT FreeScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext);

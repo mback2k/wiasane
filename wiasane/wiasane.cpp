@@ -41,8 +41,6 @@
 #include "strutil.h"
 
 
-static PWIASANE_Context g_pContext = NULL; // global instance of the WIASANE context with device information
-
 WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 { // depends on command
 	PWIASANE_Context pContext;
@@ -87,7 +85,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_INITIALIZE: // online
 			Trace(TEXT("CMD_INITIALIZE"));
-			g_pContext = pContext;
 
 			hr = OpenScannerDevice(pValue->pScanInfo, pContext);
 			if (SUCCEEDED(hr)) {
@@ -101,7 +98,6 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 
 		case CMD_UNINITIALIZE: // online
 			Trace(TEXT("CMD_UNINITIALIZE"));
-			g_pContext = NULL;
 
 			hr = FreeScannerSession(pValue->pScanInfo, pContext);
 			FreeScannerDefaults(pValue->pScanInfo, pContext);
@@ -768,23 +764,26 @@ WIAMICRO_API HRESULT SetPixelWindow(_Inout_ PSCANINFO pScanInfo, LONG x, LONG y,
 }
 
 
-WINSANE_API_CALLBACK SessionAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password)
+WINSANE_API_CALLBACK SessionAuthCallbackEx(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password, _In_ void *userdata)
 {
 	LPSTR lpUsername, lpPassword;
+	PWIASANE_Context pContext;
 	HANDLE hHeap;
 
-	if (!g_pContext || !resource || !strlen(resource) || !username || !password)
+	if (!resource || !strlen(resource) || !username || !password || !userdata)
 		return;
 
 	Trace(TEXT("------ SessionAuthCallback(resource='%hs') ------"), resource);
+
+	pContext = (PWIASANE_Context) userdata;
 
 	hHeap = GetProcessHeap();
 	if (!hHeap)
 		return;
 
-	lpUsername = StringConvToA(hHeap, g_pContext->pszUsername);
+	lpUsername = StringConvToA(hHeap, pContext->pszUsername);
 	if (lpUsername) {
-		lpPassword = StringConvToA(hHeap, g_pContext->pszPassword);
+		lpPassword = StringConvToA(hHeap, pContext->pszPassword);
 		if (lpPassword) {
 			strcpy_s(username, SANE_MAX_USERNAME_LEN, lpUsername);
 			strcpy_s(password, SANE_MAX_PASSWORD_LEN, lpPassword);
@@ -860,7 +859,7 @@ HRESULT InitScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	}
 
 	if (!pContext->oSession->IsInitialized()) {
-		status = pContext->oSession->Init(NULL, &SessionAuthCallback);
+		status = pContext->oSession->InitEx(NULL, &SessionAuthCallbackEx, pContext);
 		if (status != SANE_STATUS_GOOD) {
 			return GetErrorCode(status);
 		}
