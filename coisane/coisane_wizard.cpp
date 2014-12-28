@@ -35,8 +35,6 @@
 #include "coisane_util.h"
 
 
-static PCOISANE_Data g_pWizardPageData = NULL; // global instance of the COISANE data with device information
-
 DWORD WINAPI NewDeviceWizardFinishInstall(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
 {
 	SP_NEWDEVICEWIZARD_DATA newDeviceWizardData;
@@ -794,9 +792,8 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 	SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_CONNECT);
 	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
 	if (oSession) {
-		g_pWizardPageData = pData;
 		SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_INIT);
-		if (oSession->Init(NULL, &WizardPageAuthCallback) == SANE_STATUS_GOOD) {
+		if (oSession->InitEx(NULL, &WizardPageAuthCallbackEx, pData) == SANE_STATUS_GOOD) {
 			SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_FIND);
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
 				oDevice = oSession->GetDevice(pData->lpName);
@@ -809,7 +806,6 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 						ChangeDeviceState(pData->hDeviceInfoSet, pData->pDeviceInfoData, DICS_PROPCHANGE, DICS_FLAG_GLOBAL);
 
 						if (oSession->Exit() == SANE_STATUS_GOOD) {
-							g_pWizardPageData = NULL;
 							delete oSession;
 
 							if (pData->hThread == hThread) {
@@ -833,7 +829,6 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 		} else if (pData->hThread == hThread) {
 			MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 		}
-		g_pWizardPageData = NULL;
 		delete oSession;
 	} else if (pData->hThread == hThread) {
 		MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
@@ -957,17 +952,17 @@ BOOL WINAPI HideWizardPageProgress(_In_ HWND hwndDlg, _Inout_ PCOISANE_Data pDat
 }
 
 
-WINSANE_API_CALLBACK WizardPageAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password)
+WINSANE_API_CALLBACK WizardPageAuthCallbackEx(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password, _In_ void *userdata)
 {
 	LPSTR lpUsername, lpPassword;
 	PCOISANE_Data pData;
 
-	if (!g_pWizardPageData || !resource || !strlen(resource) || !username || !password)
+	if (!resource || !strlen(resource) || !username || !password || !userdata)
 		return;
 
 	Trace(TEXT("------ WizardPageAuthCallback(resource='%hs') ------"), resource);
 
-	pData = g_pWizardPageData;
+	pData = (PCOISANE_Data) userdata;
 
 	lpUsername = StringConvToA(pData->hHeap, pData->lpUsername);
 	if (lpUsername) {

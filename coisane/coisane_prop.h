@@ -57,6 +57,6 @@ DWORD WINAPI ThreadProcResetDevice(_In_ LPVOID lpParameter);
 VOID WINAPI ShowPropertyPageAdvancedProgress(_In_ HWND hwndDlg);
 VOID WINAPI HidePropertyPageAdvancedProgress(_In_ HWND hwndDlg);
 
-WINSANE_API_CALLBACK PropertyPageAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password);
+WINSANE_API_CALLBACK PropertyPageAuthCallbackEx(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password, _In_ void *userdata);
 
 #endif

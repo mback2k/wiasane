@@ -33,8 +33,6 @@
 #include "coisane_util.h"
 
 
-static PCOISANE_Data g_pPropertyPageData = NULL; // global instance of the COISANE data with device information
-
 DWORD WINAPI AddPropertyPageAdvanced(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData)
 {
 	SP_ADDPROPERTYPAGE_DATA addPropertyPageData;
@@ -582,9 +580,8 @@ DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
 	SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_CONNECT);
 	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
 	if (oSession) {
-		g_pPropertyPageData = pData;
 		SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_INIT);
-		if (oSession->Init(NULL, &PropertyPageAuthCallback) == SANE_STATUS_GOOD) {
+		if (oSession->InitEx(NULL, &PropertyPageAuthCallbackEx, pData) == SANE_STATUS_GOOD) {
 			SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_FIND);
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
 				oDevice = oSession->GetDevice(pData->lpName);
@@ -596,7 +593,6 @@ DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
 						if (oSession->Exit() == SANE_STATUS_GOOD) {
 							res = UpdateInstallDeviceFlagsEx(pData->hDeviceInfoSet, pData->pDeviceInfoData, 0, DI_FLAGSEX_PROPCHANGE_PENDING);
 							if (res == ERROR_SUCCESS) {
-								g_pPropertyPageData = NULL;
 								delete oSession;
 
 								if (pData->hThread != hThread)
@@ -629,7 +625,6 @@ DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
 		} else if (pData->hThread == hThread) {
 			MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 		}
-		g_pPropertyPageData = NULL;
 		delete oSession;
 	} else if (pData->hThread == hThread) {
 		MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
@@ -670,9 +665,8 @@ static VOID WINAPI PerformDeviceAction(_In_ HANDLE hThread, _In_ UINT hwndDlgIte
 	SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_CONNECT);
 	oSession = WINSANE_Session::Remote(pData->lpHost, pData->usPort);
 	if (oSession) {
-		g_pPropertyPageData = pData;
 		SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_INIT);
-		if (oSession->Init(NULL, &PropertyPageAuthCallback) == SANE_STATUS_GOOD) {
+		if (oSession->InitEx(NULL, &PropertyPageAuthCallbackEx, pData) == SANE_STATUS_GOOD) {
 			SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_PROPERTIES_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_FIND);
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
 				oDevice = oSession->GetDevice(lpName);
@@ -711,7 +705,6 @@ static VOID WINAPI PerformDeviceAction(_In_ HANDLE hThread, _In_ UINT hwndDlgIte
 		} else if (pData->hThread == hThread) {
 			MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 		}
-		g_pPropertyPageData = NULL;
 		delete oSession;
 	} else if (pData->hThread == hThread) {
 		MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_CONNECT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
@@ -852,19 +845,19 @@ VOID WINAPI HidePropertyPageAdvancedProgress(_In_ HWND hwndDlg)
 }
 
 
-WINSANE_API_CALLBACK PropertyPageAuthCallback(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password)
+WINSANE_API_CALLBACK PropertyPageAuthCallbackEx(_In_ SANE_String_Const resource, _Inout_ SANE_Char *username, _Inout_ SANE_Char *password, _In_ void *userdata)
 {
 	LPTSTR lptUsername, lptPassword;
 	LPSTR lpUsername, lpPassword;
 	PCOISANE_Data pData;
 	BOOL res;
 
-	if (!g_pPropertyPageData || !resource || !strlen(resource) || !username || !password)
+	if (!resource || !strlen(resource) || !username || !password || !userdata)
 		return;
 
 	Trace(TEXT("------ PropertyPageAuthCallback(resource='%hs') ------"), resource);
 
-	pData = g_pPropertyPageData;
+	pData = (PCOISANE_Data) userdata;
 
 	lptUsername = NULL;
 	lptPassword = NULL;
