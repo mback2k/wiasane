@@ -137,20 +137,16 @@ BOOL WINSANE_Option::IsValidValue(_In_ double value)
 		case SANE_CONSTRAINT_RANGE:
 			is_valid = TRUE;
 			range = this->sane_option->constraint.range;
-			if (this->sane_option->type == SANE_TYPE_FIXED) {
-				if (value < SANE_UNFIX(range->min))
-					is_valid = FALSE;
-				else if (value > SANE_UNFIX(range->max))
-					is_valid = FALSE;
-			} else {
+			if (this->sane_option->type == SANE_TYPE_FIXED)
+				word = SANE_FIX(value);
+			else
 				word = (SANE_Word) value;
-				if (word < range->min)
-					is_valid = FALSE;
-				else if (word > range->max)
-					is_valid = FALSE;
-				else if (range->quant && ((word - range->min) % range->quant))
-					is_valid = FALSE;
-			}
+			if (word < range->min)
+				is_valid = FALSE;
+			else if (word > range->max)
+				is_valid = FALSE;
+			else if (range->quant && ((word - range->min) % range->quant))
+				is_valid = FALSE;
 			break;
 
 		case SANE_CONSTRAINT_WORD_LIST:
