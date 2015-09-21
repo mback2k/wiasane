@@ -192,6 +192,7 @@ BOOL WINSANE_Option::IsValidValue(_In_ SANE_String_Const value)
 {
 	SANE_String_Const *string_list;
 	BOOL is_valid;
+	size_t length;
 	int index;
 
 	switch (this->sane_option->constraint_type) {
@@ -203,10 +204,12 @@ BOOL WINSANE_Option::IsValidValue(_In_ SANE_String_Const value)
 		case SANE_CONSTRAINT_STRING_LIST:
 			is_valid = FALSE;
 			string_list = this->sane_option->constraint.string_list;
+			length = strlen(value);
 			for (index = 0; string_list[index] != NULL; index++) {
-				if (strcmp(value, string_list[index]) == 0) {
-					is_valid = TRUE;
-					break;
+				if (strncmp(value, string_list[index], length) == 0 &&
+					length == strlen(string_list[index])) {
+						is_valid = TRUE;
+						break;
 				}
 			}
 			break;
