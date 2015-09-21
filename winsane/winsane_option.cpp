@@ -177,6 +177,11 @@ BOOL WINSANE_Option::IsValidValue(_In_ double value)
 		case SANE_CONSTRAINT_NONE:
 		default:
 			is_valid = TRUE;
+			if (this->sane_option->type == SANE_TYPE_BOOL) {
+				if (value != SANE_TRUE && value != SANE_FALSE) {
+					is_valid = FALSE;
+				}
+			}
 			break;
 	}
 
