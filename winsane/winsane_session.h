@@ -62,6 +62,8 @@ public:
 	PWINSANE_Device GetDevice(_In_ PTSTR pszName);
 	VOID ClearDevices();
 
+	PWINSANE_Device GetDeviceByName(_In_ SANE_String_Const name);
+	PWINSANE_Device GetDeviceByName(_In_ PTSTR pszName);
 
 private:
 	LONG num_devices;
