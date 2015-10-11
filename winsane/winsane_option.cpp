@@ -21,6 +21,8 @@
 #include "winsane_option.h"
 #include "winsane_internal.h"
 
+#include <math.h>
+
 WINSANE_Option::WINSANE_Option(_In_ PWINSANE_Session session, _In_ PWINSANE_Device device, _In_ PWINSANE_Socket sock, _In_ PSANE_Option_Descriptor sane_option, _In_ SANE_Handle sane_handle, _In_ int index)
 {
 	this->session = session;
@@ -312,6 +314,252 @@ BOOL WINSANE_Option::IsValidValueString(_In_ SANE_String_Const value_string)
 						is_valid = TRUE;
 						break;
 				}
+			}
+			break;
+
+		case SANE_CONSTRAINT_NONE:
+		default:
+			is_valid = TRUE;
+			break;
+	}
+
+	return is_valid;
+}
+
+
+BOOL WINSANE_Option::ConstrainValue(_Inout_ double *value, _Out_ PSANE_Word info)
+{
+	SANE_Bool value_bool;
+	SANE_Int value_int;
+	SANE_Fixed value_fixed;
+	BOOL is_valid;
+
+	switch (this->sane_option->type) {
+		case SANE_TYPE_BOOL:
+			value_bool = *value ? SANE_TRUE : SANE_FALSE;
+			is_valid = this->ConstrainValueBool(&value_bool, info);
+			*value = value_bool;
+			break;
+
+		case SANE_TYPE_INT:
+			value_int = (SANE_Int) *value;
+			is_valid = this->ConstrainValueInt(&value_int, info);
+			*value = value_int;
+			break;
+
+		case SANE_TYPE_FIXED:
+			value_fixed = SANE_FIX(*value);
+			is_valid = this->ConstrainValueFixed(&value_fixed, info);
+			*value = SANE_UNFIX(value_fixed);
+			break;
+
+		default:
+			is_valid = FALSE;
+			break;
+	}
+
+	return is_valid;
+}
+
+BOOL WINSANE_Option::ConstrainValue(_Inout_ PSANE_Word value, _Out_ PSANE_Word info)
+{
+	SANE_Word *word_list, word_list_length, word, val1, val2;
+	SANE_Range *range;
+	BOOL is_valid;
+	int index, match;
+
+	if (this->sane_option->type == SANE_TYPE_STRING)
+		return FALSE;
+
+	switch (this->sane_option->constraint_type) {
+		case SANE_CONSTRAINT_RANGE:
+			is_valid = TRUE;
+			range = this->sane_option->constraint.range;
+			word = *value;
+			if (word < range->min) {
+				*value = range->min;
+				if (info) {
+					*info |= SANE_INFO_INEXACT;
+				}
+			} else if (word > range->max) {
+				*value = range->max;
+				if (info) {
+					*info |= SANE_INFO_INEXACT;
+				}
+			} else if (range->quant) {
+				val1 = (unsigned int) (word - range->min + range->quant / 2) / range->quant;
+				val1 = val1 * range->quant + range->min;
+				if (val1 > range->max) {
+					val1 = range->max;
+				}
+				if (val1 != word) {
+					*value = val1;
+					if (info) {
+						*info |= SANE_INFO_INEXACT;
+					}
+				}
+			}
+			break;
+
+		case SANE_CONSTRAINT_WORD_LIST:
+			is_valid = TRUE;
+			word_list = this->sane_option->constraint.word_list;
+			word_list_length = *word_list;
+			word = *value;
+			match = 1;
+			val1 = abs(word - word_list[1]);
+			for (index = 1; index <= word_list_length; index++) {
+				if ((val2 = abs(word - word_list[index])) < val1) {
+					val1 = val2;
+					match = index;
+				}
+			}
+			if (word != word_list[match]) {
+				*value = word_list[match];
+				if (info) {
+					*info |= SANE_INFO_INEXACT;
+				}
+			}
+			break;
+
+		case SANE_CONSTRAINT_STRING_LIST:
+			is_valid = FALSE;
+			break;
+
+		case SANE_CONSTRAINT_NONE:
+		default:
+			is_valid = TRUE;
+			break;
+	}
+
+	return is_valid;
+}
+
+BOOL WINSANE_Option::ConstrainValueBool(_Inout_ PSANE_Bool value_bool, _Out_ PSANE_Word info)
+{
+	BOOL is_valid;
+
+	if (this->sane_option->type != SANE_TYPE_BOOL)
+		return FALSE;
+
+	switch (this->sane_option->constraint_type) {
+		case SANE_CONSTRAINT_RANGE:
+		case SANE_CONSTRAINT_WORD_LIST:
+			is_valid = this->ConstrainValue(value_bool, info);
+			break;
+
+		case SANE_CONSTRAINT_STRING_LIST:
+			is_valid = FALSE;
+			break;
+
+		case SANE_CONSTRAINT_NONE:
+		default:
+			if (*value_bool == SANE_TRUE || *value_bool == SANE_FALSE) {
+				is_valid = TRUE;
+			} else {
+				is_valid = FALSE;
+			}
+			break;
+	}
+
+	return is_valid;
+}
+
+BOOL WINSANE_Option::ConstrainValueInt(_Inout_ PSANE_Int value_int, _Out_ PSANE_Word info)
+{
+	BOOL is_valid;
+
+	if (this->sane_option->type != SANE_TYPE_INT)
+		return FALSE;
+
+	switch (this->sane_option->constraint_type) {
+		case SANE_CONSTRAINT_RANGE:
+		case SANE_CONSTRAINT_WORD_LIST:
+			is_valid = this->ConstrainValue(value_int, info);
+			break;
+
+		case SANE_CONSTRAINT_STRING_LIST:
+			is_valid = FALSE;
+			break;
+
+		case SANE_CONSTRAINT_NONE:
+		default:
+			is_valid = TRUE;
+			break;
+	}
+
+	return is_valid;
+}
+
+BOOL WINSANE_Option::ConstrainValueFixed(_Inout_ PSANE_Fixed value_fixed, _Out_ PSANE_Word info)
+{
+	BOOL is_valid;
+
+	if (this->sane_option->type != SANE_TYPE_FIXED)
+		return FALSE;
+
+	switch (this->sane_option->constraint_type) {
+		case SANE_CONSTRAINT_RANGE:
+		case SANE_CONSTRAINT_WORD_LIST:
+			is_valid = this->ConstrainValue(value_fixed, info);
+			break;
+
+		case SANE_CONSTRAINT_STRING_LIST:
+			is_valid = FALSE;
+			break;
+
+		case SANE_CONSTRAINT_NONE:
+		default:
+			is_valid = TRUE;
+			break;
+	}
+
+	return is_valid;
+}
+
+BOOL WINSANE_Option::ConstrainValueString(_Inout_ SANE_String value_string, _Out_ PSANE_Word info)
+{
+	SANE_String_Const *string_list;
+	BOOL is_valid;
+	size_t length, index_length, match_length;
+	int index, match, num_matches;
+
+	UNREFERENCED_PARAMETER(info);
+
+	if (this->sane_option->type != SANE_TYPE_STRING)
+		return FALSE;
+
+	switch (this->sane_option->constraint_type) {
+		case SANE_CONSTRAINT_RANGE:
+		case SANE_CONSTRAINT_WORD_LIST:
+			is_valid = FALSE;
+			break;
+
+		case SANE_CONSTRAINT_STRING_LIST:
+			is_valid = FALSE;
+			string_list = this->sane_option->constraint.string_list;
+			length = strlen(value_string);
+			num_matches = 0;
+			match = -1;
+			match_length = 0;
+			for (index = 0; string_list[index] != NULL; index++) {
+				if (_strnicmp(value_string, string_list[index], length) == 0 &&
+					length <= (index_length = strlen(string_list[index]))) {
+						match = index;
+						match_length = index_length;
+						if (length == match_length) {
+							if (strncmp(value_string, string_list[match], match_length) != 0) {
+								strncpy_s(value_string, length, string_list[match], match_length);
+								is_valid = TRUE;
+								break;
+							}
+						}
+						num_matches++;
+				}
+			}
+			if (is_valid == FALSE && num_matches == 1) {
+				strncpy_s(value_string, length, string_list[match], match_length);
+				is_valid = TRUE;
 			}
 			break;
 
