@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2015, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -59,6 +59,19 @@ WINSANE_Device::~WINSANE_Device()
 	this->sane_handle = INVALID_SANE_HANDLE;
 	this->num_options = 0;
 	this->options = NULL;
+}
+
+PWINSANE_Device WINSANE_Device::ByName(_In_ PWINSANE_Session session, _In_ PWINSANE_Socket sock, _In_ SANE_String_Const name)
+{
+	PSANE_Device sane_device;
+
+	sane_device = new SANE_Device();
+	sane_device->name = name;
+	sane_device->vendor = NULL;
+	sane_device->model = NULL;
+	sane_device->type = NULL;
+
+	return new WINSANE_Device(session, sock, sane_device);
 }
 
 
