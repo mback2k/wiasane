@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2015, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -52,7 +52,11 @@ public:
 	PSANE_String_Const GetConstraintStringList();
 
 	BOOL IsValidValue(_In_ double value);
-	BOOL IsValidValue(_In_ SANE_String_Const value);
+	BOOL IsValidValue(_In_ SANE_Word value);
+	BOOL IsValidValueBool(_In_ SANE_Bool value_bool);
+	BOOL IsValidValueInt(_In_ SANE_Int value_int);
+	BOOL IsValidValueFixed(_In_ SANE_Fixed value_fixed);
+	BOOL IsValidValueString(_In_ SANE_String_Const value_string);
 
 	HRESULT GetValue(_Out_ double *value);
 	HRESULT GetValueBool(_Out_ PSANE_Bool value_bool);

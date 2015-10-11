@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2015, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -126,22 +126,47 @@ PSANE_String_Const WINSANE_Option::GetConstraintStringList()
 	return this->sane_option->constraint.string_list;
 }
 
+
 BOOL WINSANE_Option::IsValidValue(_In_ double value)
+{
+	BOOL is_valid;
+
+	switch (this->sane_option->type) {
+		case SANE_TYPE_BOOL:
+			is_valid = this->IsValidValueBool((SANE_Bool) value);
+			break;
+
+		case SANE_TYPE_INT:
+			is_valid = this->IsValidValueInt((SANE_Int) value);
+			break;
+
+		case SANE_TYPE_FIXED:
+			is_valid = this->IsValidValueFixed(SANE_FIX(value));
+			break;
+
+		default:
+			is_valid = FALSE;
+			break;
+	}
+
+	return is_valid;
+}
+
+BOOL WINSANE_Option::IsValidValue(_In_ SANE_Word value)
 {
 	SANE_Word *word_list, word_list_length, word, temp;
 	SANE_Range *range;
 	BOOL is_valid;
 	int index;
 
+	if (this->sane_option->type == SANE_TYPE_STRING)
+		return FALSE;
+
 	switch (this->sane_option->constraint_type) {
 		case SANE_CONSTRAINT_RANGE:
 			is_valid = TRUE;
 			range = this->sane_option->constraint.range;
-			if (this->sane_option->type == SANE_TYPE_FIXED) {
-				word = SANE_FIX(value);
-			} else {
-				word = (SANE_Word) value;
-			}
+			word = value;
 			if (word < range->min) {
 				is_valid = FALSE;
 			} else if (word > range->max) {
@@ -157,11 +182,7 @@ BOOL WINSANE_Option::IsValidValue(_In_ double value)
 			is_valid = FALSE;
 			word_list = this->sane_option->constraint.word_list;
 			word_list_length = *word_list;
-			if (this->sane_option->type == SANE_TYPE_FIXED) {
-				word = SANE_FIX(value);
-			} else {
-				word = (SANE_Word) value;
-			}
+			word = value;
 			for (index = 1; index <= word_list_length; index++) {
 				if (word == word_list[index]) {
 					is_valid = TRUE;
@@ -177,10 +198,35 @@ BOOL WINSANE_Option::IsValidValue(_In_ double value)
 		case SANE_CONSTRAINT_NONE:
 		default:
 			is_valid = TRUE;
-			if (this->sane_option->type == SANE_TYPE_BOOL) {
-				if (value != SANE_TRUE && value != SANE_FALSE) {
-					is_valid = FALSE;
-				}
+			break;
+	}
+
+	return is_valid;
+}
+
+BOOL WINSANE_Option::IsValidValueBool(_In_ SANE_Bool value_bool)
+{
+	BOOL is_valid;
+
+	if (this->sane_option->type != SANE_TYPE_BOOL)
+		return FALSE;
+
+	switch (this->sane_option->constraint_type) {
+		case SANE_CONSTRAINT_RANGE:
+		case SANE_CONSTRAINT_WORD_LIST:
+			is_valid = this->IsValidValue(value_bool);
+			break;
+
+		case SANE_CONSTRAINT_STRING_LIST:
+			is_valid = FALSE;
+			break;
+
+		case SANE_CONSTRAINT_NONE:
+		default:
+			if (value_bool == SANE_TRUE || value_bool == SANE_FALSE) {
+				is_valid = TRUE;
+			} else {
+				is_valid = FALSE;
 			}
 			break;
 	}
@@ -188,12 +234,67 @@ BOOL WINSANE_Option::IsValidValue(_In_ double value)
 	return is_valid;
 }
 
-BOOL WINSANE_Option::IsValidValue(_In_ SANE_String_Const value)
+BOOL WINSANE_Option::IsValidValueInt(_In_ SANE_Int value_int)
+{
+	BOOL is_valid;
+
+	if (this->sane_option->type != SANE_TYPE_INT)
+		return FALSE;
+
+	switch (this->sane_option->constraint_type) {
+		case SANE_CONSTRAINT_RANGE:
+		case SANE_CONSTRAINT_WORD_LIST:
+			is_valid = this->IsValidValue(value_int);
+			break;
+
+		case SANE_CONSTRAINT_STRING_LIST:
+			is_valid = FALSE;
+			break;
+
+		case SANE_CONSTRAINT_NONE:
+		default:
+			is_valid = TRUE;
+			break;
+	}
+
+	return is_valid;
+}
+
+BOOL WINSANE_Option::IsValidValueFixed(_In_ SANE_Fixed value_fixed)
+{
+	BOOL is_valid;
+
+	if (this->sane_option->type != SANE_TYPE_FIXED)
+		return FALSE;
+
+	switch (this->sane_option->constraint_type) {
+		case SANE_CONSTRAINT_RANGE:
+		case SANE_CONSTRAINT_WORD_LIST:
+			is_valid = this->IsValidValue(value_fixed);
+			break;
+
+		case SANE_CONSTRAINT_STRING_LIST:
+			is_valid = FALSE;
+			break;
+
+		case SANE_CONSTRAINT_NONE:
+		default:
+			is_valid = TRUE;
+			break;
+	}
+
+	return is_valid;
+}
+
+BOOL WINSANE_Option::IsValidValueString(_In_ SANE_String_Const value_string)
 {
 	SANE_String_Const *string_list;
 	BOOL is_valid;
 	size_t length;
 	int index;
+
+	if (this->sane_option->type != SANE_TYPE_STRING)
+		return FALSE;
 
 	switch (this->sane_option->constraint_type) {
 		case SANE_CONSTRAINT_RANGE:
@@ -204,9 +305,9 @@ BOOL WINSANE_Option::IsValidValue(_In_ SANE_String_Const value)
 		case SANE_CONSTRAINT_STRING_LIST:
 			is_valid = FALSE;
 			string_list = this->sane_option->constraint.string_list;
-			length = strlen(value);
+			length = strlen(value_string);
 			for (index = 0; string_list[index] != NULL; index++) {
-				if (strncmp(value, string_list[index], length) == 0 &&
+				if (strncmp(value_string, string_list[index], length) == 0 &&
 					length == strlen(string_list[index])) {
 						is_valid = TRUE;
 						break;
