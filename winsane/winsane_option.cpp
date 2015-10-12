@@ -549,7 +549,8 @@ BOOL WINSANE_Option::ConstrainValueString(_Inout_ SANE_String value_string, _Ino
 						match_length = index_length;
 						if (length == match_length) {
 							if (strncmp(value_string, string_list[match], match_length) != 0) {
-								strncpy_s(value_string, length, string_list[match], match_length);
+								strncpy_s(value_string, length+1, string_list[match], match_length);
+								value_string[length] = '\0';
 								is_valid = TRUE;
 								break;
 							}
@@ -558,7 +559,8 @@ BOOL WINSANE_Option::ConstrainValueString(_Inout_ SANE_String value_string, _Ino
 				}
 			}
 			if (is_valid == FALSE && num_matches == 1) {
-				strncpy_s(value_string, length, string_list[match], match_length);
+				strncpy_s(value_string, length+1, string_list[match], match_length);
+				value_string[length] = '\0';
 				is_valid = TRUE;
 			}
 			break;

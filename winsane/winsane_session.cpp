@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2015, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -501,10 +501,13 @@ PWINSANE_Device WINSANE_Session::GetDeviceByName(_In_ SANE_String_Const name)
 
 	if (name) {
 		length = strlen(name);
-		dev_name = new SANE_Char[length+1];
-		if (dev_name) {
-			strncpy_s(dev_name, length, name, length);
-			device = WINSANE_Device::ByName(this, this->sock, dev_name);
+		if (length > 0) {
+			dev_name = new SANE_Char[length+1];
+			if (dev_name) {
+				strncpy_s(dev_name, length+1, name, length);
+				dev_name[length] = '\0';
+				device = WINSANE_Device::ByName(this, this->sock, dev_name);
+			}
 		}
 	}
 
