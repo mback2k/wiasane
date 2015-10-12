@@ -70,7 +70,7 @@ BEGIN
     ICON            "",IDC_PROPERTIES_ICON,7,7,20,20,0,WS_EX_TRANSPARENT
     LTEXT           "Scanner Access Now Easy - WIA Driver",IDC_PROPERTIES_TEXT_MAIN,37,9,174,16,SS_NOPREFIX
     LTEXT           "This page allows you to select one of the scanners available on the remote SANE server. If the selected scanner requires authentification, the required credentials also need to be specified here.",IDC_PROPERTIES_TEXT_INFO,37,28,174,32,SS_NOPREFIX
-    COMBOBOX        IDC_PROPERTIES_COMBO_SCANNER,7,84,238,72,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_PROPERTIES_COMBO_SCANNER,7,84,238,72,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Available scanner devices:",IDC_PROPERTIES_TEXT_SCANNER,7,70,238,8,SS_NOPREFIX
     GROUPBOX        "Credentials",IDC_PROPERTIES_GROUP_CREDENTIALS,7,105,238,84
     LTEXT           "Username:",IDC_PROPERTIES_TEXT_USERNAME,14,119,224,8,SS_NOPREFIX
@@ -100,7 +100,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | WS_POPUP | WS_VISIBLE | WS_CAPTIO
 FONT 9, "Segoe UI", 0, 0, 0x0
 BEGIN
     LTEXT           "Please select one of the available scanner devices. If the selected scanner requires authentification, the required credentials also need to be specified here.",IDC_WIZARD_PAGE_SCANNER_TEXT_INFO,18,8,275,24,SS_NOPREFIX
-    COMBOBOX        IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER,18,42,276,12,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_WIZARD_PAGE_SCANNER_COMBO_SCANNER,18,42,276,12,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Available scanner devices:",IDC_PROPERTIES_TEXT_SCANNER,18,30,276,8,SS_NOPREFIX
     GROUPBOX        "Credentials",IDC_WIZARD_PAGE_SCANNER_GROUP_CREDENTIALS,18,60,276,72
     LTEXT           "Username:",IDC_WIZARD_PAGE_SCANNER_TEXT_USERNAME,24,72,264,8,SS_NOPREFIX

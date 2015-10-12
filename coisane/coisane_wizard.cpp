@@ -5,7 +5,7 @@
  *                 | |/ |/ / / /_/ /___/ / /_/ / / / /  __/
  *                 |__/|__/_/\__,_//____/\__,_/_/ /_/\___/
  *
- * Copyright (C) 2012 - 2014, Marc Hoersken, <info@marc-hoersken.de>
+ * Copyright (C) 2012 - 2015, Marc Hoersken, <info@marc-hoersken.de>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this software distribution.
@@ -633,36 +633,32 @@ DWORD WINAPI ThreadProcNextWizardPageServer(_In_ LPVOID lpParameter)
 		SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_SESSION_STEP_INIT);
 		if (oSession->Init(NULL, NULL) == SANE_STATUS_GOOD) {
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
+				if (pData->lpNames) {
+					for (device = 0; pData->lpNames[device]; device++) {
+						HeapSafeFree(pData->hHeap, 0, pData->lpNames[device]);
+					}
+					HeapSafeFree(pData->hHeap, 0, pData->lpNames);
+				}
 				devices = oSession->GetDevices();
-				if (devices > 0) {
-					if (pData->lpNames) {
-						for (device = 0; pData->lpNames[device]; device++) {
-							HeapSafeFree(pData->hHeap, 0, pData->lpNames[device]);
-						}
-						HeapSafeFree(pData->hHeap, 0, pData->lpNames);
-					}
-					pData->lpNames = (LPTSTR*) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(LPTSTR) * (devices+1));
-					if (pData->lpNames) {
-						for (device = 0; device < devices; device++) {
-							oDevice = oSession->GetDevice(device);
-							if (oDevice) {
-								pData->lpNames[device] = StringConvATo(pData->hHeap, (LPSTR) oDevice->GetName());
-							}
+				pData->lpNames = (LPTSTR*) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(LPTSTR) * (devices+1));
+				if (pData->lpNames && devices > 0) {
+					for (device = 0; device < devices; device++) {
+						oDevice = oSession->GetDevice(device);
+						if (oDevice) {
+							pData->lpNames[device] = StringConvATo(pData->hHeap, (LPSTR) oDevice->GetName());
 						}
 					}
-					if (oSession->Exit() == SANE_STATUS_GOOD) {
-						delete oSession;
+				}
+				if (oSession->Exit() == SANE_STATUS_GOOD) {
+					delete oSession;
 
-						if (pData->hThread == hThread) {
-							pData->hThread = NULL;
-							PropSheet_PressButton(pData->hwndPropDlg, PSBTN_NEXT);
-						}
-						return 0;
-					} else if (pData->hThread == hThread) {
-						MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+					if (pData->hThread == hThread) {
+						pData->hThread = NULL;
+						PropSheet_PressButton(pData->hwndPropDlg, PSBTN_NEXT);
 					}
+					return 0;
 				} else if (pData->hThread == hThread) {
-					MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+					MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_SESSION_INIT_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
 				}
 			} else if (pData->hThread == hThread) {
 				MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
@@ -773,6 +769,7 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 	PWINSANE_Session oSession;
 	PWINSANE_Device oDevice;
 	PCOISANE_Data pData;
+	BOOL delDevice;
 	HANDLE hThread;
 	LPTSTR lpText;
 	HRESULT hr;
@@ -797,6 +794,11 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 			SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_FIND);
 			if (oSession->FetchDevices() == SANE_STATUS_GOOD) {
 				oDevice = oSession->GetDevice(pData->lpName);
+				delDevice = FALSE;
+				if (!oDevice) {
+					oDevice = oSession->GetDeviceByName(pData->lpName);
+					delDevice = TRUE;
+				}
 				if (oDevice) {
 					SetDlgItemTextR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDC_WIZARD_PAGE_PROGRESS_TEXT_MAIN, IDS_DEVICE_STEP_OPEN);
 					if (UpdateDeviceInfo(pData, oDevice) == ERROR_SUCCESS &&
@@ -807,6 +809,9 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 
 						if (oSession->Exit() == SANE_STATUS_GOOD) {
 							delete oSession;
+							if (delDevice) {
+								delete oDevice;
+							}
 
 							if (pData->hThread == hThread) {
 								pData->hThread = NULL;
@@ -818,6 +823,9 @@ DWORD WINAPI ThreadProcNextWizardPageScanner(_In_ LPVOID lpParameter)
 						}
 					} else if (pData->hThread == hThread) {
 						MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_OPEN_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
+					}
+					if (delDevice) {
+						delete oDevice;
 					}
 				} else if (pData->hThread == hThread) {
 					MessageBoxR(pData->hHeap, pData->hInstance, pData->hwndDlg, IDS_DEVICE_FIND_FAILED, IDS_PROPERTIES_SCANNER_DEVICE, MB_ICONERROR | MB_OK);
