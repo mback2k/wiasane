@@ -58,12 +58,12 @@ public:
 	BOOL IsValidValueFixed(_In_ SANE_Fixed value_fixed);
 	BOOL IsValidValueString(_In_ SANE_String_Const value_string);
 
-	BOOL ConstrainValue(_Inout_ double *value, _Out_ PSANE_Word info);
-	BOOL ConstrainValue(_Inout_ PSANE_Word value, _Out_ PSANE_Word info);
-	BOOL ConstrainValueBool(_Inout_ PSANE_Bool value_bool, _Out_ PSANE_Word info);
-	BOOL ConstrainValueInt(_Inout_ PSANE_Int value_int, _Out_ PSANE_Word info);
-	BOOL ConstrainValueFixed(_Inout_ PSANE_Fixed value_fixed, _Out_ PSANE_Word info);
-	BOOL ConstrainValueString(_Inout_ SANE_String value_string, _Out_ PSANE_Word info);
+	BOOL ConstrainValue(_Inout_ double *value, _Inout_ PSANE_Word info);
+	BOOL ConstrainValue(_Inout_ PSANE_Word value, _Inout_ PSANE_Word info);
+	BOOL ConstrainValueBool(_Inout_ PSANE_Bool value_bool, _Inout_ PSANE_Word info);
+	BOOL ConstrainValueInt(_Inout_ PSANE_Int value_int, _Inout_ PSANE_Word info);
+	BOOL ConstrainValueFixed(_Inout_ PSANE_Fixed value_fixed, _Inout_ PSANE_Word info);
+	BOOL ConstrainValueString(_Inout_ SANE_String value_string, _Inout_ PSANE_Word info);
 
 	HRESULT GetValue(_Out_ double *value);
 	HRESULT GetValueBool(_Out_ PSANE_Bool value_bool);

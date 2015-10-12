@@ -327,7 +327,7 @@ BOOL WINSANE_Option::IsValidValueString(_In_ SANE_String_Const value_string)
 }
 
 
-BOOL WINSANE_Option::ConstrainValue(_Inout_ double *value, _Out_ PSANE_Word info)
+BOOL WINSANE_Option::ConstrainValue(_Inout_ double *value, _Inout_ PSANE_Word info)
 {
 	SANE_Bool value_bool;
 	SANE_Int value_int;
@@ -361,7 +361,7 @@ BOOL WINSANE_Option::ConstrainValue(_Inout_ double *value, _Out_ PSANE_Word info
 	return is_valid;
 }
 
-BOOL WINSANE_Option::ConstrainValue(_Inout_ PSANE_Word value, _Out_ PSANE_Word info)
+BOOL WINSANE_Option::ConstrainValue(_Inout_ PSANE_Word value, _Inout_ PSANE_Word info)
 {
 	SANE_Word *word_list, word_list_length, word, val1, val2;
 	SANE_Range *range;
@@ -435,7 +435,7 @@ BOOL WINSANE_Option::ConstrainValue(_Inout_ PSANE_Word value, _Out_ PSANE_Word i
 	return is_valid;
 }
 
-BOOL WINSANE_Option::ConstrainValueBool(_Inout_ PSANE_Bool value_bool, _Out_ PSANE_Word info)
+BOOL WINSANE_Option::ConstrainValueBool(_Inout_ PSANE_Bool value_bool, _Inout_ PSANE_Word info)
 {
 	BOOL is_valid;
 
@@ -465,7 +465,7 @@ BOOL WINSANE_Option::ConstrainValueBool(_Inout_ PSANE_Bool value_bool, _Out_ PSA
 	return is_valid;
 }
 
-BOOL WINSANE_Option::ConstrainValueInt(_Inout_ PSANE_Int value_int, _Out_ PSANE_Word info)
+BOOL WINSANE_Option::ConstrainValueInt(_Inout_ PSANE_Int value_int, _Inout_ PSANE_Word info)
 {
 	BOOL is_valid;
 
@@ -491,7 +491,7 @@ BOOL WINSANE_Option::ConstrainValueInt(_Inout_ PSANE_Int value_int, _Out_ PSANE_
 	return is_valid;
 }
 
-BOOL WINSANE_Option::ConstrainValueFixed(_Inout_ PSANE_Fixed value_fixed, _Out_ PSANE_Word info)
+BOOL WINSANE_Option::ConstrainValueFixed(_Inout_ PSANE_Fixed value_fixed, _Inout_ PSANE_Word info)
 {
 	BOOL is_valid;
 
@@ -517,7 +517,7 @@ BOOL WINSANE_Option::ConstrainValueFixed(_Inout_ PSANE_Fixed value_fixed, _Out_ 
 	return is_valid;
 }
 
-BOOL WINSANE_Option::ConstrainValueString(_Inout_ SANE_String value_string, _Out_ PSANE_Word info)
+BOOL WINSANE_Option::ConstrainValueString(_Inout_ SANE_String value_string, _Inout_ PSANE_Word info)
 {
 	SANE_String_Const *string_list;
 	BOOL is_valid;
