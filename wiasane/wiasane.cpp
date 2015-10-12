@@ -806,10 +806,9 @@ HRESULT CreateScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Conte
 		return S_OK;
 
 	pContext->uiDevRef = 0;
-
 	pContext->pTask = NULL;
-	pContext->oDevice = NULL;
 
+	pContext->oDevice = NULL;
 	pContext->oSession = WINSANE_Session::Remote(pContext->pszHost, pContext->usPort);
 	if (!pContext->oSession)
 		return WIA_ERROR_OFFLINE;
@@ -822,17 +821,19 @@ HRESULT FreeScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	if (!pScanInfo || !pContext)
 		return E_INVALIDARG;
 
-	if (!pContext->oSession)
-		return S_OK;
-
 	ExitScannerSession(pScanInfo, pContext);
 
-	delete pContext->oSession;
-	pContext->oSession = NULL;
+	if (pContext->oDevice) {
+		delete pContext->oDevice;
+		pContext->oDevice = NULL;
+	}
 
-	pContext->oDevice = NULL;
+	if (pContext->oSession) {
+		delete pContext->oSession;
+		pContext->oSession = NULL;
+	}
+
 	pContext->pTask = NULL;
-
 	pContext->uiDevRef = 0;
 
 	return S_OK;
@@ -865,13 +866,7 @@ HRESULT InitScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 		}
 	}
 
-	status = pContext->oSession->FetchDevices();
-	if (status != SANE_STATUS_GOOD) {
-		pContext->oSession->Exit();
-		return GetErrorCode(status);
-	}
-
-	pContext->oDevice = pContext->oSession->GetDevice(pContext->pszName);
+	pContext->oDevice = pContext->oSession->GetDeviceByName(pContext->pszName);
 	if (!pContext->oDevice) {
 		pContext->oSession->Exit();
 		return WIA_ERROR_USER_INTERVENTION;
