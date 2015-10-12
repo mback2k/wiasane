@@ -524,8 +524,6 @@ BOOL WINSANE_Option::ConstrainValueString(_Inout_ SANE_String value_string, _Ino
 	size_t length, index_length, match_length;
 	int index, match, num_matches;
 
-	UNREFERENCED_PARAMETER(info);
-
 	if (this->sane_option->type != SANE_TYPE_STRING)
 		return FALSE;
 
@@ -551,9 +549,12 @@ BOOL WINSANE_Option::ConstrainValueString(_Inout_ SANE_String value_string, _Ino
 							if (strncmp(value_string, string_list[match], match_length) != 0) {
 								strncpy_s(value_string, length+1, string_list[match], match_length);
 								value_string[length] = '\0';
-								is_valid = TRUE;
-								break;
+								if (info) {
+									*info |= SANE_INFO_INEXACT;
+								}
 							}
+							is_valid = TRUE;
+							break;
 						}
 						num_matches++;
 				}
@@ -561,6 +562,9 @@ BOOL WINSANE_Option::ConstrainValueString(_Inout_ SANE_String value_string, _Ino
 			if (is_valid == FALSE && num_matches == 1) {
 				strncpy_s(value_string, length+1, string_list[match], match_length);
 				value_string[length] = '\0';
+				if (info) {
+					*info |= SANE_INFO_INEXACT;
+				}
 				is_valid = TRUE;
 			}
 			break;
