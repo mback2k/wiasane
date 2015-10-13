@@ -867,7 +867,7 @@ HRESULT InitScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	}
 
 	if (!pContext->oDevice) {
-		pContext->oDevice = pContext->oSession->GetDeviceByName(pContext->pszName);
+		pContext->oDevice = pContext->oSession->CreateDevice(pContext->pszName);
 		if (!pContext->oDevice) {
 			pContext->oSession->Exit();
 			return WIA_ERROR_USER_INTERVENTION;

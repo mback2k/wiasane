@@ -38,7 +38,7 @@ public:
 	WINSANE_Device(_In_ PWINSANE_Session session, _In_ PWINSANE_Socket sock, _In_ PSANE_Device device);
 	~WINSANE_Device();
 
-	static PWINSANE_Device ByName(_In_ PWINSANE_Session session, _In_ PWINSANE_Socket sock, _In_ SANE_String_Const name);
+	static PWINSANE_Device Create(_In_ PWINSANE_Session session, _In_ PWINSANE_Socket sock, _In_ SANE_String_Const name);
 
 
 	/* Public API */

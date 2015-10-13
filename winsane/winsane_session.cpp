@@ -488,7 +488,7 @@ VOID WINSANE_Session::ClearDevices()
 }
 
 
-PWINSANE_Device WINSANE_Session::GetDeviceByName(_In_ SANE_String_Const name)
+PWINSANE_Device WINSANE_Session::CreateDevice(_In_ SANE_String_Const name)
 {
 	PWINSANE_Device device;
 	SANE_String dev_name;
@@ -506,7 +506,7 @@ PWINSANE_Device WINSANE_Session::GetDeviceByName(_In_ SANE_String_Const name)
 			if (dev_name) {
 				strncpy_s(dev_name, length+1, name, length);
 				dev_name[length] = '\0';
-				device = WINSANE_Device::ByName(this, this->sock, dev_name);
+				device = WINSANE_Device::Create(this, this->sock, dev_name);
 			}
 		}
 	}
@@ -514,7 +514,7 @@ PWINSANE_Device WINSANE_Session::GetDeviceByName(_In_ SANE_String_Const name)
 	return device;
 }
 
-PWINSANE_Device WINSANE_Session::GetDeviceByName(_In_ PTSTR pszName)
+PWINSANE_Device WINSANE_Session::CreateDevice(_In_ PTSTR pszName)
 {
 	PWINSANE_Device device;
 	SANE_String_Const name;
@@ -526,7 +526,7 @@ PWINSANE_Device WINSANE_Session::GetDeviceByName(_In_ PTSTR pszName)
 	if (hHeap) {
 		name = (SANE_String_Const) StringConvToA(hHeap, pszName);
 		if (name) {
-			device = this->GetDeviceByName(name);
+			device = this->CreateDevice(name);
 			HeapFree(hHeap, 0, (LPVOID) name);
 		}
 	}

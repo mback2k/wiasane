@@ -590,7 +590,7 @@ DWORD WINAPI ThreadProcSavePropertyPageAdvanced(_In_ LPVOID lpParameter)
 				oDevice = oSession->GetDevice(pData->lpName);
 				delDevice = FALSE;
 				if (!oDevice) {
-					oDevice = oSession->GetDeviceByName(pData->lpName);
+					oDevice = oSession->CreateDevice(pData->lpName);
 					delDevice = TRUE;
 				}
 				if (oDevice) {

@@ -61,7 +61,7 @@ WINSANE_Device::~WINSANE_Device()
 	this->options = NULL;
 }
 
-PWINSANE_Device WINSANE_Device::ByName(_In_ PWINSANE_Session session, _In_ PWINSANE_Socket sock, _In_ SANE_String_Const name)
+PWINSANE_Device WINSANE_Device::Create(_In_ PWINSANE_Session session, _In_ PWINSANE_Socket sock, _In_ SANE_String_Const name)
 {
 	PSANE_Device sane_device;
 
