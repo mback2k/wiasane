@@ -866,10 +866,12 @@ HRESULT InitScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 		}
 	}
 
-	pContext->oDevice = pContext->oSession->GetDeviceByName(pContext->pszName);
 	if (!pContext->oDevice) {
-		pContext->oSession->Exit();
-		return WIA_ERROR_USER_INTERVENTION;
+		pContext->oDevice = pContext->oSession->GetDeviceByName(pContext->pszName);
+		if (!pContext->oDevice) {
+			pContext->oSession->Exit();
+			return WIA_ERROR_USER_INTERVENTION;
+		}
 	}
 
 	return S_OK;
