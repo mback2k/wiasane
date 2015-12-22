@@ -1,0 +1,12 @@
+os: Windows Server 2012 R2
+
+configuration:
+- Debug
+- Release
+
+platform:
+- Win32
+- x64
+
+build:
+  verbosity: detailed
