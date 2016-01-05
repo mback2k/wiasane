@@ -8,5 +8,16 @@ platform:
 - Win32
 - x64
 
+before_build:
+- ps: >-
+    $p = 'C:\Program Files (x86)\Windows Kits\8.0\build\WindowsDriver8.0.x64.props'
+    $c = [IO.File]::ReadAllText($p)
+    $c = $c.Replace('''$(VisualStudioVersion)'' != ''11.0''', '''$(VisualStudioVersion)'' &lt;''11.0''')
+    [IO.File]::WriteAllText($p, $c)
+    $p = 'C:\Program Files (x86)\Windows Kits\8.0\build\WindowsDriver8.0.Win32.props'
+    $c = [IO.File]::ReadAllText($p)
+    $c = $c.Replace('''$(VisualStudioVersion)'' != ''11.0''', '''$(VisualStudioVersion)'' &lt;''11.0''')
+    [IO.File]::WriteAllText($p, $c)
+
 build:
   verbosity: detailed
