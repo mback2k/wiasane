@@ -10,6 +10,9 @@ platform:
 
 before_build:
 - ps: >-
+    Get-ChildItem . -include *.vcxproj.user -recurse | foreach ($_) {Remove-Item $_.FullName}
+
+
     $p = 'C:\Program Files (x86)\Windows Kits\8.0\build\WindowsDriver8.0.x64.props'
 
     $c = [IO.File]::ReadAllText($p)
