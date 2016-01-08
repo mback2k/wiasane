@@ -10,6 +10,9 @@ protocol. It is referred to as Scanner Access Now Easy - WIA Driver.
 In order to access those scanner devices either the scanner itself or
 a SANE daemon needs to provide a SANE network frontend to be used.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/ii609sebkclxnlmc/branch/master?svg=true)](https://ci.appveyor.com/project/mback2k/wiasane/branch/master)
+[![Join the chat at https://gitter.im/mback2k/wiasane](https://badges.gitter.im/mback2k/wiasane.svg)](https://gitter.im/mback2k/wiasane?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Usage
 -----
 In order to use the SANE device created by this driver you will need to
