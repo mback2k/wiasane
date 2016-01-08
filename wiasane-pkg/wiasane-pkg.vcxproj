@@ -45,7 +45,7 @@
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)'=='Release'">
     <UseDebugLibraries>False</UseDebugLibraries>
-    <SignMode>ProductionSign</SignMode>
+    <SignMode>TestSign</SignMode>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="PropertySheets">

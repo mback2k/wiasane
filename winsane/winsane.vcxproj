@@ -49,7 +49,7 @@
     <UseDebugLibraries>False</UseDebugLibraries>
     <LinkIncremental>False</LinkIncremental>
     <WholeProgramOptimization>True</WholeProgramOptimization>
-    <SignMode>ProductionSign</SignMode>
+    <SignMode>TestSign</SignMode>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
