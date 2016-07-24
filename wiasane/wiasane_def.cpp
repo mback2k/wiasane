@@ -183,15 +183,15 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 	if (oOption && oOption->GetType() == SANE_TYPE_STRING && oOption->GetConstraintType() == SANE_CONSTRAINT_STRING_LIST) {
 		string_list = oOption->GetConstraintStringList();
 		for (index = 0; string_list[index] != NULL; index++) {
-			if (_stricmp(string_list[index], WIASANE_MODE_LINEART) == 0 ||
-				_stricmp(string_list[index], WIASANE_MODE_THRESHOLD) == 0) {
+			if (!_stricmp(string_list[index], WIASANE_MODE_LINEART) ||
+				!_stricmp(string_list[index], WIASANE_MODE_THRESHOLD)) {
 				pScanInfo->SupportedDataTypes |= SUPPORT_BW;
 				pContext->pValues->pszModeThreshold = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
-			} else if (_stricmp(string_list[index], WIASANE_MODE_GRAY) == 0 ||
-					    _stricmp(string_list[index], WIASANE_MODE_GRAYSCALE) == 0) {
+			} else if (!_stricmp(string_list[index], WIASANE_MODE_GRAY) ||
+				       !_stricmp(string_list[index], WIASANE_MODE_GRAYSCALE)) {
 				pScanInfo->SupportedDataTypes |= SUPPORT_GRAYSCALE;
 				pContext->pValues->pszModeGrayscale = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
-			} else if (_stricmp(string_list[index], WIASANE_MODE_COLOR) == 0) {
+			} else if (!_stricmp(string_list[index], WIASANE_MODE_COLOR)) {
 				pScanInfo->SupportedDataTypes |= SUPPORT_COLOR;
 				pContext->pValues->pszModeColor = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
 			}
