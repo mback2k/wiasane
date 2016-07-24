@@ -50,6 +50,7 @@ _Analysis_mode_(_Analysis_code_type_user_driver_)
 #define WIASANE_SOURCE_ADF_EX		"automatic document feeder"
 #define WIASANE_SOURCE_DUPLEX		"duplex"
 #define WIASANE_SOURCE_FLATBED		"flatbed"
+#define WIASANE_SOURCE_GLASS		"glass"
 
 #define WIASANE_MODE_LINEART		"lineart"
 #define WIASANE_MODE_THRESHOLD		"threshold"
