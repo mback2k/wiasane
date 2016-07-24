@@ -305,6 +305,13 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			hr = S_OK;
 			break;
 
+		case CMD_GETADFAVAILABLE: // offline
+			Trace(TEXT("CMD_GETADFAVAILABLE"));
+
+			pValue->lVal = pValue->pScanInfo->ADF > 0 ? TRUE : FALSE;
+			hr = S_OK;
+			break;
+
 		case CMD_GETADFSTATUS: // online
 			Trace(TEXT("CMD_GETADFSTATUS"));
 
@@ -312,7 +319,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			if (SUCCEEDED(hr)) {
 				pValue->lVal = MCRO_STATUS_OK;
 
-				if (pContext->pTask && pContext->pTask->bUsingADF) {
+				if (pContext->pTask && pContext->bUsingADF) {
 					CloseScannerDevice(pValue->pScanInfo, pContext);
 				} else {
 					ExitScannerSession(pValue->pScanInfo, pContext);
@@ -333,7 +340,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 					MicroEntry(CMD_LOAD_ADF, pValue);
 				}
 
-				if (pContext->pTask && pContext->pTask->bUsingADF) {
+				if (pContext->pTask && pContext->bUsingADF) {
 					pValue->lVal = MCRO_STATUS_OK;
 					CloseScannerDevice(pValue->pScanInfo, pContext);
 				} else {
@@ -350,7 +357,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 		case CMD_LOAD_ADF: // online
 			Trace(TEXT("CMD_LOAD_ADF"));
 
-			if (pContext->pTask && pContext->pTask->bUsingADF) {
+			if (pContext->pTask && pContext->bUsingADF) {
 				hr = S_OK;
 				break;
 			}
@@ -369,25 +376,28 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 							break;
 					}
 					if (SUCCEEDED(hr)) {
+						pContext->bUsingADF = TRUE;
 						hr = Scan(pValue->pScanInfo, SCAN_FIRST, NULL, 0, &lReceived);
-						if (pContext->pTask) {
-							if (SUCCEEDED(hr)) {
-								pContext->pTask->bUsingADF = TRUE;
-							} else {
-								Scan(pValue->pScanInfo, SCAN_FINISHED, NULL, 0, &lReceived);
-							}
+						if (FAILED(hr)) {
+							pContext->bUsingADF = FALSE;
+							Scan(pValue->pScanInfo, SCAN_FINISHED, NULL, 0, &lReceived);
 						}
-						if (!pContext->pTask || !pContext->pTask->bUsingADF) {
+						if (!pContext->pTask || !pContext->bUsingADF) {
 							oOption = pContext->oDevice->GetOption(WIASANE_OPTION_SOURCE);
 							if (oOption) {
 								oOption->SetValueString(pContext->pValues->pszSourceFlatbed);
 							}
 						}
 					}
-				} else
+				} else {
 					hr = E_NOTIMPL;
+				}
 
-				CloseScannerDevice(pValue->pScanInfo, pContext);
+				if (pContext->pTask && pContext->bUsingADF) {
+					CloseScannerDevice(pValue->pScanInfo, pContext);
+				} else {
+					ExitScannerSession(pValue->pScanInfo, pContext);
+				}
 			}
 			break;
 
@@ -400,16 +410,21 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 				if (oOption && pContext->pValues) {
 					hr = oOption->SetValueString(pContext->pValues->pszSourceFlatbed);
 					if (SUCCEEDED(hr)) {
-						if (pContext->pTask) {
-							pContext->pTask->bUsingADF = FALSE;
-						}
-						hr = Scan(pValue->pScanInfo, SCAN_FINISHED, NULL, 0, &lReceived);
+						pContext->bUsingADF = FALSE;
 					}
-				} else
+				} else {
 					hr = E_NOTIMPL;
+				}
 
-				ExitScannerSession(pValue->pScanInfo, pContext);
+				CloseScannerDevice(pValue->pScanInfo, pContext);
 			}
+			break;
+
+		case CMD_GETADFUNLOADREADY: // offline
+			Trace(TEXT("CMD_GETADFUNLOADREADY"));
+
+			pValue->lVal = !pContext->pTask && pContext->bUsingADF ? TRUE : FALSE;
+			hr = S_OK;
 			break;
 
 		case CMD_GETSUPPORTEDFILEFORMATS: // unsupported
@@ -480,7 +495,7 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			}
 
 			if (pContext->pTask && pContext->pTask->oScan) {
-				if (pContext->pTask->bUsingADF) {
+				if (pContext->bUsingADF) {
 					Trace(TEXT("SCAN_FIRST using ADF"));
 				} else {
 					Trace(TEXT("SCAN_FIRST during busy device"));
@@ -706,13 +721,21 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					pContext->pTask = NULL;
 				}
 
-				if (pContext->oDevice->IsOpen()) {
-					Trace(TEXT("Device is open, cancelling current scan"));
-					pContext->oDevice->Cancel();
-				}
+				if (!pContext->bUsingADF) {
+					Trace(TEXT("ADF is not in use, must cancel the current scan"));
+					if (pContext->oDevice->IsOpen()) {
+						Trace(TEXT("Device is open, cancelling current scan"));
+						pContext->oDevice->Cancel();
+					}
 
-				Trace(TEXT("Exiting scanner session"));
-				ExitScannerSession(pScanInfo, pContext);
+					Trace(TEXT("Exiting scanner session"));
+					ExitScannerSession(pScanInfo, pContext);
+				} else {
+					Trace(TEXT("ADF is in use, cannot cancel the current scan"));
+
+					Trace(TEXT("Close scanner device"));
+					CloseScannerDevice(pScanInfo, pContext);
+				}
 			}
 
 			break;

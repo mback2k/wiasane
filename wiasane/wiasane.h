@@ -73,7 +73,6 @@ typedef struct _WIASANE_Task {
 	UINT uiReceived;
 	LONG lByteGapX;
 	LONG lByteGapY;
-	BOOL bUsingADF;
 } WIASANE_Task, *PWIASANE_Task;
 
 typedef struct _WIASANE_Context {
@@ -88,6 +87,7 @@ typedef struct _WIASANE_Context {
 	USHORT usPort;
 	UINT uiDevRef;
 	LONG lScanMode;
+	BOOL bUsingADF;
 	double dblTopLeftX;
 	double dblTopLeftY;
 	double dblBottomRightX;
