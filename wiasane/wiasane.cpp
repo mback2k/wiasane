@@ -429,6 +429,8 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			break;
 	}
 
+	Trace(TEXT("------ MicroEntry(lCommand=%d) => %08x ------"), lCommand, hr);
+
 	return hr;
 }
 
@@ -446,16 +448,22 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 	if (plReceived)
 		*plReceived = 0;
 
-	if (!pScanInfo)
+	if (!pScanInfo) {
+		Trace(TEXT("Invalid or missing arguments"));
 		return E_INVALIDARG;
+	}
 
 	hHeap = pScanInfo->DeviceIOHandles[1];
-	if (!hHeap)
+	if (!hHeap) {
+		Trace(TEXT("Missing heap"));
 		return E_OUTOFMEMORY;
+	}
 
 	pContext = (PWIASANE_Context) pScanInfo->pMicroDriverContext;
-	if (!pContext)
+	if (!pContext) {
+		Trace(TEXT("Missing context"));
 		return E_FAIL;
+	}
 
 	switch (lPhase) {
 		case SCAN_FIRST:
@@ -466,8 +474,10 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			//
 
 			hr = OpenScannerDevice(pScanInfo, pContext);
-			if (FAILED(hr))
+			if (FAILED(hr)) {
+				Trace(TEXT("Failed to open scanner device"));
 				return hr;
+			}
 
 			if (pContext->pTask && pContext->pTask->oScan) {
 				if (pContext->pTask->bUsingADF) {
@@ -495,28 +505,40 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 					return hr;
 				}
 
-				if (!pContext->pTask)
+				if (!pContext->pTask) {
+					Trace(TEXT("Task does not exist, allocating it"));
 					pContext->pTask = (PWIASANE_Task) HeapAlloc(hHeap, HEAP_ZERO_MEMORY, sizeof(WIASANE_Task));
+				}
 
-				if (!pContext->pTask)
+				if (!pContext->pTask) {
+					Trace(TEXT("Failed to create task, out of memory"));
 					return E_OUTOFMEMORY;
+				}
 
 				status = pContext->oDevice->Start(&pContext->pTask->oScan);
-				if (status != SANE_STATUS_GOOD)
+				if (status != SANE_STATUS_GOOD) {
+					Trace(TEXT("Failed to start scan"));
 					return GetErrorCode(status);
+				}
 
-				if (!pContext->pTask->oScan)
+				if (!pContext->pTask->oScan) {
+					Trace(TEXT("Failed to create scan, out of memory"));
 					return E_OUTOFMEMORY;
+				}
 
 				status = pContext->pTask->oScan->Connect();
-				if (status != SANE_STATUS_GOOD)
+				if (status != SANE_STATUS_GOOD) {
+					Trace(TEXT("Failed to connect to scan data port"));
 					return GetErrorCode(status);
+				}
 
 				Trace(TEXT("Byte-order: %04x"), pContext->pTask->oScan->GetByteOrder());
 
 				hr = FetchScannerParams(pScanInfo, pContext);
-				if (FAILED(hr))
+				if (FAILED(hr)) {
+					Trace(TEXT("Failed to fetch scanner parameters"));
 					return hr;
+				}
 
 				if (pScanInfo->PixelBits == 1)
 					pContext->pTask->lByteGapX = ((LONG) ceil(pScanInfo->Window.xExtent / 8.0)) - pScanInfo->WidthBytes;
@@ -671,8 +693,11 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 			//
 
 			if (pContext->oDevice) {
+				Trace(TEXT("Device exists, exiting scanner session"));
 				if (pContext->pTask) {
+					Trace(TEXT("Tasks exists, deleting it"));
 					if (pContext->pTask->oScan) {
+						Trace(TEXT("Scan exists, deleting it"));
 						delete pContext->pTask->oScan;
 						pContext->pTask->oScan = NULL;
 					}
@@ -682,9 +707,11 @@ WIAMICRO_API HRESULT Scan(_Inout_ PSCANINFO pScanInfo, LONG lPhase, _Out_writes_
 				}
 
 				if (pContext->oDevice->IsOpen()) {
+					Trace(TEXT("Device is open, cancelling current scan"));
 					pContext->oDevice->Cancel();
 				}
 
+				Trace(TEXT("Exiting scanner session"));
 				ExitScannerSession(pScanInfo, pContext);
 			}
 
