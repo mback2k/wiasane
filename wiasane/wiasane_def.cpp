@@ -165,13 +165,22 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 			if (!_stricmp(string_list[index], WIASANE_SOURCE_ADF) ||
 				!_stricmp(string_list[index], WIASANE_SOURCE_ADF_EX)) {
 				pScanInfo->ADF = max(pScanInfo->ADF, 1);
+				if (pContext->pValues->pszSourceADF) {
+					HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues->pszSourceADF);
+				}
 				pContext->pValues->pszSourceADF = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
 			} else if (!_stricmp(string_list[index], WIASANE_SOURCE_DUPLEX)) {
 				pScanInfo->ADF = max(pScanInfo->ADF, 2);
+				if (pContext->pValues->pszSourceDuplex) {
+					HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues->pszSourceDuplex);
+				}
 				pContext->pValues->pszSourceDuplex = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
 			} else if (!_stricmp(string_list[index], WIASANE_SOURCE_FLATBED) ||
 				       !_stricmp(string_list[index], WIASANE_SOURCE_GLASS) ||
 				       !pContext->pValues->pszSourceFlatbed) {
+				if (pContext->pValues->pszSourceFlatbed) {
+					HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues->pszSourceFlatbed);
+				}
 				pContext->pValues->pszSourceFlatbed = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
 			}
 		}
@@ -187,13 +196,22 @@ HRESULT InitScannerDefaults(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Contex
 			if (!_stricmp(string_list[index], WIASANE_MODE_LINEART) ||
 				!_stricmp(string_list[index], WIASANE_MODE_THRESHOLD)) {
 				pScanInfo->SupportedDataTypes |= SUPPORT_BW;
+				if (pContext->pValues->pszModeThreshold) {
+					HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues->pszModeThreshold);
+				}
 				pContext->pValues->pszModeThreshold = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
 			} else if (!_stricmp(string_list[index], WIASANE_MODE_GRAY) ||
 				       !_stricmp(string_list[index], WIASANE_MODE_GRAYSCALE)) {
 				pScanInfo->SupportedDataTypes |= SUPPORT_GRAYSCALE;
+				if (pContext->pValues->pszModeGrayscale) {
+					HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues->pszModeGrayscale);
+				}
 				pContext->pValues->pszModeGrayscale = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
 			} else if (!_stricmp(string_list[index], WIASANE_MODE_COLOR)) {
 				pScanInfo->SupportedDataTypes |= SUPPORT_COLOR;
+				if (pContext->pValues->pszModeColor) {
+					HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pValues->pszModeColor);
+				}
 				pContext->pValues->pszModeColor = StringDupA(pScanInfo->DeviceIOHandles[1], string_list[index]);
 			}
 		}
