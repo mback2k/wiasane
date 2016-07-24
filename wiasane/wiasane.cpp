@@ -811,40 +811,57 @@ WINSANE_API_CALLBACK SessionAuthCallbackEx(_In_ SANE_String_Const resource, _Ino
 
 HRESULT CreateScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	if (!pScanInfo || !pContext)
+	Trace(TEXT("------ CreateScannerSession() ------"));
+
+	if (!pScanInfo || !pContext) {
+		Trace(TEXT("Invalid or missing arguments"));
 		return E_INVALIDARG;
+	}
 
-	if (pContext->oSession)
+	if (pContext->oSession) {
+		Trace(TEXT("Session already exists"));
 		return S_OK;
+	}
 
+	Trace(TEXT("Initializing device reference count"));
 	pContext->uiDevRef = 0;
 	pContext->pTask = NULL;
 
 	pContext->oDevice = NULL;
 	pContext->oSession = WINSANE_Session::Remote(pContext->pszHost, pContext->usPort);
-	if (!pContext->oSession)
+	if (!pContext->oSession) {
+		Trace(TEXT("Session could not be created, device probably offline"));
 		return WIA_ERROR_OFFLINE;
+	}
 
 	return S_OK;
 }
 
 HRESULT FreeScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {
-	if (!pScanInfo || !pContext)
-		return E_INVALIDARG;
+	Trace(TEXT("------ FreeScannerSession() ------"));
 
+	if (!pScanInfo || !pContext) {
+		Trace(TEXT("Invalid or missing arguments"));
+		return E_INVALIDARG;
+	}
+
+	Trace(TEXT("Before freeing the session, exit it"));
 	ExitScannerSession(pScanInfo, pContext);
 
 	if (pContext->oDevice) {
+		Trace(TEXT("Device exists, delete it"));
 		delete pContext->oDevice;
 		pContext->oDevice = NULL;
 	}
 
 	if (pContext->oSession) {
+		Trace(TEXT("Session exists, delete it"));
 		delete pContext->oSession;
 		pContext->oSession = NULL;
 	}
 
+	Trace(TEXT("Reset task and device reference count without checking it"));
 	pContext->pTask = NULL;
 	pContext->uiDevRef = 0;
 
@@ -857,30 +874,45 @@ HRESULT InitScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 	SANE_Status status;
 	HRESULT hr;
 
-	if (!pScanInfo || !pContext)
-		return E_INVALIDARG;
+	Trace(TEXT("------ InitScannerSession() ------"));
 
-	if (pContext->oSession && pContext->oSession->IsInitialized() && pContext->oDevice)
+	if (!pScanInfo || !pContext) {
+		Trace(TEXT("Invalid or missing arguments"));
+		return E_INVALIDARG;
+	}
+
+	if (pContext->oSession && pContext->oSession->IsInitialized() && pContext->oDevice) {
+		Trace(TEXT("Session is already initialized and device exists"));
 		return S_OK;
+	}
 
 	if (!pContext->oSession) {
+		Trace(TEXT("Session does not exist, creating it"));
 		hr = CreateScannerSession(pScanInfo, pContext);
-		if (FAILED(hr))
+		if (FAILED(hr)) {
+			Trace(TEXT("Creating session failed"));
 			return hr;
-		if (!pContext->oSession)
+		}
+		if (!pContext->oSession) {
+			Trace(TEXT("Creating session failed, session missing"));
 			return E_FAIL;
+		}
 	}
 
 	if (!pContext->oSession->IsInitialized()) {
+		Trace(TEXT("Session is not initialized, initializing it"));
 		status = pContext->oSession->InitEx(NULL, &SessionAuthCallbackEx, pContext);
 		if (status != SANE_STATUS_GOOD) {
+			Trace(TEXT("Initializing session failed"));
 			return GetErrorCode(status);
 		}
 	}
 
 	if (!pContext->oDevice) {
+		Trace(TEXT("Device does not exist, creating it by name"));
 		pContext->oDevice = pContext->oSession->CreateDevice(pContext->pszName);
 		if (!pContext->oDevice) {
+			Trace(TEXT("Creating device by name failed, user intervention required, exiting session"));
 			pContext->oSession->Exit();
 			return WIA_ERROR_USER_INTERVENTION;
 		}
@@ -893,19 +925,32 @@ HRESULT ExitScannerSession(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 {
 	SANE_Status status;
 
-	if (!pScanInfo || !pContext || !pContext->oSession)
+	Trace(TEXT("------ ExitScannerSession() ------"));
+
+	if (!pScanInfo || !pContext || !pContext->oSession) {
+		Trace(TEXT("Invalid or missing arguments"));
 		return E_INVALIDARG;
+	}
 
-	if (pContext->oDevice)
+	if (pContext->oDevice) {
+		Trace(TEXT("Device still exists, close it"));
 		CloseScannerDevice(pScanInfo, pContext);
+	}
 
-	if (pContext->uiDevRef > 0)
+	if (pContext->uiDevRef > 0) {
+		Trace(TEXT("Cannot exit session, because device reference count is still greater than 0"));
 		return S_FALSE;
+	}
 
 	if (pContext->oSession->IsInitialized()) {
+		Trace(TEXT("Session is initialized, exiting it"));
 		status = pContext->oSession->Exit();
-		if (status != SANE_STATUS_GOOD)
+		if (status != SANE_STATUS_GOOD) {
+			Trace(TEXT("Exiting session failed"));
 			return GetErrorCode(status);
+		}
+	} else {
+		Trace(TEXT("Session was not initialized"));
 	}
 
 	return S_OK;
@@ -917,28 +962,51 @@ HRESULT OpenScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context 
 	SANE_Status status;
 	HRESULT hr;
 
-	if (!pScanInfo || !pContext)
+	Trace(TEXT("------ OpenScannerDevice() ------"));
+
+	if (!pScanInfo || !pContext) {
+		Trace(TEXT("Invalid or missing arguments"));
 		return E_INVALIDARG;
+	}
 
 	if (!pContext->oSession || !pContext->oSession->IsInitialized() || !pContext->oDevice) {
+		Trace(TEXT("Device or session does not exist or is not initialized, initializing session"));
 		hr = InitScannerSession(pScanInfo, pContext);
-		if (FAILED(hr))
+		if (FAILED(hr)) {
+			Trace(TEXT("Session initialization failed"));
 			return hr;
-		if (!pContext->oSession || !pContext->oDevice)
+		}
+		if (!pContext->oSession || !pContext->oDevice) {
+			Trace(TEXT("Session initialization failed, session or device missing"));
 			return E_FAIL;
+		}
 	}
 
 	if (!pContext->oDevice->IsOpen()) {
+		Trace(TEXT("Device is not open, opening it"));
 		status = pContext->oDevice->Open();
-		if (status != SANE_STATUS_GOOD)
+		if (status != SANE_STATUS_GOOD) {
+			Trace(TEXT("Opening device failed"));
 			return GetErrorCode(status);
+		}
 
+		Trace(TEXT("Fetching device options"));
 		status = pContext->oDevice->FetchOptions();
-		if (status != SANE_STATUS_GOOD)
+		if (status != SANE_STATUS_GOOD) {
+			Trace(TEXT("Fetching device options failed"));
 			return GetErrorCode(status);
+		}
+	} else {
+		Trace(TEXT("Device is already open"));
 	}
 
+	Trace(TEXT("Device reference count = %d"), pContext->uiDevRef);
+
+	Trace(TEXT("Increment device reference count"));
 	pContext->uiDevRef++;
+
+	Trace(TEXT("Device reference count = %d"), pContext->uiDevRef);
+
 	return S_OK;
 }
 
@@ -946,34 +1014,60 @@ HRESULT CloseScannerDevice(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context
 {
 	SANE_Status status;
 
-	if (!pScanInfo || !pContext || !pContext->oSession || !pContext->oDevice)
+	Trace(TEXT("------ CloseScannerDevice() ------"));
+
+	if (!pScanInfo || !pContext || !pContext->oSession || !pContext->oDevice) {
+		Trace(TEXT("Invalid or missing arguments"));
 		return E_INVALIDARG;
+	}
 
-	if (pContext->uiDevRef > 0)
+	Trace(TEXT("Device reference count = %d"), pContext->uiDevRef);
+
+	if (pContext->uiDevRef > 0) {
+		Trace(TEXT("Decrement device reference count"));
 		pContext->uiDevRef--;
+	}
 
-	if (pContext->uiDevRef > 0)
+	Trace(TEXT("Device reference count = %d"), pContext->uiDevRef);
+
+	if (pContext->uiDevRef > 0) {
+		Trace(TEXT("Device reference count is still greater than 0"));
 		return S_FALSE;
+	}
 
 	if (pContext->pTask) {
+		Trace(TEXT("Current task exists"));
 		if (pContext->pTask->oScan) {
+			Trace(TEXT("Current scan exists"));
 			if (pContext->oDevice->IsOpen()) {
+				Trace(TEXT("Device is open, cancelling current scan"));
 				pContext->oDevice->Cancel();
+			} else {
+				Trace(TEXT("Device is already closed"));
 			}
 
+			Trace(TEXT("Deleting current scan"));
 			delete pContext->pTask->oScan;
 			pContext->pTask->oScan = NULL;
 		}
 
+		Trace(TEXT("Deleting current task"));
 		ZeroMemory(pContext->pTask, sizeof(WIASANE_Task));
 		HeapSafeFree(pScanInfo->DeviceIOHandles[1], 0, pContext->pTask);
 		pContext->pTask = NULL;
+	} else {
+		Trace(TEXT("No current task"));
 	}
 
 	if (pContext->oDevice->IsOpen()) {
+		Trace(TEXT("Device is open, closing it"));
 		status = pContext->oDevice->Close();
-		if (status != SANE_STATUS_GOOD)
+		if (status != SANE_STATUS_GOOD) {
+			Trace(TEXT("Closing failed"));
 			return GetErrorCode(status);
+		}
+	} else {
+		Trace(TEXT("Device is already closed"));
 	}
 
 	return S_OK;
