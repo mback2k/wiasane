@@ -640,12 +640,15 @@ DWORD WINAPI ThreadProcNextWizardPageServer(_In_ LPVOID lpParameter)
 					HeapSafeFree(pData->hHeap, 0, pData->lpNames);
 				}
 				devices = oSession->GetDevices();
-				pData->lpNames = (LPTSTR*) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(LPTSTR) * (devices+1));
-				if (pData->lpNames && devices > 0) {
-					for (device = 0; device < devices; device++) {
-						oDevice = oSession->GetDevice(device);
-						if (oDevice) {
-							pData->lpNames[device] = StringConvATo(pData->hHeap, (LPSTR) oDevice->GetName());
+				if (devices > 0) {
+					pData->lpNames = (LPTSTR*) HeapAlloc(pData->hHeap, HEAP_ZERO_MEMORY, sizeof(LPTSTR) * (devices+1));
+					if (pData->lpNames) {
+						pData->lpNames[devices] = NULL;
+						for (device = 0; device < devices; device++) {
+							oDevice = oSession->GetDevice(device);
+							if (oDevice) {
+								pData->lpNames[device] = StringConvATo(pData->hHeap, (LPSTR) oDevice->GetName());
+							}
 						}
 					}
 				}
