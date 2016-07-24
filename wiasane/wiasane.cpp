@@ -412,6 +412,18 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			}
 			break;
 
+		case CMD_GETSUPPORTEDFILEFORMATS: // unsupported
+			Trace(TEXT("CMD_GETSUPPORTEDFILEFORMATS"));
+			break;
+
+		case CMD_GETSUPPORTEDMEMORYFORMATS: // unsupported
+			Trace(TEXT("CMD_GETSUPPORTEDMEMORYFORMATS"));
+			break;
+
+		case CMD_SETFORMAT: // unsupported
+			Trace(TEXT("CMD_SETFORMAT"));
+			break;
+
 		default:
 			Trace(TEXT("Unknown Command (%d)"), lCommand);
 			break;
