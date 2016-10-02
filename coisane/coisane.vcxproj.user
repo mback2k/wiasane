@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <SignMode>ProductionSign</SignMode>
-    <ProductionCertificate>E=info@marc-hoersken.de, CN=Marc Hörsken, L=Mannheim, S=Baden-Wuerttemberg, C=DE, Description=W6261QR3g96rz13c | 32EE5409DE44BC0B47C9B72DA8F82D9B166FC781</ProductionCertificate>
+    <ProductionCertificate>E=info@marc-hoersken.de, CN="Open Source Developer, Marc Hörsken", O=Open Source Developer, C=DE | C5698D67670FEDE0F6B0642A4811D9D2F33FA857</ProductionCertificate>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Platform)'=='x64'">
     <LocalDebuggerCommand>C:\Program Files (x86)\Windows Kits\8.0\Tools\x64\devcon.exe</LocalDebuggerCommand>
