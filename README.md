@@ -11,6 +11,7 @@ In order to access those scanner devices either the scanner itself or
 a SANE daemon needs to provide a SANE network frontend to be used.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/ii609sebkclxnlmc/branch/master?svg=true)](https://ci.appveyor.com/project/mback2k/wiasane/branch/master)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/3217/badge.svg)](https://scan.coverity.com/projects/mback2k-wiasane)
 [![Join the chat at https://gitter.im/mback2k/wiasane](https://badges.gitter.im/mback2k/wiasane.svg)](https://gitter.im/mback2k/wiasane?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Usage
