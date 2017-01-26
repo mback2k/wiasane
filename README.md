@@ -1,5 +1,7 @@
 WiaSane
 =======
+
+[![Join the chat at https://gitter.im/mback2k/wiasane](https://badges.gitter.im/mback2k/wiasane.svg)](https://gitter.im/mback2k/wiasane?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 The WiaSane project provides a Windows Image Acquisition (WIA) Driver
 which enables image acquisition from scanner devices through the
 Scanner Access Now Easy (SANE) network protocol.
