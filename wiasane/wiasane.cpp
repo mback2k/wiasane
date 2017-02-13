@@ -223,7 +223,7 @@ WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)
 			if (pContext->oDevice) {
 				oOption = pContext->oDevice->GetOption(WIASANE_OPTION_BRIGHTNESS);
 				if (!oOption) {
-					Trace(TEXT("Option '%hs' or '%hs' is not supported."),
+					Trace(TEXT("Option '%hs' is not supported."),
 						WIASANE_OPTION_BRIGHTNESS);
 					hr = E_NOTIMPL;
 					break;
