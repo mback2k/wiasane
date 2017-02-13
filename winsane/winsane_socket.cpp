@@ -107,6 +107,7 @@ BOOL WINSANE_Socket::Reconnect()
 
 LONG WINSANE_Socket::Flush()
 {
+	PBYTE newbuf;
 	ULONG offset, size;
 	LONG result;
 
@@ -123,9 +124,13 @@ LONG WINSANE_Socket::Flush()
 		if (offset < this->buflen) {
 			size = this->buflen - offset;
 			memmove(this->buf, this->buf + offset, size);
-			this->buf = this->ReallocBuffer(this->buf, this->buflen, size);
-			this->buflen = size;
 			this->bufoff = 0;
+
+			newbuf = this->ReallocBuffer(this->buf, this->buflen, size);
+			if (newbuf) {
+				this->buf = newbuf;
+				this->buflen = size;
+			}
 		} else if (offset == this->buflen) {
 			this->Clear();
 		}
@@ -233,6 +238,7 @@ LONG WINSANE_Socket::ReadSocket(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG 
 
 LONG WINSANE_Socket::Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG buflen)
 {
+	PBYTE newbuf;
 	LONG space, size;
 
 	if (this->buf && this->buflen)
@@ -242,14 +248,23 @@ LONG WINSANE_Socket::Write(_In_reads_bytes_(buflen) CONST PBYTE buf, _In_ LONG b
 
 	if (space < buflen) {
 		size = this->bufoff + buflen;
-		this->buf = this->ReallocBuffer(this->buf, this->buflen, size);
-		this->buflen = size;
+		newbuf = this->ReallocBuffer(this->buf, this->buflen, size);
+		if (newbuf) {
+			this->buf = newbuf;
+			this->buflen = size;
+			space = this->buflen - this->bufoff;
+		}
 	}
 
-	memcpy(this->buf + this->bufoff, buf, buflen);
-	this->bufoff += buflen;
+	if (space < buflen)
+		size = space;
+	else
+		size = buflen;
 
-	return buflen;
+	memcpy(this->buf + this->bufoff, buf, size);
+	this->bufoff += size;
+
+	return size;
 }
 
 LONG WINSANE_Socket::Read(_Out_writes_bytes_(buflen) PBYTE buf, _In_ LONG buflen)
