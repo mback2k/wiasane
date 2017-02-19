@@ -21,7 +21,7 @@
   <PropertyGroup Label="PropertySheets">
     <DriverType />
     <PlatformToolset>WindowsApplicationForDrivers8.0</PlatformToolset>
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
   </PropertyGroup>
   <PropertyGroup Label="Globals">
     <DebuggerFlavor Condition="'$(IsKernelModeToolset)'=='True'">DbgengKernelDebugger</DebuggerFlavor>
@@ -35,7 +35,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
-    <TargetVersion>Windows7</TargetVersion>
+    <TargetVersion>Win7</TargetVersion>
     <TargetName>$(MSBuildProjectName)</TargetName>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -43,23 +43,53 @@
     <UseDebugLibraries>True</UseDebugLibraries>
     <LinkIncremental>True</LinkIncremental>
     <WholeProgramOptimization>False</WholeProgramOptimization>
+    <SignMode>TestSign</SignMode>
   </PropertyGroup>
   <PropertyGroup Label="Configuration" Condition="'$(Configuration)'=='Release'">
     <UseDebugLibraries>False</UseDebugLibraries>
     <LinkIncremental>False</LinkIncremental>
     <WholeProgramOptimization>True</WholeProgramOptimization>
+    <SignMode>TestSign</SignMode>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <PropertyGroup>
     <OutDir>$(Configuration)\$(Platform)\</OutDir>
     <IntDir>$(Configuration)\$(Platform)\Temp\</IntDir>
+    <TimeStampServer>http://timestamp.comodoca.com/authenticode</TimeStampServer>
   </PropertyGroup>
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" />
   </ImportGroup>
+  <ItemGroup>
+    <PropertyPageSchema Include="$(WDKContentRoot)build\1033\sign.xml" />
+  </ItemGroup>
+  <ItemDefinitionGroup>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
+      <Culture>0x0009</Culture>
+    </ResourceCompile>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>ISOLATION_AWARE_ENABLED;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <SDLCheck>True</SDLCheck>
+      <AssemblerOutput>All</AssemblerOutput>
+    </ClCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(DDK_INC_PATH)</AdditionalIncludeDirectories>
+    </Midl>
+    <Link>
+      <ModuleDefinitionFile>winsane-util.def</ModuleDefinitionFile>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <GenerateDebugInformation>True</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG_PREFIX="winsane-util";%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
@@ -74,6 +104,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="winsane-util_str.h" />
+    <ClInclude Include="winsane-util_dbg.h" />
+    <ClInclude Include="winsane-util_mem.h" />
+    <ClInclude Include="winsane-util_reg.h" />
+    <ClInclude Include="winsane-util_res.h" />
+  </ItemGroup>
+  <ItemGroup>
     <ClCompile Include="winsane-util_str.cpp" />
     <ClCompile Include="winsane-util_dbg.cpp" />
     <ClCompile Include="winsane-util_mem.cpp" />
@@ -81,11 +119,13 @@
     <ClCompile Include="winsane-util_res.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="winsane-util_str.h" />
-    <ClInclude Include="winsane-util_dbg.h" />
-    <ClInclude Include="winsane-util_mem.h" />
-    <ClInclude Include="winsane-util_reg.h" />
-    <ClInclude Include="winsane-util_res.h" />
+    <ResourceCompile Include="winsane-util.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="winsane-util.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

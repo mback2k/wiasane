@@ -98,6 +98,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Content Include="$(SolutionDir)winsane-util\$(OutDir)winsane-util.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="dllmain.h" />
     <ClInclude Include="sane.h" />
@@ -124,6 +129,11 @@
   </ItemGroup>
   <ItemGroup>
     <FilesToPackage Include="$(TargetPath)" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\winsane-util\winsane-util.vcxproj">
+      <Project>{abe9a9db-5ba2-4c99-99f0-cf120ea3cf44}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

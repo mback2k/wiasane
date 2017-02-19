@@ -104,6 +104,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Content Include="$(SolutionDir)winsane-util\$(OutDir)winsane-util.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
     <ClInclude Include="resource.h" />
     <ClInclude Include="devsane.h" />
     <ClInclude Include="devsane_util.h" />

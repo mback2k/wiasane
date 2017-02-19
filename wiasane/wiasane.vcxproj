@@ -111,6 +111,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Content Include="$(SolutionDir)winsane-util\$(OutDir)winsane-util.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="$(SolutionDir)winsane\$(OutDir)winsane.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -143,6 +146,9 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\winsane-util\winsane-util.vcxproj">
+      <Project>{abe9a9db-5ba2-4c99-99f0-cf120ea3cf44}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\winsane\winsane.vcxproj">
       <Project>{b210e114-bf47-442f-8a8e-6719b6359eb8}</Project>
     </ProjectReference>

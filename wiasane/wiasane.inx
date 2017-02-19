@@ -8,6 +8,7 @@ DriverVer=20/10/2012,0.1.0.0
 DriverPackageDisplayName=%WIASANE.DeviceDesc%
 
 [SourceDisksFiles.$ARCH$]
+winsane-util.dll=1
 winsane.dll=1
 wiasane.dll=1
 coisane.dll=1
@@ -62,6 +63,7 @@ HKR,,HardwareConfig,0x00000001,1
 HKR,,CreateFileName,0x00000000,"AUTO"
 
 [WIASANE.CopyFiles]
+winsane-util.dll
 winsane.dll
 wiasane.dll
 
@@ -69,6 +71,7 @@ wiasane.dll
 HKR,,CoInstallers32,0x00010000,"coisane.dll,CoInstaller"
 
 [WIASANE.CoInstaller.CopyFiles]
+winsane-util.dll
 winsane.dll
 coisane.dll
 

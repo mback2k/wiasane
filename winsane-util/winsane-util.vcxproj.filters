@@ -47,5 +47,18 @@
     <ClInclude Include="winsane-util_mem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="winsane-util.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="winsane-util.def">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

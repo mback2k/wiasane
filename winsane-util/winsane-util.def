@@ -1,0 +1,25 @@
+LIBRARY WINSANE-UTIL
+
+EXPORTS
+	_Trace_
+	HeapSafeFree
+	LocalSafeFree
+	GlobalSafeFree
+	StringDupA
+	StringDupW
+	StringConvWToA
+	StringConvAToW
+	StringCbAPrintfA
+	StringCbAPrintfW
+	StringCchAPrintfA
+	StringCchAPrintfW
+	StringCbAVPrintfA
+	StringCbAVPrintfW
+	StringCchAVPrintfA
+	StringCchAVPrintfW
+	LoadAString
+	MessageBoxR
+	SetWindowTextR
+	SetDlgItemTextR
+	ReadRegistryLong
+	ReadRegistryString

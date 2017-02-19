@@ -80,17 +80,20 @@
     <FilesToPackage Include="@(Inf->'%(CopyOutput)')" Condition="'@(Inf)'!=''" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\devsane\devsane.vcxproj">
-      <Project>{9a97a3c5-d74a-400e-9aaa-1588190924b7}</Project>
+    <ProjectReference Include="..\winsane-util\winsane-util.vcxproj">
+      <Project>{abe9a9db-5ba2-4c99-99f0-cf120ea3cf44}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\coisane\coisane.vcxproj">
-      <Project>{cb743d7c-09b3-41af-9067-807f2ced7ad8}</Project>
+    <ProjectReference Include="..\winsane\winsane.vcxproj">
+      <Project>{b210e114-bf47-442f-8a8e-6719b6359eb8}</Project>
     </ProjectReference>
     <ProjectReference Include="..\wiasane\wiasane.vcxproj">
       <Project>{6f8f9679-52f6-4b8e-9edf-67de89ec3cfa}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\winsane\winsane.vcxproj">
-      <Project>{b210e114-bf47-442f-8a8e-6719b6359eb8}</Project>
+    <ProjectReference Include="..\coisane\coisane.vcxproj">
+      <Project>{cb743d7c-09b3-41af-9067-807f2ced7ad8}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\devsane\devsane.vcxproj">
+      <Project>{9a97a3c5-d74a-400e-9aaa-1588190924b7}</Project>
     </ProjectReference>
     <ProjectReference Include="..\winsane-dbg\winsane-dbg.vcxproj">
       <Project>{59a26f4a-bcf6-4ea0-85a4-20de17c36bbb}</Project>
