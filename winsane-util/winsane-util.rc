@@ -44,7 +44,7 @@ BEGIN
             VALUE "FileDescription", "Scanner Access Now Easy - Windows Utility DLL"
             VALUE "FileVersion", "0.1.2.10"
             VALUE "InternalName", "winsane-util.dll"
-            VALUE "LegalCopyright", "Copyright © 2012-2016 Marc Hörsken. All rights reserved."
+            VALUE "LegalCopyright", "Copyright © 2012-2017 Marc Hörsken. All rights reserved."
             VALUE "OriginalFilename", "winsane-util.dll"
             VALUE "ProductName", "Scanner Access Now Easy - WIA Driver"
             VALUE "ProductVersion", "0.1.2.10"
