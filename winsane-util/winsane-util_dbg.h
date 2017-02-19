@@ -18,8 +18,8 @@
  *
  ***************************************************************************/
 
-#ifndef STRUTIL_DBG_H
-#define STRUTIL_DBG_H
+#ifndef WINSANE_UTIL_DBG_H
+#define WINSANE_UTIL_DBG_H
 
 #if _MSC_VER > 1000
 #pragma once

@@ -18,8 +18,8 @@
  *
  ***************************************************************************/
 
-#ifndef STRUTIL_H
-#define STRUTIL_H
+#ifndef WINSANE_UTIL_STR_H
+#define WINSANE_UTIL_STR_H
 
 #if _MSC_VER > 1000
 #pragma once
