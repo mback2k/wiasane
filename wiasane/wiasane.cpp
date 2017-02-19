@@ -36,9 +36,9 @@
 #include "wiasane_def.h"
 #include "wiasane_scan.h"
 #include "wiasane_util.h"
-#include "strutil_dbg.h"
-#include "strutil_mem.h"
-#include "strutil.h"
+#include "winsane-util_dbg.h"
+#include "winsane-util_mem.h"
+#include "winsane-util_str.h"
 
 
 WIAMICRO_API HRESULT MicroEntry(LONG lCommand, _Inout_ PVAL pValue)

@@ -18,9 +18,9 @@
  *
  ***************************************************************************/
 
-#include "strutil_reg.h"
+#include "winsane-util_reg.h"
 
-#include "strutil_mem.h"
+#include "winsane-util_mem.h"
 
 _Success_(return == ERROR_SUCCESS)
 LONG WINAPI ReadRegistryLong(_In_ HANDLE hHeap, _In_ HKEY hKey, _In_opt_ LPCTSTR lpcszValueName, _Out_ DWORD *pdwValue)

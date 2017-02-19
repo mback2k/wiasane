@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "strutil", "strutil\strutil.vcxproj", "{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winsane-util", "winsane-util\winsane-util.vcxproj", "{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winsane", "winsane\winsane.vcxproj", "{B210E114-BF47-442F-8A8E-6719B6359EB8}"
 	ProjectSection(ProjectDependencies) = postProject

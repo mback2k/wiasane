@@ -24,9 +24,9 @@
 #include <difxapi.h>
 #include <newdev.h>
 
-#include "strutil.h"
-#include "strutil_mem.h"
-#include "strutil_dbg.h"
+#include "winsane-util_str.h"
+#include "winsane-util_mem.h"
+#include "winsane-util_dbg.h"
 #include "devsane_util.h"
 
 

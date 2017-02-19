@@ -15,36 +15,36 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="strutil.cpp">
+    <ClCompile Include="winsane-util_str.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="strutil_res.cpp">
+    <ClCompile Include="winsane-util_res.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="strutil_dbg.cpp">
+    <ClCompile Include="winsane-util_dbg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="strutil_reg.cpp">
+    <ClCompile Include="winsane-util_reg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="strutil_mem.cpp">
+    <ClCompile Include="winsane-util_mem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="strutil.h">
+    <ClInclude Include="winsane-util_str.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="strutil_res.h">
+    <ClInclude Include="winsane-util_res.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="strutil_dbg.h">
+    <ClInclude Include="winsane-util_dbg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="strutil_reg.h">
+    <ClInclude Include="winsane-util_reg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="strutil_mem.h">
+    <ClInclude Include="winsane-util_mem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

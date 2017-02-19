@@ -18,9 +18,9 @@
  *
  ***************************************************************************/
 
-#include "strutil_res.h"
+#include "winsane-util_res.h"
 
-#include "strutil_mem.h"
+#include "winsane-util_mem.h"
 
 _Success_(return)
 BOOL WINAPI LoadAString(_In_ HANDLE hHeap, _In_opt_ HINSTANCE hInstance, _In_ UINT uID, _Outptr_result_nullonfailure_ LPTSTR *plpszString, _Out_opt_ int *piLength)

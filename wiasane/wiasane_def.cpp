@@ -25,10 +25,10 @@
 
 #include "wiasane_opt.h"
 #include "wiasane_scan.h"
-#include "strutil_dbg.h"
-#include "strutil_mem.h"
-#include "strutil_reg.h"
-#include "strutil.h"
+#include "winsane-util_dbg.h"
+#include "winsane-util_mem.h"
+#include "winsane-util_reg.h"
+#include "winsane-util_str.h"
 
 HRESULT ReadRegistryInformation(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {

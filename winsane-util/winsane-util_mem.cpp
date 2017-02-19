@@ -18,7 +18,7 @@
  *
  ***************************************************************************/
 
-#include "strutil_mem.h"
+#include "winsane-util_mem.h"
 
 BOOL WINAPI HeapSafeFree(_Inout_ HANDLE hHeap, _In_ DWORD dwFlags, _In_opt_ _Post_ptr_invalid_ LPVOID lpMem)
 {

@@ -26,10 +26,10 @@
 
 #include "dllmain.h"
 #include "resource.h"
-#include "strutil.h"
-#include "strutil_reg.h"
-#include "strutil_mem.h"
-#include "strutil_dbg.h"
+#include "winsane-util_str.h"
+#include "winsane-util_reg.h"
+#include "winsane-util_mem.h"
+#include "winsane-util_dbg.h"
 
 _Success_(return == ERROR_SUCCESS)
 DWORD WINAPI GetDlgItemAText(_In_ HANDLE hHeap, _In_ HWND hDlg, _In_ int nIDDlgItem, _Outptr_result_nullonfailure_ LPTSTR *plpszText, _Out_opt_ size_t *pcchLength)

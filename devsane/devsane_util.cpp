@@ -29,9 +29,9 @@
 #include <malloc.h>
 
 #include "resource.h"
-#include "strutil.h"
-#include "strutil_mem.h"
-#include "strutil_dbg.h"
+#include "winsane-util_str.h"
+#include "winsane-util_mem.h"
+#include "winsane-util_dbg.h"
 
 
 DWORD CreateInstallInfo(_In_ HANDLE hHeap, _Out_ PINSTALLERINFO pInstallerInfo, _Outptr_result_maybenull_ LPVOID *plpData)

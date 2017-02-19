@@ -18,12 +18,12 @@
  *
  ***************************************************************************/
 
-#include "strutil.h"
+#include "winsane-util_str.h"
 
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "strutil_mem.h"
+#include "winsane-util_mem.h"
 
 _Success_(return != NULL)
 LPSTR WINAPI StringDupA(_In_ HANDLE hHeap, _In_ LPCSTR lpszString)

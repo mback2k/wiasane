@@ -18,7 +18,7 @@
  *
  ***************************************************************************/
 
-#include "strutil_dbg.h"
+#include "winsane-util_dbg.h"
 
 #ifdef _DEBUG
 
@@ -27,8 +27,8 @@
 #include <strsafe.h>
 #include <malloc.h>
 
-#include "strutil.h"
-#include "strutil_mem.h"
+#include "winsane-util_str.h"
+#include "winsane-util_mem.h"
 
 VOID Trace_(_In_ LPCTSTR lpszPrefix, _In_ LPCTSTR lpszFormat, ...)
 {

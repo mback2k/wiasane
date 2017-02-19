@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <tchar.h>
 
-#include "strutil.h"
+#include "winsane-util_str.h"
 
 #define WINSANE_AUTH_MD5 "$MD5$"
 #define WINSANE_AUTH_MD5_FORMAT "$MD5$%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"

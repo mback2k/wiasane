@@ -21,7 +21,7 @@
 #include "winsane_device.h"
 #include "winsane_internal.h"
 
-#include "strutil.h"
+#include "winsane-util_str.h"
 
 #define INVALID_SANE_HANDLE ((SANE_Handle)-1)
 

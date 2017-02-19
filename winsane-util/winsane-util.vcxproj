@@ -27,7 +27,7 @@
     <DebuggerFlavor Condition="'$(IsKernelModeToolset)'=='True'">DbgengKernelDebugger</DebuggerFlavor>
     <DebuggerFlavor Condition="'$(IsUserModeToolset)'=='True'">DbgengRemoteDebugger</DebuggerFlavor>
     <ProjectGuid>{ABE9A9DB-5BA2-4C99-99F0-CF120EA3CF44}</ProjectGuid>
-    <ProjectName>strutil</ProjectName>
+    <ProjectName>winsane-util</ProjectName>
     <RootNamespace>$(MSBuildProjectName)</RootNamespace>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
@@ -74,18 +74,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="strutil.cpp" />
-    <ClCompile Include="strutil_dbg.cpp" />
-    <ClCompile Include="strutil_mem.cpp" />
-    <ClCompile Include="strutil_reg.cpp" />
-    <ClCompile Include="strutil_res.cpp" />
+    <ClCompile Include="winsane-util_str.cpp" />
+    <ClCompile Include="winsane-util_dbg.cpp" />
+    <ClCompile Include="winsane-util_mem.cpp" />
+    <ClCompile Include="winsane-util_reg.cpp" />
+    <ClCompile Include="winsane-util_res.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="strutil.h" />
-    <ClInclude Include="strutil_dbg.h" />
-    <ClInclude Include="strutil_mem.h" />
-    <ClInclude Include="strutil_reg.h" />
-    <ClInclude Include="strutil_res.h" />
+    <ClInclude Include="winsane-util_str.h" />
+    <ClInclude Include="winsane-util_dbg.h" />
+    <ClInclude Include="winsane-util_mem.h" />
+    <ClInclude Include="winsane-util_reg.h" />
+    <ClInclude Include="winsane-util_res.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

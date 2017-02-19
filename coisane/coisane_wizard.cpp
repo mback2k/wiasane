@@ -28,10 +28,10 @@
 
 #include "dllmain.h"
 #include "resource.h"
-#include "strutil.h"
-#include "strutil_dbg.h"
-#include "strutil_mem.h"
-#include "strutil_res.h"
+#include "winsane-util_str.h"
+#include "winsane-util_dbg.h"
+#include "winsane-util_mem.h"
+#include "winsane-util_res.h"
 #include "coisane_util.h"
 
 

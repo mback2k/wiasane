@@ -24,7 +24,7 @@
 #include <wia.h>
 
 #include "wiasane_opt.h"
-#include "strutil_dbg.h"
+#include "winsane-util_dbg.h"
 
 HRESULT FetchScannerParams(_Inout_ PSCANINFO pScanInfo, _Inout_ PWIASANE_Context pContext)
 {

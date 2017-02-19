@@ -68,7 +68,7 @@
       <Culture>0x0009</Culture>
     </ResourceCompile>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)strutil</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)winsane-util</AdditionalIncludeDirectories>
       <ExceptionHandling>
       </ExceptionHandling>
       <SDLCheck>True</SDLCheck>
@@ -76,8 +76,8 @@
       <PreprocessorDefinitions>WINSANE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)strutil\$(OutDir)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>%(AdditionalDependencies);ws2_32.lib;strutil.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)winsane-util\$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>%(AdditionalDependencies);ws2_32.lib;winsane-util.lib</AdditionalDependencies>
       <GenerateDebugInformation>True</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>

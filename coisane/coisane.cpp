@@ -28,7 +28,7 @@
 #include "coisane_util.h"
 #include "coisane_prop.h"
 #include "coisane_wizard.h"
-#include "strutil_dbg.h"
+#include "winsane-util_dbg.h"
 
 
 DWORD CALLBACK CoInstaller(_In_ DI_FUNCTION InstallFunction, _In_ HDEVINFO hDeviceInfoSet, _In_ PSP_DEVINFO_DATA pDeviceInfoData, OPTIONAL _Inout_ PCOINSTALLER_CONTEXT_DATA Context)
