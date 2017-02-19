@@ -30,7 +30,7 @@
 #include "winsane-util_str.h"
 #include "winsane-util_mem.h"
 
-VOID Trace_(_In_ LPCTSTR lpszPrefix, _In_ LPCTSTR lpszFormat, ...)
+VOID _Trace_(_In_ LPCTSTR lpszPrefix, _In_ LPCTSTR lpszFormat, ...)
 {
 	LPTSTR lpszMsg, lpszOut;
 	va_list argList;
@@ -51,6 +51,13 @@ VOID Trace_(_In_ LPCTSTR lpszPrefix, _In_ LPCTSTR lpszFormat, ...)
 			HeapSafeFree(hHeap, 0, lpszMsg);
 		}
 	}
+}
+
+#else
+
+VOID _Trace_()
+{
+	((void)0);
 }
 
 #endif

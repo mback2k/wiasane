@@ -32,9 +32,10 @@ __user_code
 #include <wtypes.h>
 
 #ifdef _DEBUG
-VOID Trace_(_In_ LPCTSTR lpszPrefix, _In_ LPCTSTR lpszFormat, ...);
-#define Trace(format, ...) Trace_(TEXT(_DEBUG_PREFIX), format, ##__VA_ARGS__)
+VOID _Trace_(_In_ LPCTSTR lpszPrefix, _In_ LPCTSTR lpszFormat, ...);
+#define Trace(format, ...) _Trace_(TEXT(_DEBUG_PREFIX), format, ##__VA_ARGS__)
 #else
+VOID _Trace_();
 #define Trace(format, ...) ((void)0)
 #endif
 
